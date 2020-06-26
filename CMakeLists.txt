@@ -289,7 +289,6 @@ if(NOT q)
         endforeach()
     endforeach()
 
-    # ~50G for 127
     set(near_7)
     list(APPEND near_7 s_h)
     list(APPEND near_7 a_r)
@@ -325,7 +324,6 @@ if(NOT q)
     list(APPEND near_7 c_l)
     list(APPEND near_7 w_a)
 
-    # peak 61G for 127
     set(near_5)
     list(APPEND near_5 l_e)
     list(APPEND near_5 R)
