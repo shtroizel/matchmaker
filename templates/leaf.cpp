@@ -40,13 +40,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace matchmaker
 {
-    int64_t size_snth()
+    int size_snth()
     {
         return word_snth::variants_by_string().size();
     }
 
 
-    std::string const & at_snth(int64_t const & index)
+    std::string const & at_snth(int const & index)
     {
         if (index < 0 || index >= size_snth())
         {
@@ -61,7 +61,7 @@ namespace matchmaker
     }
 
 
-    int64_t lookup_snth(std::string const & str, bool * found)
+    int lookup_snth(std::string const & str, bool * found)
     {
         word_snth::Type w{word_snth::lookup(str, found)};
 

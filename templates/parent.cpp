@@ -69,9 +69,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace matchmaker
 {
-    using size_func = std::function<int64_t ()>;
-    using at_func = std::function<std::string const & (int64_t const &)>;
-    using lookup_func = std::function<int64_t (std::string const &, bool *)>;
+    using size_func = std::function<int ()>;
+    using at_func = std::function<std::string const & (int const &)>;
+    using lookup_func = std::function<int (std::string const &, bool *)>;
 
     PROPERTYx3_MATCHABLE(
         size_func,
@@ -120,11 +120,11 @@ namespace matchmaker
 #undef _set_properties
 
 
-    int64_t size_snth()
+    int size_snth()
     {
-        static int64_t const ret =
+        static int const ret =
             [&](){
-                int64_t r{0};
+                int r{0};
                 r += size_snth_a();
                 r += size_snth_b();
                 r += size_snth_c();
@@ -157,10 +157,10 @@ namespace matchmaker
     }
 
 
-    static std::vector<std::pair<int64_t, at_func>> const letter_boundries =
+    static std::vector<std::pair<int, at_func>> const letter_boundries =
         [](){
-            int64_t b{0};
-            std::vector<std::pair<int64_t, at_func>> boundries;
+            int b{0};
+            std::vector<std::pair<int, at_func>> boundries;
 
             // this code fails! (static initialization issues?)
 //                 for (auto const & l : letter_snth::variants())
@@ -200,7 +200,7 @@ namespace matchmaker
             return boundries;
         }();
 
-    std::string const & at_snth(int64_t const & index)
+    std::string const & at_snth(int const & index)
     {
         if (index < 0 || index >= size_snth())
         {
@@ -224,9 +224,9 @@ namespace matchmaker
     }
 
 
-    int64_t lookup_snth(std::string const & str, bool * found)
+    int lookup_snth(std::string const & str, bool * found)
     {
-        static std::array<std::pair<letter_snth::Type, int64_t>, 26> const io_snth {
+        static std::array<std::pair<letter_snth::Type, int>, 26> const io_snth {
             std::make_pair(letter_snth::a::grab(), letter_boundries[0].first),
             std::make_pair(letter_snth::b::grab(), letter_boundries[1].first),
             std::make_pair(letter_snth::c::grab(), letter_boundries[2].first),
@@ -278,7 +278,7 @@ namespace matchmaker
                 goto lookup_failed;
             }
 
-            int64_t ret = io_snth[i].first.as_lookup()(str, found);
+            int ret = io_snth[i].first.as_lookup()(str, found);
             ret += io_snth[i].second;
             return ret;
         }

@@ -101,9 +101,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace matchmaker
 {
-    using size_func = std::function<int64_t ()>;
-    using at_func = std::function<std::string const & (int64_t const &)>;
-    using lookup_func = std::function<int64_t (std::string const &, bool *)>;
+    using size_func = std::function<int ()>;
+    using at_func = std::function<std::string const & (int const &)>;
+    using lookup_func = std::function<int (std::string const &, bool *)>;
 
     PROPERTYx3_MATCHABLE(
         size_func,
@@ -188,11 +188,11 @@ namespace matchmaker
 
 
 
-    int64_t size()
+    int size()
     {
-        static int64_t const ret =
+        static int const ret =
             [&](){
-                int64_t r{0};
+                int r{0};
                 for (auto const & l : letter::variants())
                     r += l.as_size()();
                 return r;
@@ -202,10 +202,10 @@ namespace matchmaker
     }
 
 
-    static std::vector<std::pair<int64_t, letter::Type>> const letter_boundries =
+    static std::vector<std::pair<int, letter::Type>> const letter_boundries =
         [](){
-            int64_t b{0};
-            std::vector<std::pair<int64_t, letter::Type>> boundries;
+            int b{0};
+            std::vector<std::pair<int, letter::Type>> boundries;
             for (auto const & l : letter::variants())
             {
                 boundries.push_back(std::make_pair(b, l));
@@ -215,7 +215,7 @@ namespace matchmaker
         }();
 
 
-    std::string const & at(int64_t const & index)
+    std::string const & at(int const & index)
     {
         static std::string const empty_str;
 
@@ -238,9 +238,9 @@ namespace matchmaker
     }
 
 
-    int64_t lookup(std::string const & str, bool * found)
+    int lookup(std::string const & str, bool * found)
     {
-        static std::array<std::pair<letter::Type, int64_t>, 52> const io {
+        static std::array<std::pair<letter::Type, int>, 52> const io {
 #ifdef Q_ONLY
             std::make_pair(letter::Q::grab(), letter_boundries[0].first),
             std::make_pair(letter::Q::grab(), letter_boundries[0].first),
@@ -380,7 +380,7 @@ namespace matchmaker
                 goto lookup_failed;
             }
 
-            int64_t ret = io[i].first.as_lookup()(str, found);
+            int ret = io[i].first.as_lookup()(str, found);
             ret += io[i].second;
             return ret;
         }
@@ -392,10 +392,10 @@ lookup_failed:
     }
 
 
-    void complete(std::string const & str, std::vector<int64_t> & completion)
+    void complete(std::string const & str, std::vector<int> & completion)
     {
         completion.clear();
-        int64_t index{lookup(str, nullptr)};
+        int index{lookup(str, nullptr)};
 
         for (; index < size(); ++index)
         {

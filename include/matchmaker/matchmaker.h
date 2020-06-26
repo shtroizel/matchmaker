@@ -38,8 +38,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace matchmaker
 {
-    int64_t size();
-    std::string const & at(int64_t const & index);
-    int64_t lookup(std::string const & str, bool * found);
-    void complete(std::string const & str, std::vector<int64_t> & completion);
+    int size();
+    std::string const & at(int const & index);
+    int lookup(std::string const & str, bool * found);
+    void complete(std::string const & str, std::vector<int> & completion);
 }

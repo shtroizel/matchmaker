@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main()
 {
-    int64_t index{-1};
+    int index{-1};
     bool found{false};
 
     while (true)
@@ -66,7 +66,7 @@ int main()
         {
             if (words[0] == ":abc")
             {
-                for (int64_t i = 0; i < matchmaker::size(); ++i)
+                for (int i = 0; i < matchmaker::size(); ++i)
                 {
                     auto start = std::chrono::high_resolution_clock::now();
                     std::string const & str = matchmaker::at(i);
@@ -81,7 +81,7 @@ int main()
             else if (words[0].size() && words[0][0] == ':')
             {
                 std::string word{words[0].substr(1)};
-                std::vector<int64_t> completion;
+                std::vector<int> completion;
                 auto start = std::chrono::high_resolution_clock::now();
                 matchmaker::complete(word, completion);
                 auto stop = std::chrono::high_resolution_clock::now();
