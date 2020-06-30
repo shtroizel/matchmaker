@@ -48,7 +48,7 @@ def usage():
 
 
 def build_and_install(use_clang, retain, retain_matchables, jobs, low_memory, repo_root, build_dir,
-                      install_dir, a, q, mem_127, mem_63, mem_31_14, mem_15_30):
+                      install_dir, atomic_libs, q, mem_127, mem_63, mem_31_14, mem_15_30):
     start_dir = os.getcwd()
 
     if not retain:
@@ -110,8 +110,8 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, low_memory, re
 
     if q:
         cmake_cmd.append('-Dq=ON')
-        a = True
-    if a:
+        atomic_libs = True
+    if atomic_libs:
         cmake_cmd.append('-DATOMIC_LIBS=ON')
     if mem_15_30:
         cmake_cmd.append('-DMEM_15_30=ON')
@@ -160,7 +160,7 @@ def main():
     jobs = str(multiprocessing.cpu_count())
     build_dir = ''
     install_dir = ''
-    a = False
+    atomic_libs = False
     q = False
     mem_127 = False
     mem_63 = False
@@ -188,7 +188,7 @@ def main():
         elif o in ('-i', '--install_dir'):
             install_dir = a
         elif o in ('-a', '--atomic_libs'):
-            a = True
+            atomic_libs = True
         elif o in ('-q', '--q'):
             q = True
         elif o in ('--mem_127'):
@@ -205,7 +205,7 @@ def main():
     repo_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
 
     build_and_install(use_clang, retain, retain_matchables, jobs, low_memory, repo_root, build_dir,
-                      install_dir, a, q, mem_127, mem_63, mem_31_14, mem_15_30)
+                      install_dir, atomic_libs, q, mem_127, mem_63, mem_31_14, mem_15_30)
 
     exit(0)
 
