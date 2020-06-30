@@ -135,7 +135,6 @@ if(ATOMIC_LIBS)
         add_single_prefix_lib_without_deps(k)
         add_single_prefix_lib_without_deps(q)
         add_single_prefix_lib_without_deps(v)
-        add_single_prefix_lib_without_deps(w)
         add_single_prefix_lib_without_deps(x)
         add_single_prefix_lib_without_deps(y)
         add_single_prefix_lib_without_deps(z)
@@ -148,7 +147,6 @@ if(ATOMIC_LIBS)
             first_letter STREQUAL "j" OR
             first_letter STREQUAL "k" OR
             first_letter STREQUAL "v" OR
-            first_letter STREQUAL "w" OR
             first_letter STREQUAL "x" OR
             first_letter STREQUAL "y" OR
             first_letter STREQUAL "z"
