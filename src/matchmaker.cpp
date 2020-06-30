@@ -392,12 +392,14 @@ lookup_failed:
     }
 
 
-    void complete(std::string const & str, std::vector<int> & completion)
+    void complete(std::string const & str, int max_results, std::vector<int> & completion)
     {
         completion.clear();
-        int index{lookup(str, nullptr)};
 
-        for (; index < size(); ++index)
+        int index{lookup(str, nullptr)};
+        int result_count{0};
+
+        for (; index < size() && result_count < max_results; ++index, ++result_count)
         {
             std::string const & s = at(index);
             if (s.size() >= str.size() && s.substr(0, str.size()) == str)

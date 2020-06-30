@@ -41,5 +41,5 @@ namespace matchmaker
     int size();
     std::string const & at(int const & index);
     int lookup(std::string const & str, bool * found);
-    void complete(std::string const & str, std::vector<int> & completion);
+    void complete(std::string const & str, int max_results, std::vector<int> & completion);
 }
