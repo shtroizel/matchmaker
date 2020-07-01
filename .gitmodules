@@ -1,3 +1,6 @@
 [submodule "matchable"]
 	path = matchable
 	url = https://github.com/shtroizel/matchable.git
+[submodule "completable"]
+	path = completable
+	url = https://github.com/shtroizel/completable.git
