@@ -8,9 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra")
 
 
+get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
+set(CMAKE_INSTALL_RPATH "${rpath_dir}")
+
 find_package(matchmaker 1 REQUIRED)
 
-set(CMAKE_INSTALL_RPATH "${matchmaker_DIR}/..")
 
 add_executable(test_program src/test_program.cpp)
 target_link_libraries(test_program matchmaker)
