@@ -94,7 +94,7 @@ def main():
         else:
             assert False, "unhandled option"
 
-    repo_root = os.path.dirname(os.path.realpath(__file__)) + '/../test_program'
+    repo_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
 
     build_and_install(repo_root, build_dir, install_dir, matchmaker_dir, use_clang)
 
