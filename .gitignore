@@ -3,3 +3,11 @@ generated_include
 generated_src
 build
 install
+data_reader/build
+data_reader/install
+build_q
+install_q
+data_reader/build_q
+data_reader/install_q
+generated_include_q
+generated_src_q

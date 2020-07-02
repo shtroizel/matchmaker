@@ -37,13 +37,14 @@ endif()
 
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/matchmaker")
 
+set(suffix_q "")
 if(q)
     add_definitions(-DQ_ONLY)
+    set(suffix_q "_q")
 endif()
 
-find_package(matchable 10.0.3 REQUIRED)
+find_package(matchable 10.0.4 REQUIRED)
 include_directories(${matchable_DIR}/../../../include)
-
 
 set(lib_list)
 macro(add_lib_finalization lib_name)
@@ -51,23 +52,23 @@ macro(add_lib_finalization lib_name)
     target_include_directories(
         matchmaker_${lib_name}
         PRIVATE
-        generated_include
+        generated_include${suffix_q}
         INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/generated_include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/generated_include${suffix_q}>
         $<INSTALL_INTERFACE:include>
     )
     set_target_properties(matchmaker_${lib_name} PROPERTIES POSITION_INDEPENDENT_CODE 1)
     install(
         TARGETS matchmaker_${lib_name}
-        DESTINATION lib/matchmaker
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/matchmaker
         EXPORT matchmaker
     )
 endmacro()
 
 
 macro(add_single_prefix_lib_without_deps prefix)
-    add_library(matchmaker_${prefix} SHARED generated_src/${prefix}.cpp)
+    add_library(matchmaker_${prefix} SHARED generated_src${suffix_q}/${prefix}.cpp)
     add_lib_finalization(${prefix})
 endmacro()
 
@@ -494,506 +495,506 @@ endif()
 if(NOT ATOMIC_LIBS)
     set(
         multi_0_srcs
-        generated_src/s_n.cpp
-        generated_src/l_u.cpp
-        generated_src/V.cpp
-        generated_src/a_g.cpp
+        generated_src${suffix_q}/s_n.cpp
+        generated_src${suffix_q}/l_u.cpp
+        generated_src${suffix_q}/V.cpp
+        generated_src${suffix_q}/a_g.cpp
     )
     set(
         multi_1_srcs
-        generated_src/s_k.cpp
-        generated_src/o_p.cpp
-        generated_src/o_b.cpp
-        generated_src/g_i.cpp
-        generated_src/e_s.cpp
+        generated_src${suffix_q}/s_k.cpp
+        generated_src${suffix_q}/o_p.cpp
+        generated_src${suffix_q}/o_b.cpp
+        generated_src${suffix_q}/g_i.cpp
+        generated_src${suffix_q}/e_s.cpp
     )
     set(
         multi_2_srcs
-        generated_src/p_y.cpp
-        generated_src/u_r.cpp
-        generated_src/i_r.cpp
-        generated_src/r_h.cpp
-        generated_src/u_n_h.cpp
-        generated_src/n_u.cpp
+        generated_src${suffix_q}/p_y.cpp
+        generated_src${suffix_q}/u_r.cpp
+        generated_src${suffix_q}/i_r.cpp
+        generated_src${suffix_q}/r_h.cpp
+        generated_src${suffix_q}/u_n_h.cpp
+        generated_src${suffix_q}/n_u.cpp
     )
     set(
         multi_3_srcs
-        generated_src/u_n_g.cpp
-        generated_src/p_r_i.cpp
-        generated_src/e_r.cpp
-        generated_src/e_u.cpp
-        generated_src/a_f.cpp
-        generated_src/u_n_l.cpp
-        generated_src/o_s.cpp
+        generated_src${suffix_q}/u_n_g.cpp
+        generated_src${suffix_q}/p_r_i.cpp
+        generated_src${suffix_q}/e_r.cpp
+        generated_src${suffix_q}/e_u.cpp
+        generated_src${suffix_q}/a_f.cpp
+        generated_src${suffix_q}/u_n_l.cpp
+        generated_src${suffix_q}/o_s.cpp
     )
     set(
         multi_4_srcs
-        generated_src/e_c.cpp
-        generated_src/o_c.cpp
-        generated_src/s_q.cpp
-        generated_src/s_m.cpp
-        generated_src/u_n_w.cpp
-        generated_src/a_e.cpp
-        generated_src/e_t.cpp
-        generated_src/x.cpp
+        generated_src${suffix_q}/e_c.cpp
+        generated_src${suffix_q}/o_c.cpp
+        generated_src${suffix_q}/s_q.cpp
+        generated_src${suffix_q}/s_m.cpp
+        generated_src${suffix_q}/u_n_w.cpp
+        generated_src${suffix_q}/a_e.cpp
+        generated_src${suffix_q}/e_t.cpp
+        generated_src${suffix_q}/x.cpp
     )
     set(
         multi_5_srcs
-        generated_src/e_v.cpp
-        generated_src/u_l.cpp
-        generated_src/i_d.cpp
-        generated_src/u_n_v.cpp
-        generated_src/t_w.cpp
-        generated_src/o_x.cpp
-        generated_src/t_y.cpp
-        generated_src/Z.cpp
-        generated_src/u_n_o.cpp
+        generated_src${suffix_q}/e_v.cpp
+        generated_src${suffix_q}/u_l.cpp
+        generated_src${suffix_q}/i_d.cpp
+        generated_src${suffix_q}/u_n_v.cpp
+        generated_src${suffix_q}/t_w.cpp
+        generated_src${suffix_q}/o_x.cpp
+        generated_src${suffix_q}/t_y.cpp
+        generated_src${suffix_q}/Z.cpp
+        generated_src${suffix_q}/u_n_o.cpp
     )
     set(
         multi_6_srcs
-        generated_src/w_r.cpp
-        generated_src/g_y.cpp
-        generated_src/i_l.cpp
-        generated_src/U.cpp
-        generated_src/a_v.cpp
-        generated_src/p_r_a.cpp
-        generated_src/d_y.cpp
-        generated_src/a_i.cpp
-        generated_src/l_y.cpp
-        generated_src/o_l.cpp
+        generated_src${suffix_q}/w_r.cpp
+        generated_src${suffix_q}/g_y.cpp
+        generated_src${suffix_q}/i_l.cpp
+        generated_src${suffix_q}/U.cpp
+        generated_src${suffix_q}/a_v.cpp
+        generated_src${suffix_q}/p_r_a.cpp
+        generated_src${suffix_q}/d_y.cpp
+        generated_src${suffix_q}/a_i.cpp
+        generated_src${suffix_q}/l_y.cpp
+        generated_src${suffix_q}/o_l.cpp
     )
     set(
         multi_7_srcs
-        generated_src/e_a.cpp
-        generated_src/e_q.cpp
-        generated_src/o_n.cpp
-        generated_src/i_c.cpp
-        generated_src/Y.cpp
-        generated_src/o_m.cpp
-        generated_src/u_n_n.cpp
-        generated_src/e_d.cpp
-        generated_src/e_f.cpp
-        generated_src/n_o_t.cpp
-        generated_src/o_d.cpp
-        generated_src/n_o_n.cpp
+        generated_src${suffix_q}/e_a.cpp
+        generated_src${suffix_q}/e_q.cpp
+        generated_src${suffix_q}/o_n.cpp
+        generated_src${suffix_q}/i_c.cpp
+        generated_src${suffix_q}/Y.cpp
+        generated_src${suffix_q}/o_m.cpp
+        generated_src${suffix_q}/u_n_n.cpp
+        generated_src${suffix_q}/e_d.cpp
+        generated_src${suffix_q}/e_f.cpp
+        generated_src${suffix_q}/n_o_t.cpp
+        generated_src${suffix_q}/o_d.cpp
+        generated_src${suffix_q}/n_o_n.cpp
     )
     set(
         multi_8_srcs
-        generated_src/o_t.cpp
-        generated_src/a_z.cpp
-        generated_src/o_o.cpp
-        generated_src/o_f.cpp
-        generated_src/p_t.cpp
-        generated_src/p_n.cpp
-        generated_src/n_o_r.cpp
-        generated_src/u_m.cpp
-        generated_src/e_g.cpp
-        generated_src/u_t.cpp
-        generated_src/a_w.cpp
-        generated_src/i_o.cpp
+        generated_src${suffix_q}/o_t.cpp
+        generated_src${suffix_q}/a_z.cpp
+        generated_src${suffix_q}/o_o.cpp
+        generated_src${suffix_q}/o_f.cpp
+        generated_src${suffix_q}/p_t.cpp
+        generated_src${suffix_q}/p_n.cpp
+        generated_src${suffix_q}/n_o_r.cpp
+        generated_src${suffix_q}/u_m.cpp
+        generated_src${suffix_q}/e_g.cpp
+        generated_src${suffix_q}/u_t.cpp
+        generated_src${suffix_q}/a_w.cpp
+        generated_src${suffix_q}/i_o.cpp
     )
     set(
         multi_9_srcs
-        generated_src/e_y.cpp
-        generated_src/u_s.cpp
-        generated_src/g_n.cpp
-        generated_src/a_x.cpp
-        generated_src/g_h.cpp
-        generated_src/b_y.cpp
-        generated_src/i_t.cpp
-        generated_src/a_q.cpp
-        generated_src/Q.cpp
-        generated_src/n_o_s.cpp
-        generated_src/n_o_v.cpp
-        generated_src/n_o_m.cpp
-        generated_src/u_n_j.cpp
-        generated_src/u_n_k.cpp
+        generated_src${suffix_q}/e_y.cpp
+        generated_src${suffix_q}/u_s.cpp
+        generated_src${suffix_q}/g_n.cpp
+        generated_src${suffix_q}/a_x.cpp
+        generated_src${suffix_q}/g_h.cpp
+        generated_src${suffix_q}/b_y.cpp
+        generated_src${suffix_q}/i_t.cpp
+        generated_src${suffix_q}/a_q.cpp
+        generated_src${suffix_q}/Q.cpp
+        generated_src${suffix_q}/n_o_s.cpp
+        generated_src${suffix_q}/n_o_v.cpp
+        generated_src${suffix_q}/n_o_m.cpp
+        generated_src${suffix_q}/u_n_j.cpp
+        generated_src${suffix_q}/u_n_k.cpp
     )
     set(
         multi_10_srcs
-        generated_src/u_n_q.cpp
-        generated_src/Q.cpp
-        generated_src/o_i.cpp
-        generated_src/o_e.cpp
-        generated_src/u_n_u.cpp
-        generated_src/i_g.cpp
-        generated_src/e_i.cpp
-        generated_src/p_r_u.cpp
-        generated_src/o_a.cpp
-        generated_src/n_y.cpp
-        generated_src/a_k.cpp
-        generated_src/n_o_c.cpp
-        generated_src/d_h.cpp
-        generated_src/e_b.cpp
-        generated_src/t_s.cpp
-        generated_src/o_w.cpp
+        generated_src${suffix_q}/u_n_q.cpp
+        generated_src${suffix_q}/Q.cpp
+        generated_src${suffix_q}/o_i.cpp
+        generated_src${suffix_q}/o_e.cpp
+        generated_src${suffix_q}/u_n_u.cpp
+        generated_src${suffix_q}/i_g.cpp
+        generated_src${suffix_q}/e_i.cpp
+        generated_src${suffix_q}/p_r_u.cpp
+        generated_src${suffix_q}/o_a.cpp
+        generated_src${suffix_q}/n_y.cpp
+        generated_src${suffix_q}/a_k.cpp
+        generated_src${suffix_q}/n_o_c.cpp
+        generated_src${suffix_q}/d_h.cpp
+        generated_src${suffix_q}/e_b.cpp
+        generated_src${suffix_q}/t_s.cpp
+        generated_src${suffix_q}/o_w.cpp
     )
     set(
         multi_11_srcs
-        generated_src/w_u.cpp
-        generated_src/n_o_u.cpp
-        generated_src/n_o_b.cpp
-        generated_src/n_o_d.cpp
-        generated_src/e_o.cpp
-        generated_src/n_o_o.cpp
-        generated_src/b_h.cpp
-        generated_src/e_e.cpp
-        generated_src/a_h.cpp
-        generated_src/i_a.cpp
-        generated_src/o_z.cpp
-        generated_src/X.cpp
-        generated_src/o_g.cpp
-        generated_src/w_y.cpp
-        generated_src/o_k.cpp
-        generated_src/a_o.cpp
-        generated_src/d_w.cpp
-        generated_src/u_v.cpp
+        generated_src${suffix_q}/w_u.cpp
+        generated_src${suffix_q}/n_o_u.cpp
+        generated_src${suffix_q}/n_o_b.cpp
+        generated_src${suffix_q}/n_o_d.cpp
+        generated_src${suffix_q}/e_o.cpp
+        generated_src${suffix_q}/n_o_o.cpp
+        generated_src${suffix_q}/b_h.cpp
+        generated_src${suffix_q}/e_e.cpp
+        generated_src${suffix_q}/a_h.cpp
+        generated_src${suffix_q}/i_a.cpp
+        generated_src${suffix_q}/o_z.cpp
+        generated_src${suffix_q}/X.cpp
+        generated_src${suffix_q}/o_g.cpp
+        generated_src${suffix_q}/w_y.cpp
+        generated_src${suffix_q}/o_k.cpp
+        generated_src${suffix_q}/a_o.cpp
+        generated_src${suffix_q}/d_w.cpp
+        generated_src${suffix_q}/u_v.cpp
     )
     set(
         multi_12_srcs
-        generated_src/e_j.cpp
-        generated_src/a_y.cpp
-        generated_src/n_o_i.cpp
-        generated_src/o_y.cpp
-        generated_src/c_t.cpp
-        generated_src/c_z.cpp
-        generated_src/u_g.cpp
-        generated_src/t_z.cpp
-        generated_src/r_y.cpp
-        generated_src/u_b.cpp
-        generated_src/m_n.cpp
-        generated_src/n_o_w.cpp
-        generated_src/i_p.cpp
-        generated_src/e_k.cpp
-        generated_src/i_v.cpp
-        generated_src/d_j.cpp
-        generated_src/a_a.cpp
-        generated_src/a_j.cpp
-        generated_src/c_n.cpp
-        generated_src/u_d.cpp
-        generated_src/o_h.cpp
+        generated_src${suffix_q}/e_j.cpp
+        generated_src${suffix_q}/a_y.cpp
+        generated_src${suffix_q}/n_o_i.cpp
+        generated_src${suffix_q}/o_y.cpp
+        generated_src${suffix_q}/c_t.cpp
+        generated_src${suffix_q}/c_z.cpp
+        generated_src${suffix_q}/u_g.cpp
+        generated_src${suffix_q}/t_z.cpp
+        generated_src${suffix_q}/r_y.cpp
+        generated_src${suffix_q}/u_b.cpp
+        generated_src${suffix_q}/m_n.cpp
+        generated_src${suffix_q}/n_o_w.cpp
+        generated_src${suffix_q}/i_p.cpp
+        generated_src${suffix_q}/e_k.cpp
+        generated_src${suffix_q}/i_v.cpp
+        generated_src${suffix_q}/d_j.cpp
+        generated_src${suffix_q}/a_a.cpp
+        generated_src${suffix_q}/a_j.cpp
+        generated_src${suffix_q}/c_n.cpp
+        generated_src${suffix_q}/u_d.cpp
+        generated_src${suffix_q}/o_h.cpp
     )
     set(
         multi_13_srcs
-        generated_src/s_v.cpp
-        generated_src/n_o_e.cpp
-        generated_src/t_c.cpp
-        generated_src/i_b.cpp
-        generated_src/u_n_y.cpp
-        generated_src/p_r_y.cpp
-        generated_src/b_d.cpp
-        generated_src/n_o_g.cpp
-        generated_src/e_w.cpp
-        generated_src/u_n_z.cpp
-        generated_src/u_k.cpp
-        generated_src/i_w.cpp
-        generated_src/f_y.cpp
-        generated_src/i_f.cpp
-        generated_src/s_f.cpp
-        generated_src/u_i.cpp
-        generated_src/g_w.cpp
-        generated_src/i_z.cpp
-        generated_src/p_f.cpp
-        generated_src/i_k.cpp
-        generated_src/c_s.cpp
+        generated_src${suffix_q}/s_v.cpp
+        generated_src${suffix_q}/n_o_e.cpp
+        generated_src${suffix_q}/t_c.cpp
+        generated_src${suffix_q}/i_b.cpp
+        generated_src${suffix_q}/u_n_y.cpp
+        generated_src${suffix_q}/p_r_y.cpp
+        generated_src${suffix_q}/b_d.cpp
+        generated_src${suffix_q}/n_o_g.cpp
+        generated_src${suffix_q}/e_w.cpp
+        generated_src${suffix_q}/u_n_z.cpp
+        generated_src${suffix_q}/u_k.cpp
+        generated_src${suffix_q}/i_w.cpp
+        generated_src${suffix_q}/f_y.cpp
+        generated_src${suffix_q}/i_f.cpp
+        generated_src${suffix_q}/s_f.cpp
+        generated_src${suffix_q}/u_i.cpp
+        generated_src${suffix_q}/g_w.cpp
+        generated_src${suffix_q}/i_z.cpp
+        generated_src${suffix_q}/p_f.cpp
+        generated_src${suffix_q}/i_k.cpp
+        generated_src${suffix_q}/c_s.cpp
     )
     set(
         multi_14_srcs
-        generated_src/p_p.cpp
-        generated_src/u_x.cpp
-        generated_src/s_r.cpp
-        generated_src/l_l.cpp
-        generated_src/n_o_y.cpp
-        generated_src/c_p.cpp
-        generated_src/i_x.cpp
-        generated_src/b_k.cpp
-        generated_src/m_s.cpp
-        generated_src/c_c.cpp
-        generated_src/m_t.cpp
-        generated_src/n_o_x.cpp
-        generated_src/n_o_l.cpp
-        generated_src/s_g.cpp
-        generated_src/w_l.cpp
-        generated_src/d_c.cpp
-        generated_src/r_c.cpp
-        generated_src/u_h.cpp
-        generated_src/m_b.cpp
-        generated_src/f_c.cpp
-        generated_src/g_p.cpp
-        generated_src/t_p.cpp
-        generated_src/d_s.cpp
-        generated_src/f_j.cpp
-        generated_src/e_h.cpp
-        generated_src/g_t.cpp
-        generated_src/m_p.cpp
-        generated_src/u_f.cpp
-        generated_src/m_c.cpp
-        generated_src/s_d.cpp
-        generated_src/m_h.cpp
-        generated_src/s_s.cpp
+        generated_src${suffix_q}/p_p.cpp
+        generated_src${suffix_q}/u_x.cpp
+        generated_src${suffix_q}/s_r.cpp
+        generated_src${suffix_q}/l_l.cpp
+        generated_src${suffix_q}/n_o_y.cpp
+        generated_src${suffix_q}/c_p.cpp
+        generated_src${suffix_q}/i_x.cpp
+        generated_src${suffix_q}/b_k.cpp
+        generated_src${suffix_q}/m_s.cpp
+        generated_src${suffix_q}/c_c.cpp
+        generated_src${suffix_q}/m_t.cpp
+        generated_src${suffix_q}/n_o_x.cpp
+        generated_src${suffix_q}/n_o_l.cpp
+        generated_src${suffix_q}/s_g.cpp
+        generated_src${suffix_q}/w_l.cpp
+        generated_src${suffix_q}/d_c.cpp
+        generated_src${suffix_q}/r_c.cpp
+        generated_src${suffix_q}/u_h.cpp
+        generated_src${suffix_q}/m_b.cpp
+        generated_src${suffix_q}/f_c.cpp
+        generated_src${suffix_q}/g_p.cpp
+        generated_src${suffix_q}/t_p.cpp
+        generated_src${suffix_q}/d_s.cpp
+        generated_src${suffix_q}/f_j.cpp
+        generated_src${suffix_q}/e_h.cpp
+        generated_src${suffix_q}/g_t.cpp
+        generated_src${suffix_q}/m_p.cpp
+        generated_src${suffix_q}/u_f.cpp
+        generated_src${suffix_q}/m_c.cpp
+        generated_src${suffix_q}/s_d.cpp
+        generated_src${suffix_q}/m_h.cpp
+        generated_src${suffix_q}/s_s.cpp
     )
     set(
         multi_15_srcs
-        generated_src/d_z.cpp
-        generated_src/m_r.cpp
-        generated_src/l_h.cpp
-        generated_src/t_m.cpp
-        generated_src/l_c.cpp
-        generated_src/i_h.cpp
-        generated_src/c_w.cpp
-        generated_src/n_g.cpp
-        generated_src/r_f.cpp
-        generated_src/h_d.cpp
-        generated_src/p_k.cpp
-        generated_src/c_f.cpp
-        generated_src/n_o_p.cpp
-        generated_src/n_o_a.cpp
-        generated_src/t_j.cpp
-        generated_src/i_j.cpp
-        generated_src/d_v.cpp
-        generated_src/d_b.cpp
-        generated_src/f_t.cpp
-        generated_src/f_p.cpp
-        generated_src/b_t.cpp
-        generated_src/u_a.cpp
-        generated_src/t_l.cpp
-        generated_src/d_k.cpp
-        generated_src/m_g.cpp
-        generated_src/l_b.cpp
-        generated_src/h_w.cpp
-        generated_src/p_c.cpp
-        generated_src/c_m.cpp
-        generated_src/r_g.cpp
-        generated_src/s_b.cpp
-        generated_src/m_l.cpp
-        generated_src/t_b.cpp
-        generated_src/h_g.cpp
-        generated_src/d_t.cpp
-        generated_src/m_m.cpp
-        generated_src/l_w.cpp
-        generated_src/m_k.cpp
-        generated_src/b_s.cpp
-        generated_src/i_u.cpp
-        generated_src/u_c.cpp
-        generated_src/l_v.cpp
-        generated_src/h_c.cpp
-        generated_src/h_r.cpp
-        generated_src/b_b.cpp
-        generated_src/b_c.cpp
-        generated_src/m_f.cpp
-        generated_src/p_m.cpp
-        generated_src/r_t.cpp
-        generated_src/p_d.cpp
-        generated_src/c_d.cpp
-        generated_src/b_p.cpp
-        generated_src/n_o_z.cpp
-        generated_src/n_o_h.cpp
-        generated_src/f_d.cpp
-        generated_src/u_z.cpp
-        generated_src/e_z.cpp
+        generated_src${suffix_q}/d_z.cpp
+        generated_src${suffix_q}/m_r.cpp
+        generated_src${suffix_q}/l_h.cpp
+        generated_src${suffix_q}/t_m.cpp
+        generated_src${suffix_q}/l_c.cpp
+        generated_src${suffix_q}/i_h.cpp
+        generated_src${suffix_q}/c_w.cpp
+        generated_src${suffix_q}/n_g.cpp
+        generated_src${suffix_q}/r_f.cpp
+        generated_src${suffix_q}/h_d.cpp
+        generated_src${suffix_q}/p_k.cpp
+        generated_src${suffix_q}/c_f.cpp
+        generated_src${suffix_q}/n_o_p.cpp
+        generated_src${suffix_q}/n_o_a.cpp
+        generated_src${suffix_q}/t_j.cpp
+        generated_src${suffix_q}/i_j.cpp
+        generated_src${suffix_q}/d_v.cpp
+        generated_src${suffix_q}/d_b.cpp
+        generated_src${suffix_q}/f_t.cpp
+        generated_src${suffix_q}/f_p.cpp
+        generated_src${suffix_q}/b_t.cpp
+        generated_src${suffix_q}/u_a.cpp
+        generated_src${suffix_q}/t_l.cpp
+        generated_src${suffix_q}/d_k.cpp
+        generated_src${suffix_q}/m_g.cpp
+        generated_src${suffix_q}/l_b.cpp
+        generated_src${suffix_q}/h_w.cpp
+        generated_src${suffix_q}/p_c.cpp
+        generated_src${suffix_q}/c_m.cpp
+        generated_src${suffix_q}/r_g.cpp
+        generated_src${suffix_q}/s_b.cpp
+        generated_src${suffix_q}/m_l.cpp
+        generated_src${suffix_q}/t_b.cpp
+        generated_src${suffix_q}/h_g.cpp
+        generated_src${suffix_q}/d_t.cpp
+        generated_src${suffix_q}/m_m.cpp
+        generated_src${suffix_q}/l_w.cpp
+        generated_src${suffix_q}/m_k.cpp
+        generated_src${suffix_q}/b_s.cpp
+        generated_src${suffix_q}/i_u.cpp
+        generated_src${suffix_q}/u_c.cpp
+        generated_src${suffix_q}/l_v.cpp
+        generated_src${suffix_q}/h_c.cpp
+        generated_src${suffix_q}/h_r.cpp
+        generated_src${suffix_q}/b_b.cpp
+        generated_src${suffix_q}/b_c.cpp
+        generated_src${suffix_q}/m_f.cpp
+        generated_src${suffix_q}/p_m.cpp
+        generated_src${suffix_q}/r_t.cpp
+        generated_src${suffix_q}/p_d.cpp
+        generated_src${suffix_q}/c_d.cpp
+        generated_src${suffix_q}/b_p.cpp
+        generated_src${suffix_q}/n_o_z.cpp
+        generated_src${suffix_q}/n_o_h.cpp
+        generated_src${suffix_q}/f_d.cpp
+        generated_src${suffix_q}/u_z.cpp
+        generated_src${suffix_q}/e_z.cpp
     )
     set(
         multi_16_srcs
-        generated_src/s_j.cpp
-        generated_src/f_s.cpp
-        generated_src/r_m.cpp
-        generated_src/d_m.cpp
-        generated_src/n_r.cpp
-        generated_src/d_g.cpp
-        generated_src/f_w.cpp
-        generated_src/p_g.cpp
-        generated_src/g_d.cpp
-        generated_src/r_w.cpp
-        generated_src/r_p.cpp
-        generated_src/f_n.cpp
-        generated_src/d_d.cpp
-        generated_src/r_s.cpp
-        generated_src/p_w.cpp
-        generated_src/f_g.cpp
-        generated_src/l_s.cpp
-        generated_src/c_g.cpp
-        generated_src/d_l.cpp
-        generated_src/t_g.cpp
-        generated_src/l_n.cpp
-        generated_src/h_t.cpp
-        generated_src/h_l.cpp
-        generated_src/l_p.cpp
-        generated_src/i_i.cpp
-        generated_src/o_q.cpp
-        generated_src/m_z.cpp
-        generated_src/g_m.cpp
-        generated_src/b_w.cpp
-        generated_src/m_w.cpp
-        generated_src/h_p.cpp
-        generated_src/h_s.cpp
-        generated_src/l_g.cpp
-        generated_src/w_k.cpp
-        generated_src/n_t.cpp
-        generated_src/c_k.cpp
-        generated_src/b_x.cpp
-        generated_src/b_v.cpp
-        generated_src/n_s.cpp
-        generated_src/i_e.cpp
-        generated_src/l_x.cpp
-        generated_src/l_t.cpp
-        generated_src/i_q.cpp
-        generated_src/f_m.cpp
-        generated_src/f_f.cpp
-        generated_src/f_b.cpp
-        generated_src/d_p.cpp
-        generated_src/b_n.cpp
-        generated_src/w_m.cpp
-        generated_src/t_n.cpp
-        generated_src/p_r_s.cpp
-        generated_src/p_r_p.cpp
-        generated_src/p_r_n.cpp
-        generated_src/s_z.cpp
-        generated_src/g_j.cpp
-        generated_src/l_r.cpp
-        generated_src/r_b.cpp
-        generated_src/g_c.cpp
-        generated_src/l_d.cpp
-        generated_src/n_p.cpp
-        generated_src/m_d.cpp
-        generated_src/r_l.cpp
-        generated_src/t_f.cpp
-        generated_src/h_h.cpp
-        generated_src/g_g.cpp
-        generated_src/r_d.cpp
-        generated_src/p_q.cpp
-        generated_src/n_v.cpp
-        generated_src/m_v.cpp
-        generated_src/l_m.cpp
-        generated_src/l_f.cpp
-        generated_src/h_m.cpp
-        generated_src/h_f.cpp
-        generated_src/h_b.cpp
-        generated_src/g_v.cpp
-        generated_src/f_v.cpp
-        generated_src/b_g.cpp
-        generated_src/b_f.cpp
-        generated_src/w_b.cpp
-        generated_src/w_c.cpp
-        generated_src/w_d.cpp
-        generated_src/w_f.cpp
-        generated_src/o_j.cpp
-        generated_src/n_d.cpp
-        generated_src/d_n.cpp
-        generated_src/d_f.cpp
-        generated_src/p_b.cpp
-        generated_src/n_j.cpp
-        generated_src/i_y.cpp
-        generated_src/t_x.cpp
-        generated_src/t_k.cpp
-        generated_src/r_n.cpp
+        generated_src${suffix_q}/s_j.cpp
+        generated_src${suffix_q}/f_s.cpp
+        generated_src${suffix_q}/r_m.cpp
+        generated_src${suffix_q}/d_m.cpp
+        generated_src${suffix_q}/n_r.cpp
+        generated_src${suffix_q}/d_g.cpp
+        generated_src${suffix_q}/f_w.cpp
+        generated_src${suffix_q}/p_g.cpp
+        generated_src${suffix_q}/g_d.cpp
+        generated_src${suffix_q}/r_w.cpp
+        generated_src${suffix_q}/r_p.cpp
+        generated_src${suffix_q}/f_n.cpp
+        generated_src${suffix_q}/d_d.cpp
+        generated_src${suffix_q}/r_s.cpp
+        generated_src${suffix_q}/p_w.cpp
+        generated_src${suffix_q}/f_g.cpp
+        generated_src${suffix_q}/l_s.cpp
+        generated_src${suffix_q}/c_g.cpp
+        generated_src${suffix_q}/d_l.cpp
+        generated_src${suffix_q}/t_g.cpp
+        generated_src${suffix_q}/l_n.cpp
+        generated_src${suffix_q}/h_t.cpp
+        generated_src${suffix_q}/h_l.cpp
+        generated_src${suffix_q}/l_p.cpp
+        generated_src${suffix_q}/i_i.cpp
+        generated_src${suffix_q}/o_q.cpp
+        generated_src${suffix_q}/m_z.cpp
+        generated_src${suffix_q}/g_m.cpp
+        generated_src${suffix_q}/b_w.cpp
+        generated_src${suffix_q}/m_w.cpp
+        generated_src${suffix_q}/h_p.cpp
+        generated_src${suffix_q}/h_s.cpp
+        generated_src${suffix_q}/l_g.cpp
+        generated_src${suffix_q}/w_k.cpp
+        generated_src${suffix_q}/n_t.cpp
+        generated_src${suffix_q}/c_k.cpp
+        generated_src${suffix_q}/b_x.cpp
+        generated_src${suffix_q}/b_v.cpp
+        generated_src${suffix_q}/n_s.cpp
+        generated_src${suffix_q}/i_e.cpp
+        generated_src${suffix_q}/l_x.cpp
+        generated_src${suffix_q}/l_t.cpp
+        generated_src${suffix_q}/i_q.cpp
+        generated_src${suffix_q}/f_m.cpp
+        generated_src${suffix_q}/f_f.cpp
+        generated_src${suffix_q}/f_b.cpp
+        generated_src${suffix_q}/d_p.cpp
+        generated_src${suffix_q}/b_n.cpp
+        generated_src${suffix_q}/w_m.cpp
+        generated_src${suffix_q}/t_n.cpp
+        generated_src${suffix_q}/p_r_s.cpp
+        generated_src${suffix_q}/p_r_p.cpp
+        generated_src${suffix_q}/p_r_n.cpp
+        generated_src${suffix_q}/s_z.cpp
+        generated_src${suffix_q}/g_j.cpp
+        generated_src${suffix_q}/l_r.cpp
+        generated_src${suffix_q}/r_b.cpp
+        generated_src${suffix_q}/g_c.cpp
+        generated_src${suffix_q}/l_d.cpp
+        generated_src${suffix_q}/n_p.cpp
+        generated_src${suffix_q}/m_d.cpp
+        generated_src${suffix_q}/r_l.cpp
+        generated_src${suffix_q}/t_f.cpp
+        generated_src${suffix_q}/h_h.cpp
+        generated_src${suffix_q}/g_g.cpp
+        generated_src${suffix_q}/r_d.cpp
+        generated_src${suffix_q}/p_q.cpp
+        generated_src${suffix_q}/n_v.cpp
+        generated_src${suffix_q}/m_v.cpp
+        generated_src${suffix_q}/l_m.cpp
+        generated_src${suffix_q}/l_f.cpp
+        generated_src${suffix_q}/h_m.cpp
+        generated_src${suffix_q}/h_f.cpp
+        generated_src${suffix_q}/h_b.cpp
+        generated_src${suffix_q}/g_v.cpp
+        generated_src${suffix_q}/f_v.cpp
+        generated_src${suffix_q}/b_g.cpp
+        generated_src${suffix_q}/b_f.cpp
+        generated_src${suffix_q}/w_b.cpp
+        generated_src${suffix_q}/w_c.cpp
+        generated_src${suffix_q}/w_d.cpp
+        generated_src${suffix_q}/w_f.cpp
+        generated_src${suffix_q}/o_j.cpp
+        generated_src${suffix_q}/n_d.cpp
+        generated_src${suffix_q}/d_n.cpp
+        generated_src${suffix_q}/d_f.cpp
+        generated_src${suffix_q}/p_b.cpp
+        generated_src${suffix_q}/n_j.cpp
+        generated_src${suffix_q}/i_y.cpp
+        generated_src${suffix_q}/t_x.cpp
+        generated_src${suffix_q}/t_k.cpp
+        generated_src${suffix_q}/r_n.cpp
     )
     set(
         multi_17_srcs
-        generated_src/n_b.cpp
-        generated_src/h_v.cpp
-        generated_src/p_r_l.cpp
-        generated_src/n_o_f.cpp
-        generated_src/n_o_k.cpp
-        generated_src/p_r_f.cpp
-        generated_src/n_n.cpp
-        generated_src/r_v.cpp
-        generated_src/u_u.cpp
-        generated_src/r_r.cpp
-        generated_src/f_h.cpp
-        generated_src/u_j.cpp
-        generated_src/t_t.cpp
-        generated_src/t_d.cpp
-        generated_src/p_v.cpp
-        generated_src/n_c.cpp
-        generated_src/m_x.cpp
-        generated_src/h_n.cpp
-        generated_src/w_j.cpp
-        generated_src/t_v.cpp
-        generated_src/n_m.cpp
-        generated_src/n_l.cpp
-        generated_src/h_q.cpp
-        generated_src/g_s.cpp
-        generated_src/f_z.cpp
-        generated_src/d_x.cpp
-        generated_src/c_v.cpp
-        generated_src/c_q.cpp
-        generated_src/c_b.cpp
-        generated_src/b_z.cpp
-        generated_src/b_m.cpp
-        generated_src/w_p.cpp
-        generated_src/w_s.cpp
-        generated_src/w_t.cpp
-        generated_src/w_g.cpp
-        generated_src/u_n_x.cpp
-        generated_src/p_r_z.cpp
-        generated_src/p_r_x.cpp
-        generated_src/p_r_w.cpp
-        generated_src/p_r_v.cpp
-        generated_src/p_r_t.cpp
-        generated_src/p_r_r.cpp
-        generated_src/p_r_q.cpp
-        generated_src/p_r_m.cpp
-        generated_src/p_r_k.cpp
-        generated_src/p_r_j.cpp
-        generated_src/p_r_h.cpp
-        generated_src/p_r_g.cpp
-        generated_src/p_r_d.cpp
-        generated_src/p_r_c.cpp
-        generated_src/p_r_b.cpp
-        generated_src/n_o_q.cpp
-        generated_src/n_o_j.cpp
-        generated_src/u_y.cpp
-        generated_src/u_w.cpp
-        generated_src/u_q.cpp
-        generated_src/u_o.cpp
-        generated_src/u_e.cpp
-        generated_src/t_q.cpp
-        generated_src/s_x.cpp
-        generated_src/r_z.cpp
-        generated_src/r_x.cpp
-        generated_src/r_q.cpp
-        generated_src/r_k.cpp
-        generated_src/r_j.cpp
-        generated_src/p_z.cpp
-        generated_src/p_x.cpp
-        generated_src/p_j.cpp
-        generated_src/n_z.cpp
-        generated_src/n_x.cpp
-        generated_src/n_w.cpp
-        generated_src/n_q.cpp
-        generated_src/n_k.cpp
-        generated_src/n_h.cpp
-        generated_src/n_f.cpp
-        generated_src/m_q.cpp
-        generated_src/m_j.cpp
-        generated_src/l_z.cpp
-        generated_src/l_q.cpp
-        generated_src/l_k.cpp
-        generated_src/l_j.cpp
-        generated_src/h_z.cpp
-        generated_src/h_x.cpp
-        generated_src/h_k.cpp
-        generated_src/h_j.cpp
-        generated_src/g_z.cpp
-        generated_src/g_x.cpp
-        generated_src/g_q.cpp
-        generated_src/g_k.cpp
-        generated_src/g_f.cpp
-        generated_src/g_b.cpp
-        generated_src/f_x.cpp
-        generated_src/f_q.cpp
-        generated_src/f_k.cpp
-        generated_src/d_q.cpp
-        generated_src/c_x.cpp
-        generated_src/c_j.cpp
-        generated_src/b_q.cpp
-        generated_src/b_j.cpp
-        generated_src/w_n.cpp
-        generated_src/w_q.cpp
-        generated_src/w_v.cpp
-        generated_src/w_w.cpp
-        generated_src/w_x.cpp
-        generated_src/w_z.cpp
+        generated_src${suffix_q}/n_b.cpp
+        generated_src${suffix_q}/h_v.cpp
+        generated_src${suffix_q}/p_r_l.cpp
+        generated_src${suffix_q}/n_o_f.cpp
+        generated_src${suffix_q}/n_o_k.cpp
+        generated_src${suffix_q}/p_r_f.cpp
+        generated_src${suffix_q}/n_n.cpp
+        generated_src${suffix_q}/r_v.cpp
+        generated_src${suffix_q}/u_u.cpp
+        generated_src${suffix_q}/r_r.cpp
+        generated_src${suffix_q}/f_h.cpp
+        generated_src${suffix_q}/u_j.cpp
+        generated_src${suffix_q}/t_t.cpp
+        generated_src${suffix_q}/t_d.cpp
+        generated_src${suffix_q}/p_v.cpp
+        generated_src${suffix_q}/n_c.cpp
+        generated_src${suffix_q}/m_x.cpp
+        generated_src${suffix_q}/h_n.cpp
+        generated_src${suffix_q}/w_j.cpp
+        generated_src${suffix_q}/t_v.cpp
+        generated_src${suffix_q}/n_m.cpp
+        generated_src${suffix_q}/n_l.cpp
+        generated_src${suffix_q}/h_q.cpp
+        generated_src${suffix_q}/g_s.cpp
+        generated_src${suffix_q}/f_z.cpp
+        generated_src${suffix_q}/d_x.cpp
+        generated_src${suffix_q}/c_v.cpp
+        generated_src${suffix_q}/c_q.cpp
+        generated_src${suffix_q}/c_b.cpp
+        generated_src${suffix_q}/b_z.cpp
+        generated_src${suffix_q}/b_m.cpp
+        generated_src${suffix_q}/w_p.cpp
+        generated_src${suffix_q}/w_s.cpp
+        generated_src${suffix_q}/w_t.cpp
+        generated_src${suffix_q}/w_g.cpp
+        generated_src${suffix_q}/u_n_x.cpp
+        generated_src${suffix_q}/p_r_z.cpp
+        generated_src${suffix_q}/p_r_x.cpp
+        generated_src${suffix_q}/p_r_w.cpp
+        generated_src${suffix_q}/p_r_v.cpp
+        generated_src${suffix_q}/p_r_t.cpp
+        generated_src${suffix_q}/p_r_r.cpp
+        generated_src${suffix_q}/p_r_q.cpp
+        generated_src${suffix_q}/p_r_m.cpp
+        generated_src${suffix_q}/p_r_k.cpp
+        generated_src${suffix_q}/p_r_j.cpp
+        generated_src${suffix_q}/p_r_h.cpp
+        generated_src${suffix_q}/p_r_g.cpp
+        generated_src${suffix_q}/p_r_d.cpp
+        generated_src${suffix_q}/p_r_c.cpp
+        generated_src${suffix_q}/p_r_b.cpp
+        generated_src${suffix_q}/n_o_q.cpp
+        generated_src${suffix_q}/n_o_j.cpp
+        generated_src${suffix_q}/u_y.cpp
+        generated_src${suffix_q}/u_w.cpp
+        generated_src${suffix_q}/u_q.cpp
+        generated_src${suffix_q}/u_o.cpp
+        generated_src${suffix_q}/u_e.cpp
+        generated_src${suffix_q}/t_q.cpp
+        generated_src${suffix_q}/s_x.cpp
+        generated_src${suffix_q}/r_z.cpp
+        generated_src${suffix_q}/r_x.cpp
+        generated_src${suffix_q}/r_q.cpp
+        generated_src${suffix_q}/r_k.cpp
+        generated_src${suffix_q}/r_j.cpp
+        generated_src${suffix_q}/p_z.cpp
+        generated_src${suffix_q}/p_x.cpp
+        generated_src${suffix_q}/p_j.cpp
+        generated_src${suffix_q}/n_z.cpp
+        generated_src${suffix_q}/n_x.cpp
+        generated_src${suffix_q}/n_w.cpp
+        generated_src${suffix_q}/n_q.cpp
+        generated_src${suffix_q}/n_k.cpp
+        generated_src${suffix_q}/n_h.cpp
+        generated_src${suffix_q}/n_f.cpp
+        generated_src${suffix_q}/m_q.cpp
+        generated_src${suffix_q}/m_j.cpp
+        generated_src${suffix_q}/l_z.cpp
+        generated_src${suffix_q}/l_q.cpp
+        generated_src${suffix_q}/l_k.cpp
+        generated_src${suffix_q}/l_j.cpp
+        generated_src${suffix_q}/h_z.cpp
+        generated_src${suffix_q}/h_x.cpp
+        generated_src${suffix_q}/h_k.cpp
+        generated_src${suffix_q}/h_j.cpp
+        generated_src${suffix_q}/g_z.cpp
+        generated_src${suffix_q}/g_x.cpp
+        generated_src${suffix_q}/g_q.cpp
+        generated_src${suffix_q}/g_k.cpp
+        generated_src${suffix_q}/g_f.cpp
+        generated_src${suffix_q}/g_b.cpp
+        generated_src${suffix_q}/f_x.cpp
+        generated_src${suffix_q}/f_q.cpp
+        generated_src${suffix_q}/f_k.cpp
+        generated_src${suffix_q}/d_q.cpp
+        generated_src${suffix_q}/c_x.cpp
+        generated_src${suffix_q}/c_j.cpp
+        generated_src${suffix_q}/b_q.cpp
+        generated_src${suffix_q}/b_j.cpp
+        generated_src${suffix_q}/w_n.cpp
+        generated_src${suffix_q}/w_q.cpp
+        generated_src${suffix_q}/w_v.cpp
+        generated_src${suffix_q}/w_w.cpp
+        generated_src${suffix_q}/w_x.cpp
+        generated_src${suffix_q}/w_z.cpp
     )
 
     foreach(multi_index RANGE 0 17)
@@ -1041,7 +1042,7 @@ foreach(first_a_z_number RANGE 97 122)
     endif()
 
     # single letter parents
-    list(APPEND matchmaker_srcs generated_src/${first_letter}.cpp)
+    list(APPEND matchmaker_srcs generated_src${suffix_q}/${first_letter}.cpp)
 
     # two letter parents
     foreach(second_a_z_number RANGE 97 122)
@@ -1052,7 +1053,7 @@ foreach(first_a_z_number RANGE 97 122)
             (first_letter STREQUAL "n" AND second_letter STREQUAL "o") OR
             (first_letter STREQUAL "u" AND second_letter STREQUAL "n")
         )
-            list(APPEND matchmaker_srcs generated_src/${first_letter}_${second_letter}.cpp)
+            list(APPEND matchmaker_srcs generated_src${suffix_q}/${first_letter}_${second_letter}.cpp)
         endif()
     endforeach()
 endforeach()
@@ -1072,12 +1073,12 @@ if(NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "sparc64")
 endif()
 install(
     TARGETS matchmaker
-    DESTINATION lib/matchmaker
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/matchmaker
     EXPORT matchmaker
 )
 install(
     DIRECTORY include/matchmaker
-    DESTINATION include
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/include
 )
 
 
@@ -1089,7 +1090,7 @@ include(CMakePackageConfigHelpers)
 configure_package_config_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/config.cmake.in
     "${CMAKE_CURRENT_BINARY_DIR}/matchmaker-config.cmake"
-    INSTALL_DESTINATION "lib/matchmaker/cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/matchmaker/cmake"
     NO_SET_AND_CHECK_MACRO
     NO_CHECK_REQUIRED_COMPONENTS_MACRO
 )

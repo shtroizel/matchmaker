@@ -22,14 +22,23 @@ def usage():
 
 
 def prepare_letters(repo_root, q, parents_only):
+    generated_include = repo_root + '/generated_include'
+    generated_src = repo_root + '/generated_src'
+    if q:
+        generated_include = generated_include + '_q'
+        generated_src = generated_src + '_q'
+
+    generated_include = generated_include + '/'
+    generated_src = generated_src + '/'
+
     if not parents_only:
         # reset header location
-        shutil.rmtree(repo_root + '/generated_include/matchmaker/generated_letters', ignore_errors=True)
-        os.makedirs(repo_root + '/generated_include/matchmaker/generated_letters')
+        shutil.rmtree(generated_include + '/matchmaker/generated_letters', ignore_errors=True)
+        os.makedirs(generated_include + '/matchmaker/generated_letters')
 
         # reset impl location
-        shutil.rmtree(repo_root + '/generated_src', ignore_errors=True)
-        os.makedirs(repo_root + '/generated_src')
+        shutil.rmtree(generated_src, ignore_errors=True)
+        os.makedirs(generated_src)
 
     leaf_h = repo_root + '/templates/leaf.h'
     leaf_cpp = repo_root + '/templates/leaf.cpp'
@@ -43,12 +52,12 @@ def prepare_letters(repo_root, q, parents_only):
                 continue
 
         if not parents_only:
-            os.makedirs(repo_root + '/generated_include/matchmaker/generated_letters/' + first_letter)
+            os.makedirs(generated_include + '/matchmaker/generated_letters/' + first_letter)
 
-        letter_h = repo_root + '/generated_include/matchmaker/generated_letters/' \
-                             + first_letter + '/' + first_letter + '.h'
+        letter_h = generated_include + '/matchmaker/generated_letters/' + first_letter + '/' +             \
+                                                                          first_letter + '.h'
 
-        letter_cpp = repo_root + '/generated_src/' + first_letter + '.cpp'
+        letter_cpp = generated_src + first_letter + '.cpp'
 
         #single_leaves = ascii_uppercase
         single_leaves = ascii_uppercase + 'jkvxyz'
@@ -76,17 +85,18 @@ def prepare_letters(repo_root, q, parents_only):
 
         for second_letter in ascii_lowercase:
             if not parents_only:
-                os.makedirs(repo_root + '/generated_include/matchmaker/generated_letters/' + first_letter \
-                                      + '/' + second_letter)
-            letter_letter_h = repo_root + '/generated_include/matchmaker/generated_letters/' \
-                                             + first_letter + '/' + second_letter + '/'  \
-                                             + first_letter + '_' + second_letter + '.h'
-            letter_letter_cpp = repo_root + '/generated_src/' + first_letter + '_' + second_letter + '.cpp'
+                os.makedirs(generated_include + '/matchmaker/generated_letters/' + first_letter + '/'      \
+                                                                                 + second_letter)
 
-            if (q and first_letter == 'q' and second_letter == 'u') or \
-               (first_letter == 'p' and second_letter == 'r') or \
-               (first_letter == 'n' and second_letter == 'o') or \
-               (first_letter == 'u' and second_letter == 'n'):
+            letter_letter_h = generated_include + '/matchmaker/generated_letters/' + first_letter + '/'    \
+                    + second_letter + '/' + first_letter + '_' + second_letter + '.h'
+
+            letter_letter_cpp = generated_src + first_letter + '_' + second_letter + '.cpp'
+
+            if (q and first_letter == 'q' and second_letter == 'u') or                                     \
+                    (first_letter == 'p' and second_letter == 'r') or                                      \
+                    (first_letter == 'n' and second_letter == 'o') or                                      \
+                    (first_letter == 'u' and second_letter == 'n'):
 
                 # two letter parent
                 shutil.copy(parent_h, letter_letter_h)
@@ -101,13 +111,14 @@ def prepare_letters(repo_root, q, parents_only):
                     continue
 
                 for third_letter in ascii_lowercase:
-                    os.makedirs(repo_root + '/generated_include/matchmaker/generated_letters/' \
-                                          + first_letter + '/' + second_letter + '/' + third_letter)
-                    letter_letter_letter_h = repo_root + '/generated_include/matchmaker/' \
-                            + 'generated_letters/' + first_letter + '/' + second_letter + '/' \
-                            + third_letter + '/' + first_letter + '_' + second_letter + '_' \
-                            + third_letter + '.h'
-                    letter_letter_letter_cpp = repo_root + '/generated_src/' + first_letter + '_' \
+                    os.makedirs(generated_include + '/matchmaker/generated_letters/'                       \
+                            + first_letter + '/' + second_letter + '/' + third_letter)
+
+                    letter_letter_letter_h = generated_include + '/matchmaker/generated_letters/'          \
+                            + first_letter + '/' + second_letter + '/' + third_letter + '/'                \
+                            + first_letter + '_' + second_letter + '_' + third_letter + '.h'
+
+                    letter_letter_letter_cpp = generated_src + first_letter + '_'                          \
                             + second_letter + '_' + third_letter + '.cpp'
 
                     # three letter leaf
@@ -115,7 +126,7 @@ def prepare_letters(repo_root, q, parents_only):
                     shutil.copy(leaf_cpp, letter_letter_letter_cpp)
                     for filename in [letter_letter_letter_h, letter_letter_letter_cpp]:
                         for line in fileinput.input(filename, inplace=True):
-                            replaced = line.replace("aoeu", first_letter + '/' + second_letter + '/' + \
+                            replaced = line.replace("aoeu", first_letter + '/' + second_letter + '/' +     \
                                                     third_letter)
                             replaced = replaced.replace("snth", first_letter + '_' + second_letter + '_' + \
                                                         third_letter)

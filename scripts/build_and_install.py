@@ -12,25 +12,28 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 def usage():
-    print('')
+    print('options for building matchmaker:\n')
     print('    -h, --help                    print this message\n')
-    print('    -b  --build_dir               build directory (default is <repo_root>/build)\n')
-    print('    -i  --install_dir             install directory (default is <repo_root>/install)')
-    print('                                  note that relative paths are relative to build_dir\n')
+    print('    -b  --build_dir               build directory')
+    print('                                    * default is <matchmaker root>/build')
+    print('                                    * relative paths are relative to <matchmaker root>\n')
+    print('    -i  --install_dir             install directory')
+    print('                                    * default is <matchmaker root>/install')
+    print('                                    * relative paths are relative to <build_dir>\n')
     print('    -c  --clang                   force use of clang compiler (default is system compiler)\n')
     print('    -r  --retain                  retain previous build (continuation/incremental building)\n')
-    print('    -m  --retain_matchables       retain generated matchables (implied when -r is used)')
-    print('                                    * will fail if \'-q\'ness changes\n')
+    print('    -m  --retain_matchables       retain generated matchables (implied when -r is used)\n')
     print('    -j  --jobs                    max jobs (default is cpu count [' + \
             str(multiprocessing.cpu_count()) + '])')
     print('                                    * you probably want --mem... instead')
     print('                                    * avoidance recommended\n')
     print('    -a, --atomic_libs             instead of multi-libs, each prefix gets its own lib')
-    print('                                    * good for stats')
     print('                                    * increases startup time for programs 5x when not q only')
     print('                                    * avoidance recommended except for q\n')
     print('    -q, --q                       q only (implies -a)')
     print('                                    * low RAM usage (less than 1G per job')
+    print('                                    * adds \'_q\' suffix to build_dir')
+    print('                                    * adds \'_q\' suffix to install_dir')
     print('                                    * builds quickly')
     print('                                    * starts quickly\n\n')
     print('    WHEN BUILDING EVERYTHING')
@@ -47,9 +50,16 @@ def usage():
 
 
 
-def build_and_install(use_clang, retain, retain_matchables, jobs, low_memory, repo_root, build_dir,
-                      install_dir, atomic_libs, q, mem_127, mem_63, mem_31_14, mem_15_30):
+def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, install_dir, atomic_libs,
+                      q, mem_127, mem_63, mem_31_14, mem_15_30):
     start_dir = os.getcwd()
+
+    matchmaker_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
+    os.chdir(matchmaker_root)
+
+    suffix_q = ''
+    if q:
+        suffix_q = '_q'
 
     if not retain:
         prepare_letters_cmd = ['scripts/prepare_letters.py']
@@ -67,12 +77,25 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, low_memory, re
             build_matchable_cmd.append('-l')
             if use_clang:
                 build_matchable_cmd.append('-c')
+            if q:
+                build_matchable_cmd.append('-b')
+                build_matchable_cmd.append('build_q')
+                build_matchable_cmd.append('-i')
+                build_matchable_cmd.append('../install_q')
+
             if subprocess.run(build_matchable_cmd).returncode != 0:
                 print('matchable failed to build')
                 exit(1)
 
             # then build and install data reader
             build_data_reader_cmd = ['data_reader/scripts/build_and_install.py']
+            if q:
+                build_data_reader_cmd.append('-b')
+                build_data_reader_cmd.append('build_q')
+                build_data_reader_cmd.append('-i')
+                build_data_reader_cmd.append('../install_q')
+                build_data_reader_cmd.append('-m')
+                build_data_reader_cmd.append('../matchable/install_q')
             if use_clang:
                 build_data_reader_cmd.append('-c')
             if subprocess.run(build_data_reader_cmd).returncode != 0:
@@ -82,7 +105,7 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, low_memory, re
             # run prepare_matchables with the data reader
             prepare_matchables_cmd = ['scripts/prepare_matchables.py']
             prepare_matchables_cmd.append('-l')
-            prepare_matchables_cmd.append('data_reader/install')
+            prepare_matchables_cmd.append('data_reader/install' + suffix_q)
             if q:
                 prepare_matchables_cmd.append('-q')
             if subprocess.run(prepare_matchables_cmd).returncode != 0:
@@ -91,20 +114,28 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, low_memory, re
 
 
     if build_dir == '':
-        build_dir = repo_root + '/build/'
+        build_dir = matchmaker_root + '/build'
+    while build_dir[-1] == '/':
+        build_dir = build_dir[:-1]
+    build_dir = build_dir + suffix_q + '/'
 
     if install_dir == '':
-        install_dir = repo_root + '/install/'
+        install_dir = matchmaker_root + '/install'
+    while install_dir[-1] == '/':
+        install_dir = install_dir[:-1]
+    install_dir = install_dir + suffix_q + '/'
 
     if not retain:
         shutil.rmtree(build_dir, ignore_errors=True)
-        shutil.rmtree(install_dir, ignore_errors=True)
-
     if not os.path.exists(build_dir):
         os.makedirs(build_dir)
-        os.makedirs(install_dir)
 
     os.chdir(build_dir)
+
+    if not retain:
+        shutil.rmtree(install_dir, ignore_errors=True)
+    if not os.path.exists(install_dir):
+        os.makedirs(install_dir)
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + install_dir]
 
@@ -126,8 +157,9 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, low_memory, re
         cmake_cmd.append('-DCMAKE_C_COMPILER=/usr/bin/clang')
         cmake_cmd.append('-DCMAKE_CXX_COMPILER=/usr/bin/clang++')
 
-    cmake_cmd.append('-Dmatchable_DIR=' + repo_root + '/matchable/install/lib/matchable/cmake')
-    cmake_cmd.append(repo_root)
+    cmake_cmd.append('-Dmatchable_DIR=' + matchmaker_root + '/matchable/install' + suffix_q + \
+            '/lib/matchable/cmake')
+    cmake_cmd.append(matchmaker_root)
 
     if subprocess.run(cmake_cmd).returncode != 0:
         print('cmake failed')
@@ -156,7 +188,6 @@ def main():
     use_clang = False
     retain = False
     retain_matchables = False
-    low_memory = False
     jobs = str(multiprocessing.cpu_count())
     build_dir = ''
     install_dir = ''
@@ -177,12 +208,8 @@ def main():
             retain = True
         elif o in ('-m', '--retain_matchables'):
             retain_matchables = True
-        elif o in ('-l', '--low_memory'):
-            low_memory = True
         elif o in ('-j', '--jobs'):
             jobs = a
-        elif o in ('-r', '--repo_root'):
-            repo_root = a
         elif o in ('-b', '--build_dir'):
             build_dir = a
         elif o in ('-i', '--install_dir'):
@@ -202,10 +229,9 @@ def main():
         else:
             assert False, "unhandled option"
 
-    repo_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
 
-    build_and_install(use_clang, retain, retain_matchables, jobs, low_memory, repo_root, build_dir,
-                      install_dir, atomic_libs, q, mem_127, mem_63, mem_31_14, mem_15_30)
+    build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, install_dir, atomic_libs,
+                      q, mem_127, mem_63, mem_31_14, mem_15_30)
 
     exit(0)
 

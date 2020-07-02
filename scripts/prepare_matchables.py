@@ -123,8 +123,12 @@ def main():
     if reader_loc[0] != '/':
         reader_loc = repo_root + reader_loc
 
-    prepare_generated_include(repo_root + '/generated_include/matchmaker/generated_matchables/',
-                              reader_loc, q)
+    out_dir = repo_root + '/generated_include'
+    if q:
+        out_dir = out_dir + '_q'
+    out_dir = out_dir + '/'
+
+    prepare_generated_include(out_dir + '/matchmaker/generated_matchables/', reader_loc, q)
     exit(0)
 
 
