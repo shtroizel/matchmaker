@@ -46,7 +46,7 @@ namespace matchmaker
     }
 
 
-    std::string const & at_snth(int const & index)
+    std::string const & at_snth(int index)
     {
         if (index < 0 || index >= size_snth())
         {
@@ -61,12 +61,12 @@ namespace matchmaker
     }
 
 
-    int lookup_snth(std::string const & str, bool * found)
+    int lookup_snth(std::string const & word, bool * found)
     {
-        word_snth::Type w{word_snth::lookup(str, found)};
+        word_snth::Type w{word_snth::lookup(word, found)};
 
         if (nullptr != found)
-            *found = w.as_string() == str;
+            *found = w.as_string() == word;
 
         return w.as_by_string_index();
     }

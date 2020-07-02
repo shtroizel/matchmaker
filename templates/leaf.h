@@ -37,6 +37,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace matchmaker
 {
     int size_snth();
-    std::string const & at_snth(int const & index);
-    int lookup_snth(std::string const & str, bool * found);
+    std::string const & at_snth(int index);
+    int lookup_snth(std::string const & word, bool * found);
 }

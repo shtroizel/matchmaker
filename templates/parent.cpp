@@ -200,7 +200,7 @@ namespace matchmaker
             return boundries;
         }();
 
-    std::string const & at_snth(int const & index)
+    std::string const & at_snth(int index)
     {
         if (index < 0 || index >= size_snth())
         {
@@ -224,7 +224,7 @@ namespace matchmaker
     }
 
 
-    int lookup_snth(std::string const & str, bool * found)
+    int lookup_snth(std::string const & word, bool * found)
     {
         static std::array<std::pair<letter_snth::Type, int>, 26> const io_snth {
             std::make_pair(letter_snth::a::grab(), letter_boundries[0].first),
@@ -258,17 +258,17 @@ namespace matchmaker
         static std::string const snth{"snth"};
         static int const depth = std::count(snth.begin(), snth.end(), '_') + 1;
 
-        if (str.size() < 1)
+        if (word.size() < 1)
             goto lookup_failed;
 
-        if ((int) str.size() <= depth)
-            return lookup_snth_a(str, found);
+        if ((int) word.size() <= depth)
+            return lookup_snth_a(word, found);
 
-        if (str[depth] < 'a' || str[depth] > 'z')
+        if (word[depth] < 'a' || word[depth] > 'z')
             goto lookup_failed;
 
         {
-            int i = str[depth];
+            int i = word[depth];
             i -= 'a';
 
             if (i < 0 || i > 25)
@@ -278,7 +278,7 @@ namespace matchmaker
                 goto lookup_failed;
             }
 
-            int ret = io_snth[i].first.as_lookup()(str, found);
+            int ret = io_snth[i].first.as_lookup()(word, found);
             ret += io_snth[i].second;
             return ret;
         }

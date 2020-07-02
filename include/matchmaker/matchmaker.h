@@ -38,8 +38,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace matchmaker
 {
+    /**
+     * @returns
+     *     The number of words in the dictionary
+     */
     int size();
-    std::string const & at(int const & index);
-    int lookup(std::string const & str, bool * found);
-    void complete(std::string const & str, int max_results, std::vector<int> & completion);
+
+    /**
+     * @param[in] index
+     *     valid indexes range from 0 to size() - 1 with 0 being the first word in the
+     *     dictionary and size() - 1 the last
+     * @returns
+     *     The word at the given index, or empty string when index is out of range
+     */
+    std::string const & at(int index);
+
+    /**
+     * @param[in] word
+     *     string to look up in the dictionary
+     * @param[out] found
+     *     true if the string is found, false otherwise
+     *     ignored when nullptr
+     * @returns
+     *     the index of the given word if it exists,
+     *     or the index that the given word would have if it did exist
+     */
+    int lookup(std::string const & word, bool * found);
+
+//     void complete(std::string const & word, int & start, int & end);
+    // TODO replace this with the better interface commented out above!
+    void complete(std::string const & word, int max_results, std::vector<int> & completion);
 }

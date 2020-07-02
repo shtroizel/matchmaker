@@ -215,7 +215,7 @@ namespace matchmaker
         }();
 
 
-    std::string const & at(int const & index)
+    std::string const & at(int index)
     {
         static std::string const empty_str;
 
@@ -238,7 +238,7 @@ namespace matchmaker
     }
 
 
-    int lookup(std::string const & str, bool * found)
+    int lookup(std::string const & word, bool * found)
     {
         static std::array<std::pair<letter::Type, int>, 52> const io {
 #ifdef Q_ONLY
@@ -350,20 +350,20 @@ namespace matchmaker
 #endif
         };
 
-        if (str.size() == 0)
+        if (word.size() == 0)
             goto lookup_failed;
 
-        if (str[0] < 'A' || (str[0] > 'Z' && str[0] < 'a') || str[0] > 'z')
+        if (word[0] < 'A' || (word[0] > 'Z' && word[0] < 'a') || word[0] > 'z')
             goto lookup_failed;
 
 #ifdef Q_ONLY
-        if (str[0] != 'Q' && str[0] != 'q')
+        if (word[0] != 'Q' && word[0] != 'q')
             goto lookup_failed;
 #endif
 
         {
-            int i = str[0];
-            if (str[0] > 'Z')
+            int i = word[0];
+            if (word[0] > 'Z')
             {
                 i -= 'a';
                 i += 26;
@@ -380,7 +380,7 @@ namespace matchmaker
                 goto lookup_failed;
             }
 
-            int ret = io[i].first.as_lookup()(str, found);
+            int ret = io[i].first.as_lookup()(word, found);
             ret += io[i].second;
             return ret;
         }
@@ -392,17 +392,17 @@ lookup_failed:
     }
 
 
-    void complete(std::string const & str, int max_results, std::vector<int> & completion)
+    void complete(std::string const & word, int max_results, std::vector<int> & completion)
     {
         completion.clear();
 
-        int index{lookup(str, nullptr)};
+        int index{lookup(word, nullptr)};
         int result_count{0};
 
         for (; index < size() && result_count < max_results; ++index, ++result_count)
         {
             std::string const & s = at(index);
-            if (s.size() >= str.size() && s.substr(0, str.size()) == str)
+            if (s.size() >= word.size() && s.substr(0, word.size()) == word)
                 completion.push_back(index);
             else
                 break;
