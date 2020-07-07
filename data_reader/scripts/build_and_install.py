@@ -22,10 +22,12 @@ def usage():
     print('                            * defaults to <data_reader root>/../matchable/install\n')
     print('    -c  --clang           force use of clang compiler')
     print('                            * system compiler used by default\n')
+    print('    -d  --debug           debug build')
+    print('                            * default is release\n')
 
 
 
-def build_and_install(build_dir, install_dir, matchable_dir, use_clang):
+def build_and_install(build_dir, install_dir, matchable_dir, use_clang, debug):
     start_dir = os.getcwd()
 
     data_reader_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
@@ -63,6 +65,11 @@ def build_and_install(build_dir, install_dir, matchable_dir, use_clang):
         cmake_cmd.append('-DCMAKE_C_COMPILER=/usr/bin/clang')
         cmake_cmd.append('-DCMAKE_CXX_COMPILER=/usr/bin/clang++')
 
+    if debug:
+        cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
+    else:
+        cmake_cmd.append('-DCMAKE_BUILD_TYPE=Release')
+
     cmake_cmd.append(data_reader_root)
 
     if subprocess.run(cmake_cmd).returncode != 0:
@@ -81,8 +88,8 @@ def build_and_install(build_dir, install_dir, matchable_dir, use_clang):
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:m:',
-                                   ['help', 'clang', 'build_dir', 'install_dir', 'matchable_dir'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:m:d',
+                                   ['help', 'clang', 'build_dir', 'install_dir', 'matchable_dir', 'debug'])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -92,6 +99,7 @@ def main():
     build_dir = ''
     install_dir = ''
     matchable_dir = ''
+    debug = False
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -105,10 +113,12 @@ def main():
             install_dir = a
         elif o in ('-m', '--matchable_dir'):
             matchable_dir = a
+        elif o in ('-d', '--debug'):
+            debug = True
         else:
             assert False, "unhandled option"
 
-    build_and_install(build_dir, install_dir, matchable_dir, use_clang)
+    build_and_install(build_dir, install_dir, matchable_dir, use_clang, debug)
 
     exit(0)
 
