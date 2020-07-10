@@ -41,20 +41,31 @@ cd matchmaker
 git submodule update --init --recursive
 ```
 
-## building matchmaker
+## build and install matchmaker + completable; run completable
+### options for building matchmaker
 ```
 scripts/build_and_install.py -h
 ```
 
-## building completable
-completable is an application that uses the matchmaker library
+### options for building completable
 ```
 completable/scripts/build_and_install.py -h
 ```
 
-## quick start example
+### EXAMPLE: build q only (quick)
 ```
 scripts/build_and_install.py -q
 completable/scripts/build_and_install.py -q
 completable/install_q/bin/completable
 ```
+
+### EXAMPLE: entire dictionary limiting memory usage to 17 GB
+```
+scripts/build_and_install.py -l 17
+completable/scripts/build_and_install.py
+completable/install/bin/completable
+```
+
+
+## additional notes
+* "quick" builds are isolated and can be run in parallel with complete builds
