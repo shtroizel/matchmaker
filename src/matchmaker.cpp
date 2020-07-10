@@ -392,18 +392,18 @@ lookup_failed:
     }
 
 
-    void complete(std::string const & word, int max_results, std::vector<int> & completion)
+    void complete(std::string const & prefix, int & start, int & length)
     {
-        completion.clear();
+        length = 0;
 
-        int index{lookup(word, nullptr)};
-        int result_count{0};
+        int index{lookup(prefix, nullptr)};
+        start = index;
 
-        for (; index < size() && result_count < max_results; ++index, ++result_count)
+        for (; index < size(); ++index)
         {
             std::string const & s = at(index);
-            if (s.size() >= word.size() && s.substr(0, word.size()) == word)
-                completion.push_back(index);
+            if (s.size() >= prefix.size() && s.substr(0, prefix.size()) == prefix)
+                ++length;
             else
                 break;
         }

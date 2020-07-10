@@ -30,6 +30,16 @@ namespace matchmaker
      *     or the index that the given word would have if it did exist
      */
     int lookup(std::string const & word, bool * found);
+
+    /**
+     * @param[in] prefix
+     *     prefix to complete
+     * @param[out] start
+     *     index of first word with the given prefix, or -1 if length is 0
+     * @param[out] length
+     *     number of words with the given prefix
+     */
+    void complete(std::string const & prefix, int & start, int & length);
 }
 ```
 

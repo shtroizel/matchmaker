@@ -65,7 +65,13 @@ namespace matchmaker
      */
     int lookup(std::string const & word, bool * found);
 
-//     void complete(std::string const & word, int & start, int & end);
-    // TODO replace this with the better interface commented out above!
-    void complete(std::string const & word, int max_results, std::vector<int> & completion);
+    /**
+     * @param[in] prefix
+     *     prefix to complete
+     * @param[out] start
+     *     index of first word with the given prefix, or -1 if length is 0
+     * @param[out] length
+     *     number of words with the given prefix
+     */
+    void complete(std::string const & prefix, int & start, int & length);
 }
