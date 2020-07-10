@@ -38,7 +38,7 @@ def prepare_generated_include(out_dir, reader_loc, q):
 
         os.makedirs(out_dir + first_letter)
 
-        single_leaves = ascii_uppercase + 'jkvxyz'
+        single_leaves = ascii_uppercase + 'jkxyz'
         if not q:
             single_leaves = single_leaves + 'q'
 
@@ -59,6 +59,16 @@ def prepare_generated_include(out_dir, reader_loc, q):
             if (q and first_letter == 'q' and second_letter == 'u') or \
                (first_letter == 'p' and second_letter == 'r') or \
                (first_letter == 'n' and second_letter == 'o') or \
+               (first_letter == 'c' and second_letter == 'o') or \
+               (first_letter == 'r' and second_letter == 'e') or \
+               (first_letter == 'i' and second_letter == 'n') or \
+               (first_letter == 'c' and second_letter == 'a') or \
+               (first_letter == 's' and second_letter == 'u') or \
+               (first_letter == 'd' and second_letter == 'i') or \
+               (first_letter == 'd' and second_letter == 'e') or \
+               (first_letter == 'p' and second_letter == 'a') or \
+               (first_letter == 's' and second_letter == 't') or \
+               (first_letter == 't' and second_letter == 'r') or \
                (first_letter == 'u' and second_letter == 'n'):
 
                 for third_letter in ascii_lowercase:

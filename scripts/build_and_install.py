@@ -37,31 +37,22 @@ def usage():
     print('                                    * increases startup time for programs 5x when not q only')
     print('                                    * avoidance recommended except for q\n')
     print('    -q, --q                       q only (implies -a)')
-    print('                                    * low RAM usage (less than 1G per job')
+    print('                                    * low memory usage (less than 1 GB per job')
     print('                                    * adds \'_q\' suffix to build_dir')
     print('                                    * adds \'_q\' suffix to install_dir')
     print('                                    * builds quickly')
     print('                                    * starts quickly\n')
     print('    -l, --memory_usage_limit      memory usage limit in GB')
-    print('                                    * with g++ while compiling:')
-    print('                                      - usage can spike to 40GB regardless of value given')
-    print('                                      - values under 40GB will be respected where possible')
-    print('                                    * with clang while compiling:')
-    print('                                      - usage can spike to 15GB regardless of value given')
-    print('                                      - values under 15GB will be respected where possible')
-    print('                                    * with linker \'ld\'')
-    print('                                      - memory usage for final linking can reach 40GB')
-    print('                                    * with linker \'ld.gold\'')
-    print('                                      - memory usage for final linking about 15GB')
-    print('                                      - gold linker only used for final linking, ld still used')
-    print('                                        everywhere else')
-    print('                                      - gold linker automatically used if available except on')
-    print('                                        sparc64 where \'ld\' is always used\n')
+    print('                                    * usage can spike to 20GB regardless of value given')
+    print('                                    * values under 20GB will be respected where possible\n')
+    print('    -d, --debug                   debug build')
+    print('                                    * compilation requires less memory')
+    print('                                    * compiles faster\n')
 
 
 
 def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, install_dir, atomic_libs,
-                      q, memory_usage_limit):
+                      q, memory_usage_limit, debug):
     start_dir = os.getcwd()
 
     matchmaker_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
@@ -149,6 +140,13 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + install_dir]
 
+    cmake_cmd.append('-DJOBS=' + jobs)
+
+    if debug:
+        cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
+    else:
+        cmake_cmd.append('-DCMAKE_BUILD_TYPE=Release')
+
     if q:
         cmake_cmd.append('-Dq=ON')
         atomic_libs = True
@@ -164,7 +162,8 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
         cmake_cmd.append('-DMEM_LIMIT=' + memory_usage_limit)
 
     if use_clang:
-        cmake_cmd.append('-DMEM_MODEL_CLANG=ON')
+        if debug:
+            cmake_cmd.append('-DMEM_MODEL_CLANG_DEBUG=ON')
         cmake_cmd.append('-DCMAKE_C_COMPILER=/usr/bin/clang')
         cmake_cmd.append('-DCMAKE_CXX_COMPILER=/usr/bin/clang++')
 
@@ -188,9 +187,9 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crmj:aql:',
+        opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crmj:aql:d',
                 ['help', 'build_dir', 'install_dir', 'clang', 'retain', 'retain_matchables', 'jobs',
-                'atomic_libs', 'q', 'memory_usage_limit'])
+                'atomic_libs', 'q', 'memory_usage_limit', 'debug'])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -205,6 +204,7 @@ def main():
     atomic_libs = False
     q = False
     memory_usage_limit = ''
+    debug = False
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -228,12 +228,14 @@ def main():
             q = True
         elif o in ('-l, --memory_usage_limit'):
             memory_usage_limit = a
+        elif o in ('-d, --debug'):
+            debug = True
         else:
             assert False, "unhandled option"
 
 
     build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, install_dir, atomic_libs,
-                      q, memory_usage_limit)
+                      q, memory_usage_limit, debug)
 
     exit(0)
 
