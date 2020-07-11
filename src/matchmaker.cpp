@@ -222,9 +222,6 @@ namespace matchmaker
         if (index < 0 || index >= size())
             return empty_str;
 
-        if (letter_boundries.size() == 0)
-            return empty_str;
-
         auto iter = std::lower_bound(
             letter_boundries.begin(),
             letter_boundries.end(),
