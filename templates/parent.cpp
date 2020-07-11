@@ -70,7 +70,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace matchmaker
 {
     using size_func = std::function<int ()>;
-    using at_func = std::function<std::string const & (int const &)>;
+    using at_func = std::function<std::string const & (int)>;
     using lookup_func = std::function<int (std::string const &, bool *)>;
 
     PROPERTYx3_MATCHABLE(
