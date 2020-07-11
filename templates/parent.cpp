@@ -157,48 +157,20 @@ namespace matchmaker
     }
 
 
-    static std::vector<std::pair<int, at_func>> const letter_boundries =
+    static std::vector<std::pair<int, letter_snth::Type>> const letter_boundries =
         [](){
             int b{0};
-            std::vector<std::pair<int, at_func>> boundries;
+            std::vector<std::pair<int, letter_snth::Type>> boundries;
 
-            // this code fails! (static initialization issues?)
-//                 for (auto const & l : letter_snth::variants())
-//                 {
-//                     boundries.push_back(std::make_pair(b, l.as_at()));
-//                     b += l.as_size()();
-//                 }
-
-            // have to do it the long way...
-            boundries.push_back(std::make_pair(b, &at_snth_a)); b += size_snth_a();
-            boundries.push_back(std::make_pair(b, &at_snth_b)); b += size_snth_b();
-            boundries.push_back(std::make_pair(b, &at_snth_c)); b += size_snth_c();
-            boundries.push_back(std::make_pair(b, &at_snth_d)); b += size_snth_d();
-            boundries.push_back(std::make_pair(b, &at_snth_e)); b += size_snth_e();
-            boundries.push_back(std::make_pair(b, &at_snth_f)); b += size_snth_f();
-            boundries.push_back(std::make_pair(b, &at_snth_g)); b += size_snth_g();
-            boundries.push_back(std::make_pair(b, &at_snth_h)); b += size_snth_h();
-            boundries.push_back(std::make_pair(b, &at_snth_i)); b += size_snth_i();
-            boundries.push_back(std::make_pair(b, &at_snth_j)); b += size_snth_j();
-            boundries.push_back(std::make_pair(b, &at_snth_k)); b += size_snth_k();
-            boundries.push_back(std::make_pair(b, &at_snth_l)); b += size_snth_l();
-            boundries.push_back(std::make_pair(b, &at_snth_m)); b += size_snth_m();
-            boundries.push_back(std::make_pair(b, &at_snth_n)); b += size_snth_n();
-            boundries.push_back(std::make_pair(b, &at_snth_o)); b += size_snth_o();
-            boundries.push_back(std::make_pair(b, &at_snth_p)); b += size_snth_p();
-            boundries.push_back(std::make_pair(b, &at_snth_q)); b += size_snth_q();
-            boundries.push_back(std::make_pair(b, &at_snth_r)); b += size_snth_r();
-            boundries.push_back(std::make_pair(b, &at_snth_s)); b += size_snth_s();
-            boundries.push_back(std::make_pair(b, &at_snth_t)); b += size_snth_t();
-            boundries.push_back(std::make_pair(b, &at_snth_u)); b += size_snth_u();
-            boundries.push_back(std::make_pair(b, &at_snth_v)); b += size_snth_v();
-            boundries.push_back(std::make_pair(b, &at_snth_w)); b += size_snth_w();
-            boundries.push_back(std::make_pair(b, &at_snth_x)); b += size_snth_x();
-            boundries.push_back(std::make_pair(b, &at_snth_y)); b += size_snth_y();
-            boundries.push_back(std::make_pair(b, &at_snth_z)); b += size_snth_z();
+            for (auto const & l : letter_snth::variants())
+            {
+                boundries.push_back(std::make_pair(b, l));
+                b += l.as_size()();
+            }
 
             return boundries;
         }();
+
 
     std::string const & at_snth(int index)
     {
@@ -220,7 +192,7 @@ namespace matchmaker
         if (iter != letter_boundries.begin())
             --iter;
 
-        return iter->second(index - iter->first);
+        return iter->second.as_at()(index - iter->first);
     }
 
 
