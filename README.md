@@ -48,7 +48,7 @@ namespace matchmaker
 ```
 git clone https://github.com/shtroizel/matchmaker.git
 cd matchmaker
-git submodule update --init --recursive
+git submodule update --init
 ```
 
 ## build and install
