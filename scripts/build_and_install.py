@@ -32,7 +32,7 @@ def usage():
     print('    -j  --jobs                    max jobs')
     print('                                    * default is cpu count [' +                                 \
             str(multiprocessing.cpu_count()) + '])')
-    print('                                    * you probably want --mem... instead\n')
+    print('                                    * you probably want -l instead\n')
     print('    -a, --atomic_libs             instead of multi-libs, each prefix gets its own lib')
     print('                                    * increases startup time for programs 5x when not q only')
     print('                                    * avoidance recommended except for q\n')
