@@ -51,31 +51,23 @@ cd matchmaker
 git submodule update --init --recursive
 ```
 
-## build and install matchmaker + completable; run completable
-### options for building matchmaker
+## build and install
+### options
 ```
 scripts/build_and_install.py -h
-```
-
-### options for building completable
-```
-completable/scripts/build_and_install.py -h
 ```
 
 ### EXAMPLE: build q only (quick)
 ```
 scripts/build_and_install.py -q
-completable/scripts/build_and_install.py -q
-completable/install_q/bin/completable
 ```
 
 ### EXAMPLE: entire dictionary limiting memory usage to 17 GB
 ```
 scripts/build_and_install.py -l 17
-completable/scripts/build_and_install.py
-completable/install/bin/completable
 ```
-
 
 ## additional notes
 * "quick" builds are isolated and can be run in parallel with complete builds
+* the "completable" repository depends on matchmaker via submodule so clone it instead if you want
+  an example application along with the library
