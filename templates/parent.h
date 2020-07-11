@@ -39,10 +39,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include <string>
+#include <vector>
+
 
 namespace matchmaker
 {
     int size_snth();
     std::string const & at_snth(int index);
     int lookup_snth(std::string const & word, bool * found);
+    void parts_of_speech_snth(int index, std::vector<std::string const *> & pos);
 }

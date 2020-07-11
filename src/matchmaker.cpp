@@ -104,14 +104,17 @@ namespace matchmaker
     using size_func = std::function<int ()>;
     using at_func = std::function<std::string const & (int)>;
     using lookup_func = std::function<int (std::string const &, bool *)>;
+    using parts_of_speech_func = std::function<void (int, std::vector<std::string const *> &)>;
 
-    PROPERTYx3_MATCHABLE(
+    PROPERTYx4_MATCHABLE(
         size_func,
         size,
         at_func,
         at,
         lookup_func,
         lookup,
+        parts_of_speech_func,
+        parts_of_speech,
         letter,
 #ifdef Q_ONLY
         Q, q
@@ -124,7 +127,8 @@ namespace matchmaker
 #define _set_properties(_letter)                                                                           \
     SET_PROPERTY(letter, _letter, size, &size_##_letter)                                                   \
     SET_PROPERTY(letter, _letter, at, &at_##_letter)                                                       \
-    SET_PROPERTY(letter, _letter, lookup, &lookup_##_letter)
+    SET_PROPERTY(letter, _letter, lookup, &lookup_##_letter)                                               \
+    SET_PROPERTY(letter, _letter, parts_of_speech, &parts_of_speech_##_letter)
 
 #ifdef Q_ONLY
     _set_properties(Q)
@@ -386,6 +390,25 @@ lookup_failed:
         if (nullptr != found)
             *found = false;
         return 0;
+    }
+
+
+    void parts_of_speech(int index, std::vector<std::string const *> & pos)
+    {
+        pos.clear();
+        if (index < 0 || index >= size())
+            return;
+
+        auto iter = std::lower_bound(
+            letter_boundries.begin(),
+            letter_boundries.end(),
+            index,
+            [](auto const & b, auto const & i){ return b.first <= i; }
+        );
+        if (iter != letter_boundries.begin())
+            --iter;
+
+        iter->second.as_parts_of_speech()(index - iter->first, pos);
     }
 
 

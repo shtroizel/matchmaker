@@ -37,7 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
 #include <string>
-#include <chrono>
+#include <vector>
 
 #include <matchmaker/generated_letters/aoeu/snth.h>
 #include <matchmaker/generated_matchables/aoeu/snth.h>
@@ -74,5 +74,13 @@ namespace matchmaker
             *found = w.as_string() == word;
 
         return w.as_by_string_index();
+    }
+
+
+    void parts_of_speech_snth(int index, std::vector<std::string const *> & pos)
+    {
+        pos.clear();
+        for (auto const & p : word_snth::from_by_string_index(index).as_pos_snth_vect())
+            pos.push_back(&p.as_pos_desc_snth().as_string());
     }
 }

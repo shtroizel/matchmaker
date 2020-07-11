@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <functional>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <matchable/matchable.h>
 
@@ -78,14 +79,17 @@ namespace matchmaker
     using size_func = std::function<int ()>;
     using at_func = std::function<std::string const & (int)>;
     using lookup_func = std::function<int (std::string const &, bool *)>;
+    using parts_of_speech_func = std::function<void (int, std::vector<std::string const *> &)>;
 
-    PROPERTYx3_MATCHABLE(
+    PROPERTYx4_MATCHABLE(
         size_func,
         size,
         at_func,
         at,
         lookup_func,
         lookup,
+        parts_of_speech_func,
+        parts_of_speech,
         letter_snth,
         a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
     )
@@ -94,7 +98,8 @@ namespace matchmaker
 #define _set_properties(_letter)                                                                           \
     SET_PROPERTY(letter_snth, _letter, size, &size_snth_##_letter)                                         \
     SET_PROPERTY(letter_snth, _letter, at, &at_snth_##_letter)                                             \
-    SET_PROPERTY(letter_snth, _letter, lookup, &lookup_snth_##_letter)
+    SET_PROPERTY(letter_snth, _letter, lookup, &lookup_snth_##_letter)                                     \
+    SET_PROPERTY(letter_snth, _letter, parts_of_speech, &parts_of_speech_snth_##_letter)
 
     _set_properties(a)
     _set_properties(b)
@@ -265,5 +270,31 @@ lookup_failed:
         if (nullptr != found)
             *found = false;
         return 0;
+    }
+
+
+    void parts_of_speech_snth(int index, std::vector<std::string const *> & pos)
+    {
+        pos.clear();
+
+        // only possible when parts_of_speech() buggy (matchmaker.cpp)
+        if (index < 0 || index >= size_snth())
+        {
+            std::cout << "parts_of_speech_snth(" << index << ") out of bounds with size_snth() of: "
+                      << size_snth() << std::endl;
+            return;
+        }
+
+        auto iter = std::lower_bound(
+            letter_boundries.begin(),
+            letter_boundries.end(),
+            index,
+            [](auto const & b, auto const & i){ return b.first <= i; }
+        );
+
+        if (iter != letter_boundries.begin())
+            --iter;
+
+        iter->second.as_parts_of_speech()(index - iter->first, pos);
     }
 }
