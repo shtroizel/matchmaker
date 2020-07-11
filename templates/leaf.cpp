@@ -30,6 +30,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+// 'aoeu' replaced by letters deliminated by '/'
+// 'snth' replaced by letters deliminated by '_'
+
+
+
 #include <iostream>
 #include <string>
 #include <chrono>
