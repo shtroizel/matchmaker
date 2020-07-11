@@ -394,6 +394,13 @@ lookup_failed:
 
     void complete(std::string const & prefix, int & start, int & length)
     {
+        if (prefix.size() == 0)
+        {
+            start = 0;
+            length = size();
+            return;
+        }
+
         length = 0;
 
         int index{lookup(prefix, nullptr)};
