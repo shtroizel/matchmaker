@@ -85,9 +85,9 @@ namespace matchmaker
     )
 
 
-#define _set_properties(_letter) \
-    SET_PROPERTY(letter_snth, _letter, size, &size_snth_##_letter) \
-    SET_PROPERTY(letter_snth, _letter, at, &at_snth_##_letter) \
+#define _set_properties(_letter)                                                                           \
+    SET_PROPERTY(letter_snth, _letter, size, &size_snth_##_letter)                                         \
+    SET_PROPERTY(letter_snth, _letter, at, &at_snth_##_letter)                                             \
     SET_PROPERTY(letter_snth, _letter, lookup, &lookup_snth_##_letter)
 
     _set_properties(a)

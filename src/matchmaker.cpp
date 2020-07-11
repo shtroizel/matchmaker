@@ -121,9 +121,9 @@ namespace matchmaker
 #endif
     )
 
-#define _set_properties(_letter) \
-    SET_PROPERTY(letter, _letter, size, &size_##_letter) \
-    SET_PROPERTY(letter, _letter, at, &at_##_letter) \
+#define _set_properties(_letter)                                                                           \
+    SET_PROPERTY(letter, _letter, size, &size_##_letter)                                                   \
+    SET_PROPERTY(letter, _letter, at, &at_##_letter)                                                       \
     SET_PROPERTY(letter, _letter, lookup, &lookup_##_letter)
 
 #ifdef Q_ONLY
