@@ -8,7 +8,7 @@ import sys
 import getopt
 
 from concurrent.futures import ThreadPoolExecutor
-
+from shutil import which
 
 
 def usage():
@@ -162,8 +162,13 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
         cmake_cmd.append('-DMEM_LIMIT=' + memory_usage_limit)
 
     if use_clang:
-        cmake_cmd.append('-DCMAKE_C_COMPILER=/usr/bin/clang')
-        cmake_cmd.append('-DCMAKE_CXX_COMPILER=/usr/bin/clang++')
+        clang_c = which('clang')
+        clang_cxx = which('clang++')
+        if clang_c is None or clang_cxx is None:
+            print('search for clang compiler failed')
+            exit(1)
+        cmake_cmd.append('-DCMAKE_C_COMPILER=' + clang_c)
+        cmake_cmd.append('-DCMAKE_CXX_COMPILER=' + clang_cxx)
 
     cmake_cmd.append('-Dmatchable_DIR=' + matchmaker_root + '/matchable/install' + suffix_q + \
             '/lib/matchable/cmake')
