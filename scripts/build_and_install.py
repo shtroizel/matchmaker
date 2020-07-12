@@ -162,8 +162,6 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
         cmake_cmd.append('-DMEM_LIMIT=' + memory_usage_limit)
 
     if use_clang:
-        if debug:
-            cmake_cmd.append('-DMEM_MODEL_CLANG_DEBUG=ON')
         cmake_cmd.append('-DCMAKE_C_COMPILER=/usr/bin/clang')
         cmake_cmd.append('-DCMAKE_CXX_COMPILER=/usr/bin/clang++')
 

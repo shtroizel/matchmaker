@@ -11,7 +11,6 @@ if(CMAKE_SYSTEM_PROCESSOR STREQUAL "sparc64")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mcmodel=medany")
 endif()
 
-option(MEM_MODEL_CLANG_DEBUG "memory usage model for clang debug builds" OFF)
 option(ATOMIC_LIBS "builds a library for every prefix" OFF)
 option(q "build q (and Q) only" OFF)
 
@@ -379,13 +378,19 @@ if(NOT q)
         message(STATUS "******* memory usage limit: ${MEM_LIMIT} GB *******")
 
         macro(add_near_group near_suffix)
-            # combo clang + Debug uses low memory
-            # instead of creating new "near" groups for this just pretend
-            # that we have more memory than we do (by 33/17ths)
+            # memory usage model based on g++ Release and Debug builds
+            #
+            # for clang and clang + debug we reuse the g++ model by scaling the "memory limit"
+            # used in the calculations for how many of which libs can run together
             set(adjusted_MEM_LIMIT ${MEM_LIMIT})
-            if(MEM_MODEL_CLANG_DEBUG)
-                math(EXPR adjusted_MEM_LIMIT "${MEM_LIMIT} * 33")
-                math(EXPR adjusted_MEM_LIMIT "${adjusted_MEM_LIMIT} / 17")
+            if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+                if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+                    math(EXPR adjusted_MEM_LIMIT "${MEM_LIMIT} * 33")
+                    math(EXPR adjusted_MEM_LIMIT "${adjusted_MEM_LIMIT} / 17")
+                else()
+                    math(EXPR adjusted_MEM_LIMIT "${MEM_LIMIT} * 107")
+                    math(EXPR adjusted_MEM_LIMIT "${adjusted_MEM_LIMIT} / 76")
+                endif()
             endif()
             math(EXPR group_size "${adjusted_MEM_LIMIT} / ${near_suffix}")
             list(LENGTH near_${near_suffix} near_length)
