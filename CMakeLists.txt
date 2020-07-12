@@ -390,14 +390,13 @@ if(NOT q)
                     math(EXPR adjusted_MEM_LIMIT "${adjusted_MEM_LIMIT} / 76")
                 endif()
             endif()
+
+            # how many libs can run in parallel (group_size)?
             math(EXPR group_size "${adjusted_MEM_LIMIT} / ${near_suffix}")
+
             list(LENGTH near_${near_suffix} near_length)
             set(index "0")
-            while(1)
-                if(index GREATER_EQUAL ${near_length})
-                    break()
-                endif()
-
+            while(index LESS ${near_length})
                 set(group "")
                 if(${group_size} GREATER_EQUAL "2")
                     set(broke "0")
@@ -416,6 +415,7 @@ if(NOT q)
                     endif()
                 endif()
 
+                # separated out from above to guarantee at least 1 regardless of group size
                 list(GET near_${near_suffix} ${index} cur)
                 list(APPEND group ${cur})
                 add_single_prefix_libs_dep_on_prev("${group}")
