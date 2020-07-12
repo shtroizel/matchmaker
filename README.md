@@ -32,6 +32,14 @@ namespace matchmaker
     int lookup(std::string const & word, bool * found);
 
     /**
+     * @param[in] index
+     *     index of a word in the dictionary
+     * @param[out] pos
+     *     vector containing the parts of speech associated with the given word
+     */
+    void parts_of_speech(int index, std::vector<std::string const *> & pos);
+
+    /**
      * @param[in] prefix
      *     prefix to complete
      * @param[out] start

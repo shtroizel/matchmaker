@@ -57,7 +57,7 @@ namespace matchmaker
      * @param[in] word
      *     string to look up in the dictionary
      * @param[out] found
-     *     true if the string is found, false otherwise
+     *     true if word is found, false otherwise
      *     ignored when nullptr
      * @returns
      *     the index of the given word if it exists,
