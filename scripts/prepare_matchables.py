@@ -52,6 +52,7 @@ def prepare_generated_include(out_dir, reader_loc, q):
                     out_dir + first_letter,
                     first_letter,
                     'nil',
+                    'nil',
                     'nil'
                 ])
             continue
@@ -82,7 +83,8 @@ def prepare_generated_include(out_dir, reader_loc, q):
                         out_dir + first_letter + '/' + second_letter + '/' + third_letter,
                         first_letter,
                         second_letter,
-                        third_letter
+                        third_letter,
+                        'nil'
                     ])
 
             else:
@@ -92,6 +94,7 @@ def prepare_generated_include(out_dir, reader_loc, q):
                     out_dir + first_letter + '/' + second_letter,
                     first_letter,
                     second_letter,
+                    'nil',
                     'nil'
                 ])
 
