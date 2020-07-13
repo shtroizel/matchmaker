@@ -28,6 +28,9 @@ def prepare_generated_include(out_dir, reader_loc, q):
     start_dir = os.getcwd()
     os.chdir(reader_loc)
 
+    data_reader_stage_0 = reader_loc + '/bin/data_reader_stage_0'
+    data_reader_stage_0_data = reader_loc + '/share/matchmaker/data_reader_stage_0/data'
+
     out_dir += '/'
     cmds = []
 
@@ -44,8 +47,8 @@ def prepare_generated_include(out_dir, reader_loc, q):
 
         if first_letter in single_leaves:
             cmds.append([
-                    reader_loc + '/bin/matchmaker_data_reader',
-                    reader_loc + '/share/matchmaker/matchmaker_data_reader/data',
+                    data_reader_stage_0,
+                    data_reader_stage_0_data,
                     out_dir + first_letter,
                     first_letter,
                     'nil',
@@ -74,8 +77,8 @@ def prepare_generated_include(out_dir, reader_loc, q):
                 for third_letter in ascii_lowercase:
                     os.makedirs(out_dir + first_letter + '/' + second_letter + '/' + third_letter)
                     cmds.append([
-                        reader_loc + '/bin/matchmaker_data_reader',
-                        reader_loc + '/share/matchmaker/matchmaker_data_reader/data',
+                        data_reader_stage_0,
+                        data_reader_stage_0_data,
                         out_dir + first_letter + '/' + second_letter + '/' + third_letter,
                         first_letter,
                         second_letter,
@@ -84,8 +87,8 @@ def prepare_generated_include(out_dir, reader_loc, q):
 
             else:
                 cmds.append([
-                    reader_loc + '/bin/matchmaker_data_reader',
-                    reader_loc + '/share/matchmaker/matchmaker_data_reader/data',
+                    data_reader_stage_0,
+                    data_reader_stage_0_data,
                     out_dir + first_letter + '/' + second_letter,
                     first_letter,
                     second_letter,

@@ -89,14 +89,14 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
                 exit(1)
 
             # then build and install data reader
-            build_data_reader_cmd = ['data_reader/scripts/build_and_install.py']
+            build_data_reader_cmd = ['data_reader/stage_0/scripts/build_and_install.py']
             if q:
                 build_data_reader_cmd.append('-b')
                 build_data_reader_cmd.append('build_q')
                 build_data_reader_cmd.append('-i')
                 build_data_reader_cmd.append('../install_q')
                 build_data_reader_cmd.append('-m')
-                build_data_reader_cmd.append('../matchable/install_q')
+                build_data_reader_cmd.append('../../matchable/install_q')
             if use_clang:
                 build_data_reader_cmd.append('-c')
             if subprocess.run(build_data_reader_cmd).returncode != 0:
@@ -106,7 +106,7 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
             # run prepare_matchables with the data reader
             prepare_matchables_cmd = ['scripts/prepare_matchables.py']
             prepare_matchables_cmd.append('-l')
-            prepare_matchables_cmd.append('data_reader/install' + suffix_q)
+            prepare_matchables_cmd.append('data_reader/stage_0/install' + suffix_q)
             if q:
                 prepare_matchables_cmd.append('-q')
             if subprocess.run(prepare_matchables_cmd).returncode != 0:

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(matchmaker_data_reader VERSION 1.0.0)
+project(data_reader_stage_0 VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -22,8 +22,8 @@ add_custom_target(ex_3201 ALL)
 add_custom_command(
     TARGET ex_3201
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/data/3201/3201.zip
-    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/data/3201/files.zip
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/../data/3201/3201.zip
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/../data/3201/files.zip
     WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/3201
     COMMENT "Unpacking 3201..."
     VERBATIM
@@ -32,8 +32,8 @@ add_custom_target(ex_3202 ALL)
 add_custom_command(
     TARGET ex_3202
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/data/3202/3202.zip
-    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/data/3202/files.zip
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/../data/3202/3202.zip
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/../data/3202/files.zip
     WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/3202
     COMMENT "Unpacking 3202..."
     VERBATIM
@@ -42,8 +42,8 @@ add_custom_target(ex_3203 ALL)
 add_custom_command(
     TARGET ex_3203
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/data/3203/3203.zip
-    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/data/3203/files.zip
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/../data/3203/3203.zip
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/../data/3203/files.zip
     WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/3203
     COMMENT "Unpacking 3203..."
     VERBATIM
@@ -52,7 +52,7 @@ add_custom_target(ex_51155-0 ALL)
 add_custom_command(
     TARGET ex_51155-0
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/data/51155/51155-0.zip
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/../data/51155/51155-0.zip
     WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/51155
     COMMENT "Unpacking 5115-0..."
     VERBATIM

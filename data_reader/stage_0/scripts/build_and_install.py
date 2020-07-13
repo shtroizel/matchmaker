@@ -10,16 +10,16 @@ from shutil import which
 
 
 def usage():
-    print('options for building data_reader:\n')
+    print('options for building data_reader_stage_0:\n')
     print('    -h, --help            print this message\n')
     print('    -b  --build_dir       build directory')
-    print('                            * defaults to <data_reader root>/build')
-    print('                            * relative paths are relative to <data_reader root>\n')
+    print('                            * defaults to <data_reader_stage_0 root>/build')
+    print('                            * relative paths are relative to <data_reader_stage_0 root>\n')
     print('    -i  --install_dir     install directory')
-    print('                            * defaults to <data_reader root>/install')
+    print('                            * defaults to <data_reader_stage_0 root>/install')
     print('                            * relative paths are relative to build_dir\n')
     print('    -m  --matchable_dir   matchable install directory')
-    print('                            * defaults to <data_reader root>/../matchable/install\n')
+    print('                            * defaults to <data_reader_stage_0 root>/../matchable/install\n')
     print('    -c  --clang           force use of clang compiler')
     print('                            * system compiler used by default\n')
     print('    -d  --debug           debug build')
@@ -30,21 +30,21 @@ def usage():
 def build_and_install(build_dir, install_dir, matchable_dir, use_clang, debug):
     start_dir = os.getcwd()
 
-    data_reader_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
-    os.chdir(data_reader_root)
+    data_reader_stage_0_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
+    os.chdir(data_reader_stage_0_root)
 
     if build_dir == '':
-        build_dir = data_reader_root + '/build'
+        build_dir = data_reader_stage_0_root + '/build'
     while build_dir[-1] == '/':
         build_dir = build_dir[:-1]
 
     if install_dir == '':
-        install_dir = data_reader_root + '/install'
+        install_dir = data_reader_stage_0_root + '/install'
     while install_dir[-1] == '/':
         install_dir = install_dir[:-1]
 
     if matchable_dir == '':
-        matchable_dir = data_reader_root + '/../matchable/install'
+        matchable_dir = data_reader_stage_0_root + '/../../matchable/install'
     while matchable_dir[-1] == '/':
         matchable_dir = matchable_dir[:-1]
 
@@ -76,16 +76,16 @@ def build_and_install(build_dir, install_dir, matchable_dir, use_clang, debug):
     else:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Release')
 
-    cmake_cmd.append(data_reader_root)
+    cmake_cmd.append(data_reader_stage_0_root)
 
     if subprocess.run(cmake_cmd).returncode != 0:
         print('cmake failed')
-        os.chdir(data_reader_root)
+        os.chdir(data_reader_stage_0_root)
         exit(1)
 
     if subprocess.run(['make', '-j' + str(multiprocessing.cpu_count()), 'install']).returncode != 0:
         print('make failed')
-        os.chdir(data_reader_root)
+        os.chdir(data_reader_stage_0_root)
         exit(1)
 
     os.chdir(start_dir)
