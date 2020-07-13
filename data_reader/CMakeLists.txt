@@ -17,6 +17,7 @@ install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION bin)
 file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/3201)
 file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/3202)
 file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/3203)
+file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/51155)
 add_custom_target(ex_3201 ALL)
 add_custom_command(
     TARGET ex_3201
@@ -45,5 +46,14 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/data/3203/files.zip
     WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/3203
     COMMENT "Unpacking 3203..."
+    VERBATIM
+)
+add_custom_target(ex_51155-0 ALL)
+add_custom_command(
+    TARGET ex_51155-0
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/data/51155/51155-0.zip
+    WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/51155
+    COMMENT "Unpacking 5115-0..."
     VERBATIM
 )
