@@ -255,46 +255,6 @@ int main(int argc, char ** argv)
     fclose(mobypos_file);
 
 
-    // remove nonsense
-    //
-    // there are a huge amount of words starting with "non" - so many that to properly support we need
-    // to go 4 deep with the prefix...
-    //
-    // until then any "non" word that exists without the "non" prefix gets removed!
-    // until then encourage ppl skilz (practice positive language!) who needs non words anyway?
-    //
-    // *** update ***
-    // this about to be removed, four letter prefixes supported!
-    //
-    if (l0 == "n" && l1 == "o" && l2 == "n" && l3 == "nil")
-    {
-        std::string const nonword_prefix{"esc_non"};
-        auto word_matchable = mm.grab("word" + prefix);
-        std::vector<std::string> nonwords;
-        std::vector<std::string> nonword_pos_vect;
-        std::string nonword_with_non_removed;
-        word_matchable->variants_starting_with(nonword_prefix, nonwords);
-        for (auto const & nonword : nonwords)
-        {
-            nonword_with_non_removed = nonword.substr(nonword_prefix.size());
-            if (
-                std::find(
-                    encountered_words.begin(),
-                    encountered_words.end(),
-                    nonword_with_non_removed
-                ) != encountered_words.end()
-            )
-            {
-                nonword_pos_vect.clear();
-                word_matchable->get_propertyvect(nonword, "pos" + prefix, nonword_pos_vect);
-                for (auto p : nonword_pos_vect)
-                    mm.grab(p.substr(11, 7))->del_variant(nonword);
-
-                word_matchable->del_variant(nonword);
-            }
-        }
-    }
-
     // remove leading underscore
     prefix.erase(0, 1);
 

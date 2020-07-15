@@ -35,6 +35,8 @@ def usage():
     print('                                    * you probably want -l instead\n')
     print('    -a, --atomic_libs             instead of multi-libs, each prefix gets its own lib')
     print('                                    * increases startup time for programs 5x when not q only')
+    print('                                    * adds \'_atomic\' suffix to build_dir unless q only')
+    print('                                    * adds \'_atomic\' suffix to install_dir unless q only')
     print('                                    * avoidance recommended except for q\n')
     print('    -q, --q                       q only (implies -a)')
     print('                                    * low memory usage (less than 1 GB per job')
@@ -42,30 +44,29 @@ def usage():
     print('                                    * adds \'_q\' suffix to install_dir')
     print('                                    * builds quickly')
     print('                                    * starts quickly\n')
-    print('    -l, --memory_usage_limit      memory usage limit in GB')
-    print('                                    * usage can spike to 20GB regardless of value given')
-    print('                                    * values under 20GB will be respected where possible\n')
-    print('    -d, --debug                   debug build')
-    print('                                    * compilation requires less memory')
-    print('                                    * compiles faster\n')
+    print('    -d, --debug                   debug build\n')
 
 
 
 def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, install_dir, atomic_libs,
-                      q, memory_usage_limit, debug):
+                      q, debug):
     start_dir = os.getcwd()
 
     matchmaker_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
     os.chdir(matchmaker_root)
 
-    suffix_q = ''
+    suffix = ''
     if q:
-        suffix_q = '_q'
+        suffix = '_q'
+    elif atomic_libs:
+        suffix = '_atomic'
 
     if not retain:
         prepare_letters_cmd = ['scripts/prepare_letters.py']
         if q:
             prepare_letters_cmd.append('-q')
+        if atomic_libs:
+            prepare_letters_cmd.append('-a')
         if subprocess.run(prepare_letters_cmd).returncode != 0:
             print('prepare_letters.py failed')
             exit(1)
@@ -78,11 +79,11 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
             build_matchable_cmd.append('-l')
             if use_clang:
                 build_matchable_cmd.append('-c')
-            if q:
-                build_matchable_cmd.append('-b')
-                build_matchable_cmd.append('build_q')
-                build_matchable_cmd.append('-i')
-                build_matchable_cmd.append('../install_q')
+
+            build_matchable_cmd.append('-b')
+            build_matchable_cmd.append('build' + suffix)
+            build_matchable_cmd.append('-i')
+            build_matchable_cmd.append('../install' + suffix)
 
             if subprocess.run(build_matchable_cmd).returncode != 0:
                 print('matchable failed to build')
@@ -90,13 +91,12 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
 
             # then build and install data reader
             build_data_reader_cmd = ['data_reader/stage_0/scripts/build_and_install.py']
-            if q:
-                build_data_reader_cmd.append('-b')
-                build_data_reader_cmd.append('build_q')
-                build_data_reader_cmd.append('-i')
-                build_data_reader_cmd.append('../install_q')
-                build_data_reader_cmd.append('-m')
-                build_data_reader_cmd.append('../../matchable/install_q')
+            build_data_reader_cmd.append('-b')
+            build_data_reader_cmd.append('build' + suffix)
+            build_data_reader_cmd.append('-i')
+            build_data_reader_cmd.append('../install' + suffix)
+            build_data_reader_cmd.append('-m')
+            build_data_reader_cmd.append('../../matchable/install' + suffix)
             if use_clang:
                 build_data_reader_cmd.append('-c')
             if subprocess.run(build_data_reader_cmd).returncode != 0:
@@ -106,9 +106,11 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
             # run prepare_matchables with the data reader
             prepare_matchables_cmd = ['scripts/prepare_matchables.py']
             prepare_matchables_cmd.append('-l')
-            prepare_matchables_cmd.append('data_reader/stage_0/install' + suffix_q)
+            prepare_matchables_cmd.append('data_reader/stage_0/install' + suffix)
             if q:
                 prepare_matchables_cmd.append('-q')
+            if atomic_libs:
+                prepare_matchables_cmd.append('-a')
             if subprocess.run(prepare_matchables_cmd).returncode != 0:
                 print('prepare_matchables_cmd.py failed')
                 exit(1)
@@ -118,13 +120,13 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
         build_dir = matchmaker_root + '/build'
     while build_dir[-1] == '/':
         build_dir = build_dir[:-1]
-    build_dir = build_dir + suffix_q + '/'
+    build_dir = build_dir + suffix + '/'
 
     if install_dir == '':
         install_dir = matchmaker_root + '/install'
     while install_dir[-1] == '/':
         install_dir = install_dir[:-1]
-    install_dir = install_dir + suffix_q + '/'
+    install_dir = install_dir + suffix + '/'
 
     if not retain:
         shutil.rmtree(build_dir, ignore_errors=True)
@@ -153,14 +155,6 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
     if atomic_libs:
         cmake_cmd.append('-DATOMIC_LIBS=ON')
 
-    memory_usage_limit_is_number = len(memory_usage_limit) > 0
-    for digit in memory_usage_limit:
-        if digit < '0' or digit > '9':
-            memory_usage_limit_is_number = False
-
-    if memory_usage_limit_is_number:
-        cmake_cmd.append('-DMEM_LIMIT=' + memory_usage_limit)
-
     if use_clang:
         clang_c = which('clang')
         clang_cxx = which('clang++')
@@ -170,7 +164,7 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
         cmake_cmd.append('-DCMAKE_C_COMPILER=' + clang_c)
         cmake_cmd.append('-DCMAKE_CXX_COMPILER=' + clang_cxx)
 
-    cmake_cmd.append('-Dmatchable_DIR=' + matchmaker_root + '/matchable/install' + suffix_q + \
+    cmake_cmd.append('-Dmatchable_DIR=' + matchmaker_root + '/matchable/install' + suffix + \
             '/lib/matchable/cmake')
     cmake_cmd.append(matchmaker_root)
 
@@ -206,7 +200,6 @@ def main():
     install_dir = ''
     atomic_libs = False
     q = False
-    memory_usage_limit = ''
     debug = False
 
     for o, a in opts:
@@ -229,16 +222,13 @@ def main():
             atomic_libs = True
         elif o in ('-q', '--q'):
             q = True
-        elif o in ('-l, --memory_usage_limit'):
-            memory_usage_limit = a
         elif o in ('-d, --debug'):
             debug = True
         else:
             assert False, "unhandled option"
 
-
     build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, install_dir, atomic_libs,
-                      q, memory_usage_limit, debug)
+                      q, debug)
 
     exit(0)
 

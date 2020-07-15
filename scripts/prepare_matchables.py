@@ -18,6 +18,7 @@ def usage():
     print('    -h, --help                       print this message')
     print('    -l, --data_reader_loc            data_reader installation prefix')
     print('    -q, --q                          q only')
+    print('    -a, --atomic_libs                atomic_libs')
 
 
 
@@ -41,53 +42,148 @@ def prepare_generated_include(out_dir, reader_loc, q):
 
         os.makedirs(out_dir + first_letter)
 
-        single_leaves = ascii_uppercase + 'jkxyz'
-        if not q:
-            single_leaves = single_leaves + 'q'
-
-        if first_letter in single_leaves:
-            cmds.append([
-                    data_reader_stage_0,
-                    data_reader_stage_0_data,
-                    out_dir + first_letter,
-                    first_letter,
-                    'nil',
-                    'nil',
-                    'nil'
-                ])
-            continue
-
         for second_letter in ascii_lowercase:
             os.makedirs(out_dir + first_letter + '/' + second_letter)
 
-            if (q and first_letter == 'q' and second_letter == 'u') or \
-               (first_letter == 'p' and second_letter == 'r') or \
-               (first_letter == 'n' and second_letter == 'o') or \
-               (first_letter == 'c' and second_letter == 'o') or \
-               (first_letter == 'r' and second_letter == 'e') or \
-               (first_letter == 'i' and second_letter == 'n') or \
-               (first_letter == 'c' and second_letter == 'a') or \
-               (first_letter == 's' and second_letter == 'u') or \
-               (first_letter == 'd' and second_letter == 'i') or \
-               (first_letter == 'd' and second_letter == 'e') or \
-               (first_letter == 'p' and second_letter == 'a') or \
-               (first_letter == 's' and second_letter == 't') or \
-               (first_letter == 't' and second_letter == 'r') or \
-               (first_letter == 'u' and second_letter == 'n'):
+            if (q and first_letter == 'q' and second_letter == 'u') or                                     \
+                    (first_letter == 'p' and second_letter == 'r') or                                      \
+                    (first_letter == 'n' and second_letter == 'o') or                                      \
+                    (first_letter == 'u' and second_letter == 'n') or                                      \
+                    (first_letter == 'c' and second_letter == 'o') or                                      \
+                    (first_letter == 'i' and second_letter == 'n') or                                      \
+                    (first_letter == 'c' and second_letter == 'a') or                                      \
+                    (first_letter == 's' and second_letter == 'u') or                                      \
+                    (first_letter == 'd' and second_letter == 'i') or                                      \
+                    (first_letter == 'd' and second_letter == 'e') or                                      \
+                    (first_letter == 'p' and second_letter == 'a') or                                      \
+                    (first_letter == 's' and second_letter == 't') or                                      \
+                    (first_letter == 't' and second_letter == 'r') or                                      \
+                    (first_letter == 'r' and second_letter == 'e') or                                      \
+                    (first_letter == 'a' and second_letter == 'n') or                                      \
+                    (first_letter == 'c' and second_letter == 'h') or                                      \
+                    (first_letter == 'm' and second_letter == 'a') or                                      \
+                    (first_letter == 's' and second_letter == 'e') or                                      \
+                    (first_letter == 'o' and second_letter == 'v') or                                      \
+                    (first_letter == 'm' and second_letter == 'i') or                                      \
+                    (first_letter == 'p' and second_letter == 'e') or                                      \
+                    (first_letter == 'p' and second_letter == 'o') or                                      \
+                    (first_letter == 'm' and second_letter == 'e') or                                      \
+                    (first_letter == 'b' and second_letter == 'a') or                                      \
+                    (first_letter == 'b' and second_letter == 'e') or                                      \
+                    (first_letter == 'h' and second_letter == 'e') or                                      \
+                    (first_letter == 'h' and second_letter == 'a') or                                      \
+                    (first_letter == 'p' and second_letter == 'h') or                                      \
+                    (first_letter == 'm' and second_letter == 'o') or                                      \
+                    (first_letter == 't' and second_letter == 'h') or                                      \
+                    (first_letter == 'l' and second_letter == 'a') or                                      \
+                    (first_letter == 'e' and second_letter == 'x') or                                      \
+                    (first_letter == 's' and second_letter == 'p') or                                      \
+                    (first_letter == 'c' and second_letter == 'r') or                                      \
+                    (first_letter == 'h' and second_letter == 'o') or                                      \
+                    (first_letter == 'f' and second_letter == 'o') or                                      \
+                    (first_letter == 's' and second_letter == 'c') or                                      \
+                    (first_letter == 'b' and second_letter == 'r') or                                      \
+                    (first_letter == 'e' and second_letter == 'n') or                                      \
+                    (first_letter == 't' and second_letter == 'e') or                                      \
+                    (first_letter == 't' and second_letter == 'a') or                                      \
+                    (first_letter == 's' and second_letter == 'a') or                                      \
+                    (first_letter == 'h' and second_letter == 'y') or                                      \
+                    (first_letter == 'c' and second_letter == 'l') or                                      \
+                    (first_letter == 'a' and second_letter == 'r') or                                      \
+                    (first_letter == 'a' and second_letter == 'l') or                                      \
+                    (first_letter == 'l' and second_letter == 'i') or                                      \
+                    (first_letter == 'g' and second_letter == 'a') or                                      \
+                    (first_letter == 's' and second_letter == 'o') or                                      \
+                    (first_letter == 'r' and second_letter == 'a') or                                      \
+                    (first_letter == 'g' and second_letter == 'r') or                                      \
+                    (first_letter == 'b' and second_letter == 'i') or                                      \
+                    (first_letter == 'p' and second_letter == 'l') or                                      \
+                    (first_letter == 'a' and second_letter == 'c') or                                      \
+                    (first_letter == 't' and second_letter == 'o') or                                      \
+                    (first_letter == 'p' and second_letter == 'i') or                                      \
+                    (first_letter == 'o' and second_letter == 'u') or                                      \
+                    (first_letter == 'f' and second_letter == 'l') or                                      \
+                    (first_letter == 's' and second_letter == 'i') or                                      \
+                    (first_letter == 'b' and second_letter == 'u') or                                      \
+                    (first_letter == 'm' and second_letter == 'u') or                                      \
+                    (first_letter == 's' and second_letter == 'h') or                                      \
+                    (first_letter == 'd' and second_letter == 'o') or                                      \
+                    (first_letter == 'b' and second_letter == 'o') or                                      \
+                    (first_letter == 'n' and second_letter == 'e') or                                      \
+                    (first_letter == 'i' and second_letter == 'm') or                                      \
+                    (first_letter == 'l' and second_letter == 'e') or                                      \
+                    (first_letter == 'f' and second_letter == 'a') or                                      \
+                    (first_letter == 'f' and second_letter == 'i') or                                      \
+                    (first_letter == 'w' and second_letter == 'a') or                                      \
+                    (first_letter == 'a' and second_letter == 'm') or                                      \
+                    (first_letter == 'v' and second_letter == 'i') or                                      \
+                    (first_letter == 'v' and second_letter == 'e') or                                      \
+                    (first_letter == 'l' and second_letter == 'o') or                                      \
+                    (first_letter == 'f' and second_letter == 'r') or                                      \
+                    (first_letter == 'r' and second_letter == 'o') or                                      \
+                    (first_letter == 'b' and second_letter == 'l') or                                      \
+                    (first_letter == 'p' and second_letter == 'u') or                                      \
+                    (first_letter == 'a' and second_letter == 'p') or                                      \
+                    (first_letter == 'c' and second_letter == 'u') or                                      \
+                    (first_letter == 'a' and second_letter == 's') or                                      \
+                    (first_letter == 'c' and second_letter == 'e') or                                      \
+                    (first_letter == 'p' and second_letter == 's') or                                      \
+                    (first_letter == 'g' and second_letter == 'e') or                                      \
+                    (first_letter == 'f' and second_letter == 'e'):
 
                 for third_letter in ascii_lowercase:
                     os.makedirs(out_dir + first_letter + '/' + second_letter + '/' + third_letter)
-                    cmds.append([
-                        data_reader_stage_0,
-                        data_reader_stage_0_data,
-                        out_dir + first_letter + '/' + second_letter + '/' + third_letter,
-                        first_letter,
-                        second_letter,
-                        third_letter,
-                        'nil'
-                    ])
+
+                    if (first_letter == 'p' and second_letter == 'r' and third_letter == 'e') or           \
+                            (first_letter == 'd' and second_letter == 'i' and third_letter == 's') or      \
+                            (first_letter == 'c' and second_letter == 'o' and third_letter == 'n') or      \
+                            (first_letter == 'n' and second_letter == 'o' and third_letter == 'n') or      \
+                            (first_letter == 'u' and second_letter == 'n' and third_letter == 'd') or      \
+                            (first_letter == 'p' and second_letter == 'r' and third_letter == 'o') or      \
+                            (first_letter == 'u' and second_letter == 'n' and third_letter == 's') or      \
+                            (first_letter == 's' and second_letter == 'u' and third_letter == 'b') or      \
+                            (first_letter == 'i' and second_letter == 'n' and third_letter == 't') or      \
+                            (first_letter == 's' and second_letter == 'u' and third_letter == 'p') or      \
+                            (first_letter == 'u' and second_letter == 'n' and third_letter == 'c') or      \
+                            (first_letter == 'p' and second_letter == 'a' and third_letter == 'r') or      \
+                            (first_letter == 't' and second_letter == 'r' and third_letter == 'a') or      \
+                            (first_letter == 'u' and second_letter == 'n' and third_letter == 'p') or      \
+                            (first_letter == 't' and second_letter == 'r' and third_letter == 'i') or      \
+                            (first_letter == 'c' and second_letter == 'o' and third_letter == 'm') or      \
+                            (first_letter == 'c' and second_letter == 'a' and third_letter == 'r') or      \
+                            (first_letter == 'r' and second_letter == 'e' and third_letter == 'c'):
+
+                        for fourth_letter in ascii_lowercase:
+                            os.makedirs(out_dir + first_letter + '/' + second_letter + '/' + third_letter  \
+                                    + '/' + fourth_letter)
+
+                            # four letter prefix
+                            cmds.append([
+                                data_reader_stage_0,
+                                data_reader_stage_0_data,
+                                out_dir + first_letter + '/' + second_letter + '/' + third_letter + '/'    \
+                                        + fourth_letter,
+                                first_letter,
+                                second_letter,
+                                third_letter,
+                                fourth_letter
+                            ])
+                    else:
+
+                        # three letter prefix
+                        cmds.append([
+                            data_reader_stage_0,
+                            data_reader_stage_0_data,
+                            out_dir + first_letter + '/' + second_letter + '/' + third_letter,
+                            first_letter,
+                            second_letter,
+                            third_letter,
+                            'nil'
+                        ])
 
             else:
+
+                # two letter prefix
                 cmds.append([
                     data_reader_stage_0,
                     data_reader_stage_0_data,
@@ -110,7 +206,7 @@ def prepare_generated_include(out_dir, reader_loc, q):
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hl:q', ['help', 'data_reader_loc', 'q'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hl:qa', ['help', 'data_reader_loc', 'q', 'atomic_libs'])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -118,6 +214,7 @@ def main():
 
     reader_loc = ''
     q = False
+    atomic_libs = False
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -127,6 +224,8 @@ def main():
             reader_loc = a
         elif o in ('-q', '--q'):
             q = True
+        elif o in ('-a', '--atomic_libs'):
+            atomic_libs = True
         else:
             assert False, "unhandled option"
 
@@ -140,9 +239,12 @@ def main():
         reader_loc = repo_root + reader_loc
 
     out_dir = repo_root + '/generated_include'
+    suffix = ''
     if q:
-        out_dir = out_dir + '_q'
-    out_dir = out_dir + '/'
+        suffix = '_q'
+    elif atomic_libs:
+        suffix = '_atomic'
+    out_dir += suffix + '/'
 
     prepare_generated_include(out_dir + '/matchmaker/generated_matchables/', reader_loc, q)
     exit(0)
