@@ -83,148 +83,148 @@ endforeach()
 # matchmaker_srcs are parents (no leaves)
 set(matchmaker_srcs)
 
-foreach(first_letter ${A_z_letters})
+foreach(l0 ${A_z_letters})
 
     # add single letter parents to matchmaker_srcs
-    list(APPEND matchmaker_srcs generated_src${suffix}/${first_letter}.cpp)
+    list(APPEND matchmaker_srcs generated_src${suffix}/${l0}.cpp)
 
-    foreach(second_a_z_number RANGE 97 122)
-        string(ASCII ${second_a_z_number} second_letter)
+    foreach(l1_a_z_number RANGE 97 122)
+        string(ASCII ${l1_a_z_number} l1)
         if(
-            (first_letter STREQUAL "q" AND second_letter STREQUAL "u") OR
-            (first_letter STREQUAL "p" AND second_letter STREQUAL "r") OR
-            (first_letter STREQUAL "n" AND second_letter STREQUAL "o") OR
-            (first_letter STREQUAL "u" AND second_letter STREQUAL "n") OR
-            (first_letter STREQUAL "c" AND second_letter STREQUAL "o") OR
-            (first_letter STREQUAL "i" AND second_letter STREQUAL "n") OR
-            (first_letter STREQUAL "c" AND second_letter STREQUAL "a") OR
-            (first_letter STREQUAL "s" AND second_letter STREQUAL "u") OR
-            (first_letter STREQUAL "d" AND second_letter STREQUAL "i") OR
-            (first_letter STREQUAL "d" AND second_letter STREQUAL "e") OR
-            (first_letter STREQUAL "p" AND second_letter STREQUAL "a") OR
-            (first_letter STREQUAL "s" AND second_letter STREQUAL "t") OR
-            (first_letter STREQUAL "t" AND second_letter STREQUAL "r") OR
-            (first_letter STREQUAL "r" AND second_letter STREQUAL "e") OR
-            (first_letter STREQUAL "a" AND second_letter STREQUAL "n") OR
-            (first_letter STREQUAL "c" AND second_letter STREQUAL "h") OR
-            (first_letter STREQUAL "m" AND second_letter STREQUAL "a") OR
-            (first_letter STREQUAL "s" AND second_letter STREQUAL "e") OR
-            (first_letter STREQUAL "o" AND second_letter STREQUAL "v") OR
-            (first_letter STREQUAL "m" AND second_letter STREQUAL "i") OR
-            (first_letter STREQUAL "p" AND second_letter STREQUAL "e") OR
-            (first_letter STREQUAL "p" AND second_letter STREQUAL "o") OR
-            (first_letter STREQUAL "m" AND second_letter STREQUAL "e") OR
-            (first_letter STREQUAL "b" AND second_letter STREQUAL "a") OR
-            (first_letter STREQUAL "b" AND second_letter STREQUAL "e") OR
-            (first_letter STREQUAL "h" AND second_letter STREQUAL "e") OR
-            (first_letter STREQUAL "h" AND second_letter STREQUAL "a") OR
-            (first_letter STREQUAL "p" AND second_letter STREQUAL "h") OR
-            (first_letter STREQUAL "m" AND second_letter STREQUAL "o") OR
-            (first_letter STREQUAL "t" AND second_letter STREQUAL "h") OR
-            (first_letter STREQUAL "l" AND second_letter STREQUAL "a") OR
-            (first_letter STREQUAL "e" AND second_letter STREQUAL "x") OR
-            (first_letter STREQUAL "s" AND second_letter STREQUAL "p") OR
-            (first_letter STREQUAL "c" AND second_letter STREQUAL "r") OR
-            (first_letter STREQUAL "h" AND second_letter STREQUAL "o") OR
-            (first_letter STREQUAL "f" AND second_letter STREQUAL "o") OR
-            (first_letter STREQUAL "s" AND second_letter STREQUAL "c") OR
-            (first_letter STREQUAL "b" AND second_letter STREQUAL "r") OR
-            (first_letter STREQUAL "e" AND second_letter STREQUAL "n") OR
-            (first_letter STREQUAL "t" AND second_letter STREQUAL "e") OR
-            (first_letter STREQUAL "t" AND second_letter STREQUAL "a") OR
-            (first_letter STREQUAL "s" AND second_letter STREQUAL "a") OR
-            (first_letter STREQUAL "h" AND second_letter STREQUAL "y") OR
-            (first_letter STREQUAL "c" AND second_letter STREQUAL "l") OR
-            (first_letter STREQUAL "a" AND second_letter STREQUAL "r") OR
-            (first_letter STREQUAL "a" AND second_letter STREQUAL "l") OR
-            (first_letter STREQUAL "l" AND second_letter STREQUAL "i") OR
-            (first_letter STREQUAL "g" AND second_letter STREQUAL "a") OR
-            (first_letter STREQUAL "s" AND second_letter STREQUAL "o") OR
-            (first_letter STREQUAL "r" AND second_letter STREQUAL "a") OR
-            (first_letter STREQUAL "g" AND second_letter STREQUAL "r") OR
-            (first_letter STREQUAL "b" AND second_letter STREQUAL "i") OR
-            (first_letter STREQUAL "p" AND second_letter STREQUAL "l") OR
-            (first_letter STREQUAL "a" AND second_letter STREQUAL "c") OR
-            (first_letter STREQUAL "t" AND second_letter STREQUAL "o") OR
-            (first_letter STREQUAL "p" AND second_letter STREQUAL "i") OR
-            (first_letter STREQUAL "o" AND second_letter STREQUAL "u") OR
-            (first_letter STREQUAL "f" AND second_letter STREQUAL "l") OR
-            (first_letter STREQUAL "s" AND second_letter STREQUAL "i") OR
-            (first_letter STREQUAL "b" AND second_letter STREQUAL "u") OR
-            (first_letter STREQUAL "m" AND second_letter STREQUAL "u") OR
-            (first_letter STREQUAL "s" AND second_letter STREQUAL "h") OR
-            (first_letter STREQUAL "d" AND second_letter STREQUAL "o") OR
-            (first_letter STREQUAL "b" AND second_letter STREQUAL "o") OR
-            (first_letter STREQUAL "n" AND second_letter STREQUAL "e") OR
-            (first_letter STREQUAL "i" AND second_letter STREQUAL "m") OR
-            (first_letter STREQUAL "l" AND second_letter STREQUAL "e") OR
-            (first_letter STREQUAL "f" AND second_letter STREQUAL "a") OR
-            (first_letter STREQUAL "f" AND second_letter STREQUAL "i") OR
-            (first_letter STREQUAL "w" AND second_letter STREQUAL "a") OR
-            (first_letter STREQUAL "a" AND second_letter STREQUAL "m") OR
-            (first_letter STREQUAL "v" AND second_letter STREQUAL "i") OR
-            (first_letter STREQUAL "v" AND second_letter STREQUAL "e") OR
-            (first_letter STREQUAL "l" AND second_letter STREQUAL "o") OR
-            (first_letter STREQUAL "f" AND second_letter STREQUAL "r") OR
-            (first_letter STREQUAL "r" AND second_letter STREQUAL "o") OR
-            (first_letter STREQUAL "b" AND second_letter STREQUAL "l") OR
-            (first_letter STREQUAL "p" AND second_letter STREQUAL "u") OR
-            (first_letter STREQUAL "a" AND second_letter STREQUAL "p") OR
-            (first_letter STREQUAL "c" AND second_letter STREQUAL "u") OR
-            (first_letter STREQUAL "a" AND second_letter STREQUAL "s") OR
-            (first_letter STREQUAL "c" AND second_letter STREQUAL "e") OR
-            (first_letter STREQUAL "p" AND second_letter STREQUAL "s") OR
-            (first_letter STREQUAL "g" AND second_letter STREQUAL "e") OR
-            (first_letter STREQUAL "f" AND second_letter STREQUAL "e")
+            (q AND l0 STREQUAL "q" AND l1 STREQUAL "u") OR
+            (l0 STREQUAL "p" AND l1 STREQUAL "r") OR
+            (l0 STREQUAL "n" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "u" AND l1 STREQUAL "n") OR
+            (l0 STREQUAL "c" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "i" AND l1 STREQUAL "n") OR
+            (l0 STREQUAL "c" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "s" AND l1 STREQUAL "u") OR
+            (l0 STREQUAL "d" AND l1 STREQUAL "i") OR
+            (l0 STREQUAL "d" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "p" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "s" AND l1 STREQUAL "t") OR
+            (l0 STREQUAL "t" AND l1 STREQUAL "r") OR
+            (l0 STREQUAL "r" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "a" AND l1 STREQUAL "n") OR
+            (l0 STREQUAL "c" AND l1 STREQUAL "h") OR
+            (l0 STREQUAL "m" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "s" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "o" AND l1 STREQUAL "v") OR
+            (l0 STREQUAL "m" AND l1 STREQUAL "i") OR
+            (l0 STREQUAL "p" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "p" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "m" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "b" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "b" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "h" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "h" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "p" AND l1 STREQUAL "h") OR
+            (l0 STREQUAL "m" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "t" AND l1 STREQUAL "h") OR
+            (l0 STREQUAL "l" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "e" AND l1 STREQUAL "x") OR
+            (l0 STREQUAL "s" AND l1 STREQUAL "p") OR
+            (l0 STREQUAL "c" AND l1 STREQUAL "r") OR
+            (l0 STREQUAL "h" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "f" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "s" AND l1 STREQUAL "c") OR
+            (l0 STREQUAL "b" AND l1 STREQUAL "r") OR
+            (l0 STREQUAL "e" AND l1 STREQUAL "n") OR
+            (l0 STREQUAL "t" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "t" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "s" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "h" AND l1 STREQUAL "y") OR
+            (l0 STREQUAL "c" AND l1 STREQUAL "l") OR
+            (l0 STREQUAL "a" AND l1 STREQUAL "r") OR
+            (l0 STREQUAL "a" AND l1 STREQUAL "l") OR
+            (l0 STREQUAL "l" AND l1 STREQUAL "i") OR
+            (l0 STREQUAL "g" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "s" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "r" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "g" AND l1 STREQUAL "r") OR
+            (l0 STREQUAL "b" AND l1 STREQUAL "i") OR
+            (l0 STREQUAL "p" AND l1 STREQUAL "l") OR
+            (l0 STREQUAL "a" AND l1 STREQUAL "c") OR
+            (l0 STREQUAL "t" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "p" AND l1 STREQUAL "i") OR
+            (l0 STREQUAL "o" AND l1 STREQUAL "u") OR
+            (l0 STREQUAL "f" AND l1 STREQUAL "l") OR
+            (l0 STREQUAL "s" AND l1 STREQUAL "i") OR
+            (l0 STREQUAL "b" AND l1 STREQUAL "u") OR
+            (l0 STREQUAL "m" AND l1 STREQUAL "u") OR
+            (l0 STREQUAL "s" AND l1 STREQUAL "h") OR
+            (l0 STREQUAL "d" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "b" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "n" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "i" AND l1 STREQUAL "m") OR
+            (l0 STREQUAL "l" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "f" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "f" AND l1 STREQUAL "i") OR
+            (l0 STREQUAL "w" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "a" AND l1 STREQUAL "m") OR
+            (l0 STREQUAL "v" AND l1 STREQUAL "i") OR
+            (l0 STREQUAL "v" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "l" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "f" AND l1 STREQUAL "r") OR
+            (l0 STREQUAL "r" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "b" AND l1 STREQUAL "l") OR
+            (l0 STREQUAL "p" AND l1 STREQUAL "u") OR
+            (l0 STREQUAL "a" AND l1 STREQUAL "p") OR
+            (l0 STREQUAL "c" AND l1 STREQUAL "u") OR
+            (l0 STREQUAL "a" AND l1 STREQUAL "s") OR
+            (l0 STREQUAL "c" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "p" AND l1 STREQUAL "s") OR
+            (l0 STREQUAL "g" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "f" AND l1 STREQUAL "e")
         )
-            foreach(third_a_z_number RANGE 97 122)
-                string(ASCII ${third_a_z_number} third_letter)
+            foreach(l2_a_z_number RANGE 97 122)
+                string(ASCII ${l2_a_z_number} l2)
                 if(
-                    (first_letter STREQUAL "p" AND second_letter STREQUAL "r" AND third_letter STREQUAL "e") OR
-                    (first_letter STREQUAL "d" AND second_letter STREQUAL "i" AND third_letter STREQUAL "s") OR
-                    (first_letter STREQUAL "c" AND second_letter STREQUAL "o" AND third_letter STREQUAL "n") OR
-                    (first_letter STREQUAL "n" AND second_letter STREQUAL "o" AND third_letter STREQUAL "n") OR
-                    (first_letter STREQUAL "u" AND second_letter STREQUAL "n" AND third_letter STREQUAL "d") OR
-                    (first_letter STREQUAL "p" AND second_letter STREQUAL "r" AND third_letter STREQUAL "o") OR
-                    (first_letter STREQUAL "u" AND second_letter STREQUAL "n" AND third_letter STREQUAL "s") OR
-                    (first_letter STREQUAL "s" AND second_letter STREQUAL "u" AND third_letter STREQUAL "b") OR
-                    (first_letter STREQUAL "i" AND second_letter STREQUAL "n" AND third_letter STREQUAL "t") OR
-                    (first_letter STREQUAL "s" AND second_letter STREQUAL "u" AND third_letter STREQUAL "p") OR
-                    (first_letter STREQUAL "u" AND second_letter STREQUAL "n" AND third_letter STREQUAL "c") OR
-                    (first_letter STREQUAL "p" AND second_letter STREQUAL "a" AND third_letter STREQUAL "r") OR
-                    (first_letter STREQUAL "t" AND second_letter STREQUAL "r" AND third_letter STREQUAL "a") OR
-                    (first_letter STREQUAL "u" AND second_letter STREQUAL "n" AND third_letter STREQUAL "p") OR
-                    (first_letter STREQUAL "t" AND second_letter STREQUAL "r" AND third_letter STREQUAL "i") OR
-                    (first_letter STREQUAL "c" AND second_letter STREQUAL "o" AND third_letter STREQUAL "m") OR
-                    (first_letter STREQUAL "c" AND second_letter STREQUAL "a" AND third_letter STREQUAL "r") OR
-                    (first_letter STREQUAL "r" AND second_letter STREQUAL "e" AND third_letter STREQUAL "c")
+                    (l0 STREQUAL "p" AND l1 STREQUAL "r" AND l2 STREQUAL "e") OR
+                    (l0 STREQUAL "d" AND l1 STREQUAL "i" AND l2 STREQUAL "s") OR
+                    (l0 STREQUAL "c" AND l1 STREQUAL "o" AND l2 STREQUAL "n") OR
+                    (l0 STREQUAL "n" AND l1 STREQUAL "o" AND l2 STREQUAL "n") OR
+                    (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "d") OR
+                    (l0 STREQUAL "p" AND l1 STREQUAL "r" AND l2 STREQUAL "o") OR
+                    (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "s") OR
+                    (l0 STREQUAL "s" AND l1 STREQUAL "u" AND l2 STREQUAL "b") OR
+                    (l0 STREQUAL "i" AND l1 STREQUAL "n" AND l2 STREQUAL "t") OR
+                    (l0 STREQUAL "s" AND l1 STREQUAL "u" AND l2 STREQUAL "p") OR
+                    (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "c") OR
+                    (l0 STREQUAL "p" AND l1 STREQUAL "a" AND l2 STREQUAL "r") OR
+                    (l0 STREQUAL "t" AND l1 STREQUAL "r" AND l2 STREQUAL "a") OR
+                    (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "p") OR
+                    (l0 STREQUAL "t" AND l1 STREQUAL "r" AND l2 STREQUAL "i") OR
+                    (l0 STREQUAL "c" AND l1 STREQUAL "o" AND l2 STREQUAL "m") OR
+                    (l0 STREQUAL "c" AND l1 STREQUAL "a" AND l2 STREQUAL "r") OR
+                    (l0 STREQUAL "r" AND l1 STREQUAL "e" AND l2 STREQUAL "c")
                 )
                     # three letter parents
                     list(
                         APPEND
                         matchmaker_srcs
-                        generated_src${suffix}/${first_letter}_${second_letter}_${third_letter}.cpp
+                        generated_src${suffix}/${l0}_${l1}_${l2}.cpp
                     )
 
                     # four letter leaves
-                    foreach(fourth_a_z_number RANGE 97 122)
-                        string(ASCII ${fourth_a_z_number} fourth_letter)
+                    foreach(l3_a_z_number RANGE 97 122)
+                        string(ASCII ${l3_a_z_number} l3)
                         list(
                             APPEND
                             prefix_list
-                            "${first_letter}_${second_letter}_${third_letter}_${fourth_letter}"
+                            "${l0}_${l1}_${l2}_${l3}"
                         )
                     endforeach()
                 else()
                     # two letter parents
-                    list(APPEND matchmaker_srcs generated_src${suffix}/${first_letter}_${second_letter}.cpp)
+                    list(APPEND matchmaker_srcs generated_src${suffix}/${l0}_${l1}.cpp)
 
                     # three letter leaves
-                    list(APPEND prefix_list "${first_letter}_${second_letter}_${third_letter}")
+                    list(APPEND prefix_list "${l0}_${l1}_${l2}")
                 endif()
             endforeach()
         else()
-            list(APPEND prefix_list "${first_letter}_${second_letter}")
+            list(APPEND prefix_list "${l0}_${l1}")
         endif()
     endforeach()
 endforeach()
