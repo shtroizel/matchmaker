@@ -91,7 +91,7 @@ foreach(first_letter ${A_z_letters})
     foreach(second_a_z_number RANGE 97 122)
         string(ASCII ${second_a_z_number} second_letter)
         if(
-            (q AND first_letter STREQUAL "q" AND second_letter STREQUAL "u") OR
+            (first_letter STREQUAL "q" AND second_letter STREQUAL "u") OR
             (first_letter STREQUAL "p" AND second_letter STREQUAL "r") OR
             (first_letter STREQUAL "n" AND second_letter STREQUAL "o") OR
             (first_letter STREQUAL "u" AND second_letter STREQUAL "n") OR

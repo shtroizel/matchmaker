@@ -80,7 +80,7 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
 
             letter_letter_cpp = generated_src + first_letter + '_' + second_letter + '.cpp'
 
-            if (q and first_letter == 'q' and second_letter == 'u') or                                     \
+            if (first_letter == 'q' and second_letter == 'u') or                                           \
                     (first_letter == 'p' and second_letter == 'r') or                                      \
                     (first_letter == 'n' and second_letter == 'o') or                                      \
                     (first_letter == 'u' and second_letter == 'n') or                                      \

@@ -45,7 +45,7 @@ def prepare_generated_include(out_dir, reader_loc, q):
         for second_letter in ascii_lowercase:
             os.makedirs(out_dir + first_letter + '/' + second_letter)
 
-            if (q and first_letter == 'q' and second_letter == 'u') or                                     \
+            if (first_letter == 'q' and second_letter == 'u') or                                           \
                     (first_letter == 'p' and second_letter == 'r') or                                      \
                     (first_letter == 'n' and second_letter == 'o') or                                      \
                     (first_letter == 'u' and second_letter == 'n') or                                      \
