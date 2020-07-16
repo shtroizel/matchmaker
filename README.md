@@ -70,9 +70,9 @@ scripts/build_and_install.py -h
 scripts/build_and_install.py -q
 ```
 
-### EXAMPLE: entire dictionary limiting memory usage to 17 GB
+### EXAMPLE: entire dictionary
 ```
-scripts/build_and_install.py -l 17
+scripts/build_and_install.py
 ```
 
 ## additional notes
