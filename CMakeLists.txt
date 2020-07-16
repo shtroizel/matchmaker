@@ -219,7 +219,8 @@ foreach(l0 ${A_z_letters})
                             (l0 STREQUAL "o" AND l1 STREQUAL "v" AND l2 STREQUAL "e" AND l3 STREQUAL "r") OR
                             (l0 STREQUAL "i" AND l1 STREQUAL "n" AND l2 STREQUAL "t" AND l3 STREQUAL "e") OR
                             (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "d" AND l3 STREQUAL "e") OR
-                            (l0 STREQUAL "s" AND l1 STREQUAL "u" AND l2 STREQUAL "p" AND l3 STREQUAL "e")
+                            (l0 STREQUAL "s" AND l1 STREQUAL "u" AND l2 STREQUAL "p" AND l3 STREQUAL "e") OR
+                            (l0 STREQUAL "a" AND l1 STREQUAL "n" AND l2 STREQUAL "t" AND l3 STREQUAL "i")
                         )
                             # four letter parents
                             list(APPEND matchmaker_srcs generated_src${suffix}/${l0}_${l1}_${l2}_${l3}.cpp)

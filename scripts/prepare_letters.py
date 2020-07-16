@@ -239,7 +239,8 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
                             if (l0 == 'o' and l1 == 'v' and l2 == 'e' and l3 == 'r') or                    \
                                     (l0 == 'i' and l1 == 'n' and l2 == 't' and l3 == 'e') or               \
                                     (l0 == 'u' and l1 == 'n' and l2 == 'd' and l3 == 'e') or               \
-                                    (l0 == 's' and l1 == 'u' and l2 == 'p' and l3 == 'e'):
+                                    (l0 == 's' and l1 == 'u' and l2 == 'p' and l3 == 'e') or               \
+                                    (l0 == 'a' and l1 == 'n' and l2 == 't' and l3 == 'i'):
 
                                 # four letter parent
                                 shutil.copy(parent_h, letter_x4_h)

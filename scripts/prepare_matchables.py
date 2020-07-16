@@ -172,7 +172,8 @@ def prepare_generated_include(out_dir, reader_loc, q):
                             if (l0 == 'o' and l1 == 'v' and l2 == 'e' and l3 == 'r') or                    \
                                     (l0 == 'i' and l1 == 'n' and l2 == 't' and l3 == 'e') or               \
                                     (l0 == 'u' and l1 == 'n' and l2 == 'd' and l3 == 'e') or               \
-                                    (l0 == 's' and l1 == 'u' and l2 == 'p' and l3 == 'e'):
+                                    (l0 == 's' and l1 == 'u' and l2 == 'p' and l3 == 'e') or               \
+                                    (l0 == 'a' and l1 == 'n' and l2 == 't' and l3 == 'i'):
 
                                 for l4 in ascii_lowercase:
                                     os.makedirs(out_dir + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4)
