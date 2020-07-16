@@ -91,7 +91,7 @@ foreach(l0 ${A_z_letters})
     foreach(l1_a_z_number RANGE 97 122)
         string(ASCII ${l1_a_z_number} l1)
         if(
-            (q AND l0 STREQUAL "q" AND l1 STREQUAL "u") OR
+            (l0 STREQUAL "q" AND l1 STREQUAL "u") OR
             (l0 STREQUAL "p" AND l1 STREQUAL "r") OR
             (l0 STREQUAL "n" AND l1 STREQUAL "o") OR
             (l0 STREQUAL "u" AND l1 STREQUAL "n") OR
@@ -175,7 +175,9 @@ foreach(l0 ${A_z_letters})
             (l0 STREQUAL "c" AND l1 STREQUAL "e") OR
             (l0 STREQUAL "p" AND l1 STREQUAL "s") OR
             (l0 STREQUAL "g" AND l1 STREQUAL "e") OR
-            (l0 STREQUAL "f" AND l1 STREQUAL "e")
+            (l0 STREQUAL "f" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "M" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "a" AND l1 STREQUAL "u")
         )
             foreach(l2_a_z_number RANGE 97 122)
                 string(ASCII ${l2_a_z_number} l2)
@@ -197,23 +199,42 @@ foreach(l0 ${A_z_letters})
                     (l0 STREQUAL "t" AND l1 STREQUAL "r" AND l2 STREQUAL "i") OR
                     (l0 STREQUAL "c" AND l1 STREQUAL "o" AND l2 STREQUAL "m") OR
                     (l0 STREQUAL "c" AND l1 STREQUAL "a" AND l2 STREQUAL "r") OR
-                    (l0 STREQUAL "r" AND l1 STREQUAL "e" AND l2 STREQUAL "c")
+                    (l0 STREQUAL "r" AND l1 STREQUAL "e" AND l2 STREQUAL "c") OR
+                    (l0 STREQUAL "a" AND l1 STREQUAL "n" AND l2 STREQUAL "t") OR
+                    (l0 STREQUAL "o" AND l1 STREQUAL "u" AND l2 STREQUAL "t") OR
+                    (l0 STREQUAL "p" AND l1 STREQUAL "e" AND l2 STREQUAL "r") OR
+                    (l0 STREQUAL "m" AND l1 STREQUAL "i" AND l2 STREQUAL "s") OR
+                    (l0 STREQUAL "h" AND l1 STREQUAL "y" AND l2 STREQUAL "p") OR
+                    (l0 STREQUAL "s" AND l1 STREQUAL "e" AND l2 STREQUAL "m") OR
+                    (l0 STREQUAL "f" AND l1 STREQUAL "o" AND l2 STREQUAL "r") OR
+                    (l0 STREQUAL "c" AND l1 STREQUAL "h" AND l2 STREQUAL "a") OR
+                    (l0 STREQUAL "p" AND l1 STREQUAL "o" AND l2 STREQUAL "l") OR
+                    (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "a") OR
+                    (l0 STREQUAL "o" AND l1 STREQUAL "v" AND l2 STREQUAL "e")
                 )
-                    # three letter parents
-                    list(
-                        APPEND
-                        matchmaker_srcs
-                        generated_src${suffix}/${l0}_${l1}_${l2}.cpp
-                    )
-
-                    # four letter leaves
                     foreach(l3_a_z_number RANGE 97 122)
                         string(ASCII ${l3_a_z_number} l3)
-                        list(
-                            APPEND
-                            prefix_list
-                            "${l0}_${l1}_${l2}_${l3}"
+
+                        if(
+                            (l0 STREQUAL "o" AND l1 STREQUAL "v" AND l2 STREQUAL "e" AND l3 STREQUAL "r") OR
+                            (l0 STREQUAL "i" AND l1 STREQUAL "n" AND l2 STREQUAL "t" AND l3 STREQUAL "e") OR
+                            (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "d" AND l3 STREQUAL "e") OR
+                            (l0 STREQUAL "s" AND l1 STREQUAL "u" AND l2 STREQUAL "p" AND l3 STREQUAL "e")
                         )
+                            foreach(l4_a_z_number RANGE 97 122)
+                                string(ASCII ${l4_a_z_number} l4)
+
+                                # five letter leavs
+                                list(APPEND prefix_list "${l0}_${l1}_${l2}_${l3}_${l4}")
+                            endforeach()
+
+                        else()
+                            # three letter parents
+                            list(APPEND matchmaker_srcs generated_src${suffix}/${l0}_${l1}_${l2}.cpp)
+
+                            # four letter leavs
+                            list(APPEND prefix_list "${l0}_${l1}_${l2}_${l3}")
+                        endif()
                     endforeach()
                 else()
                     # two letter parents
