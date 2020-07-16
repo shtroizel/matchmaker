@@ -221,10 +221,13 @@ foreach(l0 ${A_z_letters})
                             (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "d" AND l3 STREQUAL "e") OR
                             (l0 STREQUAL "s" AND l1 STREQUAL "u" AND l2 STREQUAL "p" AND l3 STREQUAL "e")
                         )
+                            # four letter parents
+                            list(APPEND matchmaker_srcs generated_src${suffix}/${l0}_${l1}_${l2}_${l3}.cpp)
+
                             foreach(l4_a_z_number RANGE 97 122)
                                 string(ASCII ${l4_a_z_number} l4)
 
-                                # five letter leavs
+                                # five letter leaves
                                 list(APPEND prefix_list "${l0}_${l1}_${l2}_${l3}_${l4}")
                             endforeach()
 
@@ -232,7 +235,7 @@ foreach(l0 ${A_z_letters})
                             # three letter parents
                             list(APPEND matchmaker_srcs generated_src${suffix}/${l0}_${l1}_${l2}.cpp)
 
-                            # four letter leavs
+                            # four letter leaves
                             list(APPEND prefix_list "${l0}_${l1}_${l2}_${l3}")
                         endif()
                     endforeach()
