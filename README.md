@@ -1,6 +1,5 @@
 # matchmaker
-matchmaker tests the limits of compilers/linkers and MATCHABLE by compiling the dictionary<br/><br/>
-the result is a library with the following interface<br>
+English dictionary with the following interface:<br>
 ```
 namespace matchmaker
 {
