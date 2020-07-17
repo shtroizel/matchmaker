@@ -164,7 +164,29 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
                     (l0 == 'g' and l1 == 'e') or                                                           \
                     (l0 == 'f' and l1 == 'e') or                                                           \
                     (l0 == 'M' and l1 == 'a') or                                                           \
-                    (l0 == 'a' and l1 == 'u'):
+                    (l0 == 'a' and l1 == 'u') or                                                           \
+                    (l0 == 'a' and l1 == 'd') or                                                           \
+                    (l0 == 'd' and l1 == 'a') or                                                           \
+                    (l0 == 'w' and l1 == 'i') or                                                           \
+                    (l0 == 's' and l1 == 'y') or                                                           \
+                    (l0 == 'g' and l1 == 'l') or                                                           \
+                    (l0 == 'o' and l1 == 'r') or                                                           \
+                    (l0 == 'v' and l1 == 'a') or                                                           \
+                    (l0 == 'g' and l1 == 'o') or                                                           \
+                    (l0 == 't' and l1 == 'i') or                                                           \
+                    (l0 == 't' and l1 == 'u') or                                                           \
+                    (l0 == 'e' and l1 == 'l') or                                                           \
+                    (l0 == 'd' and l1 == 'r') or                                                           \
+                    (l0 == 'a' and l1 == 'b') or                                                           \
+                    (l0 == 'e' and l1 == 'p') or                                                           \
+                    (l0 == 's' and l1 == 'l') or                                                           \
+                    (l0 == 'c' and l1 == 'i') or                                                           \
+                    (l0 == 'e' and l1 == 'm') or                                                           \
+                    (l0 == 'w' and l1 == 'h') or                                                           \
+                    (l0 == 'n' and l1 == 'a') or                                                           \
+                    (l0 == 'f' and l1 == 'u') or                                                           \
+                    (l0 == 'g' and l1 == 'u') or                                                           \
+                    (l0 == 'r' and l1 == 'i'):
 
                 # two letter parent
                 shutil.copy(parent_h, letter_x2_h)
@@ -214,7 +236,22 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
                             (l0 == 'c' and l1 == 'h' and l2 == 'a') or                                     \
                             (l0 == 'p' and l1 == 'o' and l2 == 'l') or                                     \
                             (l0 == 'u' and l1 == 'n' and l2 == 'a') or                                     \
-                            (l0 == 'o' and l1 == 'v' and l2 == 'e'):
+                            (l0 == 'o' and l1 == 'v' and l2 == 'e') or                                     \
+                            (l0 == 'r' and l1 == 'e' and l2 == 's') or                                     \
+                            (l0 == 'u' and l1 == 'n' and l2 == 'r') or                                     \
+                            (l0 == 'u' and l1 == 'n' and l2 == 'i') or                                     \
+                            (l0 == 'm' and l1 == 'o' and l2 == 'n') or                                     \
+                            (l0 == 'i' and l1 == 'm' and l2 == 'p') or                                     \
+                            (l0 == 's' and l1 == 't' and l2 == 'r') or                                     \
+                            (l0 == 'c' and l1 == 'o' and l2 == 'r') or                                     \
+                            (l0 == 's' and l1 == 't' and l2 == 'a') or                                     \
+                            (l0 == 'i' and l1 == 'n' and l2 == 'c') or                                     \
+                            (l0 == 'u' and l1 == 'n' and l2 == 'e') or                                     \
+                            (l0 == 'p' and l1 == 'l' and l2 == 'a') or                                     \
+                            (l0 == 'm' and l1 == 'e' and l2 == 't') or                                     \
+                            (l0 == 'u' and l1 == 'n' and l2 == 'f') or                                     \
+                            (l0 == 'd' and l1 == 'e' and l2 == 'c') or                                     \
+                            (l0 == 'c' and l1 == 'o' and l2 == 'u'):
 
                         # three letter parent
                         shutil.copy(parent_h, letter_x3_h)
@@ -240,7 +277,10 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
                                     (l0 == 'i' and l1 == 'n' and l2 == 't' and l3 == 'e') or               \
                                     (l0 == 'u' and l1 == 'n' and l2 == 'd' and l3 == 'e') or               \
                                     (l0 == 's' and l1 == 'u' and l2 == 'p' and l3 == 'e') or               \
-                                    (l0 == 'a' and l1 == 'n' and l2 == 't' and l3 == 'i'):
+                                    (l0 == 'a' and l1 == 'n' and l2 == 't' and l3 == 'i') or               \
+                                    (l0 == 'u' and l1 == 'n' and l2 == 'c' and l3 == 'o') or               \
+                                    (l0 == 's' and l1 == 'e' and l2 == 'm' and l3 == 'i') or               \
+                                    (l0 == 'n' and l1 == 'o' and l2 == 'n' and l3 == 'c'):
 
                                 # four letter parent
                                 shutil.copy(parent_h, letter_x4_h)

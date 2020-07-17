@@ -177,7 +177,29 @@ foreach(l0 ${A_z_letters})
             (l0 STREQUAL "g" AND l1 STREQUAL "e") OR
             (l0 STREQUAL "f" AND l1 STREQUAL "e") OR
             (l0 STREQUAL "M" AND l1 STREQUAL "a") OR
-            (l0 STREQUAL "a" AND l1 STREQUAL "u")
+            (l0 STREQUAL "a" AND l1 STREQUAL "u") OR
+            (l0 STREQUAL "a" AND l1 STREQUAL "d") OR
+            (l0 STREQUAL "d" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "w" AND l1 STREQUAL "i") OR
+            (l0 STREQUAL "s" AND l1 STREQUAL "y") OR
+            (l0 STREQUAL "g" AND l1 STREQUAL "l") OR
+            (l0 STREQUAL "o" AND l1 STREQUAL "r") OR
+            (l0 STREQUAL "v" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "g" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "t" AND l1 STREQUAL "i") OR
+            (l0 STREQUAL "t" AND l1 STREQUAL "u") OR
+            (l0 STREQUAL "e" AND l1 STREQUAL "l") OR
+            (l0 STREQUAL "d" AND l1 STREQUAL "r") OR
+            (l0 STREQUAL "a" AND l1 STREQUAL "b") OR
+            (l0 STREQUAL "e" AND l1 STREQUAL "p") OR
+            (l0 STREQUAL "s" AND l1 STREQUAL "l") OR
+            (l0 STREQUAL "c" AND l1 STREQUAL "i") OR
+            (l0 STREQUAL "e" AND l1 STREQUAL "m") OR
+            (l0 STREQUAL "w" AND l1 STREQUAL "h") OR
+            (l0 STREQUAL "n" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "f" AND l1 STREQUAL "u") OR
+            (l0 STREQUAL "g" AND l1 STREQUAL "u") OR
+            (l0 STREQUAL "r" AND l1 STREQUAL "i")
         )
             # two letter parents
             list(APPEND matchmaker_srcs generated_src${suffix}/${l0}_${l1}.cpp)
@@ -213,7 +235,22 @@ foreach(l0 ${A_z_letters})
                     (l0 STREQUAL "c" AND l1 STREQUAL "h" AND l2 STREQUAL "a") OR
                     (l0 STREQUAL "p" AND l1 STREQUAL "o" AND l2 STREQUAL "l") OR
                     (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "a") OR
-                    (l0 STREQUAL "o" AND l1 STREQUAL "v" AND l2 STREQUAL "e")
+                    (l0 STREQUAL "o" AND l1 STREQUAL "v" AND l2 STREQUAL "e") OR
+                    (l0 STREQUAL "r" AND l1 STREQUAL "e" AND l2 STREQUAL "s") OR
+                    (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "r") OR
+                    (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "i") OR
+                    (l0 STREQUAL "m" AND l1 STREQUAL "o" AND l2 STREQUAL "n") OR
+                    (l0 STREQUAL "i" AND l1 STREQUAL "m" AND l2 STREQUAL "p") OR
+                    (l0 STREQUAL "s" AND l1 STREQUAL "t" AND l2 STREQUAL "r") OR
+                    (l0 STREQUAL "c" AND l1 STREQUAL "o" AND l2 STREQUAL "r") OR
+                    (l0 STREQUAL "s" AND l1 STREQUAL "t" AND l2 STREQUAL "a") OR
+                    (l0 STREQUAL "i" AND l1 STREQUAL "n" AND l2 STREQUAL "c") OR
+                    (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "e") OR
+                    (l0 STREQUAL "p" AND l1 STREQUAL "l" AND l2 STREQUAL "a") OR
+                    (l0 STREQUAL "m" AND l1 STREQUAL "e" AND l2 STREQUAL "t") OR
+                    (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "f") OR
+                    (l0 STREQUAL "d" AND l1 STREQUAL "e" AND l2 STREQUAL "c") OR
+                    (l0 STREQUAL "c" AND l1 STREQUAL "o" AND l2 STREQUAL "u")
                 )
                     # three letter parents
                     list(APPEND matchmaker_srcs generated_src${suffix}/${l0}_${l1}_${l2}.cpp)
@@ -225,7 +262,10 @@ foreach(l0 ${A_z_letters})
                             (l0 STREQUAL "i" AND l1 STREQUAL "n" AND l2 STREQUAL "t" AND l3 STREQUAL "e") OR
                             (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "d" AND l3 STREQUAL "e") OR
                             (l0 STREQUAL "s" AND l1 STREQUAL "u" AND l2 STREQUAL "p" AND l3 STREQUAL "e") OR
-                            (l0 STREQUAL "a" AND l1 STREQUAL "n" AND l2 STREQUAL "t" AND l3 STREQUAL "i")
+                            (l0 STREQUAL "a" AND l1 STREQUAL "n" AND l2 STREQUAL "t" AND l3 STREQUAL "i") OR
+                            (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "c" AND l3 STREQUAL "o") OR
+                            (l0 STREQUAL "s" AND l1 STREQUAL "e" AND l2 STREQUAL "m" AND l3 STREQUAL "i") OR
+                            (l0 STREQUAL "n" AND l1 STREQUAL "o" AND l2 STREQUAL "n" AND l3 STREQUAL "c")
                         )
                             # four letter parents
                             list(APPEND matchmaker_srcs generated_src${suffix}/${l0}_${l1}_${l2}_${l3}.cpp)
