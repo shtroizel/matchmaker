@@ -302,7 +302,8 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
                                             + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4 + '/'         \
                                             + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '_' + l4 + '.h'
 
-                                    letter_x5_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '_' + l4 + '.cpp'
+                                    letter_x5_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' + l3    \
+                                            + '_' + l4 + '.cpp'
 
                                     if (l0 == 'i' and l1 == 'n' and l2 == 't' and l3 == 'e' and            \
                                                     l4 == 'r') or                                          \
