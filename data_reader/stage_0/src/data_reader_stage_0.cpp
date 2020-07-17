@@ -112,7 +112,8 @@ bool passes_prefix_filter(
     std::string const & l1, // second letter
     std::string const & l2, // third letter
     std::string const & l3, // fourth letter
-    std::string const & l4  // fifth letter
+    std::string const & l4, // fifth letter
+    std::string const & l5  // sixth letter
 );
 void read_simple(
     FILE * input_file,
@@ -121,6 +122,7 @@ void read_simple(
     std::string const & l2,
     std::string const & l3,
     std::string const & l4,
+    std::string const & l5,
     std::string const & prefix,
     matchable::MatchableMaker & mm,
     std::vector<std::string> & encountered_words
@@ -132,6 +134,7 @@ void read_pos(
     std::string const & l2,
     std::string const & l3,
     std::string const & l4,
+    std::string const & l5,
     std::string const & prefix,
     matchable::MatchableMaker & mm,
     std::vector<std::string> & encountered_words
@@ -143,7 +146,7 @@ read_line_status::Flags read_pos_line(FILE * f, std::string & word, pos::Flags &
 
 int main(int argc, char ** argv)
 {
-    if (argc != 8)
+    if (argc != 9)
     {
         print_usage();
         return 2;
@@ -212,6 +215,18 @@ int main(int argc, char ** argv)
         return 2;
     }
 
+    std::string l5{argv[8]};
+    if (l5.size() != 1 && l5 != "nil")
+    {
+        print_usage();
+        return 2;
+    }
+    if (l5[0] < 'A' || (l5[0] > 'Z' && l5[0] < 'a') || l5[0] > 'z')
+    {
+        print_usage();
+        return 2;
+    }
+
     std::string prefix{"_" + l0};
     if (l1 != "nil")
     {
@@ -225,6 +240,10 @@ int main(int argc, char ** argv)
                 if (l4 != "nil")
                 {
                     prefix += "_" + l4;
+                    if (l5 != "nil")
+                    {
+                        prefix += "_" + l5;
+                    }
                 }
             }
         }
@@ -260,7 +279,7 @@ int main(int argc, char ** argv)
         perror(SINGLE_FN.c_str());
         exit(1);
     }
-    read_simple(single_file, l0, l1, l2, l3, l4, prefix, mm, encountered_words);
+    read_simple(single_file, l0, l1, l2, l3, l4, l5, prefix, mm, encountered_words);
     fclose(single_file);
 
     std::string const MOBYPOS_FN{DATA_DIR + "/3203/files/mobypos.txt"};
@@ -270,7 +289,7 @@ int main(int argc, char ** argv)
         perror(MOBYPOS_FN.c_str());
         exit(1);
     }
-    read_pos(mobypos_file, l0, l1, l2, l3, l4, prefix, mm, encountered_words);
+    read_pos(mobypos_file, l0, l1, l2, l3, l4, l5, prefix, mm, encountered_words);
     fclose(mobypos_file);
 
 
@@ -301,7 +320,11 @@ int main(int argc, char ** argv)
             std::cout << "--";
         else
             std::cout << l4 << " ";
-        std::cout << "-----------> " << sa_status << std::endl;
+        if (l5 == "nil")
+            std::cout << "--";
+        else
+            std::cout << l5 << " ";
+        std::cout << "---------> " << sa_status << std::endl;
     }
 
     return 0;
@@ -311,7 +334,7 @@ int main(int argc, char ** argv)
 
 void print_usage()
 {
-    std::cout << "program expects 7 arguments:\n"
+    std::cout << "program expects 8 arguments:\n"
               << "    [1]  data directory\n"
               << "    [2]  output directory\n"
               << "\n"
@@ -339,6 +362,11 @@ void print_usage()
               << "         - include words fifthing with <fifth letter>\n"
               << "         - can be disabled for four letter prefix by setting to 'nil'\n"
               << "         - ignored when <second letter> or <third letter> or <fourth letter> is 'nil'\n"
+              << "    [8]  sixth letter\n"
+              << "         - include words sixthing with <sixth letter>\n"
+              << "         - can be disabled for five letter prefix by setting to 'nil'\n"
+              << "         - ignored when <second letter> or <third letter> or <fourth letter>\n"
+              << "           or <fifth letter> is 'nil'\n"
               << std::flush;
 }
 
@@ -350,7 +378,8 @@ bool passes_prefix_filter(
     std::string const & l1,
     std::string const & l2,
     std::string const & l3,
-    std::string const & l4
+    std::string const & l4,
+    std::string const & l5
 )
 {
     if (word.size() == 0)
@@ -391,6 +420,23 @@ bool passes_prefix_filter(
                                     // if 5+ letter word does not fifth with l4 then fail
                                     if (word[4] != l4[0])
                                         return false;
+
+                                    if (l5 != "nil")
+                                    {
+                                        if (word.size() > 5)
+                                        {
+                                            // if 6+ letter word does not sixth with l5 then fail
+                                            if (word[5] != l5[0])
+                                                return false;
+                                        }
+                                        else
+                                        {
+                                            // include five letter word of l0 + l1 + l2 + l3 + l4 when
+                                            // l5 is 'a', otherwise fail
+                                            if (l5[0] != 'a')
+                                                return false;
+                                        }
+                                    }
                                 }
                                 else
                                 {
@@ -437,6 +483,7 @@ void read_simple(
     std::string const & l2,
     std::string const & l3,
     std::string const & l4,
+    std::string const & l5,
     std::string const & prefix,
     matchable::MatchableMaker & mm,
     std::vector<std::string> & encountered_words
@@ -456,7 +503,7 @@ void read_simple(
 
         encountered_words.push_back(word);
 
-        if (!passes_prefix_filter(word, l0, l1, l2, l3, l4))
+        if (!passes_prefix_filter(word, l0, l1, l2, l3, l4, l5))
             continue;
 
         if (status.is_set(read_line_status::not_printable_ascii::grab()))
@@ -485,6 +532,7 @@ void read_pos(
     std::string const & l2,
     std::string const & l3,
     std::string const & l4,
+    std::string const & l5,
     std::string const & prefix,
     matchable::MatchableMaker & mm,
     std::vector<std::string> & encountered_words
@@ -505,7 +553,7 @@ void read_pos(
 
         encountered_words.push_back(word);
 
-        if (!passes_prefix_filter(word, l0, l1, l2, l3, l4))
+        if (!passes_prefix_filter(word, l0, l1, l2, l3, l4, l5))
             continue;
 
         if (status.is_set(read_line_status::not_printable_ascii::grab()))

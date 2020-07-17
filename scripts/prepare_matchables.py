@@ -187,7 +187,8 @@ def prepare_generated_include(out_dir, reader_loc, q):
                                         l1,
                                         l2,
                                         l3,
-                                        l4
+                                        l4,
+                                        'nil'
                                     ])
                             else:
 
@@ -200,6 +201,7 @@ def prepare_generated_include(out_dir, reader_loc, q):
                                     l1,
                                     l2,
                                     l3,
+                                    'nil',
                                     'nil'
                                 ])
                     else:
@@ -213,6 +215,7 @@ def prepare_generated_include(out_dir, reader_loc, q):
                             l1,
                             l2,
                             'nil',
+                            'nil',
                             'nil'
                         ])
 
@@ -225,6 +228,7 @@ def prepare_generated_include(out_dir, reader_loc, q):
                     out_dir + l0 + '/' + l1,
                     l0,
                     l1,
+                    'nil',
                     'nil',
                     'nil',
                     'nil'
