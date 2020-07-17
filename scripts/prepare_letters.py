@@ -264,8 +264,9 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
 
 
                         for l3 in ascii_lowercase:
-                            os.makedirs(generated_include + '/matchmaker/generated_letters/'               \
-                                    + l0 + '/' + l1 + '/' + l2 + '/' + l3)
+                            if not parents_only:
+                                os.makedirs(generated_include + '/matchmaker/generated_letters/'           \
+                                        + l0 + '/' + l1 + '/' + l2 + '/' + l3)
 
                             letter_x4_h = generated_include + '/matchmaker/generated_letters/'             \
                                     + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/'                            \
@@ -293,15 +294,15 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
                                         print(replaced, end='')
 
                                 for l4 in ascii_lowercase:
-                                    os.makedirs(generated_include + '/matchmaker/generated_letters/'       \
-                                            + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4)
+                                    if not parents_only:
+                                        os.makedirs(generated_include + '/matchmaker/generated_letters/'   \
+                                                + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4)
 
                                     letter_x5_h = generated_include + '/matchmaker/generated_letters/'     \
                                             + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4 + '/'         \
                                             + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '_' + l4 + '.h'
 
-                                    letter_x5_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' + l3    \
-                                            + '_' + l4 + '.cpp'
+                                    letter_x5_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '_' + l4 + '.cpp'
 
                                     if (l0 == 'i' and l1 == 'n' and l2 == 't' and l3 == 'e' and            \
                                                     l4 == 'r') or                                          \
@@ -320,7 +321,7 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
                                                 replaced = line.replace("aoeu", l0 + '/' + l1 + '/' + l2   \
                                                         + '/' + l3 + '/' + l4)
                                                 replaced = replaced.replace("snth", l0 + '_' + l1 + '_'    \
-                                                        + l2 + '_' + l3 + '/' + l4)
+                                                        + l2 + '_' + l3 + '_' + l4)
                                                 print(replaced, end='')
 
                                         if parents_only:
