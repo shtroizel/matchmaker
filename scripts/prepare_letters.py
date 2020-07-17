@@ -252,30 +252,77 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
                                                 + l3)
                                         print(replaced, end='')
 
-                                if parents_only:
-                                    continue
-
                                 for l4 in ascii_lowercase:
                                     os.makedirs(generated_include + '/matchmaker/generated_letters/'       \
                                             + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4)
 
                                     letter_x5_h = generated_include + '/matchmaker/generated_letters/'     \
                                             + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4 + '/'         \
-                                            + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '_' + l4 +'.h'
+                                            + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '_' + l4 + '.h'
 
                                     letter_x5_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' + l3    \
                                             + '_' + l4 + '.cpp'
 
-                                    # five letter leaf
-                                    shutil.copy(leaf_h, letter_x5_h)
-                                    shutil.copy(leaf_cpp, letter_x5_cpp)
-                                    for filename in [letter_x5_h, letter_x5_cpp]:
-                                        for line in fileinput.input(filename, inplace=True):
-                                            replaced = line.replace("aoeu", l0 + '/' + l1 + '/' + l2 + '/' \
-                                                    + l3 + '/' + l4)
-                                            replaced = replaced.replace("snth", l0 + '_' + l1 + '_' + l2   \
-                                                    + '_' + l3 + '_' + l4)
-                                            print(replaced, end='')
+                                    if (l0 == 'i' and l1 == 'n' and l2 == 't' and l3 == 'e' and            \
+                                                    l4 == 'r') or                                          \
+                                                                                                           \
+                                            (l0 == 's' and l1 == 'u' and l2 == 'p' and l3 == 'e' and       \
+                                                    l4 == 'r') or                                          \
+                                                                                                           \
+                                            (l0 == 'u' and l1 == 'n' and l2 == 'd' and l3 == 'e' and       \
+                                                    l4 == 'r'):
+
+                                        # five letter parent
+                                        shutil.copy(parent_h, letter_x5_h)
+                                        shutil.copy(parent_cpp, letter_x5_cpp)
+                                        for filename in [letter_x5_h, letter_x5_cpp]:
+                                            for line in fileinput.input(filename, inplace=True):
+                                                replaced = line.replace("aoeu", l0 + '/' + l1 + '/' + l2   \
+                                                        + '/' + l3 + '/' + l4)
+                                                replaced = replaced.replace("snth", l0 + '_' + l1 + '_'    \
+                                                        + l2 + '_' + l3 + '/' + l4)
+                                                print(replaced, end='')
+
+                                        if parents_only:
+                                            continue
+
+                                        for l5 in ascii_lowercase:
+                                            os.makedirs(generated_include                                  \
+                                                    + '/matchmaker/generated_letters/' + l0 + '/' + l1     \
+                                                    + '/' + l2 + '/' + l3 + '/' + l4 + '/' + l5)
+
+                                            letter_x6_h = generated_include                                \
+                                                    + '/matchmaker/generated_letters/' + l0 + '/' + l1     \
+                                                    + '/' + l2 + '/' + l3 + '/' + l4 + '/' + l5 + '/'      \
+                                                    + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '_' + l4 + '_' \
+                                                    + l5 + '.h'
+
+                                            letter_x6_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' \
+                                                    + l3 + '_' + l4 + '_' + l5 + '.cpp'
+
+                                            # six letter leaf
+                                            shutil.copy(leaf_h, letter_x6_h)
+                                            shutil.copy(leaf_cpp, letter_x6_cpp)
+                                            for filename in [letter_x6_h, letter_x6_cpp]:
+                                                for line in fileinput.input(filename, inplace=True):
+                                                    replaced = line.replace("aoeu", l0 + '/' + l1 + '/'    \
+                                                            + l2 + '/' + l3 + '/' + l4 + '/' + l5)
+                                                    replaced = replaced.replace("snth", l0 + '_' + l1      \
+                                                            + '_' + l2 + '_' + l3 + '_' + l4 + '_' + l5)
+                                                    print(replaced, end='')
+
+                                    elif not parents_only:
+
+                                        # five letter leaf
+                                        shutil.copy(leaf_h, letter_x5_h)
+                                        shutil.copy(leaf_cpp, letter_x5_cpp)
+                                        for filename in [letter_x5_h, letter_x5_cpp]:
+                                            for line in fileinput.input(filename, inplace=True):
+                                                replaced = line.replace("aoeu", l0 + '/' + l1 + '/' + l2   \
+                                                        + '/' + l3 + '/' + l4)
+                                                replaced = replaced.replace("snth", l0 + '_' + l1 + '_'    \
+                                                        + l2 + '_' + l3 + '_' + l4)
+                                                print(replaced, end='')
 
                             elif not parents_only:
 

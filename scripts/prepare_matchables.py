@@ -178,18 +178,46 @@ def prepare_generated_include(out_dir, reader_loc, q):
                                 for l4 in ascii_lowercase:
                                     os.makedirs(out_dir + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4)
 
-                                    # five letter prefix
-                                    cmds.append([
-                                        data_reader_stage_0,
-                                        data_reader_stage_0_data,
-                                        out_dir + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4,
-                                        l0,
-                                        l1,
-                                        l2,
-                                        l3,
-                                        l4,
-                                        'nil'
-                                    ])
+                                    if (l0 == 'i' and l1 == 'n' and l2 == 't' and l3 == 'e' and            \
+                                                    l4 == 'r') or                                          \
+                                                                                                           \
+                                            (l0 == 's' and l1 == 'u' and l2 == 'p' and l3 == 'e' and       \
+                                                    l4 == 'r') or                                          \
+                                                                                                           \
+                                            (l0 == 'u' and l1 == 'n' and l2 == 'd' and l3 == 'e' and       \
+                                                    l4 == 'r'):
+
+                                        for l5 in ascii_lowercase:
+                                            os.makedirs(out_dir + l0 + '/' + l1 + '/' + l2 + '/' + l3      \
+                                                    + '/' + l4 + '/' + l5)
+
+                                            # six letter prefix
+                                            cmds.append([
+                                                data_reader_stage_0,
+                                                data_reader_stage_0_data,
+                                                out_dir + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4   \
+                                                        + '/' + l5,
+                                                l0,
+                                                l1,
+                                                l2,
+                                                l3,
+                                                l4,
+                                                l5
+                                            ])
+                                    else:
+
+                                        # five letter prefix
+                                        cmds.append([
+                                            data_reader_stage_0,
+                                            data_reader_stage_0_data,
+                                            out_dir + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4,
+                                            l0,
+                                            l1,
+                                            l2,
+                                            l3,
+                                            l4,
+                                            'nil'
+                                        ])
                             else:
 
                                 # four letter prefix
