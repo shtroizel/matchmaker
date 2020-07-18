@@ -94,9 +94,9 @@ SET_PROPERTY(pos, D, pos_desc, pos_desc::Definite_spc_Article::grab())
 SET_PROPERTY(pos, I, pos_desc, pos_desc::Indefinite_spc_Article::grab())
 SET_PROPERTY(pos, o, pos_desc, pos_desc::Nominative::grab())
 
+
 MATCHABLE(
-    read_line_status,
-    eof,
+    word_status,
     not_printable_ascii,
     has_spaces,
     has_hyphens,
@@ -106,6 +106,7 @@ MATCHABLE(
 
 
 void print_usage();
+
 bool passes_prefix_filter(
     std::string const & word,
     std::string const & l0, // first letter
@@ -115,6 +116,7 @@ bool passes_prefix_filter(
     std::string const & l4, // fifth letter
     std::string const & l5  // sixth letter
 );
+
 void read_3201_single(
     FILE * input_file,
     std::string const & l0,
@@ -126,6 +128,7 @@ void read_3201_single(
     std::string const & prefix,
     matchable::MatchableMaker & mm
 );
+
 void read_3203_mobypos(
     FILE * input_file,
     std::string const & l0,
@@ -137,10 +140,30 @@ void read_3203_mobypos(
     std::string const & prefix,
     matchable::MatchableMaker & mm
 );
+
+void read_51155(
+    FILE * input_file,
+    std::string const & l0,
+    std::string const & l1,
+    std::string const & l2,
+    std::string const & l3,
+    std::string const & l4,
+    std::string const & l5,
+    std::string const & prefix,
+    matchable::MatchableMaker & mm
 );
-void update_read_line_status(read_line_status::Flags & flags, int & ch);
-read_line_status::Flags read_3201_single_line(FILE * f, std::string & word);
-read_line_status::Flags read_3203_mobypos_line(FILE * f, std::string & word, pos::Flags & parts_of_speech);
+
+void update_word_status(word_status::Flags & flags, int & ch);
+
+bool read_3201_single_line(FILE * f, std::string & word, word_status::Flags & status);
+
+bool read_3203_mobypos_line(
+    FILE * f,
+    std::string & word,
+    word_status::Flags & status,
+    pos::Flags & parts_of_speech
+);
+
 
 
 int main(int argc, char ** argv)
@@ -290,6 +313,18 @@ int main(int argc, char ** argv)
         }
         read_3203_mobypos(mobypos_file, l0, l1, l2, l3, l4, l5, prefix, mm);
         fclose(mobypos_file);
+    }
+
+    {
+        std::string const FN_51155{DATA_DIR + "/51155/51155-0.txt"};
+        FILE * f = fopen(FN_51155.c_str(), "r");
+        if (f == 0)
+        {
+            perror(FN_51155.c_str());
+            exit(1);
+        }
+        read_51155(f, l0, l1, l2, l3, l4, l5, prefix, mm);
+        fclose(f);
     }
 
 
@@ -489,12 +524,11 @@ void read_3201_single(
 )
 {
     std::string word;
-    read_line_status::Flags status;
+    word_status::Flags status;
 
     while (true)
     {
-        status = read_3201_single_line(input_file, word);
-        if (status.is_set(read_line_status::eof::grab()))
+        if (!read_3201_single_line(input_file, word, status))
             break;
 
         if (word.size() == 0)
@@ -503,16 +537,16 @@ void read_3201_single(
         if (!passes_prefix_filter(word, l0, l1, l2, l3, l4, l5))
             continue;
 
-        if (status.is_set(read_line_status::not_printable_ascii::grab()))
+        if (status.is_set(word_status::not_printable_ascii::grab()))
             continue;
 
-        if (status.is_set(read_line_status::has_spaces::grab()))
+        if (status.is_set(word_status::has_spaces::grab()))
             continue;
 
-        if (status.is_set(read_line_status::has_hyphens::grab()))
+        if (status.is_set(word_status::has_hyphens::grab()))
             continue;
 
-        if (status.is_set(read_line_status::has_other_symbols::grab()))
+        if (status.is_set(word_status::has_other_symbols::grab()))
             continue;
 
         std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
@@ -536,12 +570,11 @@ void read_3203_mobypos(
 {
     std::string word;
     pos::Flags pos_flags;
-    read_line_status::Flags status;
+    word_status::Flags status;
 
     while (true)
     {
-        status = read_3203_mobypos_line(input_file, word, pos_flags);
-        if (status.is_set(read_line_status::eof::grab()))
+        if (!read_3203_mobypos_line(input_file, word, status, pos_flags))
             break;
 
         if (word.size() == 0)
@@ -550,16 +583,16 @@ void read_3203_mobypos(
         if (!passes_prefix_filter(word, l0, l1, l2, l3, l4, l5))
             continue;
 
-        if (status.is_set(read_line_status::not_printable_ascii::grab()))
+        if (status.is_set(word_status::not_printable_ascii::grab()))
             continue;
 
-        if (status.is_set(read_line_status::has_spaces::grab()))
+        if (status.is_set(word_status::has_spaces::grab()))
             continue;
 
-        if (status.is_set(read_line_status::has_hyphens::grab()))
+        if (status.is_set(word_status::has_hyphens::grab()))
             continue;
 
-        if (status.is_set(read_line_status::has_other_symbols::grab()))
+        if (status.is_set(word_status::has_other_symbols::grab()))
             continue;
 
         std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
@@ -574,49 +607,198 @@ void read_3203_mobypos(
 
 
 
-void update_read_line_status(read_line_status::Flags & flags, int & ch)
+void read_51155(
+    FILE * input_file,
+    std::string const & l0,
+    std::string const & l1,
+    std::string const & l2,
+    std::string const & l3,
+    std::string const & l4,
+    std::string const & l5,
+    std::string const & prefix,
+    matchable::MatchableMaker & mm
+)
 {
-    if (ch < 32 || ch > 126)
+    std::string word;
+    word_status::Flags status;
+    bool ok{false};
+    int ch{0};
+
+    while (true)
     {
-        flags.set(read_line_status::not_printable_ascii::grab());
-        ch = '?';
-    }
-    else if (ch < 'A' || (ch > 'Z' && ch < 'a') || ch > 'z')
-    {
-        if (ch == ' ')
-            flags.set(read_line_status::has_spaces::grab());
-        else if (ch == '-')
-            flags.set(read_line_status::has_hyphens::grab());
-        else
-            flags.set(read_line_status::has_other_symbols::grab());
+        ok = false;
+
+        ch = fgetc(input_file);
+        if (ch == 'K')
+        {
+            ch = fgetc(input_file);
+            if (ch == 'E')
+            {
+                ch = fgetc(input_file);
+                if (ch == 'Y')
+                {
+                    ch = fgetc(input_file);
+                    if (ch == ':')
+                    {
+                        ch = fgetc(input_file);
+                        if (ch == ' ')
+                            ok = true;
+                    }
+                }
+            }
+        }
+        else if (ch == 'S')
+        {
+            ch = fgetc(input_file);
+            if (ch == 'Y')
+            {
+                ch = fgetc(input_file);
+                if (ch == 'N')
+                {
+                    ch = fgetc(input_file);
+                    if (ch == ':')
+                    {
+                        ch = fgetc(input_file);
+                        if (ch == ' ')
+                            ok = true;
+                    }
+                }
+            }
+        }
+        else if (ch == 'A')
+        {
+            ch = fgetc(input_file);
+            if (ch == 'N')
+            {
+                ch = fgetc(input_file);
+                if (ch == 'T')
+                {
+                    ch = fgetc(input_file);
+                    if (ch == ':')
+                    {
+                        ch = fgetc(input_file);
+                        if (ch == ' ')
+                            ok = true;
+                    }
+                }
+            }
+        }
+
+        if (ok)
+        {
+            while (ch != '.')
+            {
+                word.clear();
+                status.clear();
+
+                // read word
+                while (true)
+                {
+                    ch = fgetc(input_file);
+
+                    if (ch == EOF)
+                        return;
+
+                    if (ch == ' ' || ch == '.' || ch == ',' || ch == 10 || ch == 13)
+                        break;
+
+                    if (ch >= 'A' && ch <= 'Z')
+                        ch += 32;
+
+                    update_word_status(status, ch);
+                    word += (char) ch;
+                }
+
+                // maybe add word
+                if (word.size() > 0)
+                {
+                    if (!passes_prefix_filter(word, l0, l1, l2, l3, l4, l5))
+                        continue;
+
+                    if (status.is_set(word_status::not_printable_ascii::grab()))
+                        continue;
+
+                    if (status.is_set(word_status::has_spaces::grab()))
+                        continue;
+
+                    if (status.is_set(word_status::has_hyphens::grab()))
+                        continue;
+
+                    if (status.is_set(word_status::has_other_symbols::grab()))
+                        continue;
+
+                    std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
+                    mm.grab("word" + prefix)->add_variant(escaped);
+                }
+            }
+        }
+
+        // skip to end of line
+        while (ch != 10 && ch != 13)
+        {
+            ch = fgetc(input_file);
+            if (ch == EOF)
+                return;
+        }
+
+        // skip to beginning of next line
+        while (ch == 10 || ch == 13)
+        {
+            ch = fgetc(input_file);
+            if (ch == EOF)
+                return;
+
+            if (ch != 10 && ch != 13)
+                ungetc(ch, input_file);
+        }
     }
 }
 
 
 
-read_line_status::Flags read_3201_single_line(FILE * f, std::string & word)
+void update_word_status(word_status::Flags & flags, int & ch)
+{
+    if (ch < 32 || ch > 126)
+    {
+        flags.set(word_status::not_printable_ascii::grab());
+        ch = '?';
+    }
+    else if (ch < 'A' || (ch > 'Z' && ch < 'a') || ch > 'z')
+    {
+        if (ch == ' ')
+            flags.set(word_status::has_spaces::grab());
+        else if (ch == '-')
+            flags.set(word_status::has_hyphens::grab());
+        else
+            flags.set(word_status::has_other_symbols::grab());
+    }
+}
+
+
+
+bool read_3201_single_line(
+    FILE * f,
+    std::string & word,
+    word_status::Flags & status
+)
 {
     word.clear();
-    read_line_status::Flags ret;
+    status.clear();
 
     int ch;
     while (true)
     {
         ch = fgetc(f);
         if (ch == EOF)
-        {
-            ret.set(read_line_status::eof::grab());
-            break;
-        }
+            return false;
 
         if (ch == 10 || ch == 13)
         {
             while (true)
             {
                 ch = fgetc(f);
-
                 if (ch == EOF)
-                    break;
+                    return false;
 
                 if (ch != 10 && ch != 13)
                 {
@@ -627,30 +809,32 @@ read_line_status::Flags read_3201_single_line(FILE * f, std::string & word)
             break;
         }
 
-        update_read_line_status(ret, ch);
+        update_word_status(status, ch);
         word += (char) ch;
     }
 
-    return ret;
+    return true;
 }
 
 
 
-read_line_status::Flags read_3203_mobypos_line(FILE * f, std::string & word, pos::Flags & parts_of_speech)
+bool read_3203_mobypos_line(
+    FILE * f,
+    std::string & word,
+    word_status::Flags & status,
+    pos::Flags & parts_of_speech
+)
 {
     word.clear();
+    status.clear();
     parts_of_speech.clear();
-    read_line_status::Flags ret;
 
     int ch;
     while (true)
     {
         ch = fgetc(f);
         if (ch == EOF)
-        {
-            ret.set(read_line_status::eof::grab());
-            return ret;
-        }
+            return false;
 
         if (ch == 10 || ch == 13)
             continue;
@@ -658,8 +842,7 @@ read_line_status::Flags read_3203_mobypos_line(FILE * f, std::string & word, pos
         if (ch == (int) '\\')
             break;
 
-        update_read_line_status(ret, ch);
-
+        update_word_status(status, ch);
         word += (char) ch;
     }
 
@@ -667,16 +850,13 @@ read_line_status::Flags read_3203_mobypos_line(FILE * f, std::string & word, pos
     {
         ch = fgetc(f);
         if (ch == EOF)
-        {
-            ret.set(read_line_status::eof::grab());
-            break;
-        }
+            return false;
 
         if (ch == 10 || ch == 13)
             break;
 
         if (ch < 32 || ch > 126)
-            ret.set(read_line_status::not_printable_ascii::grab());
+            status.set(word_status::not_printable_ascii::grab());
 
         if (ch == (int) '!')
             ch = (int) 'n';
@@ -687,5 +867,5 @@ read_line_status::Flags read_3203_mobypos_line(FILE * f, std::string & word, pos
             parts_of_speech.set(pos_flag);
     }
 
-    return ret;
+    return true;
 }
