@@ -124,8 +124,7 @@ void read_3201_single(
     std::string const & l4,
     std::string const & l5,
     std::string const & prefix,
-    matchable::MatchableMaker & mm,
-    std::vector<std::string> & encountered_words
+    matchable::MatchableMaker & mm
 );
 void read_3203_mobypos(
     FILE * input_file,
@@ -136,8 +135,8 @@ void read_3203_mobypos(
     std::string const & l4,
     std::string const & l5,
     std::string const & prefix,
-    matchable::MatchableMaker & mm,
-    std::vector<std::string> & encountered_words
+    matchable::MatchableMaker & mm
+);
 );
 void update_read_line_status(read_line_status::Flags & flags, int & ch);
 read_line_status::Flags read_3201_single_line(FILE * f, std::string & word);
@@ -269,9 +268,6 @@ int main(int argc, char ** argv)
 
     mm.grab("word" + prefix)->add_property("pos" + prefix + "::Type", "pos" + prefix);
 
-    std::vector<std::string> encountered_words;
-
-
     {
         std::string const FN_3201_SINGLE{DATA_DIR + "/3201/files/SINGLE.TXT"};
         FILE * single_file = fopen(FN_3201_SINGLE.c_str(), "r");
@@ -280,7 +276,7 @@ int main(int argc, char ** argv)
             perror(FN_3201_SINGLE.c_str());
             exit(1);
         }
-        read_3201_single(single_file, l0, l1, l2, l3, l4, l5, prefix, mm, encountered_words);
+        read_3201_single(single_file, l0, l1, l2, l3, l4, l5, prefix, mm);
         fclose(single_file);
     }
 
@@ -292,7 +288,7 @@ int main(int argc, char ** argv)
             perror(FN_3203_MOBYPOS.c_str());
             exit(1);
         }
-        read_3203_mobypos(mobypos_file, l0, l1, l2, l3, l4, l5, prefix, mm, encountered_words);
+        read_3203_mobypos(mobypos_file, l0, l1, l2, l3, l4, l5, prefix, mm);
         fclose(mobypos_file);
     }
 
@@ -489,8 +485,7 @@ void read_3201_single(
     std::string const & l4,
     std::string const & l5,
     std::string const & prefix,
-    matchable::MatchableMaker & mm,
-    std::vector<std::string> & encountered_words
+    matchable::MatchableMaker & mm
 )
 {
     std::string word;
@@ -504,8 +499,6 @@ void read_3201_single(
 
         if (word.size() == 0)
             continue;
-
-        encountered_words.push_back(word);
 
         if (!passes_prefix_filter(word, l0, l1, l2, l3, l4, l5))
             continue;
@@ -538,8 +531,7 @@ void read_3203_mobypos(
     std::string const & l4,
     std::string const & l5,
     std::string const & prefix,
-    matchable::MatchableMaker & mm,
-    std::vector<std::string> & encountered_words
+    matchable::MatchableMaker & mm
 )
 {
     std::string word;
@@ -554,8 +546,6 @@ void read_3203_mobypos(
 
         if (word.size() == 0)
             continue;
-
-        encountered_words.push_back(word);
 
         if (!passes_prefix_filter(word, l0, l1, l2, l3, l4, l5))
             continue;
