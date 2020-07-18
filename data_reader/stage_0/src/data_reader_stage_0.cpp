@@ -115,7 +115,7 @@ bool passes_prefix_filter(
     std::string const & l4, // fifth letter
     std::string const & l5  // sixth letter
 );
-void read_simple(
+void read_3201_single(
     FILE * input_file,
     std::string const & l0,
     std::string const & l1,
@@ -127,7 +127,7 @@ void read_simple(
     matchable::MatchableMaker & mm,
     std::vector<std::string> & encountered_words
 );
-void read_pos(
+void read_3203_mobypos(
     FILE * input_file,
     std::string const & l0,
     std::string const & l1,
@@ -140,8 +140,8 @@ void read_pos(
     std::vector<std::string> & encountered_words
 );
 void update_read_line_status(read_line_status::Flags & flags, int & ch);
-read_line_status::Flags read_simple_line(FILE * f, std::string & word);
-read_line_status::Flags read_pos_line(FILE * f, std::string & word, pos::Flags & parts_of_speech);
+read_line_status::Flags read_3201_single_line(FILE * f, std::string & word);
+read_line_status::Flags read_3203_mobypos_line(FILE * f, std::string & word, pos::Flags & parts_of_speech);
 
 
 int main(int argc, char ** argv)
@@ -272,25 +272,29 @@ int main(int argc, char ** argv)
     std::vector<std::string> encountered_words;
 
 
-    std::string const SINGLE_FN{DATA_DIR + "/3201/files/SINGLE.TXT"};
-    FILE * single_file = fopen(SINGLE_FN.c_str(), "r");
-    if (single_file == 0)
     {
-        perror(SINGLE_FN.c_str());
-        exit(1);
+        std::string const FN_3201_SINGLE{DATA_DIR + "/3201/files/SINGLE.TXT"};
+        FILE * single_file = fopen(FN_3201_SINGLE.c_str(), "r");
+        if (single_file == 0)
+        {
+            perror(FN_3201_SINGLE.c_str());
+            exit(1);
+        }
+        read_3201_single(single_file, l0, l1, l2, l3, l4, l5, prefix, mm, encountered_words);
+        fclose(single_file);
     }
-    read_simple(single_file, l0, l1, l2, l3, l4, l5, prefix, mm, encountered_words);
-    fclose(single_file);
 
-    std::string const MOBYPOS_FN{DATA_DIR + "/3203/files/mobypos.txt"};
-    FILE * mobypos_file = fopen(MOBYPOS_FN.c_str(), "r");
-    if (mobypos_file == 0)
     {
-        perror(MOBYPOS_FN.c_str());
-        exit(1);
+        std::string const FN_3203_MOBYPOS{DATA_DIR + "/3203/files/mobypos.txt"};
+        FILE * mobypos_file = fopen(FN_3203_MOBYPOS.c_str(), "r");
+        if (mobypos_file == 0)
+        {
+            perror(FN_3203_MOBYPOS.c_str());
+            exit(1);
+        }
+        read_3203_mobypos(mobypos_file, l0, l1, l2, l3, l4, l5, prefix, mm, encountered_words);
+        fclose(mobypos_file);
     }
-    read_pos(mobypos_file, l0, l1, l2, l3, l4, l5, prefix, mm, encountered_words);
-    fclose(mobypos_file);
 
 
     // remove leading underscore
@@ -476,7 +480,7 @@ bool passes_prefix_filter(
 
 
 
-void read_simple(
+void read_3201_single(
     FILE * input_file,
     std::string const & l0,
     std::string const & l1,
@@ -494,7 +498,7 @@ void read_simple(
 
     while (true)
     {
-        status = read_simple_line(input_file, word);
+        status = read_3201_single_line(input_file, word);
         if (status.is_set(read_line_status::eof::grab()))
             break;
 
@@ -525,7 +529,7 @@ void read_simple(
 
 
 
-void read_pos(
+void read_3203_mobypos(
     FILE * input_file,
     std::string const & l0,
     std::string const & l1,
@@ -544,7 +548,7 @@ void read_pos(
 
     while (true)
     {
-        status = read_pos_line(input_file, word, pos_flags);
+        status = read_3203_mobypos_line(input_file, word, pos_flags);
         if (status.is_set(read_line_status::eof::grab()))
             break;
 
@@ -600,7 +604,7 @@ void update_read_line_status(read_line_status::Flags & flags, int & ch)
 
 
 
-read_line_status::Flags read_simple_line(FILE * f, std::string & word)
+read_line_status::Flags read_3201_single_line(FILE * f, std::string & word)
 {
     word.clear();
     read_line_status::Flags ret;
@@ -642,7 +646,7 @@ read_line_status::Flags read_simple_line(FILE * f, std::string & word)
 
 
 
-read_line_status::Flags read_pos_line(FILE * f, std::string & word, pos::Flags & parts_of_speech)
+read_line_status::Flags read_3203_mobypos_line(FILE * f, std::string & word, pos::Flags & parts_of_speech)
 {
     word.clear();
     parts_of_speech.clear();
