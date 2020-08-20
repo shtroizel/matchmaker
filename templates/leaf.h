@@ -38,6 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -46,7 +47,7 @@ namespace matchmaker
     int size_snth();
     std::string const & at_snth(int index);
     int lookup_snth(std::string const & word, bool * found);
-    void parts_of_speech_snth(int index, std::vector<std::string const *> & pos);
+    std::vector<int8_t> const & flagged_parts_of_speech_snth(int index);
     std::vector<int> const & synonyms_snth(int index);
     std::vector<int> const & antonyms_snth(int index);
 }

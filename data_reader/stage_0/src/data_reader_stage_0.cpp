@@ -33,66 +33,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <matchable/matchable.h>
 #include <matchable/matchable_fwd.h>
-
 #include <matchable/MatchableMaker.h>
 
+#include <matchmaker/parts_of_speech.h>
 
-
-MATCHABLE(
-    pos_desc,
-    Noun,
-    Plural,
-    Noun_Phrase,
-    Verb_spc__pl_usu_spc_participle_pr_,
-    Verb_spc__pl_transitive_pr_,
-    Verb_spc__pl_intransitive_pr_,
-    Adjective,
-    Adverb,
-    Conjunction,
-    Preposition,
-    Interjection,
-    Pronoun,
-    Definite_spc_Article,
-    Indefinite_spc_Article,
-    Nominative
-);
-
-PROPERTYx1_MATCHABLE(
-    pos_desc::Type,
-    pos_desc,
-    pos,
-    N,
-    p,
-    h,
-    V,
-    t,
-    i,
-    A,
-    v,
-    C,
-    P,
-    n, // !
-    r,
-    D,
-    I,
-    o
-)
-
-SET_PROPERTY(pos, N, pos_desc, pos_desc::Noun::grab())
-SET_PROPERTY(pos, p, pos_desc, pos_desc::Plural::grab())
-SET_PROPERTY(pos, h, pos_desc, pos_desc::Noun_Phrase::grab())
-SET_PROPERTY(pos, V, pos_desc, pos_desc::Verb_spc__pl_usu_spc_participle_pr_::grab())
-SET_PROPERTY(pos, t, pos_desc, pos_desc::Verb_spc__pl_transitive_pr_::grab())
-SET_PROPERTY(pos, i, pos_desc, pos_desc::Verb_spc__pl_intransitive_pr_::grab())
-SET_PROPERTY(pos, A, pos_desc, pos_desc::Adjective::grab())
-SET_PROPERTY(pos, v, pos_desc, pos_desc::Adverb::grab())
-SET_PROPERTY(pos, C, pos_desc, pos_desc::Conjunction::grab())
-SET_PROPERTY(pos, P, pos_desc, pos_desc::Preposition::grab())
-SET_PROPERTY(pos, n, pos_desc, pos_desc::Interjection::grab())
-SET_PROPERTY(pos, r, pos_desc, pos_desc::Pronoun::grab())
-SET_PROPERTY(pos, D, pos_desc, pos_desc::Definite_spc_Article::grab())
-SET_PROPERTY(pos, I, pos_desc, pos_desc::Indefinite_spc_Article::grab())
-SET_PROPERTY(pos, o, pos_desc, pos_desc::Nominative::grab())
 
 
 MATCHABLE(
@@ -161,7 +105,7 @@ bool read_3203_mobypos_line(
     FILE * f,
     std::string & word,
     word_status::Flags & status,
-    pos::Flags & parts_of_speech
+    parts_of_speech::Flags & pos
 );
 
 
@@ -273,23 +217,7 @@ int main(int argc, char ** argv)
 
     matchable::MatchableMaker mm;
 
-    for (auto desc : pos_desc::variants_by_index())
-        mm.grab("pos_desc" + prefix)->add_variant(desc.as_identifier_string());
-
-    mm.grab("pos" + prefix)->add_property("pos_desc" + prefix + "::Type", "pos_desc" + prefix);
-
-    for (auto p : pos::variants_by_index())
-    {
-        mm.grab("pos" + prefix)->add_variant(p.as_identifier_string() + prefix);
-        mm.grab("pos" + prefix)->set_property(
-            p.as_identifier_string() + prefix,
-            "pos_desc" + prefix,
-            "pos_desc" + prefix + "::"
-                       + pos_desc::from_index(p.as_index()).as_identifier_string() + "::grab()"
-        );
-    }
-
-    mm.grab("word" + prefix)->add_property("pos" + prefix + "::Type", "pos" + prefix);
+    mm.grab("word" + prefix)->add_property("int8_t", "pos");
     mm.grab("word" + prefix)->add_property("int", "syn");
     mm.grab("word" + prefix)->add_property("int", "ant");
 
@@ -362,6 +290,9 @@ int main(int argc, char ** argv)
         else
             std::cout << l5 << " ";
         std::cout << "---------> " << sa_status << std::endl;
+
+        if (sa_status != matchable::save_as__status::success::grab())
+            return 1;
     }
 
     return 0;
@@ -553,6 +484,10 @@ void read_3201_single(
 
         std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
         mm.grab("word" + prefix)->add_variant(escaped);
+        std::vector<std::string> property_values;
+        for (auto p : parts_of_speech::variants_by_string())
+            property_values.push_back("0");
+        mm.grab("word" + prefix)->set_propertyvect(escaped, "pos", property_values);
     }
 }
 
@@ -571,7 +506,7 @@ void read_3203_mobypos(
 )
 {
     std::string word;
-    pos::Flags pos_flags;
+    parts_of_speech::Flags pos_flags;
     word_status::Flags status;
 
     while (true)
@@ -600,10 +535,15 @@ void read_3203_mobypos(
         std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
 
         mm.grab("word" + prefix)->add_variant(escaped);
-        std::vector<std::string> svect;
-        for (auto p : pos_flags.currently_set())
-            svect.push_back("pos" + prefix + "::" + p.as_identifier_string() + prefix + "::grab()");
-        mm.grab("word" + prefix)->set_propertyvect(escaped, "pos" + prefix, svect);
+        std::vector<std::string> property_values;
+        for (auto p : parts_of_speech::variants_by_string())
+        {
+            if (pos_flags.is_set(p))
+                property_values.push_back("1");
+            else
+                property_values.push_back("0");
+        }
+        mm.grab("word" + prefix)->set_propertyvect(escaped, "pos", property_values);
     }
 }
 
@@ -731,6 +671,10 @@ void read_51155(
 
                     std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
                     mm.grab("word" + prefix)->add_variant(escaped);
+                    std::vector<std::string> property_values;
+                    for (auto p : parts_of_speech::variants_by_string())
+                        property_values.push_back("0");
+                    mm.grab("word" + prefix)->set_propertyvect(escaped, "pos", property_values);
                 }
             }
         }
@@ -824,12 +768,12 @@ bool read_3203_mobypos_line(
     FILE * f,
     std::string & word,
     word_status::Flags & status,
-    pos::Flags & parts_of_speech
+    parts_of_speech::Flags & pos_flags
 )
 {
     word.clear();
     status.clear();
-    parts_of_speech.clear();
+    pos_flags.clear();
 
     int ch;
     while (true)
@@ -864,9 +808,9 @@ bool read_3203_mobypos_line(
             ch = (int) 'n';
 
         auto ch_str = std::string(1, (char) ch);
-        auto pos_flag = pos::from_string(ch_str);
+        auto pos_flag = parts_of_speech::from_string(ch_str);
         if (!pos_flag.is_nil())
-            parts_of_speech.set(pos_flag);
+            pos_flags.set(pos_flag);
     }
 
     return true;

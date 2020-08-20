@@ -1,5 +1,8 @@
-# matchmaker
-English dictionary with the following interface:<br>
+# MATCHMAKER
+"Memory is neither created nor destroyed, it is simply compiled into existence."<br/>
+--107<br/>
+
+We give us an English dictionary with the following interface:<br>
 ```
 namespace matchmaker
 {
@@ -31,28 +34,49 @@ namespace matchmaker
     int lookup(std::string const & word, bool * found);
 
     /**
+     * @returns
+     *     A vector containing all parts of speech known to matchmaker
+     */
+    std::vector<std::string> const & all_parts_of_speech();
+
+    /**
+     * @param[in] index
+     *     index of a word in the dictionary
+     * @returns
+     *     A vector of booleans such that the vector's size is equal to all_parts_of_speech.size().
+     *     Elements are set to 1 if their cooresponding all_parts_of_speech() index pertains to the
+     *     given word, or 0 otherwise. For performance and implementation details int8_t is used instead
+     *     of bool. Specifically, the vectors already exist as MATCHABLE properties and are simply
+     *     forwarded, meaning that this function is a constant time operation. MATCHABLE does not support
+     *     properties of type bool, so using bool here would result in needless copying.
+     * @see all_parts_of_speech()
+     */
+    std::vector<int8_t> const & flagged_parts_of_speech(int index);
+
+    /**
      * @param[in] index
      *     index of a word in the dictionary
      * @param[out] pos
-     *     vector containing the parts of speech associated with the given word
+     *     A vector containing the parts of speech associated with the given word.
+     *     Pointed to strings are static (avoids allocation / destruction)
      */
     void parts_of_speech(int index, std::vector<std::string const *> & pos);
 
     /**
      * @param[in] index
      *     index of a word in the dictionary
-     * @param[out] syn
+     * @returns
      *     vector of indexes of synonyms
      */
-    void synonyms(int index, std::vector<int> & syn);
+    std::vector<int> const & synonyms(int index);
 
     /**
      * @param[in] index
      *     index of a word in the dictionary
-     * @param[out] ant
+     * @returns
      *     vector of indexes of antonyms
      */
-    void antonyms(int index, std::vector<int> & ant);
+    std::vector<int> const & antonyms(int index);
 
     /**
      * @param[in] prefix

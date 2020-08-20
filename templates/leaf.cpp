@@ -84,17 +84,16 @@ namespace matchmaker
     }
 
 
-    void parts_of_speech_snth(int index, std::vector<std::string const *> & pos)
+    std::vector<int8_t> const & flagged_parts_of_speech_snth(int index)
     {
-        pos.clear();
+        static std::vector<int8_t> const empty{};
         if (index < 0 || index >= size_snth())
         {
-            std::cout << "parts_of_speech_snth(" << index << ") out of bounds with size_snth() of: "
+            std::cout << "flagged_parts_of_speech_snth(" << index << ") out of bounds with size_snth() of: "
                       << size_snth() << std::endl;
-            return;
+            return empty;
         }
-        for (auto const & p : word_snth::from_by_string_index(index).as_pos_snth_vect())
-            pos.push_back(&p.as_pos_desc_snth().as_string());
+        return word_snth::from_by_string_index(index).as_pos_vect();
     }
 
 

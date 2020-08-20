@@ -79,7 +79,7 @@ namespace matchmaker
     using size_func = std::function<int ()>;
     using at_func = std::function<std::string const & (int)>;
     using lookup_func = std::function<int (std::string const &, bool *)>;
-    using parts_of_speech_func = std::function<void (int, std::vector<std::string const *> &)>;
+    using flagged_parts_of_speech_func = std::function<std::vector<int8_t> const & (int)>;
     using synonyms_func = std::function<std::vector<int> const & (int)>;
     using antonyms_func = std::function<std::vector<int> const & (int)>;
 
@@ -90,8 +90,8 @@ namespace matchmaker
         at,
         lookup_func,
         lookup,
-        parts_of_speech_func,
-        parts_of_speech,
+        flagged_parts_of_speech_func,
+        flagged_parts_of_speech,
         synonyms_func,
         synonyms,
         antonyms_func,
@@ -105,7 +105,7 @@ namespace matchmaker
     SET_PROPERTY(letter_snth, _letter, size, &size_snth_##_letter)                                         \
     SET_PROPERTY(letter_snth, _letter, at, &at_snth_##_letter)                                             \
     SET_PROPERTY(letter_snth, _letter, lookup, &lookup_snth_##_letter)                                     \
-    SET_PROPERTY(letter_snth, _letter, parts_of_speech, &parts_of_speech_snth_##_letter)                   \
+    SET_PROPERTY(letter_snth, _letter, flagged_parts_of_speech, &flagged_parts_of_speech_snth_##_letter)   \
     SET_PROPERTY(letter_snth, _letter, synonyms, &synonyms_snth_##_letter)                                 \
     SET_PROPERTY(letter_snth, _letter, antonyms, &antonyms_snth_##_letter)
 
@@ -280,16 +280,16 @@ lookup_failed:
     }
 
 
-    void parts_of_speech_snth(int index, std::vector<std::string const *> & pos)
+    std::vector<int8_t> const & flagged_parts_of_speech_snth(int index)
     {
-        pos.clear();
+        static std::vector<int8_t> const empty{};
 
         // only possible when parts_of_speech() buggy (matchmaker.cpp)
         if (index < 0 || index >= size_snth())
         {
-            std::cout << "parts_of_speech_snth(" << index << ") out of bounds with size_snth() of: "
+            std::cout << "flagged_parts_of_speech_snth(" << index << ") out of bounds with size_snth() of: "
                       << size_snth() << std::endl;
-            return;
+            return empty;
         }
 
         auto iter = std::lower_bound(
@@ -302,7 +302,7 @@ lookup_failed:
         if (iter != letter_boundries.begin())
             --iter;
 
-        iter->second.as_parts_of_speech()(index - iter->first, pos);
+        return iter->second.as_flagged_parts_of_speech()(index - iter->first);
     }
 
 

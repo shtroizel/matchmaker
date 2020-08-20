@@ -97,6 +97,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #include <matchmaker/generated_letters/z/z.h>
 #endif
 
+#include <matchmaker/parts_of_speech.h>
+
 
 
 namespace matchmaker
@@ -104,7 +106,7 @@ namespace matchmaker
     using size_func = std::function<int ()>;
     using at_func = std::function<std::string const & (int)>;
     using lookup_func = std::function<int (std::string const &, bool *)>;
-    using parts_of_speech_func = std::function<void (int, std::vector<std::string const *> &)>;
+    using flagged_parts_of_speech_func = std::function<std::vector<int8_t> const & (int)>;
     using synonyms_func = std::function<std::vector<int> const & (int)>;
     using antonyms_func = std::function<std::vector<int> const & (int)>;
 
@@ -115,8 +117,8 @@ namespace matchmaker
         at,
         lookup_func,
         lookup,
-        parts_of_speech_func,
-        parts_of_speech,
+        flagged_parts_of_speech_func,
+        flagged_parts_of_speech,
         synonyms_func,
         synonyms,
         antonyms_func,
@@ -134,7 +136,7 @@ namespace matchmaker
     SET_PROPERTY(letter, _letter, size, &size_##_letter)                                                   \
     SET_PROPERTY(letter, _letter, at, &at_##_letter)                                                       \
     SET_PROPERTY(letter, _letter, lookup, &lookup_##_letter)                                               \
-    SET_PROPERTY(letter, _letter, parts_of_speech, &parts_of_speech_##_letter)                             \
+    SET_PROPERTY(letter, _letter, flagged_parts_of_speech, &flagged_parts_of_speech_##_letter)             \
     SET_PROPERTY(letter, _letter, synonyms, &synonyms_##_letter)                                           \
     SET_PROPERTY(letter, _letter, antonyms, &antonyms_##_letter)
 
@@ -401,11 +403,23 @@ lookup_failed:
     }
 
 
-    void parts_of_speech(int index, std::vector<std::string const *> & pos)
+    std::vector<std::string> const & all_parts_of_speech()
     {
-        pos.clear();
+        static std::vector<std::string> const pos = [](){
+            std::vector<std::string> ret;
+            for (auto p : parts_of_speech::variants())
+                ret.push_back(p.as_pos_desc().as_string());
+            return ret;
+        }();
+        return pos;
+    }
+
+
+    std::vector<int8_t> const & flagged_parts_of_speech(int index)
+    {
+        static std::vector<int8_t> const empty{};
         if (index < 0 || index >= size())
-            return;
+            return empty;
 
         auto iter = std::lower_bound(
             letter_boundries.begin(),
@@ -416,7 +430,25 @@ lookup_failed:
         if (iter != letter_boundries.begin())
             --iter;
 
-        iter->second.as_parts_of_speech()(index - iter->first, pos);
+        auto const & ret = iter->second.as_flagged_parts_of_speech()(index - iter->first);
+        if (ret.size() != all_parts_of_speech().size())
+            std::cout << "******* flagged_parts_of_speech().size != all_parts_of_speech().size *******"
+                      << "buggy code detected!" << std::endl;
+        return ret;
+    }
+
+
+    void parts_of_speech(int index, std::vector<std::string const *> & pos)
+    {
+        pos.clear();
+        if (index < 0 || index >= size())
+            return;
+
+        auto const & flagged = flagged_parts_of_speech(index);
+
+        for (int i = 0; i < (int) flagged.size(); ++i)
+            if (flagged[i] != 0)
+                pos.push_back(&all_parts_of_speech()[i]);
     }
 
 

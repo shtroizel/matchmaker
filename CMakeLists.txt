@@ -353,6 +353,11 @@ endif()
 
 # matchmaker shared library
 add_library(matchmaker SHARED ${matchmaker_srcs})
+target_include_directories(
+    matchmaker
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/data_reader/stage_0/include
+)
 foreach(lib ${lib_list})
     target_link_libraries(matchmaker ${lib})
 endforeach()
