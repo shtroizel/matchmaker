@@ -17,8 +17,6 @@ option(q "build q (and Q) only" OFF)
 
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/matchmaker")
 
-set(JOBS "1" CACHE STRING "parallel job count")
-
 set(suffix "")
 if(q)
     add_definitions(-DQ_ONLY)
