@@ -147,7 +147,6 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
 
     if q:
         cmake_cmd.append('-Dq=ON')
-        atomic_libs = True
     if atomic_libs:
         cmake_cmd.append('-DATOMIC_LIBS=ON')
 

@@ -14,9 +14,6 @@ endif()
 option(ATOMIC_LIBS "builds a library for every prefix" OFF)
 option(q "build q (and Q) only" OFF)
 
-if(q AND NOT ATOMIC_LIBS)
-    message(FATAL_ERROR "ATOMIC_LIBS required when building q only")
-endif()
 
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/matchmaker")
 
