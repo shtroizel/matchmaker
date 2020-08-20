@@ -80,8 +80,10 @@ namespace matchmaker
     using at_func = std::function<std::string const & (int)>;
     using lookup_func = std::function<int (std::string const &, bool *)>;
     using parts_of_speech_func = std::function<void (int, std::vector<std::string const *> &)>;
+    using synonyms_func = std::function<void (int, std::vector<int> &)>;
+    using antonyms_func = std::function<void (int, std::vector<int> &)>;
 
-    PROPERTYx4_MATCHABLE(
+    PROPERTYx6_MATCHABLE(
         size_func,
         size,
         at_func,
@@ -90,6 +92,10 @@ namespace matchmaker
         lookup,
         parts_of_speech_func,
         parts_of_speech,
+        synonyms_func,
+        synonyms,
+        antonyms_func,
+        antonyms,
         letter_snth,
         a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
     )
@@ -99,7 +105,9 @@ namespace matchmaker
     SET_PROPERTY(letter_snth, _letter, size, &size_snth_##_letter)                                         \
     SET_PROPERTY(letter_snth, _letter, at, &at_snth_##_letter)                                             \
     SET_PROPERTY(letter_snth, _letter, lookup, &lookup_snth_##_letter)                                     \
-    SET_PROPERTY(letter_snth, _letter, parts_of_speech, &parts_of_speech_snth_##_letter)
+    SET_PROPERTY(letter_snth, _letter, parts_of_speech, &parts_of_speech_snth_##_letter)                   \
+    SET_PROPERTY(letter_snth, _letter, synonyms, &synonyms_snth_##_letter)                                 \
+    SET_PROPERTY(letter_snth, _letter, antonyms, &antonyms_snth_##_letter)
 
     _set_properties(a)
     _set_properties(b)
@@ -127,7 +135,6 @@ namespace matchmaker
     _set_properties(x)
     _set_properties(y)
     _set_properties(z)
-
 #undef _set_properties
 
 
@@ -296,5 +303,55 @@ lookup_failed:
             --iter;
 
         iter->second.as_parts_of_speech()(index - iter->first, pos);
+    }
+
+
+    void synonyms_snth(int index, std::vector<int> & syn)
+    {
+        syn.clear();
+
+        if (index < 0 || index >= size_snth())
+        {
+            std::cout << "synonyms_snth(" << index << ") out of bounds with size_snth() of: "
+                      << size_snth() << std::endl;
+            return;
+        }
+
+        auto iter = std::lower_bound(
+            letter_boundries.begin(),
+            letter_boundries.end(),
+            index,
+            [](auto const & b, auto const & i){ return b.first <= i; }
+        );
+
+        if (iter != letter_boundries.begin())
+            --iter;
+
+        iter->second.as_synonyms()(index - iter->first, syn);
+    }
+
+
+    void antonyms_snth(int index, std::vector<int> & ant)
+    {
+        ant.clear();
+
+        if (index < 0 || index >= size_snth())
+        {
+            std::cout << "antonyms_snth(" << index << ") out of bounds with size_snth() of: "
+                      << size_snth() << std::endl;
+            return;
+        }
+
+        auto iter = std::lower_bound(
+            letter_boundries.begin(),
+            letter_boundries.end(),
+            index,
+            [](auto const & b, auto const & i){ return b.first <= i; }
+        );
+
+        if (iter != letter_boundries.begin())
+            --iter;
+
+        iter->second.as_antonyms()(index - iter->first, ant);
     }
 }

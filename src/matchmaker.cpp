@@ -105,8 +105,10 @@ namespace matchmaker
     using at_func = std::function<std::string const & (int)>;
     using lookup_func = std::function<int (std::string const &, bool *)>;
     using parts_of_speech_func = std::function<void (int, std::vector<std::string const *> &)>;
+    using synonyms_func = std::function<void (int, std::vector<int> &)>;
+    using antonyms_func = std::function<void (int, std::vector<int> &)>;
 
-    PROPERTYx4_MATCHABLE(
+    PROPERTYx6_MATCHABLE(
         size_func,
         size,
         at_func,
@@ -115,6 +117,10 @@ namespace matchmaker
         lookup,
         parts_of_speech_func,
         parts_of_speech,
+        synonyms_func,
+        synonyms,
+        antonyms_func,
+        antonyms,
         letter,
 #ifdef Q_ONLY
         Q, q
@@ -128,7 +134,9 @@ namespace matchmaker
     SET_PROPERTY(letter, _letter, size, &size_##_letter)                                                   \
     SET_PROPERTY(letter, _letter, at, &at_##_letter)                                                       \
     SET_PROPERTY(letter, _letter, lookup, &lookup_##_letter)                                               \
-    SET_PROPERTY(letter, _letter, parts_of_speech, &parts_of_speech_##_letter)
+    SET_PROPERTY(letter, _letter, parts_of_speech, &parts_of_speech_##_letter)                             \
+    SET_PROPERTY(letter, _letter, synonyms, &synonyms_##_letter)                                           \
+    SET_PROPERTY(letter, _letter, antonyms, &antonyms_##_letter)
 
 #ifdef Q_ONLY
     _set_properties(Q)
@@ -409,6 +417,44 @@ lookup_failed:
             --iter;
 
         iter->second.as_parts_of_speech()(index - iter->first, pos);
+    }
+
+
+    void synonyms(int index, std::vector<int> & syn)
+    {
+        syn.clear();
+        if (index < 0 || index >= size())
+            return;
+
+        auto iter = std::lower_bound(
+            letter_boundries.begin(),
+            letter_boundries.end(),
+            index,
+            [](auto const & b, auto const & i){ return b.first <= i; }
+        );
+        if (iter != letter_boundries.begin())
+            --iter;
+
+        iter->second.as_synonyms()(index - iter->first, syn);
+    }
+
+
+    void antonyms(int index, std::vector<int> & ant)
+    {
+        ant.clear();
+        if (index < 0 || index >= size())
+            return;
+
+        auto iter = std::lower_bound(
+            letter_boundries.begin(),
+            letter_boundries.end(),
+            index,
+            [](auto const & b, auto const & i){ return b.first <= i; }
+        );
+        if (iter != letter_boundries.begin())
+            --iter;
+
+        iter->second.as_antonyms()(index - iter->first, ant);
     }
 
 

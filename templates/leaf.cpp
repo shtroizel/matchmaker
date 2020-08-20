@@ -87,7 +87,41 @@ namespace matchmaker
     void parts_of_speech_snth(int index, std::vector<std::string const *> & pos)
     {
         pos.clear();
+        if (index < 0 || index >= size_snth())
+        {
+            std::cout << "parts_of_speech_snth(" << index << ") out of bounds with size_snth() of: "
+                      << size_snth() << std::endl;
+            return;
+        }
         for (auto const & p : word_snth::from_by_string_index(index).as_pos_snth_vect())
             pos.push_back(&p.as_pos_desc_snth().as_string());
+    }
+
+
+    void synonyms_snth(int index, std::vector<int> & syn)
+    {
+        syn.clear();
+        if (index < 0 || index >= size_snth())
+        {
+            std::cout << "synonyms_snth(" << index << ") out of bounds with size_snth() of: "
+                      << size_snth() << std::endl;
+            return;
+        }
+        for (int synonym : word_snth::from_by_string_index(index).as_syn_vect())
+            syn.push_back(synonym);
+    }
+
+
+    void antonyms_snth(int index, std::vector<int> & ant)
+    {
+        ant.clear();
+        if (index < 0 || index >= size_snth())
+        {
+            std::cout << "antonyms_snth(" << index << ") out of bounds with size_snth() of: "
+                      << size_snth() << std::endl;
+            return;
+        }
+        for (int antonym : word_snth::from_by_string_index(index).as_ant_vect())
+            ant.push_back(antonym);
     }
 }

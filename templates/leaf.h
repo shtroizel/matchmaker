@@ -47,4 +47,6 @@ namespace matchmaker
     std::string const & at_snth(int index);
     int lookup_snth(std::string const & word, bool * found);
     void parts_of_speech_snth(int index, std::vector<std::string const *> & pos);
+    void synonyms_snth(int index, std::vector<int> & syn);
+    void antonyms_snth(int index, std::vector<int> & ant);
 }

@@ -74,6 +74,22 @@ namespace matchmaker
     void parts_of_speech(int index, std::vector<std::string const *> & pos);
 
     /**
+     * @param[in] index
+     *     index of a word in the dictionary
+     * @param[out] syn
+     *     vector of indexes of synonyms
+     */
+    void synonyms(int index, std::vector<int> & syn);
+
+    /**
+     * @param[in] index
+     *     index of a word in the dictionary
+     * @param[out] ant
+     *     vector of indexes of antonyms
+     */
+    void antonyms(int index, std::vector<int> & ant);
+
+    /**
      * @param[in] prefix
      *     prefix to complete
      * @param[out] start
