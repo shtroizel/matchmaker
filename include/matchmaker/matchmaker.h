@@ -76,18 +76,18 @@ namespace matchmaker
     /**
      * @param[in] index
      *     index of a word in the dictionary
-     * @param[out] syn
+     * @returns
      *     vector of indexes of synonyms
      */
-    void synonyms(int index, std::vector<int> & syn);
+    std::vector<int> const & synonyms(int index);
 
     /**
      * @param[in] index
      *     index of a word in the dictionary
-     * @param[out] ant
+     * @returns
      *     vector of indexes of antonyms
      */
-    void antonyms(int index, std::vector<int> & ant);
+    std::vector<int> const & antonyms(int index);
 
     /**
      * @param[in] prefix

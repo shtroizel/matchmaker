@@ -98,30 +98,28 @@ namespace matchmaker
     }
 
 
-    void synonyms_snth(int index, std::vector<int> & syn)
+    std::vector<int> const & synonyms_snth(int index)
     {
-        syn.clear();
+        static std::vector<int> const empty{};
         if (index < 0 || index >= size_snth())
         {
             std::cout << "synonyms_snth(" << index << ") out of bounds with size_snth() of: "
                       << size_snth() << std::endl;
-            return;
+            return empty;
         }
-        for (int synonym : word_snth::from_by_string_index(index).as_syn_vect())
-            syn.push_back(synonym);
+        return word_snth::from_by_string_index(index).as_syn_vect();
     }
 
 
-    void antonyms_snth(int index, std::vector<int> & ant)
+    std::vector<int> const & antonyms_snth(int index)
     {
-        ant.clear();
+        static std::vector<int> const empty{};
         if (index < 0 || index >= size_snth())
         {
             std::cout << "antonyms_snth(" << index << ") out of bounds with size_snth() of: "
                       << size_snth() << std::endl;
-            return;
+            return empty;
         }
-        for (int antonym : word_snth::from_by_string_index(index).as_ant_vect())
-            ant.push_back(antonym);
+        return word_snth::from_by_string_index(index).as_ant_vect();
     }
 }

@@ -105,8 +105,8 @@ namespace matchmaker
     using at_func = std::function<std::string const & (int)>;
     using lookup_func = std::function<int (std::string const &, bool *)>;
     using parts_of_speech_func = std::function<void (int, std::vector<std::string const *> &)>;
-    using synonyms_func = std::function<void (int, std::vector<int> &)>;
-    using antonyms_func = std::function<void (int, std::vector<int> &)>;
+    using synonyms_func = std::function<std::vector<int> const & (int)>;
+    using antonyms_func = std::function<std::vector<int> const & (int)>;
 
     PROPERTYx6_MATCHABLE(
         size_func,
@@ -420,11 +420,11 @@ lookup_failed:
     }
 
 
-    void synonyms(int index, std::vector<int> & syn)
+    std::vector<int> const & synonyms(int index)
     {
-        syn.clear();
+        static std::vector<int> const empty{};
         if (index < 0 || index >= size())
-            return;
+            return empty;
 
         auto iter = std::lower_bound(
             letter_boundries.begin(),
@@ -435,15 +435,15 @@ lookup_failed:
         if (iter != letter_boundries.begin())
             --iter;
 
-        iter->second.as_synonyms()(index - iter->first, syn);
+        return iter->second.as_synonyms()(index - iter->first);
     }
 
 
-    void antonyms(int index, std::vector<int> & ant)
+    std::vector<int> const & antonyms(int index)
     {
-        ant.clear();
+        static std::vector<int> const empty{};
         if (index < 0 || index >= size())
-            return;
+            return empty;
 
         auto iter = std::lower_bound(
             letter_boundries.begin(),
@@ -454,7 +454,7 @@ lookup_failed:
         if (iter != letter_boundries.begin())
             --iter;
 
-        iter->second.as_antonyms()(index - iter->first, ant);
+        return iter->second.as_antonyms()(index - iter->first);
     }
 
 

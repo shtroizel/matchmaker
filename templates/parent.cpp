@@ -80,8 +80,8 @@ namespace matchmaker
     using at_func = std::function<std::string const & (int)>;
     using lookup_func = std::function<int (std::string const &, bool *)>;
     using parts_of_speech_func = std::function<void (int, std::vector<std::string const *> &)>;
-    using synonyms_func = std::function<void (int, std::vector<int> &)>;
-    using antonyms_func = std::function<void (int, std::vector<int> &)>;
+    using synonyms_func = std::function<std::vector<int> const & (int)>;
+    using antonyms_func = std::function<std::vector<int> const & (int)>;
 
     PROPERTYx6_MATCHABLE(
         size_func,
@@ -306,15 +306,15 @@ lookup_failed:
     }
 
 
-    void synonyms_snth(int index, std::vector<int> & syn)
+    std::vector<int> const & synonyms_snth(int index)
     {
-        syn.clear();
+        static std::vector<int> const empty{};
 
         if (index < 0 || index >= size_snth())
         {
             std::cout << "synonyms_snth(" << index << ") out of bounds with size_snth() of: "
                       << size_snth() << std::endl;
-            return;
+            return empty;
         }
 
         auto iter = std::lower_bound(
@@ -327,19 +327,19 @@ lookup_failed:
         if (iter != letter_boundries.begin())
             --iter;
 
-        iter->second.as_synonyms()(index - iter->first, syn);
+        return iter->second.as_synonyms()(index - iter->first);
     }
 
 
-    void antonyms_snth(int index, std::vector<int> & ant)
+    std::vector<int> const & antonyms_snth(int index)
     {
-        ant.clear();
+        static std::vector<int> const empty{};
 
         if (index < 0 || index >= size_snth())
         {
             std::cout << "antonyms_snth(" << index << ") out of bounds with size_snth() of: "
                       << size_snth() << std::endl;
-            return;
+            return empty;
         }
 
         auto iter = std::lower_bound(
@@ -352,6 +352,6 @@ lookup_failed:
         if (iter != letter_boundries.begin())
             --iter;
 
-        iter->second.as_antonyms()(index - iter->first, ant);
+        return iter->second.as_antonyms()(index - iter->first);
     }
 }
