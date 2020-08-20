@@ -40,7 +40,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 #include <matchmaker/generated_letters/aoeu/snth.h>
-#include <matchmaker/generated_matchables/aoeu/snth.h>
+
+#ifdef STAGE_0
+#include <matchmaker/generated_matchables_stage_0/aoeu/snth.h>
+#elif defined STAGE_1
+#include <matchmaker/generated_matchables_stage_1/aoeu/snth.h>
+#else
+INVALID_STAGE_COMPILE_ERROR
+#endif
 
 
 namespace matchmaker

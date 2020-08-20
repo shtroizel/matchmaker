@@ -354,7 +354,7 @@ def main():
         suffix = '_atomic'
     out_dir += suffix + '/'
 
-    prepare_generated_include(out_dir + '/matchmaker/generated_matchables/', reader_loc, q)
+    prepare_generated_include(out_dir + '/matchmaker/generated_matchables_stage_0/', reader_loc, q)
     exit(0)
 
 

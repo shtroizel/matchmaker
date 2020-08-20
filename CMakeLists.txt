@@ -26,6 +26,11 @@ elseif(ATOMIC_LIBS)
 endif()
 
 add_definitions(-DMATCHABLE_OMIT_BY_INDEX)
+if(stage STREQUAL "0")
+    add_definitions(-DSTAGE_0)
+elseif(stage STREQUAL "1")
+    add_definitions(-DSTAGE_1)
+endif()
 
 find_package(matchable 10.2.0 REQUIRED)
 include_directories(${matchable_DIR}/../../../include)
