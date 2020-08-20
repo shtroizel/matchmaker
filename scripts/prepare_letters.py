@@ -56,8 +56,10 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
             os.makedirs(generated_include + '/matchmaker/generated_letters/' + l0)
 
         letter_x1_h = generated_include + '/matchmaker/generated_letters/' + l0 + '/' + l0 + '.h'
-
         letter_x1_cpp = generated_src + l0 + '.cpp'
+
+        print(letter_x1_h)
+        print(letter_x1_cpp)
 
         # single letter parent
         shutil.copy(parent_h, letter_x1_h)
@@ -77,6 +79,9 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
                     + l0 + '/' + l1 + '/' + l0 + '_' + l1 + '.h'
 
             letter_x2_cpp = generated_src + l0 + '_' + l1 + '.cpp'
+
+            print(letter_x2_h)
+            print(letter_x2_cpp)
 
             if (l0 == 'q' and l1 == 'u') or                                                                \
                     (l0 == 'p' and l1 == 'r') or                                                           \
@@ -208,6 +213,9 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
 
                     letter_x3_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '.cpp'
 
+                    print(letter_x3_h)
+                    print(letter_x3_cpp)
+
                     if (l0 == 'p' and l1 == 'r' and l2 == 'e') or                                          \
                             (l0 == 'd' and l1 == 'i' and l2 == 's') or                                     \
                             (l0 == 'c' and l1 == 'o' and l2 == 'n') or                                     \
@@ -274,6 +282,9 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
 
                             letter_x4_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '.cpp'
 
+                            print(letter_x4_h)
+                            print(letter_x4_cpp)
+
                             if (l0 == 'o' and l1 == 'v' and l2 == 'e' and l3 == 'r') or                    \
                                     (l0 == 'i' and l1 == 'n' and l2 == 't' and l3 == 'e') or               \
                                     (l0 == 'u' and l1 == 'n' and l2 == 'd' and l3 == 'e') or               \
@@ -304,6 +315,9 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
 
                                     letter_x5_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' + l3    \
                                             + '_' + l4 + '.cpp'
+
+                                    print(letter_x5_h)
+                                    print(letter_x5_cpp)
 
                                     if (l0 == 'i' and l1 == 'n' and l2 == 't' and l3 == 'e' and            \
                                                     l4 == 'r') or                                          \
@@ -341,6 +355,9 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
 
                                             letter_x6_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' \
                                                     + l3 + '_' + l4 + '_' + l5 + '.cpp'
+
+                                            print(letter_x6_h)
+                                            print(letter_x6_cpp)
 
                                             # six letter leaf
                                             shutil.copy(leaf_h, letter_x6_h)
