@@ -290,6 +290,8 @@ int main(int argc, char ** argv)
     }
 
     mm.grab("word" + prefix)->add_property("pos" + prefix + "::Type", "pos" + prefix);
+    mm.grab("word" + prefix)->add_property("int", "syn");
+    mm.grab("word" + prefix)->add_property("int", "ant");
 
     {
         std::string const FN_3201_SINGLE{DATA_DIR + "/3201/files/SINGLE.TXT"};
@@ -338,7 +340,7 @@ int main(int argc, char ** argv)
             matchable::save_as__spread_mode::wrap::grab()
         );
 
-        std::cout << l0 << " ";
+        std::cout << "generating stage 0 matchables: " << l0 << " ";
         if (l1 == "nil")
             std::cout << "--";
         else
