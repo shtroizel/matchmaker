@@ -34,7 +34,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <regex>
 
 #include <matchable/matchable.h>
-#include <matchable/matchable_fwd.h>
 
 #include <matchable/MatchableMaker.h>
 #include <matchmaker/matchmaker.h>
