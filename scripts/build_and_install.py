@@ -118,7 +118,7 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
             if atomic_libs:
                 prepare_matchables_cmd.append('-a')
             if subprocess.run(prepare_matchables_cmd).returncode != 0:
-                print('prepare_matchables_cmd.py failed')
+                print('failed to prepare matchables for stage 0')
                 exit(1)
             print('\n\nstage 0 matchables ready!')
 

@@ -302,13 +302,23 @@ def prepare_generated_include(out_dir, reader_loc, q):
                     'nil'
                 ])
 
+    error_filename = '/tmp/prepare_matchables_failed'
     def prepare(cmd):
-        subprocess.run(cmd)
+        if subprocess.run(cmd).returncode != 0:
+            with open(error_filename, 'w') as f:
+                pass
+
+    if os.path.exists(error_filename):
+        os.remove(error_filename)
 
     with ThreadPoolExecutor(multiprocessing.cpu_count()) as executor:
         executor.map(prepare, cmds)
 
     os.chdir(start_dir)
+
+    if os.path.exists(error_filename):
+        os.remove(error_filename)
+        exit(1)
 
 
 
