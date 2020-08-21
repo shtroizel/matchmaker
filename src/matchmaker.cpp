@@ -99,6 +99,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <matchmaker/parts_of_speech.h>
 
+#ifdef STAGE_0
+#include <matchmaker/longest_word_stage_0.h>
+#elif defined STAGE_1
+#include <matchmaker/longest_word_stage_1.h>
+#else
+INVALID_STAGE_COMPILE_ERROR
+#endif
+
 
 
 namespace matchmaker
@@ -213,6 +221,12 @@ namespace matchmaker
             }();
 
         return ret;
+    }
+
+
+    int longest_word()
+    {
+        return LONGEST_WORD;
     }
 
 

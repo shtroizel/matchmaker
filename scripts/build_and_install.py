@@ -122,6 +122,12 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
                 exit(1)
             print('\n\nstage 0 matchables ready!')
 
+            # create longest_word_stage_0.h
+            stage_0_longest_word_file = matchmaker_root + 'generated_include' + suffix                     \
+                    + '/matchmaker/longest_word_stage_0.h'
+            with open(stage_0_longest_word_file, 'w') as f:
+                f.write('#pragma once\ninline int const LONGEST_WORD{0};\n')
+
 
     # note: stage 0 builds and installs within the build dir
 
@@ -235,8 +241,11 @@ def build_and_install(use_clang, retain, retain_matchables, jobs, build_dir, ins
             dr_stage_1_data = dr_stage_1_install_dir + '/share/matchmaker/data_reader_stage_1/data'
             stage_0_matchables_dir = matchmaker_root + 'generated_include' + suffix                        \
                     + '/matchmaker/generated_matchables_stage_0/'
+            stage_1_longest_word_file = matchmaker_root + 'generated_include' + suffix                     \
+                    + '/matchmaker/longest_word_stage_1.h'
 
-            run_dr_stage_1_cmd = [dr_stage_1_binary, dr_stage_1_data, stage_0_matchables_dir]
+            run_dr_stage_1_cmd = [dr_stage_1_binary, dr_stage_1_data, stage_0_matchables_dir,
+                                  stage_1_longest_word_file]
             if subprocess.run(run_dr_stage_1_cmd).returncode != 0:
                 print('data_reader_stage_1 failed')
                 exit(1)

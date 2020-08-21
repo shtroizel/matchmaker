@@ -71,9 +71,10 @@ bool create_stage_1_prefix(
 );
 
 
+
 int main(int argc, char ** argv)
 {
-    if (argc != 3)
+    if (argc != 4)
     {
         print_usage();
         return 2;
@@ -81,6 +82,7 @@ int main(int argc, char ** argv)
 
     std::string const DATA_DIR{argv[1]};
     std::string const STAGE_0_MATCHABLES_DIR{argv[2]};
+    std::string const LONGEST_WORD_HEADER{argv[3]};
 
     std::cout << "creating matchables for stage 1:\n" << std::endl;
     std::cout << "       ------> reading 51155 ..............: " << std::flush;
@@ -108,7 +110,32 @@ int main(int argc, char ** argv)
 
     std::cout << "\nstage 1 matchables ready!\n" << std::endl;
 
-    return 0;
+    int ret{0};
+
+    // calculate longest word
+    {
+        int longest{0};
+        for (int i = 1; i < matchmaker::size(); ++i)
+            if (matchmaker::at(i).size() > matchmaker::at(longest).size())
+                longest = i;
+
+        FILE * f = fopen(LONGEST_WORD_HEADER.c_str(), "w");
+        if (nullptr == f)
+        {
+            std::cout << "failed to open " << LONGEST_WORD_HEADER << std::endl;
+            std::cout << "unable to save longest word info, aborting..." << std::endl;
+            return 1;
+        }
+
+        std::string longest_word_content = "#pragma once\n";
+        longest_word_content += "inline int const LONGEST_WORD{" + std::to_string(longest) + "};\n";
+        if (fputs(longest_word_content.c_str(), f) == EOF)
+            ret = 1;
+
+        fclose(f);
+    }
+
+    return ret;
 }
 
 

@@ -45,6 +45,12 @@ namespace matchmaker
     int size();
 
     /**
+     * @returns
+     *     The index of the longest word in the dictionary
+     */
+    int longest_word();
+
+    /**
      * @param[in] index
      *     valid indexes range from 0 to size() - 1 with 0 being the first word in the
      *     dictionary and size() - 1 the last
