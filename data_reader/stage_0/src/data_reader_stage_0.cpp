@@ -475,6 +475,8 @@ void read_3201_single(
 
         if (status.is_set(word_status::has_spaces::grab()))
             continue;
+        else if (word.size() > 44) // censor spaceless words over 44 letters (these ppl are sick!)
+            continue;
 
         if (status.is_set(word_status::has_hyphens::grab()))
             continue;
