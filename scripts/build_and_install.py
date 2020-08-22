@@ -259,7 +259,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, jobs,
             build_data_reader_cmd.append('-i')
             build_data_reader_cmd.append('../install_mm' + suffix)
             build_data_reader_cmd.append('-m')
-            build_data_reader_cmd.append('../../matchable/install' + suffix)
+            build_data_reader_cmd.append('../../matchable/install_mm' + suffix)
             build_data_reader_cmd.append('-s')
             build_data_reader_cmd.append(stage_0_install_dir)
             if use_clang:
