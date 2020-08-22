@@ -16,21 +16,16 @@ from string import ascii_uppercase
 def usage():
     print(sys.argv[0] + ' [OPTION]')
     print('    -h, --help                  print this message')
+    print('    -w, --workspace_root        workspace directory')
     print('    -q, --q                     q only')
-    print('    -a, --atomic_libs           atomic_libs')
     print('    -p, --parents_only          update parents only')
 
 
 
-def prepare_letters(repo_root, q, atomic_libs, parents_only):
-    suffix = ''
-    if q:
-        suffix = '_q'
-    elif atomic_libs:
-        suffix = '_atomic'
+def prepare_letters(workspace_root, q, parents_only):
 
-    generated_include = repo_root + '/generated_include' + suffix + '/'
-    generated_src = repo_root + '/generated_src' + suffix + '/'
+    generated_include = workspace_root + '/generated_include/'
+    generated_src = workspace_root + '/generated_src/'
 
     if not parents_only:
         # reset header location
@@ -41,10 +36,12 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
         shutil.rmtree(generated_src, ignore_errors=True)
         os.makedirs(generated_src)
 
-    leaf_h = repo_root + '/templates/leaf.h'
-    leaf_cpp = repo_root + '/templates/leaf.cpp'
-    parent_h = repo_root + '/templates/parent.h'
-    parent_cpp = repo_root + '/templates/parent.cpp'
+    matchmaker_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
+
+    leaf_h = matchmaker_root + 'templates/leaf.h'
+    leaf_cpp = matchmaker_root + 'templates/leaf.cpp'
+    parent_h = matchmaker_root + 'templates/parent.h'
+    parent_cpp = matchmaker_root + 'templates/parent.cpp'
 
     for l0 in ascii_uppercase + ascii_lowercase:
 
@@ -420,12 +417,13 @@ def prepare_letters(repo_root, q, atomic_libs, parents_only):
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hqap', ['help', 'q', 'atomic_libs', 'parents_only'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hw:qp', ['help', 'workspace_root', 'q', 'parents_only'])
     except getopt.GetoptError as err:
         print(err)
         usage()
         sys.exit(2)
 
+    workspace_root = ''
     q = False
     atomic_libs = False
     parents_only = False
@@ -434,18 +432,20 @@ def main():
         if o in ('-h', '--help'):
             usage()
             sys.exit()
+        elif o in ('-w', '--workspace_root'):
+            workspace_root = a
         elif o in ('-q', '--q'):
             q = True
-        elif o in ('-a', '--atomic_libs'):
-            atomic_libs = True
         elif o in ('-p', '--parents_only'):
             parents_only = True
         else:
             assert False, "unhandled option"
 
+    if workspace_root == '':
+        print("workspace_root unset, use -w to set a workspace directory")
+        usage()
 
-    repo_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
-    prepare_letters(repo_root, q, atomic_libs, parents_only)
+    prepare_letters(workspace_root, q, parents_only)
     exit(0)
 
 

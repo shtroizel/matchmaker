@@ -16,13 +16,16 @@ from string import ascii_uppercase
 def usage():
     print(sys.argv[0] + ' [OPTION]')
     print('    -h, --help                       print this message')
-    print('    -l, --data_reader_loc            data_reader installation prefix')
+    print('    -w, --workspace_dir              workspace directory')
+    print('    -d, --data_reader_loc            data_reader installation prefix')
     print('    -q, --q                          q only')
-    print('    -a, --atomic_libs                atomic_libs')
 
 
 
-def prepare_generated_include(out_dir, reader_loc, q):
+def prepare_matchables(workspace_dir, reader_loc, q):
+
+    out_dir = workspace_dir + '/generated_include/matchmaker/generated_matchables/'
+
     shutil.rmtree(out_dir, ignore_errors=True)
     os.makedirs(out_dir)
 
@@ -324,47 +327,42 @@ def prepare_generated_include(out_dir, reader_loc, q):
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hl:qa', ['help', 'data_reader_loc', 'q', 'atomic_libs'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hw:d:q', ['help', 'data_reader_loc', 'q'])
     except getopt.GetoptError as err:
         print(err)
         usage()
         sys.exit(2)
 
+    workspace_dir = ''
     reader_loc = ''
     q = False
-    atomic_libs = False
 
     for o, a in opts:
         if o in ('-h', '--help'):
             usage()
             sys.exit()
-        elif o in ('-l', '--data_reader_loc'):
+        elif o in ('-w', '--workspace_dir'):
+            workspace_dir = a
+        elif o in ('-d', '--data_reader_loc'):
             reader_loc = a
         elif o in ('-q', '--q'):
             q = True
-        elif o in ('-a', '--atomic_libs'):
-            atomic_libs = True
         else:
             assert False, "unhandled option"
+
+    if workspace_dir == '':
+        usage()
+        sys.exit(2)
 
     if reader_loc == '':
         usage()
         sys.exit(2)
 
-    repo_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
-
     if reader_loc[0] != '/':
-        reader_loc = repo_root + reader_loc
+        matchmaker_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
+        reader_loc = matchmaker_root + reader_loc
 
-    out_dir = repo_root + '/generated_include'
-    suffix = ''
-    if q:
-        suffix = '_q'
-    elif atomic_libs:
-        suffix = '_atomic'
-    out_dir += suffix + '/'
-
-    prepare_generated_include(out_dir + '/matchmaker/generated_matchables_stage_0/', reader_loc, q)
+    prepare_matchables(workspace_dir, reader_loc, q)
     exit(0)
 
 

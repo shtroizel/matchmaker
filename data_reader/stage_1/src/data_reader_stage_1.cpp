@@ -65,8 +65,8 @@ void read_51155(
 
 void update_word_status(word_status::Flags & flags, int & ch);
 
-bool create_stage_1_prefix(
-    std::filesystem::directory_entry const & stage_0_header_entry,
+bool patch_matchable_header(
+    std::filesystem::directory_entry const & matchable_header,
     std::map<std::string, entry_51155> const & contents_51155
 );
 
@@ -74,15 +74,20 @@ bool create_stage_1_prefix(
 
 int main(int argc, char ** argv)
 {
-    if (argc != 4)
+    if (argc != 3)
     {
         print_usage();
         return 2;
     }
 
     std::string const DATA_DIR{argv[1]};
-    std::string const STAGE_0_MATCHABLES_DIR{argv[2]};
-    std::string const LONGEST_WORD_HEADER{argv[3]};
+    std::string const STAGE_1_WORKSPACE_DIR{argv[2]};
+    std::string const LONGEST_WORD_HEADER{
+        STAGE_1_WORKSPACE_DIR + "/generated_include/matchmaker/longest_word.h"
+    };
+    std::string const STAGE_1_MATCHABLES_DIR{
+        STAGE_1_WORKSPACE_DIR + "/generated_include/matchmaker/generated_matchables"
+    };
 
     std::cout << "creating matchables for stage 1:\n" << std::endl;
     std::cout << "       ------> reading 51155 ..............: " << std::flush;
@@ -103,9 +108,9 @@ int main(int argc, char ** argv)
 
     std::cout << "done" << std::endl;
 
-    for (auto const & entry : std::filesystem::recursive_directory_iterator(STAGE_0_MATCHABLES_DIR))
+    for (auto const & entry : std::filesystem::recursive_directory_iterator(STAGE_1_MATCHABLES_DIR))
         if (entry.is_regular_file())
-            if (!create_stage_1_prefix(entry, contents_51155))
+            if (!patch_matchable_header(entry, contents_51155))
                 return 1;
 
     std::cout << "\nstage 1 matchables ready!\n" << std::endl;
@@ -144,7 +149,7 @@ void print_usage()
 {
     std::cout << "program expects 2 arguments:\n"
               << "    [1]  data directory\n"
-              << "    [2]  stage 0 matchables directory\n"
+              << "    [2]  stage 1 workspace directory\n"
               << std::flush;
 }
 
@@ -340,16 +345,16 @@ void update_word_status(word_status::Flags & flags, int & ch)
 
 
 
-bool create_stage_1_prefix(
-    std::filesystem::directory_entry const & stage_0_header_entry,
+bool patch_matchable_header(
+    std::filesystem::directory_entry const & matchable_header,
     std::map<std::string, entry_51155> const & contents_51155
 )
 {
     matchable::MatchableMaker mm;
-    matchable::load__status::Type load_status = mm.load(stage_0_header_entry.path());
+    matchable::load__status::Type load_status = mm.load(matchable_header.path());
     if (load_status != matchable::load__status::success::grab())
     {
-        std::cout << "attempt to load " << stage_0_header_entry << " failed with: "
+        std::cout << "attempt to load " << matchable_header << " failed with: "
                   << load_status << std::endl;
         return false;
     }
@@ -407,17 +412,8 @@ bool create_stage_1_prefix(
         }
     }
 
-    std::string output_fn = stage_0_header_entry.path();
-    output_fn = std::regex_replace(
-        output_fn,
-        std::regex("generated_matchables_stage_0"),
-        "generated_matchables_stage_1"
-    );
-    std::filesystem::path output_path{output_fn};
-    std::filesystem::create_directories(output_path.parent_path());
-
     auto sa_status = mm.save_as(
-        output_fn,
+        matchable_header.path(),
         {matchable::save_as__content::matchables::grab()},
         matchable::save_as__spread_mode::wrap::grab()
     );

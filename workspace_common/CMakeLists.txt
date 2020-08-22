@@ -17,21 +17,15 @@ option(q "build q (and Q) only" OFF)
 
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/matchmaker")
 
-set(suffix "")
 if(q)
     add_definitions(-DQ_ONLY)
-    set(suffix "_q")
-elseif(ATOMIC_LIBS)
-    set(suffix "_atomic")
+endif()
+
+if(NOT MATCHMAKER_ROOT)
+    message(FATAL_ERROR "MATCHMAKER_ROOT must be set! please set to matchmaker repository root location")
 endif()
 
 add_definitions(-DMATCHABLE_OMIT_BY_INDEX)
-if(stage STREQUAL "0")
-    add_definitions(-DSTAGE_0)
-elseif(stage STREQUAL "1")
-    add_definitions(-DSTAGE_1)
-endif()
-
 find_package(matchable 10.2.0 REQUIRED)
 include_directories(${matchable_DIR}/../../../include)
 
@@ -41,10 +35,10 @@ macro(add_lib_finalization lib_name)
     target_include_directories(
         matchmaker_${lib_name}
         PRIVATE
-        generated_include${suffix}
+        generated_include
         INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/generated_include${suffix}>
+        $<BUILD_INTERFACE:${MATCHMAKER_ROOT}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/generated_include>
         $<INSTALL_INTERFACE:include>
     )
     set_target_properties(matchmaker_${lib_name} PROPERTIES POSITION_INDEPENDENT_CODE 1)
@@ -86,7 +80,7 @@ set(matchmaker_srcs)
 foreach(l0 ${A_z_letters})
 
     # add single letter parents to matchmaker_srcs
-    list(APPEND matchmaker_srcs generated_src${suffix}/${l0}.cpp)
+    list(APPEND matchmaker_srcs generated_src/${l0}.cpp)
 
     foreach(l1_a_z_number RANGE 97 122)
         string(ASCII ${l1_a_z_number} l1)
@@ -202,7 +196,7 @@ foreach(l0 ${A_z_letters})
             (l0 STREQUAL "r" AND l1 STREQUAL "i")
         )
             # two letter parents
-            list(APPEND matchmaker_srcs generated_src${suffix}/${l0}_${l1}.cpp)
+            list(APPEND matchmaker_srcs generated_src/${l0}_${l1}.cpp)
 
             foreach(l2_a_z_number RANGE 97 122)
                 string(ASCII ${l2_a_z_number} l2)
@@ -253,7 +247,7 @@ foreach(l0 ${A_z_letters})
                     (l0 STREQUAL "c" AND l1 STREQUAL "o" AND l2 STREQUAL "u")
                 )
                     # three letter parents
-                    list(APPEND matchmaker_srcs generated_src${suffix}/${l0}_${l1}_${l2}.cpp)
+                    list(APPEND matchmaker_srcs generated_src/${l0}_${l1}_${l2}.cpp)
 
                     foreach(l3_a_z_number RANGE 97 122)
                         string(ASCII ${l3_a_z_number} l3)
@@ -268,7 +262,7 @@ foreach(l0 ${A_z_letters})
                             (l0 STREQUAL "n" AND l1 STREQUAL "o" AND l2 STREQUAL "n" AND l3 STREQUAL "c")
                         )
                             # four letter parents
-                            list(APPEND matchmaker_srcs generated_src${suffix}/${l0}_${l1}_${l2}_${l3}.cpp)
+                            list(APPEND matchmaker_srcs generated_src/${l0}_${l1}_${l2}_${l3}.cpp)
 
                             foreach(l4_a_z_number RANGE 97 122)
                                 string(ASCII ${l4_a_z_number} l4)
@@ -284,7 +278,7 @@ foreach(l0 ${A_z_letters})
                                     list(
                                         APPEND
                                         matchmaker_srcs
-                                        generated_src${suffix}/${l0}_${l1}_${l2}_${l3}_${l4}.cpp
+                                        generated_src/${l0}_${l1}_${l2}_${l3}_${l4}.cpp
                                     )
 
                                     foreach(l5_a_z_number RANGE 97 122)
@@ -317,11 +311,11 @@ endforeach()
 
 
 # parent of all
-list(APPEND matchmaker_srcs src/matchmaker.cpp)
+list(APPEND matchmaker_srcs ${MATCHMAKER_ROOT}/src/matchmaker.cpp)
 
 if(ATOMIC_LIBS)
     foreach(prefix ${prefix_list})
-        add_library(matchmaker_${prefix} SHARED "generated_src${suffix}/${prefix}.cpp")
+        add_library(matchmaker_${prefix} SHARED "generated_src/${prefix}.cpp")
         add_lib_finalization(${prefix})
     endforeach()
 else()
@@ -342,7 +336,7 @@ else()
     foreach(num_0_6 RANGE 0 6)
         set(cur_sources "")
         foreach(prefix ${lib_group_${num_0_6}})
-            list(APPEND cur_sources "generated_src${suffix}/${prefix}.cpp")
+            list(APPEND cur_sources "generated_src/${prefix}.cpp")
         endforeach()
         add_library(matchmaker_${num_0_6} SHARED ${cur_sources})
         add_lib_finalization(${num_0_6})
@@ -356,7 +350,7 @@ add_library(matchmaker SHARED ${matchmaker_srcs})
 target_include_directories(
     matchmaker
     PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/data_reader/stage_0/include
+    ${MATCHMAKER_ROOT}/data_reader/stage_0/include
 )
 foreach(lib ${lib_list})
     target_link_libraries(matchmaker ${lib})
@@ -373,7 +367,7 @@ install(
     EXPORT matchmaker
 )
 install(
-    DIRECTORY include/matchmaker
+    DIRECTORY ${MATCHMAKER_ROOT}/include/matchmaker
     DESTINATION ${CMAKE_INSTALL_PREFIX}/include
 )
 
