@@ -374,9 +374,9 @@ bool patch_matchable_header(
                 " "
             );
             std::cout << "       ------> patching " << prefix;
-            for (int i = prefix.size(); i < 5; ++i)
+            for (int i = prefix.size(); i < 11; ++i)
                 std::cout << ".";
-            std::cout << "..............: " << std::flush;
+            std::cout << "........: " << std::flush;
 
             std::vector<std::string> syn_vect;
             std::vector<std::string> ant_vect;
