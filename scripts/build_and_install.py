@@ -95,6 +95,13 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, jobs,
 
     stage_0_workspace_dir = stage_0_build_dir + 'workspace/'
 
+    # always update cmake files
+    if os.path.exists(stage_0_workspace_dir):
+        shutil.copy(matchmaker_root + 'workspace_common/CMakeLists.txt',
+                    stage_0_workspace_dir + 'CMakeLists.txt')
+        shutil.copy(matchmaker_root + 'workspace_common/config.cmake.in',
+                    stage_0_workspace_dir + 'config.cmake.in')
+
     if not retain or not os.path.exists(stage_0_workspace_dir):
 
         # create stage 0 workspace as needed
@@ -225,6 +232,13 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, jobs,
     os.chdir(matchmaker_root)
 
     stage_1_workspace_dir = build_dir + 'workspace/'
+
+    # always update cmake files
+    if os.path.exists(stage_1_workspace_dir):
+        shutil.copy(matchmaker_root + 'workspace_common/CMakeLists.txt',
+                    stage_1_workspace_dir + 'CMakeLists.txt')
+        shutil.copy(matchmaker_root + 'workspace_common/config.cmake.in',
+                    stage_1_workspace_dir + 'config.cmake.in')
 
     if not retain or not os.path.exists(stage_1_workspace_dir):
 
