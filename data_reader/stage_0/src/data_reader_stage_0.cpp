@@ -113,6 +113,18 @@ bool read_3203_mobypos_line(
     parts_of_speech::Flags & pos
 );
 
+void add_word(
+    std::string const & word,
+    std::string const & prefix,
+    matchable::MatchableMaker & mm
+);
+void add_word(
+    std::string const & word,
+    std::string const & prefix,
+    parts_of_speech::Flags const & pos_flags,
+    matchable::MatchableMaker & mm
+);
+
 
 
 int main(int argc, char ** argv)
@@ -500,12 +512,7 @@ void read_3201_single(
         if (!passes_status_filter(word, status))
             continue;
 
-        std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
-        mm.grab("word" + prefix)->add_variant(escaped);
-        std::vector<std::string> property_values;
-        for (auto p : parts_of_speech::variants_by_string())
-            property_values.push_back("0");
-        mm.grab("word" + prefix)->set_propertyvect(escaped, "pos", property_values);
+        add_word(word, prefix, mm);
     }
 }
 
@@ -541,18 +548,7 @@ void read_3203_mobypos(
         if (!passes_status_filter(word, status))
             continue;
 
-        std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
-
-        mm.grab("word" + prefix)->add_variant(escaped);
-        std::vector<std::string> property_values;
-        for (auto p : parts_of_speech::variants_by_string())
-        {
-            if (pos_flags.is_set(p))
-                property_values.push_back("1");
-            else
-                property_values.push_back("0");
-        }
-        mm.grab("word" + prefix)->set_propertyvect(escaped, "pos", property_values);
+        add_word(word, prefix, pos_flags, mm);
     }
 }
 
@@ -669,12 +665,7 @@ void read_51155(
                     if (!passes_status_filter(word, status))
                         continue;
 
-                    std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
-                    mm.grab("word" + prefix)->add_variant(escaped);
-                    std::vector<std::string> property_values;
-                    for (auto p : parts_of_speech::variants_by_string())
-                        property_values.push_back("0");
-                    mm.grab("word" + prefix)->set_propertyvect(escaped, "pos", property_values);
+                    add_word(word, prefix, mm);
                 }
             }
         }
@@ -814,4 +805,38 @@ bool read_3203_mobypos_line(
     }
 
     return true;
+}
+
+
+
+void add_word(
+    std::string const & word,
+    std::string const & prefix,
+    matchable::MatchableMaker & mm
+)
+{
+    static parts_of_speech::Flags const empty_pos_flags;
+    add_word(word, prefix, empty_pos_flags, mm);
+}
+
+
+
+void add_word(
+    std::string const & word,
+    std::string const & prefix,
+    parts_of_speech::Flags const & pos_flags,
+    matchable::MatchableMaker & mm
+)
+{
+    std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
+    mm.grab("word" + prefix)->add_variant(escaped);
+    std::vector<std::string> property_values;
+    for (auto p : parts_of_speech::variants_by_string())
+    {
+        if (pos_flags.is_set(p))
+            property_values.push_back("1");
+        else
+            property_values.push_back("0");
+    }
+    mm.grab("word" + prefix)->set_propertyvect(escaped, "pos", property_values);
 }
