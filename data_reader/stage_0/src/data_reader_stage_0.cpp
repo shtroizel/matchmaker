@@ -61,6 +61,11 @@ bool passes_prefix_filter(
     std::string const & l5  // sixth letter
 );
 
+bool passes_status_filter(
+    std::string const & word,
+    word_status::Flags const & status
+);
+
 void read_3201_single(
     FILE * input_file,
     std::string const & l0,
@@ -443,6 +448,28 @@ bool passes_prefix_filter(
 }
 
 
+bool passes_status_filter(
+    std::string const & word,
+    word_status::Flags const & status
+)
+{
+    if (status.is_set(word_status::not_printable_ascii::grab()))
+        return false;
+
+    if (status.is_set(word_status::has_spaces::grab()))
+        return false;
+    else if (word.size() > 44) // censor spaceless words over 44 letters (these ppl are sick!)
+        return false;
+
+    if (status.is_set(word_status::has_hyphens::grab()))
+        return false;
+
+    if (status.is_set(word_status::has_other_symbols::grab()))
+        return false;
+
+    return true;
+}
+
 
 void read_3201_single(
     FILE * input_file,
@@ -470,18 +497,7 @@ void read_3201_single(
         if (!passes_prefix_filter(word, l0, l1, l2, l3, l4, l5))
             continue;
 
-        if (status.is_set(word_status::not_printable_ascii::grab()))
-            continue;
-
-        if (status.is_set(word_status::has_spaces::grab()))
-            continue;
-        else if (word.size() > 44) // censor spaceless words over 44 letters (these ppl are sick!)
-            continue;
-
-        if (status.is_set(word_status::has_hyphens::grab()))
-            continue;
-
-        if (status.is_set(word_status::has_other_symbols::grab()))
+        if (!passes_status_filter(word, status))
             continue;
 
         std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
@@ -522,16 +538,7 @@ void read_3203_mobypos(
         if (!passes_prefix_filter(word, l0, l1, l2, l3, l4, l5))
             continue;
 
-        if (status.is_set(word_status::not_printable_ascii::grab()))
-            continue;
-
-        if (status.is_set(word_status::has_spaces::grab()))
-            continue;
-
-        if (status.is_set(word_status::has_hyphens::grab()))
-            continue;
-
-        if (status.is_set(word_status::has_other_symbols::grab()))
+        if (!passes_status_filter(word, status))
             continue;
 
         std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
@@ -659,16 +666,7 @@ void read_51155(
                     if (!passes_prefix_filter(word, l0, l1, l2, l3, l4, l5))
                         continue;
 
-                    if (status.is_set(word_status::not_printable_ascii::grab()))
-                        continue;
-
-                    if (status.is_set(word_status::has_spaces::grab()))
-                        continue;
-
-                    if (status.is_set(word_status::has_hyphens::grab()))
-                        continue;
-
-                    if (status.is_set(word_status::has_other_symbols::grab()))
+                    if (!passes_status_filter(word, status))
                         continue;
 
                     std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
