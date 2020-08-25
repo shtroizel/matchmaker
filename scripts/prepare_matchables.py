@@ -358,8 +358,12 @@ def main():
         usage()
         sys.exit(2)
 
+    matchmaker_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
+
+    if workspace_dir[0] != '/':
+        workspace_dir = matchmaker_root + workspace_dir
+
     if reader_loc[0] != '/':
-        matchmaker_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
         reader_loc = matchmaker_root + reader_loc
 
     prepare_matchables(workspace_dir, reader_loc, q)

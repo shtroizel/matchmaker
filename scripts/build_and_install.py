@@ -66,7 +66,9 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, jobs,
 
     # vars for build and install directories
     if build_dir == '':
-        build_dir = matchmaker_root + '/build'
+        build_dir = matchmaker_root + 'build'
+    if build_dir[0] != '/':
+        build_dir = matchmaker_root + build_dir
     while build_dir[-1] == '/':
         build_dir = build_dir[:-1]
     build_dir = build_dir + suffix
@@ -74,7 +76,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, jobs,
     build_dir = build_dir + '/'
 
     if install_dir == '':
-        install_dir = matchmaker_root + '/install'
+        install_dir = matchmaker_root + 'install'
     while install_dir[-1] == '/':
         install_dir = install_dir[:-1]
     install_dir = install_dir + suffix + '/'
