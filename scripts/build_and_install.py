@@ -86,8 +86,6 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, jobs,
         shutil.rmtree(install_dir, ignore_errors=True)
         shutil.rmtree(stage_0_build_dir, ignore_errors=True)
         shutil.rmtree(build_dir, ignore_errors=True)
-    if not os.path.exists(install_dir):
-        os.makedirs(install_dir)
     if not os.path.exists(build_dir):
         os.makedirs(build_dir)
     if not os.path.exists(stage_0_build_dir):
