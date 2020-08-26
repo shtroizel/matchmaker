@@ -51,6 +51,20 @@ namespace matchmaker
     }
 
 
+    int as_longest_snth(int index)
+    {
+        if (index < 0 || index >= size_snth())
+        {
+            std::cout << "as_longest_snth(" << index << ") out of bounds with size_snth() of: "
+                      << size_snth() << std::endl;
+            static std::string const empty_str;
+            return 0;
+        }
+
+        return word_snth::from_by_string_index(index).as_by_longest_index();
+    }
+
+
     std::string const & at_snth(int index)
     {
         if (index < 0 || index >= size_snth())

@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace matchmaker
 {
     int size_snth();
+    int as_longest_snth(int index);
     std::string const & at_snth(int index);
     int lookup_snth(std::string const & word, bool * found);
     std::vector<int8_t> const & flagged_parts_of_speech_snth(int index);

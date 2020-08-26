@@ -54,10 +54,19 @@ namespace matchmaker
     /**
      * @returns
      *     A vector of all words (as indexes) sorted by length (# of letters) such that the first is the
-     *     longest and the last is the shortest. Since calculation was done at build time, this is a
-     *     constant time operation (just retrieve the vector that already exists)
+     *     longest and the last is the shortest. Since the calculation is done at build time, this is a
+     *     constant time operation (just retrieves the vector that already exists).
      */
     std::vector<int> const & by_longest();
+
+    /**
+     * @param[in] index
+     *     index of a word in the dictionary
+     * @returns
+     *     the "by_longest()" index of the given word
+     * @see by_longest()
+     */
+    int as_longest(int index);
 
     /**
      * @param[in] index

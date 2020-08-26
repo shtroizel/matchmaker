@@ -77,15 +77,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace matchmaker
 {
     using size_func = std::function<int ()>;
+    using as_longest_func = std::function<int (int)>;
     using at_func = std::function<std::string const & (int)>;
     using lookup_func = std::function<int (std::string const &, bool *)>;
     using flagged_parts_of_speech_func = std::function<std::vector<int8_t> const & (int)>;
     using synonyms_func = std::function<std::vector<int> const & (int)>;
     using antonyms_func = std::function<std::vector<int> const & (int)>;
 
-    PROPERTYx6_MATCHABLE(
+    PROPERTYx7_MATCHABLE(
         size_func,
         size,
+        as_longest_func,
+        as_longest,
         at_func,
         at,
         lookup_func,
@@ -103,6 +106,7 @@ namespace matchmaker
 
 #define _set_properties(_letter)                                                                           \
     SET_PROPERTY(letter_snth, _letter, size, &size_snth_##_letter)                                         \
+    SET_PROPERTY(letter_snth, _letter, as_longest, &as_longest_snth_##_letter)                             \
     SET_PROPERTY(letter_snth, _letter, at, &at_snth_##_letter)                                             \
     SET_PROPERTY(letter_snth, _letter, lookup, &lookup_snth_##_letter)                                     \
     SET_PROPERTY(letter_snth, _letter, flagged_parts_of_speech, &flagged_parts_of_speech_snth_##_letter)   \
@@ -188,6 +192,29 @@ namespace matchmaker
 
             return boundries;
         }();
+
+
+    int as_longest_snth(int index)
+    {
+        if (index < 0 || index >= size_snth())
+        {
+            std::cout << "as_longest_snth(" << index << ") out of bounds with size_snth() of: "
+                      << size_snth() << std::endl;
+            return 0;
+        }
+
+        auto iter = std::lower_bound(
+            letter_boundries.begin(),
+            letter_boundries.end(),
+            index,
+            [](auto const & b, auto const & i){ return b.first <= i; }
+        );
+
+        if (iter != letter_boundries.begin())
+            --iter;
+
+        return iter->second.as_as_longest()(index - iter->first);
+    }
 
 
     std::string const & at_snth(int index)

@@ -77,7 +77,8 @@ void update_word_status(word_status::Flags & flags, int & ch);
 
 bool patch_matchable_header(
     std::filesystem::directory_entry const & matchable_header,
-    std::map<std::string, entry_51155> const & contents_51155
+    std::map<std::string, entry_51155> const & contents_51155,
+    std::vector<int> const & by_longest
 );
 
 
@@ -92,18 +93,19 @@ int main(int argc, char ** argv)
 
     std::string const DATA_DIR{argv[1]};
     std::string const STAGE_1_WORKSPACE_DIR{argv[2]};
-    std::string const LONGEST_WORD_HEADER{
+    std::string const LONGEST_WORDS_HEADER{
         STAGE_1_WORKSPACE_DIR + "/generated_include/matchmaker/longest_words.h"
     };
     std::string const STAGE_1_MATCHABLES_DIR{
         STAGE_1_WORKSPACE_DIR + "/generated_include/matchmaker/generated_matchables"
     };
 
-    std::cout << "creating matchables for stage 1:\n" << std::endl;
-    std::cout << "       ------> reading 51155 ..............: " << std::flush;
-
     std::map<std::string, entry_51155> contents_51155;
 
+    std::cout << "******* stage 1 data reader *******\n" << std::endl;
+
+    // process 51155
+    std::cout << "       ------> reading 51155 ..............: " << std::flush;
     {
         std::string const FN_51155{DATA_DIR + "/51155/51155-0.txt"};
         FILE * f = fopen(FN_51155.c_str(), "r");
@@ -115,18 +117,10 @@ int main(int argc, char ** argv)
         read_51155(f, contents_51155);
         fclose(f);
     }
-
     std::cout << "done" << std::endl;
 
-    for (auto const & entry : std::filesystem::recursive_directory_iterator(STAGE_1_MATCHABLES_DIR))
-        if (entry.is_regular_file())
-            if (!patch_matchable_header(entry, contents_51155))
-                return 1;
-
-    std::cout << "\nstage 1 matchables ready!\n" << std::endl;
-
-    int ret{0};
-
+    std::cout << "       ------> calculating longest words...: " << std::flush;
+    std::vector<int> by_longest;
     {
         // calculate longest words
         std::priority_queue<
@@ -147,25 +141,33 @@ int main(int argc, char ** argv)
         while (!q.empty())
         {
             longest_word_content += "    " + std::to_string(q.top().index) + ",\n";
+            by_longest.push_back(q.top().index);
             q.pop();
         }
         longest_word_content += "};\n";
 
         // save content to file
-        FILE * f = fopen(LONGEST_WORD_HEADER.c_str(), "w");
+        FILE * f = fopen(LONGEST_WORDS_HEADER.c_str(), "w");
         if (nullptr == f)
         {
-            std::cout << "failed to open " << LONGEST_WORD_HEADER << std::endl;
+            std::cout << "failed to open " << LONGEST_WORDS_HEADER << std::endl;
             std::cout << "unable to save longest word info, aborting..." << std::endl;
             return 1;
         }
-        if (fputs(longest_word_content.c_str(), f) == EOF)
-            ret = 1;
-
+        int r = fputs(longest_word_content.c_str(), f);
         fclose(f);
+        if (r == EOF)
+            return 1;
     }
+    std::cout << "done" << std::endl;
 
-    return ret;
+    for (auto const & entry : std::filesystem::recursive_directory_iterator(STAGE_1_MATCHABLES_DIR))
+        if (entry.is_regular_file())
+            if (!patch_matchable_header(entry, contents_51155, by_longest))
+                return 1;
+
+    std::cout << "\nstage 1 matchables ready!\n" << std::endl;
+    return 0;
 }
 
 
@@ -372,7 +374,8 @@ void update_word_status(word_status::Flags & flags, int & ch)
 
 bool patch_matchable_header(
     std::filesystem::directory_entry const & matchable_header,
-    std::map<std::string, entry_51155> const & contents_51155
+    std::map<std::string, entry_51155> const & contents_51155,
+    std::vector<int> const & by_longest
 )
 {
     matchable::MatchableMaker mm;
@@ -428,9 +431,17 @@ bool patch_matchable_header(
                             ant_vect.push_back(std::to_string(index));
                     }
                 }
-
                 m->set_propertyvect(v.variant_name, "syn", syn_vect);
                 m->set_propertyvect(v.variant_name, "ant", ant_vect);
+
+                for (int i = 0; i < (int) by_longest.size(); ++i)
+                {
+                    if (matchmaker::at(by_longest[i]) == existing_word)
+                    {
+                        m->set_property(v.variant_name, "by_longest_index", std::to_string(i));
+                        break;
+                    }
+                }
             }
 
             break;

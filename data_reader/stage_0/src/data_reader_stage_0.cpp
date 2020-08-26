@@ -237,6 +237,7 @@ int main(int argc, char ** argv)
     mm.grab("word" + prefix)->add_property("int8_t", "pos");
     mm.grab("word" + prefix)->add_property("int", "syn");
     mm.grab("word" + prefix)->add_property("int", "ant");
+    mm.grab("word" + prefix)->add_property("int", "by_longest_index");
 
     {
         std::string const FN_3201_SINGLE{DATA_DIR + "/3201/files/SINGLE.TXT"};

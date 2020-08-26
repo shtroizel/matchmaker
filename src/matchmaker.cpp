@@ -105,15 +105,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace matchmaker
 {
     using size_func = std::function<int ()>;
+    using as_longest_func = std::function<int (int)>;
     using at_func = std::function<std::string const & (int)>;
     using lookup_func = std::function<int (std::string const &, bool *)>;
     using flagged_parts_of_speech_func = std::function<std::vector<int8_t> const & (int)>;
     using synonyms_func = std::function<std::vector<int> const & (int)>;
     using antonyms_func = std::function<std::vector<int> const & (int)>;
 
-    PROPERTYx6_MATCHABLE(
+    PROPERTYx7_MATCHABLE(
         size_func,
         size,
+        as_longest_func,
+        as_longest,
         at_func,
         at,
         lookup_func,
@@ -135,6 +138,7 @@ namespace matchmaker
 
 #define _set_properties(_letter)                                                                           \
     SET_PROPERTY(letter, _letter, size, &size_##_letter)                                                   \
+    SET_PROPERTY(letter, _letter, as_longest, &as_longest_##_letter)                                       \
     SET_PROPERTY(letter, _letter, at, &at_##_letter)                                                       \
     SET_PROPERTY(letter, _letter, lookup, &lookup_##_letter)                                               \
     SET_PROPERTY(letter, _letter, flagged_parts_of_speech, &flagged_parts_of_speech_##_letter)             \
@@ -240,6 +244,24 @@ namespace matchmaker
             }
             return boundries;
         }();
+
+
+    int as_longest(int index)
+    {
+        if (index < 0 || index >= size())
+            return 0;
+
+        auto iter = std::lower_bound(
+            letter_boundries.begin(),
+            letter_boundries.end(),
+            index,
+            [](auto const & b, auto const & i){ return b.first <= i; }
+        );
+        if (iter != letter_boundries.begin())
+            --iter;
+
+        return iter->second.as_as_longest()(index - iter->first);
+    }
 
 
     std::string const & at(int index)
