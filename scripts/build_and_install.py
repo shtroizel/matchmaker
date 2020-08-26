@@ -175,9 +175,9 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, jobs,
 
             # create longest_word_stage_0.h
             stage_0_longest_word_file = stage_0_workspace_dir + 'generated_include'                        \
-                    + '/matchmaker/longest_word.h'
+                    + '/matchmaker/longest_words.h'
             with open(stage_0_longest_word_file, 'w') as f:
-                f.write('#pragma once\ninline int const LONGEST_WORD{0};\n')
+                f.write('#pragma once\ninline std::vector<int> const LONGEST_WORDS{0};\n')
 
 
 

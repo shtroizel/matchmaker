@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
 #include <filesystem>
+#include <queue>
 #include <regex>
 
 #include <matchable/matchable.h>
@@ -54,6 +55,15 @@ struct entry_51155
     std::vector<std::string> ant;
 };
 
+
+// used for longest words calculation
+struct LengthIndex
+{
+    int length{0};
+    int index{0};
+    friend bool operator<(LengthIndex const & l, LengthIndex const & r);
+};
+inline bool operator<(LengthIndex const & l, LengthIndex const & r) { return l.length < r.length; }
 
 
 void print_usage();
@@ -83,7 +93,7 @@ int main(int argc, char ** argv)
     std::string const DATA_DIR{argv[1]};
     std::string const STAGE_1_WORKSPACE_DIR{argv[2]};
     std::string const LONGEST_WORD_HEADER{
-        STAGE_1_WORKSPACE_DIR + "/generated_include/matchmaker/longest_word.h"
+        STAGE_1_WORKSPACE_DIR + "/generated_include/matchmaker/longest_words.h"
     };
     std::string const STAGE_1_MATCHABLES_DIR{
         STAGE_1_WORKSPACE_DIR + "/generated_include/matchmaker/generated_matchables"
@@ -117,13 +127,31 @@ int main(int argc, char ** argv)
 
     int ret{0};
 
-    // calculate longest word
     {
-        int longest{0};
-        for (int i = 1; i < matchmaker::size(); ++i)
-            if (matchmaker::at(i).size() > matchmaker::at(longest).size())
-                longest = i;
+        // calculate longest words
+        std::priority_queue<
+            LengthIndex,
+            std::vector<LengthIndex>,
+            std::less<std::vector<LengthIndex>::value_type>
+        > q;
+        LengthIndex cur;
+        for (int i = 0; i < matchmaker::size(); ++i)
+        {
+            cur.length = matchmaker::at(i).size();
+            cur.index = i;
+            q.push(cur);
+        }
 
+        // use calculation to create header file content
+        std::string longest_word_content{"#pragma once\ninline std::vector<int> const LONGEST_WORDS{\n"};
+        while (!q.empty())
+        {
+            longest_word_content += "    " + std::to_string(q.top().index) + ",\n";
+            q.pop();
+        }
+        longest_word_content += "};\n";
+
+        // save content to file
         FILE * f = fopen(LONGEST_WORD_HEADER.c_str(), "w");
         if (nullptr == f)
         {
@@ -131,9 +159,6 @@ int main(int argc, char ** argv)
             std::cout << "unable to save longest word info, aborting..." << std::endl;
             return 1;
         }
-
-        std::string longest_word_content = "#pragma once\n";
-        longest_word_content += "inline int const LONGEST_WORD{" + std::to_string(longest) + "};\n";
         if (fputs(longest_word_content.c_str(), f) == EOF)
             ret = 1;
 

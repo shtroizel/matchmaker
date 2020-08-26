@@ -98,7 +98,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <matchmaker/parts_of_speech.h>
-#include <matchmaker/longest_word.h>
+#include <matchmaker/longest_words.h>
 
 
 
@@ -219,7 +219,13 @@ namespace matchmaker
 
     int longest_word()
     {
-        return LONGEST_WORD;
+        return LONGEST_WORDS.size() > 0 ? LONGEST_WORDS.front() : 0;
+    }
+
+
+    std::vector<int> const & by_longest()
+    {
+        return LONGEST_WORDS;
     }
 
 

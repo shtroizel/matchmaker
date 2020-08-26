@@ -45,10 +45,19 @@ namespace matchmaker
     int size();
 
     /**
+     * same as by_longest()[0]
      * @returns
      *     The index of the longest word in the dictionary
      */
     int longest_word();
+
+    /**
+     * @returns
+     *     A vector of all words (as indexes) sorted by length (# of letters) such that the first is the
+     *     longest and the last is the shortest. Since calculation was done at build time, this is a
+     *     constant time operation (just retrieve the vector that already exists)
+     */
+    std::vector<int> const & by_longest();
 
     /**
      * @param[in] index
