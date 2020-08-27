@@ -78,7 +78,8 @@ void update_word_status(word_status::Flags & flags, int & ch);
 bool patch_matchable_header(
     std::filesystem::directory_entry const & matchable_header,
     std::map<std::string, entry_51155> const & contents_51155,
-    std::vector<int> const & by_longest
+    std::vector<int> const & by_longest,
+    std::map<int, int> const & longest_offsets
 );
 
 
@@ -136,17 +137,8 @@ int main(int argc, char ** argv)
             q.push(cur);
         }
 
-        // use calculation to create header file content
-        std::string longest_word_content{"#pragma once\ninline std::vector<int> const LONGEST_WORDS{\n"};
-        while (!q.empty())
-        {
-            longest_word_content += "    " + std::to_string(q.top().index) + ",\n";
-            by_longest.push_back(q.top().index);
-            q.pop();
-        }
-        longest_word_content += "};\n";
-
-        // save content to file
+        // use calculation to create and save header file content
+        std::string index_to_print;
         FILE * f = fopen(LONGEST_WORDS_HEADER.c_str(), "w");
         if (nullptr == f)
         {
@@ -154,16 +146,75 @@ int main(int argc, char ** argv)
             std::cout << "unable to save longest word info, aborting..." << std::endl;
             return 1;
         }
-        int r = fputs(longest_word_content.c_str(), f);
+        if (fputs("#pragma once\ninline std::vector<int> const LONGEST_WORDS{\n", f) == EOF)
+        {
+            std::cout << "first write " << std::endl;
+            goto err;
+        }
+        while (!q.empty())
+        {
+            if (fputs("    ", f) == EOF)
+            {
+                std::cout << "second write " << std::endl;
+                goto err;
+            }
+            index_to_print = std::to_string(q.top().index);
+            if (fputs(index_to_print.c_str(), f) == EOF)
+            {
+                std::cout << "third write " << std::endl;
+                goto err;
+            }
+            if (fputs(",\n", f) == EOF)
+            {
+                std::cout << "fourth write " << std::endl;
+                goto err;
+            }
+
+            by_longest.push_back(q.top().index);
+            q.pop();
+        }
+        if (fputs("};\n", f) == EOF)
+        {
+            std::cout << "fifth write " << std::endl;
+            goto err;
+        }
+
         fclose(f);
-        if (r == EOF)
-            return 1;
+        goto end;
+err:
+        std::cout << "failed" << std::endl;
+        fclose(f);
+        return 1;
+end:
+        ;
+    }
+    std::cout << "done" << std::endl;
+    std::cout << "       ------> calculating offsets.........: " << std::flush;
+
+    std::map<int, int> offsets;
+    int longest_length = matchmaker::at(by_longest[0]).size();
+    for (int offset = 1; offset <= longest_length; ++offset)
+    {
+        int start = (int) by_longest.size();
+        bool found{false};
+        while (start > 0)
+        {
+            --start;
+            if ((int) matchmaker::at(by_longest[start]).size() == offset)
+            {
+                found = true;
+                break;
+            }
+        }
+        if (found)
+            offsets[offset] = start;
     }
     std::cout << "done" << std::endl;
 
+
     for (auto const & entry : std::filesystem::recursive_directory_iterator(STAGE_1_MATCHABLES_DIR))
         if (entry.is_regular_file())
-            if (!patch_matchable_header(entry, contents_51155, by_longest))
+            if (!patch_matchable_header(entry, contents_51155, by_longest, offsets))
                 return 1;
 
     std::cout << "\nstage 1 matchables ready!\n" << std::endl;
@@ -375,7 +426,8 @@ void update_word_status(word_status::Flags & flags, int & ch)
 bool patch_matchable_header(
     std::filesystem::directory_entry const & matchable_header,
     std::map<std::string, entry_51155> const & contents_51155,
-    std::vector<int> const & by_longest
+    std::vector<int> const & by_longest,
+    std::map<int, int> const & longest_offsets
 )
 {
     matchable::MatchableMaker mm;
@@ -434,12 +486,17 @@ bool patch_matchable_header(
                 m->set_propertyvect(v.variant_name, "syn", syn_vect);
                 m->set_propertyvect(v.variant_name, "ant", ant_vect);
 
-                for (int i = 0; i < (int) by_longest.size(); ++i)
                 {
-                    if (matchmaker::at(by_longest[i]) == existing_word)
+                    for (int i = longest_offsets.at(existing_word.size()); i-- > 0;)
                     {
-                        m->set_property(v.variant_name, "by_longest_index", std::to_string(i));
-                        break;
+                        if (matchmaker::at(by_longest[i]).size() != existing_word.size())
+                            break;
+
+                        if (matchmaker::at(by_longest[i]) == existing_word)
+                        {
+                            m->set_property(v.variant_name, "by_longest_index", std::to_string(i));
+                            break;
+                        }
                     }
                 }
             }
