@@ -19,7 +19,7 @@ def usage():
     print('                            * defaults to <data_reader_stage_1 root>/install')
     print('                            * relative paths are relative to build_dir\n')
     print('    -m  --matchable_dir   matchable install directory')
-    print('                            * defaults to <data_reader_stage_1 root>/../matchable/install\n')
+    print('                            * defaults to <data_reader_stage_1 root>/../matchable/install_mm\n')
     print('    -s  --stage_0_dir     matchmaker stage 0 install directory\n')
     print('    -c  --clang           force use of clang compiler')
     print('                            * system compiler used by default\n')
@@ -45,7 +45,7 @@ def build_and_install(build_dir, install_dir, matchable_dir, stage_0_dir, use_cl
         install_dir = install_dir[:-1]
 
     if matchable_dir == '':
-        matchable_dir = data_reader_stage_1_root + '/../../matchable/install'
+        matchable_dir = data_reader_stage_1_root + '/../../matchable/install_mm'
     while matchable_dir[-1] == '/':
         matchable_dir = matchable_dir[:-1]
 
