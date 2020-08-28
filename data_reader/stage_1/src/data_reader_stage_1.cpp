@@ -29,10 +29,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include <iostream>
+#include <chrono>
 #include <filesystem>
+#include <iostream>
+#include <mutex>
 #include <queue>
 #include <regex>
+#include <thread>
 
 #include <matchable/matchable.h>
 
@@ -56,14 +59,33 @@ struct entry_51155
 };
 
 
-// used for longest words calculation
+// used for longest words calculation (priority q)
 struct LengthIndex
 {
     int length{0};
     int index{0};
     friend bool operator<(LengthIndex const & l, LengthIndex const & r);
 };
-inline bool operator<(LengthIndex const & l, LengthIndex const & r) { return l.length < r.length; }
+inline bool operator<(LengthIndex const & l, LengthIndex const & r)
+{
+    if (l.length < r.length)
+        return true;
+    if (l.length > r.length)
+        return false;
+    return matchmaker::at(r.index) < matchmaker::at(l.index);
+}
+
+
+// used for header file prioirty q (largest file size() == highest priority)
+struct HeaderEntry
+{
+    std::filesystem::directory_entry entry;
+    friend bool operator<(HeaderEntry const & l, HeaderEntry const & r);
+};
+inline bool operator<(HeaderEntry const & l, HeaderEntry const & r)
+{
+    return l.entry.file_size() < r.entry.file_size();
+}
 
 
 void print_usage();
@@ -76,12 +98,16 @@ void read_51155(
 void update_word_status(word_status::Flags & flags, int & ch);
 
 bool patch_matchable_header(
-    std::filesystem::directory_entry const & matchable_header,
+    std::vector<HeaderEntry> const & matchable_headers,
     std::map<std::string, entry_51155> const & contents_51155,
     std::vector<int> const & by_longest,
-    std::map<int, int> const & longest_offsets
+    std::map<int, std::pair<int, int>> const & longest_offsets
 );
 
+
+std::mutex patch_matchable_header_mutex;
+int processed_headers{0};
+int header_count{0};
 
 
 int main(int argc, char ** argv)
@@ -146,36 +172,27 @@ int main(int argc, char ** argv)
             std::cout << "unable to save longest word info, aborting..." << std::endl;
             return 1;
         }
+
         if (fputs("#pragma once\ninline std::vector<int> const LONGEST_WORDS{\n", f) == EOF)
-        {
-            std::cout << "first write " << std::endl;
             goto err;
-        }
+
         while (!q.empty())
         {
             if (fputs("    ", f) == EOF)
-            {
-                std::cout << "second write " << std::endl;
                 goto err;
-            }
+
             index_to_print = std::to_string(q.top().index);
             if (fputs(index_to_print.c_str(), f) == EOF)
-            {
-                std::cout << "third write " << std::endl;
                 goto err;
-            }
+
             if (fputs(",\n", f) == EOF)
-            {
-                std::cout << "fourth write " << std::endl;
                 goto err;
-            }
 
             by_longest.push_back(q.top().index);
             q.pop();
         }
         if (fputs("};\n", f) == EOF)
         {
-            std::cout << "fifth write " << std::endl;
             goto err;
         }
 
@@ -189,33 +206,75 @@ end:
         ;
     }
     std::cout << "done" << std::endl;
-    std::cout << "       ------> calculating offsets.........: " << std::flush;
 
-    std::map<int, int> offsets;
-    int longest_length = matchmaker::at(by_longest[0]).size();
-    for (int offset = 1; offset <= longest_length; ++offset)
+    std::map<int, std::pair<int, int>> offsets;
     {
-        int start = (int) by_longest.size();
-        bool found{false};
-        while (start > 0)
+        int cur_end{(int) by_longest.size() - 1};
+        int cur_start{cur_end};
+        int cur_length{0};
+        for (int i = (int) by_longest.size() - 1; i-- >= 0;)
         {
-            --start;
-            if ((int) matchmaker::at(by_longest[start]).size() == offset)
+            if (matchmaker::at(by_longest[i]).size() == matchmaker::at(by_longest[cur_end]).size())
             {
-                found = true;
-                break;
+                cur_start = i;
+            }
+            else
+            {
+                cur_length = matchmaker::at(by_longest[cur_start]).size();
+                offsets[cur_length] = std::make_pair(cur_start, cur_end);
+                std::cout << "       ------> length, start, end..........: "
+                        << cur_length << ", " << cur_start << ", " << cur_end << std::endl;
+                cur_start = cur_end = i;
             }
         }
-        if (found)
-            offsets[offset] = start;
     }
-    std::cout << "done" << std::endl;
 
+    {
+        std::priority_queue<
+            HeaderEntry,
+            std::vector<HeaderEntry>,
+            std::less<std::vector<HeaderEntry>::value_type>
+        > header_entries;
 
-    for (auto const & entry : std::filesystem::recursive_directory_iterator(STAGE_1_MATCHABLES_DIR))
-        if (entry.is_regular_file())
-            if (!patch_matchable_header(entry, contents_51155, by_longest, offsets))
-                return 1;
+        for (auto const & entry : std::filesystem::recursive_directory_iterator(STAGE_1_MATCHABLES_DIR))
+            if (entry.is_regular_file())
+                header_entries.push({entry});
+
+        header_count = (int) header_entries.size();
+
+        int const CPU_COUNT = std::thread::hardware_concurrency();
+        std::vector<std::vector<HeaderEntry>> dealt_header_entries;
+        dealt_header_entries.reserve(CPU_COUNT);
+        for (int i = 0; i < CPU_COUNT; ++i)
+            dealt_header_entries.push_back(std::vector<HeaderEntry>());
+
+        int i = 0;
+        while (!header_entries.empty())
+        {
+            dealt_header_entries[i].push_back(header_entries.top());
+            header_entries.pop();
+            ++i;
+            if (i >= CPU_COUNT)
+                i = 0;
+        }
+
+        std::vector<std::thread> threads;
+        bool all_ok{true};
+        for (auto const & deal : dealt_header_entries)
+            threads.emplace_back(
+                std::thread(
+                    [&](){
+                        if (all_ok && !patch_matchable_header(deal, contents_51155, by_longest, offsets))
+                            all_ok = false;
+                    }
+                )
+            );
+        for (auto & t : threads)
+            t.join();
+
+        if (!all_ok)
+            return 1;
+    }
 
     std::cout << "\nstage 1 matchables ready!\n" << std::endl;
     return 0;
@@ -424,96 +483,122 @@ void update_word_status(word_status::Flags & flags, int & ch)
 
 
 bool patch_matchable_header(
-    std::filesystem::directory_entry const & matchable_header,
+    std::vector<HeaderEntry> const & matchable_headers,
     std::map<std::string, entry_51155> const & contents_51155,
     std::vector<int> const & by_longest,
-    std::map<int, int> const & longest_offsets
+    std::map<int, std::pair<int, int>> const & longest_offsets
 )
 {
-    matchable::MatchableMaker mm;
-    matchable::load__status::Type load_status = mm.load(matchable_header.path());
-    if (load_status != matchable::load__status::success::grab())
+    for (auto const & matchable_header : matchable_headers)
     {
-        std::cout << "attempt to load " << matchable_header << " failed with: "
-                  << load_status << std::endl;
-        return false;
-    }
-
-    std::string existing_word;
-    bool found{false};
-    int index{-1};
-
-    for (auto const & [str, m] : mm.matchables)
-    {
-        if (str.rfind("word", 0) != std::string::npos)
+        matchable::MatchableMaker mm;
+        matchable::load__status::Type load_status = mm.load(matchable_header.entry.path());
+        if (load_status != matchable::load__status::success::grab())
         {
-            std::string prefix = str.substr(5);
-            prefix = std::regex_replace(
-                prefix,
-                std::regex("_"),
-                " "
-            );
-            std::cout << "       ------> patching " << prefix;
-            for (int i = prefix.size(); i < 11; ++i)
-                std::cout << ".";
-            std::cout << "........: " << std::flush;
+            std::cout << "attempt to load " << matchable_header.entry << " failed with: "
+                    << load_status << std::endl;
+            return false;
+        }
 
-            std::vector<std::string> syn_vect;
-            std::vector<std::string> ant_vect;
-            for (auto const & v : m->variants)
+        std::string existing_word;
+        std::string prefix;
+        bool found{false};
+        int index{-1};
+
+        for (auto const & [str, m] : mm.matchables)
+        {
+            if (str.rfind("word", 0) != std::string::npos)
             {
-                syn_vect.clear();
-                ant_vect.clear();
+                prefix = str.substr(5);
+                prefix = std::regex_replace(
+                    prefix,
+                    std::regex("_"),
+                    " "
+                );
 
-                existing_word = matchable::escapable::unescape_all(v.variant_name);
-
-                auto contents_51155_iter = contents_51155.find(existing_word);
-                if (contents_51155_iter != contents_51155.end())
+                std::vector<std::string> syn_vect;
+                std::vector<std::string> ant_vect;
+                for (auto const & v : m->variants)
                 {
-                    for (auto const & s : contents_51155_iter->second.syn)
-                    {
-                        index = matchmaker::lookup(s, &found);
-                        if (found)
-                            syn_vect.push_back(std::to_string(index));
-                    }
-                    for (auto const & a : contents_51155_iter->second.ant)
-                    {
-                        index = matchmaker::lookup(a, &found);
-                        if (found)
-                            ant_vect.push_back(std::to_string(index));
-                    }
-                }
-                m->set_propertyvect(v.variant_name, "syn", syn_vect);
-                m->set_propertyvect(v.variant_name, "ant", ant_vect);
+                    syn_vect.clear();
+                    ant_vect.clear();
 
-                {
-                    for (int i = longest_offsets.at(existing_word.size()); i-- > 0;)
-                    {
-                        if (matchmaker::at(by_longest[i]).size() != existing_word.size())
-                            break;
+                    existing_word = matchable::escapable::unescape_all(v.variant_name);
 
-                        if (matchmaker::at(by_longest[i]) == existing_word)
+                    auto contents_51155_iter = contents_51155.find(existing_word);
+                    if (contents_51155_iter != contents_51155.end())
+                    {
+                        for (auto const & s : contents_51155_iter->second.syn)
                         {
-                            m->set_property(v.variant_name, "by_longest_index", std::to_string(i));
-                            break;
+                            index = matchmaker::lookup(s, &found);
+                            if (found)
+                                syn_vect.push_back(std::to_string(index));
+                        }
+                        for (auto const & a : contents_51155_iter->second.ant)
+                        {
+                            index = matchmaker::lookup(a, &found);
+                            if (found)
+                                ant_vect.push_back(std::to_string(index));
+                        }
+                    }
+                    m->set_propertyvect(v.variant_name, "syn", syn_vect);
+                    m->set_propertyvect(v.variant_name, "ant", ant_vect);
+
+                    {
+                        std::pair<int, int> const & window = longest_offsets.at(existing_word.size());
+
+                        int lower = window.first;
+                        int upper = window.second + 1;
+                        int mid{0};
+
+                        while (lower < upper)
+                        {
+                            mid = lower + (upper - lower) / 2;
+
+                            if (existing_word == matchmaker::at(by_longest[mid]))
+                            {
+                                m->set_property(v.variant_name, "by_longest_index", std::to_string(mid));
+                                break;
+                            }
+
+                            if (existing_word < matchmaker::at(by_longest[mid]))
+                                upper = mid;
+                            else
+                                lower = mid;
                         }
                     }
                 }
-            }
 
-            break;
+                found = true;
+                break;
+            }
         }
+
+        std::lock_guard<std::mutex> const lock(patch_matchable_header_mutex);
+
+        std::cout << "       ------> patching " << prefix;
+        for (int i = prefix.size(); i < 11; ++i)
+            std::cout << ".";
+        std::cout << "........: " << std::flush;
+        if (!found)
+        {
+            std::cout << "failed to find \"word\" matchable" << std::endl;
+            return false;
+        }
+
+        auto sa_status = mm.save_as(
+            matchable_header.entry.path(),
+            {matchable::save_as__content::matchables::grab()},
+            matchable::save_as__spread_mode::wrap::grab()
+        );
+
+        ++processed_headers;
+        std::cout << sa_status << " (" << processed_headers << " / " << header_count << ")" << std::endl;
+
+        if (sa_status != matchable::save_as__status::success::grab())
+            return false;
+
     }
 
-    auto sa_status = mm.save_as(
-        matchable_header.path(),
-        {matchable::save_as__content::matchables::grab()},
-        matchable::save_as__spread_mode::wrap::grab()
-    );
-
-    std::cout << sa_status << std::endl;
-
-    if (sa_status != matchable::save_as__status::success::grab())
-        return false;
     return true;
 }

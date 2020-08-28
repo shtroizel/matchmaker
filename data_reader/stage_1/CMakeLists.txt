@@ -13,8 +13,10 @@ get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
 set(CMAKE_INSTALL_RPATH "${rpath_dir}")
 find_package(matchmaker 1.2.1 REQUIRED)
 
+find_package(Threads REQUIRED)
+
 add_executable(${CMAKE_PROJECT_NAME} src/${CMAKE_PROJECT_NAME}.cpp)
-target_link_libraries(${CMAKE_PROJECT_NAME} matchablemaker_static matchmaker stdc++fs)
+target_link_libraries(${CMAKE_PROJECT_NAME} matchablemaker_static matchmaker stdc++fs Threads::Threads)
 install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION bin)
 
 ##### install extracted data #####
