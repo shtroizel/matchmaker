@@ -124,9 +124,8 @@ namespace matchmaker
      *     A vector of booleans such that the vector's size is equal to all_parts_of_speech.size().
      *     Elements are set to 1 if their cooresponding all_parts_of_speech() index pertains to the
      *     given word, or 0 otherwise. For performance and implementation details int8_t is used instead
-     *     of bool. Specifically, the vectors already exist as MATCHABLE properties and are simply
-     *     forwarded, meaning that this function is a constant time operation. MATCHABLE does not support
-     *     properties of type bool, so using bool here would result in needless copying.
+     *     of bool. Specifically, the vectors already exist as MATCHABLE properties (non-bools) and are
+     *     simply forwarded, meaning that this function is a constant time operation.
      * @see all_parts_of_speech()
      */
     std::vector<int8_t> const & flagged_parts_of_speech(int index);
