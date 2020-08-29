@@ -69,6 +69,28 @@ namespace matchmaker
     int as_longest(int index);
 
     /**
+     * @param[in] length
+     *     length of a word
+     * @param[out] index
+     *     words of given length begin at this index when using 'by_longest()'
+     * @param[out] count
+     *     number of words with the given length
+     * @returns
+     *     true if any word has the given length,
+     *     false otherwise for invalid input (index and count unchanged)
+     * @see lengths()
+     */
+    bool length_location(std::size_t length, int & index, int & count);
+
+    /**
+     * @returns
+     *     all possible lengths that a matchmaker word could have in ascending order
+     * @see
+     *     length_location()
+     */
+    std::vector<std::size_t> const & lengths();
+
+    /**
      * @param[in] index
      *     valid indexes range from 0 to size() - 1 with 0 being the first word in the
      *     dictionary and size() - 1 the last

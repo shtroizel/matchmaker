@@ -173,11 +173,12 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, jobs,
                 exit(1)
             print('\n\nstage 0 matchables ready!')
 
-            # create longest_word_stage_0.h
-            stage_0_longest_word_file = stage_0_workspace_dir + 'generated_include'                        \
-                    + '/matchmaker/longest_words.h'
-            with open(stage_0_longest_word_file, 'w') as f:
-                f.write('#pragma once\ninline std::vector<int> const LONGEST_WORDS{0};\n')
+        # create longest_word_stage_0.h
+        stage_0_longest_word_file = stage_0_workspace_dir + 'generated_include/matchmaker/longest_words.h'
+        with open(stage_0_longest_word_file, 'w') as f:
+            f.write('#pragma once\n#include<vector>\n#include<map>\n')
+            f.write('inline std::vector<int> const LONGEST_WORDS{0};\n')
+            f.write('static std::map<int, std::pair<int, int>> const LONGEST_WORDS_OFFSETS;\n\n')
 
 
 

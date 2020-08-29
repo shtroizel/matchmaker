@@ -148,6 +148,7 @@ int main(int argc, char ** argv)
 
     std::cout << "       ------> calculating longest words...: " << std::flush;
     std::vector<int> by_longest;
+    std::map<int, std::pair<int, int>> offsets;
     {
         // calculate longest words
         std::priority_queue<
@@ -163,7 +164,7 @@ int main(int argc, char ** argv)
             q.push(cur);
         }
 
-        // use calculation to create and save header file content
+        // use calculation to create and write header file content
         std::string index_to_print;
         FILE * f = fopen(LONGEST_WORDS_HEADER.c_str(), "w");
         if (nullptr == f)
@@ -173,9 +174,11 @@ int main(int argc, char ** argv)
             return 1;
         }
 
-        if (fputs("#pragma once\ninline std::vector<int> const LONGEST_WORDS{\n", f) == EOF)
+        if (fputs("#pragma once\n#include <vector>\n#include <map>\n"
+                  "inline std::vector<int> const LONGEST_WORDS{\n", f) == EOF)
             goto err;
 
+        // write initialization code for LONGEST_WORDS
         while (!q.empty())
         {
             if (fputs("    ", f) == EOF)
@@ -191,9 +194,65 @@ int main(int argc, char ** argv)
             by_longest.push_back(q.top().index);
             q.pop();
         }
-        if (fputs("};\n", f) == EOF)
-        {
+        if (fputs("};\n\n", f) == EOF)
             goto err;
+
+        // calculate offsets
+        {
+            int cur_end{(int) by_longest.size() - 1};
+            int cur_start{cur_end};
+            int cur_length{0};
+            for (int i = (int) by_longest.size() - 1; i-- >= 0;)
+            {
+                if (matchmaker::at(by_longest[i]).size() == matchmaker::at(by_longest[cur_end]).size())
+                {
+                    cur_start = i;
+                }
+                else
+                {
+                    cur_length = matchmaker::at(by_longest[cur_start]).size();
+                    offsets[cur_length] = std::make_pair(cur_start, cur_end);
+                    cur_start = cur_end = i;
+                }
+            }
+        }
+
+        // write offsets
+        {
+            std::string index;
+
+            if (fputs("inline std::map<int, std::pair<int, int>> const LONGEST_WORDS_OFFSETS{\n", f) == EOF)
+                goto err;
+
+            for (auto const & [l, o] : offsets)
+            {
+                if (fputs("    { ", f) == EOF)
+                    goto err;
+
+                index = std::to_string(l);
+                if (fputs(index.c_str(), f) == EOF)
+                    goto err;
+
+                if (fputs(", { ", f) == EOF)
+                    goto err;
+
+                index = std::to_string(o.first);
+                if (fputs(index.c_str(), f) == EOF)
+                    goto err;
+
+                if (fputs(", ", f) == EOF)
+                    goto err;
+
+                index = std::to_string(o.second);
+                if (fputs(index.c_str(), f) == EOF)
+                    goto err;
+
+                if (fputs("} },\n", f) == EOF)
+                    goto err;
+            }
+
+            if (fputs("};\n\n", f) == EOF)
+                goto err;
         }
 
         fclose(f);
@@ -207,27 +266,6 @@ end:
     }
     std::cout << "done" << std::endl;
 
-    std::map<int, std::pair<int, int>> offsets;
-    {
-        int cur_end{(int) by_longest.size() - 1};
-        int cur_start{cur_end};
-        int cur_length{0};
-        for (int i = (int) by_longest.size() - 1; i-- >= 0;)
-        {
-            if (matchmaker::at(by_longest[i]).size() == matchmaker::at(by_longest[cur_end]).size())
-            {
-                cur_start = i;
-            }
-            else
-            {
-                cur_length = matchmaker::at(by_longest[cur_start]).size();
-                offsets[cur_length] = std::make_pair(cur_start, cur_end);
-                std::cout << "       ------> length, start, end..........: "
-                        << cur_length << ", " << cur_start << ", " << cur_end << std::endl;
-                cur_start = cur_end = i;
-            }
-        }
-    }
 
     {
         std::priority_queue<

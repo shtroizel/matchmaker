@@ -264,6 +264,32 @@ namespace matchmaker
     }
 
 
+    bool length_location(std::size_t length, int & index, int & count)
+    {
+        auto iter = LONGEST_WORDS_OFFSETS.find(length);
+        if (iter == LONGEST_WORDS_OFFSETS.end())
+            return false;
+
+        index = iter->second.first;
+        count = iter->second.second - iter->second.first + 1;
+        return true;
+    }
+
+
+    std::vector<std::size_t> const & lengths()
+    {
+        static std::vector<std::size_t> const ret =
+            []()
+            {
+                std::vector<std::size_t> v;
+                for (auto const & [l, o] : LONGEST_WORDS_OFFSETS)
+                    v.push_back(l);
+                return v;
+            }();
+        return ret;
+    }
+
+
     std::string const & at(int index)
     {
         static std::string const empty_str;
