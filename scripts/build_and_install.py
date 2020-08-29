@@ -33,6 +33,8 @@ def usage():
     print('    -m  --retain_matchables       retain generated matchables')
     print('                                    * skips building of matchable')
     print('                                    * skips building and running of data readers\n')
+    print('    -f  --force_stage_1           force stage 1 complete rebuild even when incremental')
+    print('                                    * incremental as having -r, -l, or -m options\n')
     print('    -j  --jobs                    max jobs')
     print('                                    * default is cpu count [' +                                 \
             str(multiprocessing.cpu_count()) + '])\n')
@@ -48,8 +50,8 @@ def usage():
 
 
 
-def build_and_install(use_clang, retain, retain_leaves, retain_matchables, jobs, build_dir, install_dir,
-                      atomic_libs, q, debug):
+def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force_stage_1, jobs,
+                      build_dir, install_dir, atomic_libs, q, debug):
     print('\n\n************** matchmaker **************\n\n')
     print('starting stage 0 ...\n\n')
 
@@ -241,7 +243,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, jobs,
         shutil.copy(matchmaker_root + 'workspace_common/config.cmake.in',
                     stage_1_workspace_dir + 'config.cmake.in')
 
-    if not retain or not os.path.exists(stage_1_workspace_dir):
+    if not retain or not os.path.exists(stage_1_workspace_dir) or force_stage_1:
 
         # recreate stage 1 workspace
         if not retain_leaves:
@@ -344,9 +346,10 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, jobs,
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crlmj:aql:d',
+        opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crlmfj:aql:d',
                 ['help', 'build_dir', 'install_dir', 'clang', 'retain', 'retain_leaves',
-                 'retain_matchables', 'jobs', 'atomic_libs', 'q', 'memory_usage_limit', 'debug'])
+                 'retain_matchables', 'force_stage_1', 'jobs', 'atomic_libs', 'q', 'memory_usage_limit',
+                 'debug'])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -356,6 +359,7 @@ def main():
     retain = False
     retain_leaves = False
     retain_matchables = False
+    force_stage_1 = False
     jobs = str(multiprocessing.cpu_count())
     build_dir = ''
     install_dir = ''
@@ -375,6 +379,8 @@ def main():
             retain_leaves = True
         elif o in ('-m', '--retain_matchables'):
             retain_matchables = True
+        elif o in ('-f', '--force_stage_1'):
+            force_stage_1 = True
         elif o in ('-j', '--jobs'):
             jobs = a
         elif o in ('-b', '--build_dir'):
@@ -390,8 +396,8 @@ def main():
         else:
             assert False, "unhandled option"
 
-    build_and_install(use_clang, retain, retain_leaves, retain_matchables, jobs, build_dir, install_dir,
-                      atomic_libs, q, debug)
+    build_and_install(use_clang, retain, retain_leaves, retain_matchables, force_stage_1, jobs, build_dir,
+                      install_dir, atomic_libs, q, debug)
 
     exit(0)
 
