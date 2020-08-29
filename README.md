@@ -13,6 +13,52 @@ namespace matchmaker
     int size();
 
     /**
+     * same as by_longest()[0]
+     * @returns
+     *     The index of the longest word in the dictionary
+     */
+    int longest_word();
+
+    /**
+     * @returns
+     *     A vector of all words (as indexes) sorted by length (# of letters) such that the first is the
+     *     longest and the last is the shortest. Since the calculation is done at build time, this is a
+     *     constant time operation (just retrieves the vector that already exists).
+     */
+    std::vector<int> const & by_longest();
+
+    /**
+     * @param[in] index
+     *     index of a word in the dictionary
+     * @returns
+     *     the "by_longest()" index of the given word
+     * @see by_longest()
+     */
+    int as_longest(int index);
+
+    /**
+     * @param[in] length
+     *     length of a word
+     * @param[out] index
+     *     words of given length begin at this index when using 'by_longest()'
+     * @param[out] count
+     *     number of words with the given length
+     * @returns
+     *     true if any word has the given length,
+     *     false otherwise for invalid input (index and count unchanged)
+     * @see lengths()
+     */
+    bool length_location(size_t length, int & index, int & count);
+
+    /**
+     * @returns
+     *     all possible lengths that a matchmaker word could have in ascending order
+     * @see
+     *     length_location()
+     */
+    std::vector<size_t> const & lengths();
+
+    /**
      * @param[in] index
      *     valid indexes range from 0 to size() - 1 with 0 being the first word in the
      *     dictionary and size() - 1 the last
@@ -46,9 +92,8 @@ namespace matchmaker
      *     A vector of booleans such that the vector's size is equal to all_parts_of_speech.size().
      *     Elements are set to 1 if their cooresponding all_parts_of_speech() index pertains to the
      *     given word, or 0 otherwise. For performance and implementation details int8_t is used instead
-     *     of bool. Specifically, the vectors already exist as MATCHABLE properties and are simply
-     *     forwarded, meaning that this function is a constant time operation. MATCHABLE does not support
-     *     properties of type bool, so using bool here would result in needless copying.
+     *     of bool. Specifically, the vectors already exist as MATCHABLE properties (non-bools) and are
+     *     simply forwarded, meaning that this function is a constant time operation.
      * @see all_parts_of_speech()
      */
     std::vector<int8_t> const & flagged_parts_of_speech(int index);
