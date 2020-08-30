@@ -40,17 +40,17 @@ MATCHABLE(
     Noun,
     Plural,
     Noun_Phrase,
-    Verb_spc__pl_usu_spc_participle_pr_,
-    Verb_spc__pl_transitive_pr_,
-    Verb_spc__pl_intransitive_pr_,
+    Verb_spc__pl_usu_spc_part_pr_,
+    Verb_spc__pl_trans_pr_,
+    Verb_spc__pl_intrans_pr_,
     Adjective,
     Adverb,
     Conjunction,
     Preposition,
     Interjection,
     Pronoun,
-    Definite_spc_Article,
-    Indefinite_spc_Article,
+    Def_spc_Article,
+    Indef_spc_Article,
     Nominative
 );
 
@@ -78,15 +78,15 @@ PROPERTYx1_MATCHABLE(
 SET_PROPERTY(parts_of_speech, N, pos_desc, pos_desc::Noun::grab())
 SET_PROPERTY(parts_of_speech, p, pos_desc, pos_desc::Plural::grab())
 SET_PROPERTY(parts_of_speech, h, pos_desc, pos_desc::Noun_Phrase::grab())
-SET_PROPERTY(parts_of_speech, V, pos_desc, pos_desc::Verb_spc__pl_usu_spc_participle_pr_::grab())
-SET_PROPERTY(parts_of_speech, t, pos_desc, pos_desc::Verb_spc__pl_transitive_pr_::grab())
-SET_PROPERTY(parts_of_speech, i, pos_desc, pos_desc::Verb_spc__pl_intransitive_pr_::grab())
+SET_PROPERTY(parts_of_speech, V, pos_desc, pos_desc::Verb_spc__pl_usu_spc_part_pr_::grab())
+SET_PROPERTY(parts_of_speech, t, pos_desc, pos_desc::Verb_spc__pl_trans_pr_::grab())
+SET_PROPERTY(parts_of_speech, i, pos_desc, pos_desc::Verb_spc__pl_intrans_pr_::grab())
 SET_PROPERTY(parts_of_speech, A, pos_desc, pos_desc::Adjective::grab())
 SET_PROPERTY(parts_of_speech, v, pos_desc, pos_desc::Adverb::grab())
 SET_PROPERTY(parts_of_speech, C, pos_desc, pos_desc::Conjunction::grab())
 SET_PROPERTY(parts_of_speech, P, pos_desc, pos_desc::Preposition::grab())
 SET_PROPERTY(parts_of_speech, n, pos_desc, pos_desc::Interjection::grab())
 SET_PROPERTY(parts_of_speech, r, pos_desc, pos_desc::Pronoun::grab())
-SET_PROPERTY(parts_of_speech, D, pos_desc, pos_desc::Definite_spc_Article::grab())
-SET_PROPERTY(parts_of_speech, I, pos_desc, pos_desc::Indefinite_spc_Article::grab())
+SET_PROPERTY(parts_of_speech, D, pos_desc, pos_desc::Def_spc_Article::grab())
+SET_PROPERTY(parts_of_speech, I, pos_desc, pos_desc::Indef_spc_Article::grab())
 SET_PROPERTY(parts_of_speech, o, pos_desc, pos_desc::Nominative::grab())
