@@ -417,42 +417,64 @@ bool passes_prefix_filter(
                                         }
                                         else
                                         {
-                                            // include five letter word of l0 + l1 + l2 + l3 + l4 when
-                                            // l5 is 'a', otherwise fail
-                                            if (l5[0] != 'a')
+                                            // fail five letter word unless left leaf
+                                            bool left_leaf = (l5[0] == 'a');
+
+                                            if (!left_leaf)
                                                 return false;
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    // include four letter word of l0 + l1 + l2 + l3 when l4 is 'a',
-                                    // otherwise fail
-                                    if (l4[0] != 'a')
+                                    // fail four letter word unless left leaf
+                                    bool left_leaf =
+                                        (l4[0] == 'a' && l5[0] == 'a') ||
+                                        (l4[0] == 'a' && l5 == "nil");
+
+                                    if (!left_leaf)
                                         return false;
                                 }
                             }
                         }
                         else
                         {
-                            // include three letter word of l0 + l1 + l2 when l3 is 'a', otherwise fail
-                            if (l3[0] != 'a')
+                            // fail three letter word unless left leaf
+                            bool left_leaf =
+                                (l3[0] == 'a' && l4[0] == 'a' && l5[0] == 'a') ||
+                                (l3[0] == 'a' && l4[0] == 'a' && l5 == "nil") ||
+                                (l3[0] == 'a' && l4 == "nil");
+
+                            if (!left_leaf)
                                 return false;
                         }
                     }
                 }
                 else
                 {
-                    // include two letter word of l0 + l1 when l2 is 'a', otherwise fail
-                    if (l2[0] != 'a')
+                    // fail two letter word unless left leaf
+                    bool left_leaf =
+                        (l2[0] == 'a' && l3[0] == 'a' && l4[0] == 'a' && l5[0] == 'a') ||
+                        (l2[0] == 'a' && l3[0] == 'a' && l4[0] == 'a' && l5 == "nil") ||
+                        (l2[0] == 'a' && l3[0] == 'a' && l4 == "nil") ||
+                        (l2[0] == 'a' && l3 == "nil");
+
+                    if (!left_leaf)
                         return false;
                 }
             }
         }
         else
         {
-            // fail one letter word unless l1 is 'a' or 'nil'
-            if (l1[0] != 'a')
+            // fail one letter word unless left leaf
+            bool left_leaf =
+                (l1[0] == 'a' && l2[0] == 'a' && l3[0] == 'a' && l4[0] == 'a' && l5[0] == 'a') ||
+                (l1[0] == 'a' && l2[0] == 'a' && l3[0] == 'a' && l4[0] == 'a' && l5 == "nil") ||
+                (l1[0] == 'a' && l2[0] == 'a' && l3[0] == 'a' && l4 == "nil") ||
+                (l1[0] == 'a' && l2[0] == 'a' && l3 == "nil") ||
+                (l1[0] == 'a' && l2 == "nil");
+
+            if (!left_leaf)
                 return false;
         }
     }
