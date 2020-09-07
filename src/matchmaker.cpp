@@ -249,7 +249,7 @@ namespace matchmaker
     int as_longest(int index)
     {
         if (index < 0 || index >= size())
-            return 0;
+            return -1;
 
         auto iter = std::lower_bound(
             letter_boundries.begin(),
