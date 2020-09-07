@@ -705,14 +705,8 @@ void read_51155(
                     word += (char) ch;
                 }
 
-                // maybe add word
-                if (word.size() > 0)
-                {
-                    if (!passes_filter(word, status, l0, l1, l2, l3, l4, l5))
-                        continue;
-
+                if (passes_filter(word, status, l0, l1, l2, l3, l4, l5))
                     add_word(word, prefix, mm);
-                }
             }
         }
 
