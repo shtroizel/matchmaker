@@ -68,7 +68,7 @@ def prepare_letters(workspace_root, q, parents_only):
                 print(replaced, end='')
 
 
-        for l1 in ascii_lowercase:
+        for l1 in ascii_uppercase + ascii_lowercase:
             if not parents_only:
                 os.makedirs(generated_include + '/matchmaker/generated_letters/' + l0 + '/' + l1)
 
@@ -200,7 +200,7 @@ def prepare_letters(workspace_root, q, parents_only):
                         print(replaced, end='')
 
 
-                for l2 in ascii_lowercase:
+                for l2 in ascii_uppercase + ascii_lowercase:
                     if not parents_only:
                         os.makedirs(generated_include + '/matchmaker/generated_letters/'                   \
                                 + l0 + '/' + l1 + '/' + l2)
@@ -268,7 +268,7 @@ def prepare_letters(workspace_root, q, parents_only):
                                 print(replaced, end='')
 
 
-                        for l3 in ascii_lowercase:
+                        for l3 in ascii_uppercase + ascii_lowercase:
                             if not parents_only:
                                 os.makedirs(generated_include + '/matchmaker/generated_letters/'           \
                                         + l0 + '/' + l1 + '/' + l2 + '/' + l3)
@@ -301,7 +301,7 @@ def prepare_letters(workspace_root, q, parents_only):
                                                 + l3)
                                         print(replaced, end='')
 
-                                for l4 in ascii_lowercase:
+                                for l4 in ascii_uppercase + ascii_lowercase:
                                     if not parents_only:
                                         os.makedirs(generated_include + '/matchmaker/generated_letters/'   \
                                                 + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4)
@@ -339,7 +339,7 @@ def prepare_letters(workspace_root, q, parents_only):
                                         if parents_only:
                                             continue
 
-                                        for l5 in ascii_lowercase:
+                                        for l5 in ascii_uppercase + ascii_lowercase:
                                             os.makedirs(generated_include                                  \
                                                     + '/matchmaker/generated_letters/' + l0 + '/' + l1     \
                                                     + '/' + l2 + '/' + l3 + '/' + l4 + '/' + l5)

@@ -428,7 +428,7 @@ bool passes_prefix_filter(
                                         else
                                         {
                                             // fail five letter word unless left leaf
-                                            bool left_leaf = (l5[0] == 'a');
+                                            bool left_leaf = (l5[0] == 'A');
 
                                             if (!left_leaf)
                                                 return false;
@@ -439,8 +439,8 @@ bool passes_prefix_filter(
                                 {
                                     // fail four letter word unless left leaf
                                     bool left_leaf =
-                                        (l4[0] == 'a' && l5[0] == 'a') ||
-                                        (l4[0] == 'a' && l5 == "nil");
+                                        (l4[0] == 'A' && l5[0] == 'A') ||
+                                        (l4[0] == 'A' && l5 == "nil");
 
                                     if (!left_leaf)
                                         return false;
@@ -451,9 +451,9 @@ bool passes_prefix_filter(
                         {
                             // fail three letter word unless left leaf
                             bool left_leaf =
-                                (l3[0] == 'a' && l4[0] == 'a' && l5[0] == 'a') ||
-                                (l3[0] == 'a' && l4[0] == 'a' && l5 == "nil") ||
-                                (l3[0] == 'a' && l4 == "nil");
+                                (l3[0] == 'A' && l4[0] == 'A' && l5[0] == 'A') ||
+                                (l3[0] == 'A' && l4[0] == 'A' && l5 == "nil") ||
+                                (l3[0] == 'A' && l4 == "nil");
 
                             if (!left_leaf)
                                 return false;
@@ -464,10 +464,10 @@ bool passes_prefix_filter(
                 {
                     // fail two letter word unless left leaf
                     bool left_leaf =
-                        (l2[0] == 'a' && l3[0] == 'a' && l4[0] == 'a' && l5[0] == 'a') ||
-                        (l2[0] == 'a' && l3[0] == 'a' && l4[0] == 'a' && l5 == "nil") ||
-                        (l2[0] == 'a' && l3[0] == 'a' && l4 == "nil") ||
-                        (l2[0] == 'a' && l3 == "nil");
+                        (l2[0] == 'A' && l3[0] == 'A' && l4[0] == 'A' && l5[0] == 'A') ||
+                        (l2[0] == 'A' && l3[0] == 'A' && l4[0] == 'A' && l5 == "nil") ||
+                        (l2[0] == 'A' && l3[0] == 'A' && l4 == "nil") ||
+                        (l2[0] == 'A' && l3 == "nil");
 
                     if (!left_leaf)
                         return false;
@@ -478,11 +478,11 @@ bool passes_prefix_filter(
         {
             // fail one letter word unless left leaf
             bool left_leaf =
-                (l1[0] == 'a' && l2[0] == 'a' && l3[0] == 'a' && l4[0] == 'a' && l5[0] == 'a') ||
-                (l1[0] == 'a' && l2[0] == 'a' && l3[0] == 'a' && l4[0] == 'a' && l5 == "nil") ||
-                (l1[0] == 'a' && l2[0] == 'a' && l3[0] == 'a' && l4 == "nil") ||
-                (l1[0] == 'a' && l2[0] == 'a' && l3 == "nil") ||
-                (l1[0] == 'a' && l2 == "nil");
+                (l1[0] == 'A' && l2[0] == 'A' && l3[0] == 'A' && l4[0] == 'A' && l5[0] == 'A') ||
+                (l1[0] == 'A' && l2[0] == 'A' && l3[0] == 'A' && l4[0] == 'A' && l5 == "nil") ||
+                (l1[0] == 'A' && l2[0] == 'A' && l3[0] == 'A' && l4 == "nil") ||
+                (l1[0] == 'A' && l2[0] == 'A' && l3 == "nil") ||
+                (l1[0] == 'A' && l2 == "nil");
 
             if (!left_leaf)
                 return false;

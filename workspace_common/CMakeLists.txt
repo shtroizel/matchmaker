@@ -54,36 +54,38 @@ endmacro()
 set(prefix_list)
 
 set(A_z_letters)
+set(l0_A_z_letters)
 foreach(A_Z_number RANGE 65 90)
     string(ASCII ${A_Z_number} A_Z_letter)
+    list(APPEND A_z_letters ${A_Z_letter})
     if(q)
         if(NOT A_Z_letter STREQUAL "Q")
             continue()
         endif()
     endif()
-    list(APPEND A_z_letters ${A_Z_letter})
+    list(APPEND l0_A_z_letters ${A_Z_letter})
 endforeach()
 
 foreach(a_z_number RANGE 97 122)
     string(ASCII ${a_z_number} a_z_letter)
+    list(APPEND A_z_letters ${a_z_letter})
     if(q)
         if(NOT a_z_letter STREQUAL "q")
             continue()
         endif()
     endif()
-    list(APPEND A_z_letters ${a_z_letter})
+    list(APPEND l0_A_z_letters ${a_z_letter})
 endforeach()
 
 # matchmaker_srcs are parents (no leaves)
 set(matchmaker_srcs)
 
-foreach(l0 ${A_z_letters})
+foreach(l0 ${l0_A_z_letters})
 
     # add single letter parents to matchmaker_srcs
     list(APPEND matchmaker_srcs generated_src/${l0}.cpp)
 
-    foreach(l1_a_z_number RANGE 97 122)
-        string(ASCII ${l1_a_z_number} l1)
+    foreach(l1 ${A_z_letters})
         if(
             (l0 STREQUAL "q" AND l1 STREQUAL "u") OR
             (l0 STREQUAL "p" AND l1 STREQUAL "r") OR
@@ -198,8 +200,7 @@ foreach(l0 ${A_z_letters})
             # two letter parents
             list(APPEND matchmaker_srcs generated_src/${l0}_${l1}.cpp)
 
-            foreach(l2_a_z_number RANGE 97 122)
-                string(ASCII ${l2_a_z_number} l2)
+            foreach(l2 ${A_z_letters})
                 if(
                     (l0 STREQUAL "p" AND l1 STREQUAL "r" AND l2 STREQUAL "e") OR
                     (l0 STREQUAL "d" AND l1 STREQUAL "i" AND l2 STREQUAL "s") OR
@@ -249,8 +250,7 @@ foreach(l0 ${A_z_letters})
                     # three letter parents
                     list(APPEND matchmaker_srcs generated_src/${l0}_${l1}_${l2}.cpp)
 
-                    foreach(l3_a_z_number RANGE 97 122)
-                        string(ASCII ${l3_a_z_number} l3)
+                    foreach(l3 ${A_z_letters})
                         if(
                             (l0 STREQUAL "o" AND l1 STREQUAL "v" AND l2 STREQUAL "e" AND l3 STREQUAL "r") OR
                             (l0 STREQUAL "i" AND l1 STREQUAL "n" AND l2 STREQUAL "t" AND l3 STREQUAL "e") OR
@@ -264,8 +264,7 @@ foreach(l0 ${A_z_letters})
                             # four letter parents
                             list(APPEND matchmaker_srcs generated_src/${l0}_${l1}_${l2}_${l3}.cpp)
 
-                            foreach(l4_a_z_number RANGE 97 122)
-                                string(ASCII ${l4_a_z_number} l4)
+                            foreach(l4 ${A_z_letters})
                                 if(
                                     (l0 STREQUAL "i" AND l1 STREQUAL "n" AND l2 STREQUAL "t"
                                             AND l3 STREQUAL "e" AND l4 STREQUAL "r") OR
@@ -281,9 +280,7 @@ foreach(l0 ${A_z_letters})
                                         generated_src/${l0}_${l1}_${l2}_${l3}_${l4}.cpp
                                     )
 
-                                    foreach(l5_a_z_number RANGE 97 122)
-                                        string(ASCII ${l5_a_z_number} l5)
-
+                                    foreach(l5 ${A_z_letters})
                                         # six letter leaves
                                         list(APPEND prefix_list "${l0}_${l1}_${l2}_${l3}_${l4}_${l5}")
                                     endforeach()

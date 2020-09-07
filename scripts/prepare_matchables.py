@@ -45,7 +45,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
 
         os.makedirs(out_dir + l0)
 
-        for l1 in ascii_lowercase:
+        for l1 in ascii_uppercase + ascii_lowercase:
             os.makedirs(out_dir + l0 + '/' + l1)
 
             if (l0 == 'q' and l1 == 'u') or                                                                \
@@ -158,7 +158,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                     (l0 == 'g' and l1 == 'u') or                                                           \
                     (l0 == 'r' and l1 == 'i'):
 
-                for l2 in ascii_lowercase:
+                for l2 in ascii_uppercase + ascii_lowercase:
                     os.makedirs(out_dir + l0 + '/' + l1 + '/' + l2)
 
                     if (l0 == 'p' and l1 == 'r' and l2 == 'e') or                                          \
@@ -206,7 +206,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                             (l0 == 'd' and l1 == 'e' and l2 == 'c') or                                     \
                             (l0 == 'c' and l1 == 'o' and l2 == 'u'):
 
-                        for l3 in ascii_lowercase:
+                        for l3 in ascii_uppercase + ascii_lowercase:
                             os.makedirs(out_dir + l0 + '/' + l1 + '/' + l2 + '/' + l3)
 
                             if (l0 == 'o' and l1 == 'v' and l2 == 'e' and l3 == 'r') or                    \
@@ -218,7 +218,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                                     (l0 == 's' and l1 == 'e' and l2 == 'm' and l3 == 'i') or               \
                                     (l0 == 'n' and l1 == 'o' and l2 == 'n' and l3 == 'c'):
 
-                                for l4 in ascii_lowercase:
+                                for l4 in ascii_uppercase + ascii_lowercase:
                                     os.makedirs(out_dir + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4)
 
                                     if (l0 == 'i' and l1 == 'n' and l2 == 't' and l3 == 'e' and            \
@@ -230,7 +230,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                                             (l0 == 'u' and l1 == 'n' and l2 == 'd' and l3 == 'e' and       \
                                                     l4 == 'r'):
 
-                                        for l5 in ascii_lowercase:
+                                        for l5 in ascii_uppercase + ascii_lowercase:
                                             os.makedirs(out_dir + l0 + '/' + l1 + '/' + l2 + '/' + l3      \
                                                     + '/' + l4 + '/' + l5)
 
