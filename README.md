@@ -1,8 +1,7 @@
 # MATCHMAKER
-"Memory is neither created nor destroyed, it is simply compiled into existence."<br/>
---107<br/>
 
-We give us an English dictionary with the following interface:<br>
+An English dictionary compiled as static data, accessible through the following interface:
+
 ```
 namespace matchmaker
 {
