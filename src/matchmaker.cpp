@@ -264,6 +264,15 @@ namespace matchmaker
     }
 
 
+    int from_longest(int length_index)
+    {
+        if (length_index < 0 || length_index >= size())
+            return -1;
+
+        return LONGEST_WORDS[length_index];
+    }
+
+
     bool length_location(std::size_t length, int & index, int & count)
     {
         auto iter = LONGEST_WORDS_OFFSETS.find(length);

@@ -45,55 +45,9 @@ namespace matchmaker
     int size();
 
     /**
-     * same as by_longest()[0]
-     * @returns
-     *     The index of the longest word in the dictionary
-     */
-    int longest_word();
-
-    /**
-     * @returns
-     *     A vector of all words (as indexes) sorted by length (# of letters) such that the first is the
-     *     longest and the last is the shortest. Since the calculation is done at build time, this is a
-     *     constant time operation (just retrieves the vector that already exists).
-     */
-    std::vector<int> const & by_longest();
-
-    /**
      * @param[in] index
-     *     index of a word in the dictionary
-     * @returns
-     *     the "by_longest()" index of the given word
-     * @see by_longest()
-     */
-    int as_longest(int index);
-
-    /**
-     * @param[in] length
-     *     length of a word
-     * @param[out] index
-     *     words of given length begin at this index when using 'by_longest()'
-     * @param[out] count
-     *     number of words with the given length
-     * @returns
-     *     true if any word has the given length,
-     *     false otherwise for invalid input (index and count unchanged)
-     * @see lengths()
-     */
-    bool length_location(std::size_t length, int & index, int & count);
-
-    /**
-     * @returns
-     *     all possible lengths that a matchmaker word could have in ascending order
-     * @see
-     *     length_location()
-     */
-    std::vector<std::size_t> const & lengths();
-
-    /**
-     * @param[in] index
-     *     valid indexes range from 0 to size() - 1 with 0 being the first word in the
-     *     dictionary and size() - 1 the last
+     *     An index into an alphabetically sorted dictionary with 0 for the first word and size() - 1 for
+     *     the last.
      * @returns
      *     The word at the given index, or empty string when index is out of range
      */
@@ -106,10 +60,72 @@ namespace matchmaker
      *     true if word is found, false otherwise
      *     ignored when nullptr
      * @returns
-     *     the index of the given word if it exists,
+     *     the alphabetic index of the given word if it exists,
      *     or the index that the given word would have if it did exist
      */
     int lookup(std::string const & word, bool * found);
+
+    /**
+     * DEPRECATED
+     *     use from_longest(0) instead
+     *
+     * @returns
+     *     The index of the longest word in the dictionary
+     */
+    int longest_word();
+
+    /**
+     * DEPRECATED
+     *     use from_longest() intead
+     *
+     * @returns
+     *     A vector of all words (as indexes) sorted by length (# of letters) such that the first is the
+     *     longest and the last is the shortest. Since the calculation is done at build time, this is a
+     *     constant time operation (just retrieves the vector that already exists).
+     */
+    std::vector<int> const & by_longest();
+
+    /**
+     * @param[in] index
+     *     index of a word in the dictionary
+     * @returns
+     *     A "length index", which is the index the given word would have in a dictionary sorted from
+     *     longest to shortest, with 0 for the longest word and size() - 1 for the shortest.
+     * @see from_longest()
+     */
+    int as_longest(int index);
+
+    /**
+     * @param[in] length_index
+     *     The index a word would have in a dictionary sorted from longest to shortest, with 0 for the
+     *     longest word and size() - 1 for the shortest.
+     * @returns
+     *     An alphabetic index for the word of the given length index
+     * @see as_longest()
+     */
+    int from_longest(int length_index);
+
+    /**
+     * @param[in] length
+     *     length of a word
+     * @param[out] length_index
+     *     words of given length begin at this "length index"
+     * @param[out] count
+     *     number of words with the given length
+     * @returns
+     *     true if any word has the given length,
+     *     false otherwise for invalid input (in which case index and count remain unchanged)
+     * @see lengths()
+     */
+    bool length_location(std::size_t length, int & length_index, int & count);
+
+    /**
+     * @returns
+     *     all possible lengths that a matchmaker word could have in ascending order
+     * @see
+     *     length_location()
+     */
+    std::vector<std::size_t> const & lengths();
 
     /**
      * @returns
@@ -123,9 +139,7 @@ namespace matchmaker
      * @returns
      *     A vector of booleans such that the vector's size is equal to all_parts_of_speech.size().
      *     Elements are set to 1 if their cooresponding all_parts_of_speech() index pertains to the
-     *     given word, or 0 otherwise. For performance and implementation details int8_t is used instead
-     *     of bool. Specifically, the vectors already exist as MATCHABLE properties (non-bools) and are
-     *     simply forwarded, meaning that this function is a constant time operation.
+     *     given word, or 0 otherwise.
      * @see all_parts_of_speech()
      */
     std::vector<int8_t> const & flagged_parts_of_speech(int index);
