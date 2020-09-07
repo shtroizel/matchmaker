@@ -38,6 +38,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <matchmaker/parts_of_speech.h>
 
 
+int const MAX_WORD_LENGTH{44};
+
 
 MATCHABLE(
     word_status,
@@ -61,9 +63,17 @@ bool passes_prefix_filter(
     std::string const & l5  // sixth letter
 );
 
-bool passes_status_filter(
+bool passes_status_filter(word_status::Flags const & status);
+
+bool passes_filter(
     std::string const & word,
-    word_status::Flags const & status
+    word_status::Flags const & status,
+    std::string const & l0,
+    std::string const & l1,
+    std::string const & l2,
+    std::string const & l3,
+    std::string const & l4,
+    std::string const & l5
 );
 
 void read_3201_single(
@@ -483,23 +493,45 @@ bool passes_prefix_filter(
 }
 
 
-bool passes_status_filter(
-    std::string const & word,
-    word_status::Flags const & status
-)
+bool passes_status_filter(word_status::Flags const & status)
 {
     if (status.is_set(word_status::not_printable_ascii::grab()))
         return false;
 
     if (status.is_set(word_status::has_spaces::grab()))
         return false;
-    else if (word.size() > 44) // censor spaceless words over 44 letters (these ppl are sick!)
-        return false;
 
     if (status.is_set(word_status::has_hyphens::grab()))
         return false;
 
     if (status.is_set(word_status::has_other_symbols::grab()))
+        return false;
+
+    return true;
+}
+
+
+bool passes_filter(
+    std::string const & word,
+    word_status::Flags const & status,
+    std::string const & l0,
+    std::string const & l1,
+    std::string const & l2,
+    std::string const & l3,
+    std::string const & l4,
+    std::string const & l5
+)
+{
+    if (word.size() < 1)
+        return false;
+
+    if (word.size() > MAX_WORD_LENGTH)
+        return false;
+
+    if (!passes_prefix_filter(word, l0, l1, l2, l3, l4, l5))
+        return false;
+
+    if (!passes_status_filter(status))
         return false;
 
     return true;
@@ -529,10 +561,7 @@ void read_3201_single(
         if (word.size() == 0)
             continue;
 
-        if (!passes_prefix_filter(word, l0, l1, l2, l3, l4, l5))
-            continue;
-
-        if (!passes_status_filter(word, status))
+        if (!passes_filter(word, status, l0, l1, l2, l3, l4, l5))
             continue;
 
         add_word(word, prefix, mm);
@@ -565,10 +594,7 @@ void read_3203_mobypos(
         if (word.size() == 0)
             continue;
 
-        if (!passes_prefix_filter(word, l0, l1, l2, l3, l4, l5))
-            continue;
-
-        if (!passes_status_filter(word, status))
+        if (!passes_filter(word, status, l0, l1, l2, l3, l4, l5))
             continue;
 
         add_word(word, prefix, pos_flags, mm);
@@ -682,10 +708,7 @@ void read_51155(
                 // maybe add word
                 if (word.size() > 0)
                 {
-                    if (!passes_prefix_filter(word, l0, l1, l2, l3, l4, l5))
-                        continue;
-
-                    if (!passes_status_filter(word, status))
+                    if (!passes_filter(word, status, l0, l1, l2, l3, l4, l5))
                         continue;
 
                     add_word(word, prefix, mm);
