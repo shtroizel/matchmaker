@@ -14,8 +14,8 @@ namespace matchmaker
 
     /**
      * @param[in] index
-     *     An index into an alphabetically sorted dictionary with 0 for the first word and size() - 1 for
-     *     the last.
+     *     An index into an alphabetically sorted dictionary with 0 for the first word
+     *     and size() - 1 for the last.
      * @returns
      *     The word at the given index, or empty string when index is out of range
      */
@@ -37,16 +37,17 @@ namespace matchmaker
      * @param[in] index
      *     index of a word in the dictionary
      * @returns
-     *     A "length index", which is the index the given word would have in a dictionary sorted from
-     *     longest to shortest, with 0 for the longest word and size() - 1 for the shortest.
+     *     A "length index", which is the index the given word would have in a dictionary
+     *     sorted from longest to shortest, with 0 for the longest word and size() - 1 for
+     *     the shortest.
      * @see from_longest()
      */
     int as_longest(int index);
 
     /**
      * @param[in] length_index
-     *     The index a word would have in a dictionary sorted from longest to shortest, with 0 for the
-     *     longest word and size() - 1 for the shortest.
+     *     The index a word would have in a dictionary sorted from longest to shortest,
+     *     with 0 for the longest word and size() - 1 for the shortest.
      * @returns
      *     An alphabetic index for the word of the given length index
      * @see as_longest()
@@ -127,6 +128,7 @@ namespace matchmaker
      */
     void complete(std::string const & prefix, int & start, int & length);
 }
+
 ```
 
 
