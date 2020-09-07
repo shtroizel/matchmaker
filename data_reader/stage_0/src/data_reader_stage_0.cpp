@@ -53,6 +53,8 @@ MATCHABLE(
 
 void print_usage();
 
+bool has_responsibility(char letter, char prefix_element);
+
 bool passes_prefix_filter(
     std::string const & word,
     std::string const & l0, // first letter
@@ -368,6 +370,22 @@ void print_usage()
 
 
 
+bool has_responsibility(char letter, char prefix_element)
+{
+    if (letter == ' ' && prefix_element == 'A')
+        return true;
+
+    if (letter == '-' && prefix_element == 'z')
+        return true;
+
+    if (letter == prefix_element)
+        return true;
+
+    return false;
+}
+
+
+
 bool passes_prefix_filter(
     std::string const & word,
     std::string const & l0,
@@ -390,7 +408,7 @@ bool passes_prefix_filter(
         if (word.size() > 1)
         {
             // if word does not second with l1 then fail
-            if (word[1] != l1[0])
+            if (!has_responsibility(word[1], l1[0]))
                 return false;
 
             if (l2 != "nil")
@@ -398,7 +416,7 @@ bool passes_prefix_filter(
                 if (word.size() > 2)
                 {
                     // if 3+ letter word does not third with l2 then fail
-                    if (word[2] != l2[0])
+                    if (!has_responsibility(word[2], l2[0]))
                         return false;
 
                     if (l3 != "nil")
@@ -406,7 +424,7 @@ bool passes_prefix_filter(
                         if (word.size() > 3)
                         {
                             // if 4+ letter word does not fourth with l3 then fail
-                            if (word[3] != l3[0])
+                            if (!has_responsibility(word[3], l3[0]))
                                 return false;
 
                             if (l4 != "nil")
@@ -414,7 +432,7 @@ bool passes_prefix_filter(
                                 if (word.size() > 4)
                                 {
                                     // if 5+ letter word does not fifth with l4 then fail
-                                    if (word[4] != l4[0])
+                                    if (!has_responsibility(word[4], l4[0]))
                                         return false;
 
                                     if (l5 != "nil")
@@ -422,7 +440,7 @@ bool passes_prefix_filter(
                                         if (word.size() > 5)
                                         {
                                             // if 6+ letter word does not sixth with l5 then fail
-                                            if (word[5] != l5[0])
+                                            if (!has_responsibility(word[5], l5[0]))
                                                 return false;
                                         }
                                         else
@@ -496,12 +514,6 @@ bool passes_prefix_filter(
 bool passes_status_filter(word_status::Flags const & status)
 {
     if (status.is_set(word_status::not_printable_ascii::grab()))
-        return false;
-
-    if (status.is_set(word_status::has_spaces::grab()))
-        return false;
-
-    if (status.is_set(word_status::has_hyphens::grab()))
         return false;
 
     if (status.is_set(word_status::has_other_symbols::grab()))

@@ -385,14 +385,23 @@ namespace matchmaker
             goto lookup_failed;
 
         if ((int) word.size() <= depth)
-            return lookup_snth_a(word, found);
+            return lookup_snth_A(word, found);
 
-        if (word[depth] < 'A' || (word[depth] > 'Z' && word[depth] < 'a') || word[depth] > 'z')
+        if ((word[depth] < 'A' || (word[depth] > 'Z' && word[depth] < 'a') || word[depth] > 'z') &&
+                word[depth] != ' ' && word[depth] != '-')
             goto lookup_failed;
 
         {
             int i = word[depth];
-            if (word[depth] > 'Z')
+            if (word[depth] == ' ')
+            {
+                i = 0;
+            }
+            else if (word[depth] == '-')
+            {
+                i = 51;
+            }
+            else if (word[depth] > 'Z')
             {
                 i -= 'a';
                 i += 26;
