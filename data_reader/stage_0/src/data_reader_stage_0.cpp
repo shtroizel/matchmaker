@@ -266,6 +266,18 @@ int main(int argc, char ** argv)
     }
 
     {
+        std::string const FN_3201_COMPOUND{DATA_DIR + "/3201/files/COMPOUND.TXT"};
+        FILE * compound_file = fopen(FN_3201_COMPOUND.c_str(), "r");
+        if (compound_file == 0)
+        {
+            perror(FN_3201_COMPOUND.c_str());
+            exit(1);
+        }
+        read_3201_single(compound_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        fclose(compound_file);
+    }
+
+    {
         std::string const FN_3203_MOBYPOS{DATA_DIR + "/3203/files/mobypos.txt"};
         FILE * mobypos_file = fopen(FN_3203_MOBYPOS.c_str(), "r");
         if (mobypos_file == 0)
