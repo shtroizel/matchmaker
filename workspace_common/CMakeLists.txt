@@ -203,6 +203,8 @@ foreach(l0 ${l0_A_z_letters})
             foreach(l2 ${A_z_letters})
                 if(
                     (l0 STREQUAL "p" AND l1 STREQUAL "r" AND l2 STREQUAL "e") OR
+                    (l0 STREQUAL "q" AND l1 STREQUAL "u" AND l2 STREQUAL "a") OR
+                    (l0 STREQUAL "q" AND l1 STREQUAL "u" AND l2 STREQUAL "i") OR
                     (l0 STREQUAL "d" AND l1 STREQUAL "i" AND l2 STREQUAL "s") OR
                     (l0 STREQUAL "c" AND l1 STREQUAL "o" AND l2 STREQUAL "n") OR
                     (l0 STREQUAL "n" AND l1 STREQUAL "o" AND l2 STREQUAL "n") OR

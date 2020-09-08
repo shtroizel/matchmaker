@@ -214,6 +214,8 @@ def prepare_letters(workspace_root, q, parents_only):
                     print(letter_x3_cpp)
 
                     if (l0 == 'p' and l1 == 'r' and l2 == 'e') or                                          \
+                            (l0 == 'q' and l1 == 'u' and l2 == 'a') or                                     \
+                            (l0 == 'q' and l1 == 'u' and l2 == 'i') or                                     \
                             (l0 == 'd' and l1 == 'i' and l2 == 's') or                                     \
                             (l0 == 'c' and l1 == 'o' and l2 == 'n') or                                     \
                             (l0 == 'n' and l1 == 'o' and l2 == 'n') or                                     \
