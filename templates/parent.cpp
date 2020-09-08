@@ -388,18 +388,14 @@ namespace matchmaker
             return lookup_snth_A(word, found);
 
         if ((word[depth] < 'A' || (word[depth] > 'Z' && word[depth] < 'a') || word[depth] > 'z') &&
-                word[depth] != ' ' && word[depth] != '-')
+                word[depth] != ' ' && word[depth] != '-' && word[depth] != '/' && word[depth] != '\'')
             goto lookup_failed;
 
         {
             int i = word[depth];
-            if (word[depth] == ' ')
+            if (word[depth] == ' ' || word[depth] == '-' || word[depth] == '/' || word[depth] == '\'')
             {
                 i = 0;
-            }
-            else if (word[depth] == '-')
-            {
-                i = 51;
             }
             else if (word[depth] > 'Z')
             {

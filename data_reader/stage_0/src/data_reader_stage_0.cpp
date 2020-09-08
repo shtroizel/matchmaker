@@ -46,6 +46,8 @@ MATCHABLE(
     not_printable_ascii,
     has_spaces,
     has_hyphens,
+    has_slashes,
+    has_apostrophes,
     has_other_symbols
 )
 
@@ -375,7 +377,16 @@ bool has_responsibility(char letter, char prefix_element)
     if (letter == ' ' && prefix_element == 'A')
         return true;
 
-    if (letter == '-' && prefix_element == 'z')
+    if (letter == '-' && prefix_element == 'A')
+        return true;
+
+    if (letter == '/' && prefix_element == 'A')
+        return true;
+
+    if (letter == '\'' && prefix_element == 'A')
+        return true;
+
+    if (letter == '.' && prefix_element == 'A')
         return true;
 
     if (letter == prefix_element)
@@ -400,7 +411,7 @@ bool passes_prefix_filter(
         return false;
 
     // if word does not start with l0 then fail
-    if (word[0] != l0[0])
+    if (!has_responsibility(word[0], l0[0]))
         return false;
 
     if (l1 != "nil")
@@ -758,6 +769,12 @@ void update_word_status(word_status::Flags & flags, int & ch)
             flags.set(word_status::has_spaces::grab());
         else if (ch == '-')
             flags.set(word_status::has_hyphens::grab());
+        else if (ch == '/')
+            flags.set(word_status::has_slashes::grab());
+        else if (ch == '\'')
+            flags.set(word_status::has_apostrophes::grab());
+        else if (ch == '.')
+            flags.set(word_status::has_periods::grab());
         else
             flags.set(word_status::has_other_symbols::grab());
     }
