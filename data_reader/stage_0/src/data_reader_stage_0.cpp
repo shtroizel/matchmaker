@@ -275,6 +275,102 @@ int main(int argc, char ** argv)
     }
 
     {
+        std::string const FN_3201_COMMON{DATA_DIR + "/3201/files/COMMON.TXT"};
+        FILE * common_file = fopen(FN_3201_COMMON.c_str(), "r");
+        if (common_file == 0)
+        {
+            perror(FN_3201_COMMON.c_str());
+            exit(1);
+        }
+        read_3201_default(common_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        fclose(common_file);
+    }
+
+    {
+        std::string const FN_3201_NAMES{DATA_DIR + "/3201/files/NAMES.TXT"};
+        FILE * names_file = fopen(FN_3201_NAMES.c_str(), "r");
+        if (names_file == 0)
+        {
+            perror(FN_3201_NAMES.c_str());
+            exit(1);
+        }
+        read_3201_default(names_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        fclose(names_file);
+    }
+
+    {
+        std::string const FN_3201_NAMES_F{DATA_DIR + "/3201/files/NAMES-F.TXT"};
+        FILE * names_f_file = fopen(FN_3201_NAMES_F.c_str(), "r");
+        if (names_f_file == 0)
+        {
+            perror(FN_3201_NAMES_F.c_str());
+            exit(1);
+        }
+        read_3201_default(names_f_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        fclose(names_f_file);
+    }
+
+    {
+        std::string const FN_3201_NAMES_M{DATA_DIR + "/3201/files/NAMES-M.TXT"};
+        FILE * names_m_file = fopen(FN_3201_NAMES_M.c_str(), "r");
+        if (names_m_file == 0)
+        {
+            perror(FN_3201_NAMES_M.c_str());
+            exit(1);
+        }
+        read_3201_default(names_m_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        fclose(names_m_file);
+    }
+
+    {
+        std::string const FN_3201_PLACES{DATA_DIR + "/3201/files/PLACES.TXT"};
+        FILE * places_file = fopen(FN_3201_PLACES.c_str(), "r");
+        if (places_file == 0)
+        {
+            perror(FN_3201_PLACES.c_str());
+            exit(1);
+        }
+        read_3201_default(places_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        fclose(places_file);
+    }
+
+    {
+        std::string const FN_3201_CROSSWD{DATA_DIR + "/3201/files/CROSSWD.TXT"};
+        FILE * crosswd_file = fopen(FN_3201_CROSSWD.c_str(), "r");
+        if (crosswd_file == 0)
+        {
+            perror(FN_3201_CROSSWD.c_str());
+            exit(1);
+        }
+        read_3201_default(crosswd_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        fclose(crosswd_file);
+    }
+
+    {
+        std::string const FN_3201_CRSWD_D{DATA_DIR + "/3201/files/CRSWD-D.TXT"};
+        FILE * crswd_d_file = fopen(FN_3201_CRSWD_D.c_str(), "r");
+        if (crswd_d_file == 0)
+        {
+            perror(FN_3201_CRSWD_D.c_str());
+            exit(1);
+        }
+        read_3201_default(crswd_d_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        fclose(crswd_d_file);
+    }
+
+    {
+        std::string const FN_3201_ACRONYMS{DATA_DIR + "/3201/files/ACRONYMS.TXT"};
+        FILE * acronyms_file = fopen(FN_3201_ACRONYMS.c_str(), "r");
+        if (acronyms_file == 0)
+        {
+            perror(FN_3201_ACRONYMS.c_str());
+            exit(1);
+        }
+        read_3201_default(acronyms_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        fclose(acronyms_file);
+    }
+
+    {
         std::string const FN_3203_MOBYPOS{DATA_DIR + "/3203/files/mobypos.txt"};
         FILE * mobypos_file = fopen(FN_3203_MOBYPOS.c_str(), "r");
         if (mobypos_file == 0)
