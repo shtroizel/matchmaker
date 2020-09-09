@@ -434,8 +434,7 @@ namespace matchmaker
         if (word.size() == 0)
             goto lookup_failed;
 
-        if ((word[0] < 'A' || (word[0] > 'Z' && word[0] < 'a') || word[0] > 'z') &&
-                word[0] != ' ' && word[0] != '-' && word[0] != '/' && word[0] != '\'')
+        if (word[0] < 32 || word[0] > 126)
             goto lookup_failed;
 
 #ifdef Q_ONLY
@@ -445,18 +444,26 @@ namespace matchmaker
 
         {
             int i = word[0];
-            if (word[0] == ' ' || word[0] == '-' || word[0] == '/' || word[0] == '\'')
+            if (word[0] < 'A')
             {
                 i = 0;
             }
-            else if (word[0] > 'Z')
+            else if (word[0] <= 'Z')
+            {
+                i -= 'A';
+            }
+            else if (word[0] < 'a')
+            {
+                i = 0;
+            }
+            else if (word[0] <= 'z')
             {
                 i -= 'a';
                 i += 26;
             }
             else
             {
-                i -= 'A';
+                i = 0;
             }
 
             if (i < 0 || i > 51)

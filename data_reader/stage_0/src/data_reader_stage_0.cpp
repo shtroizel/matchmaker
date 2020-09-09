@@ -43,12 +43,9 @@ int const MAX_WORD_LENGTH{44};
 
 MATCHABLE(
     word_status,
-    not_printable_ascii,
-    has_spaces,
-    has_hyphens,
-    has_slashes,
-    has_apostrophes,
-    has_other_symbols
+    invisible_ascii,
+    has_matchable_symbols,
+    has_unmatchable_symbols
 )
 
 
@@ -80,7 +77,7 @@ bool passes_filter(
     std::string const & l5
 );
 
-void read_3201_single(
+void read_3201_default(
     FILE * input_file,
     std::string const & l0,
     std::string const & l1,
@@ -118,7 +115,7 @@ void read_51155(
 
 void update_word_status(word_status::Flags & flags, int & ch);
 
-bool read_3201_single_line(FILE * f, std::string & word, word_status::Flags & status);
+bool read_3201_default_line(FILE * f, std::string & word, word_status::Flags & status);
 
 bool read_3203_mobypos_line(
     FILE * f,
@@ -261,7 +258,7 @@ int main(int argc, char ** argv)
             perror(FN_3201_SINGLE.c_str());
             exit(1);
         }
-        read_3201_single(single_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        read_3201_default(single_file, l0, l1, l2, l3, l4, l5, prefix, mm);
         fclose(single_file);
     }
 
@@ -273,7 +270,7 @@ int main(int argc, char ** argv)
             perror(FN_3201_COMPOUND.c_str());
             exit(1);
         }
-        read_3201_single(compound_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        read_3201_default(compound_file, l0, l1, l2, l3, l4, l5, prefix, mm);
         fclose(compound_file);
     }
 
@@ -386,23 +383,17 @@ void print_usage()
 
 bool has_responsibility(char letter, char prefix_element)
 {
-    if (letter == ' ' && prefix_element == 'A')
-        return true;
-
-    if (letter == '-' && prefix_element == 'A')
-        return true;
-
-    if (letter == '/' && prefix_element == 'A')
-        return true;
-
-    if (letter == '\'' && prefix_element == 'A')
-        return true;
-
-    if (letter == '.' && prefix_element == 'A')
-        return true;
-
     if (letter == prefix_element)
         return true;
+
+    // support symbols supported by MATCHABLE
+    // store them all under the left most leaf
+    if (prefix_element == 'A')
+    {
+        for (auto const & [code, symbol] : matchable::escapable::code_symbol_pairs())
+            if (symbol.length() > 0 && symbol[0] == letter)
+                return true;
+    }
 
     return false;
 }
@@ -536,10 +527,10 @@ bool passes_prefix_filter(
 
 bool passes_status_filter(word_status::Flags const & status)
 {
-    if (status.is_set(word_status::not_printable_ascii::grab()))
+    if (status.is_set(word_status::invisible_ascii::grab()))
         return false;
 
-    if (status.is_set(word_status::has_other_symbols::grab()))
+    if (status.is_set(word_status::has_unmatchable_symbols::grab()))
         return false;
 
     return true;
@@ -573,7 +564,7 @@ bool passes_filter(
 }
 
 
-void read_3201_single(
+void read_3201_default(
     FILE * input_file,
     std::string const & l0,
     std::string const & l1,
@@ -590,7 +581,7 @@ void read_3201_single(
 
     while (true)
     {
-        if (!read_3201_single_line(input_file, word, status))
+        if (!read_3201_default_line(input_file, word, status))
             break;
 
         if (word.size() == 0)
@@ -730,7 +721,8 @@ void read_51155(
                     if (ch == EOF)
                         return;
 
-                    if (ch == ' ' || ch == '.' || ch == ',' || ch == 10 || ch == 13)
+                    if (ch == '{' || ch == '}' || ch == '[' || ch == ']' || ch == '_' || ch == ' ' ||
+                            ch == '.' || ch == ',' || ch == 10 || ch == 13)
                         break;
 
                     if (ch >= 'A' && ch <= 'Z')
@@ -772,29 +764,30 @@ void update_word_status(word_status::Flags & flags, int & ch)
 {
     if (ch < 32 || ch > 126)
     {
-        flags.set(word_status::not_printable_ascii::grab());
+        flags.set(word_status::invisible_ascii::grab());
         ch = '?';
     }
     else if (ch < 'A' || (ch > 'Z' && ch < 'a') || ch > 'z')
     {
-        if (ch == ' ')
-            flags.set(word_status::has_spaces::grab());
-        else if (ch == '-')
-            flags.set(word_status::has_hyphens::grab());
-        else if (ch == '/')
-            flags.set(word_status::has_slashes::grab());
-        else if (ch == '\'')
-            flags.set(word_status::has_apostrophes::grab());
-        else if (ch == '.')
-            flags.set(word_status::has_periods::grab());
+        bool found{false};
+        for (auto const & [code, symbol] : matchable::escapable::code_symbol_pairs())
+        {
+            if (symbol.length() > 0 && symbol[0] == ch)
+            {
+                found = true;
+                break;
+            }
+        }
+        if (found)
+            flags.set(word_status::has_matchable_symbols::grab());
         else
-            flags.set(word_status::has_other_symbols::grab());
+            flags.set(word_status::has_unmatchable_symbols::grab());
     }
 }
 
 
 
-bool read_3201_single_line(
+bool read_3201_default_line(
     FILE * f,
     std::string & word,
     word_status::Flags & status
@@ -874,7 +867,7 @@ bool read_3203_mobypos_line(
             break;
 
         if (ch < 32 || ch > 126)
-            status.set(word_status::not_printable_ascii::grab());
+            status.set(word_status::invisible_ascii::grab());
 
         if (ch == (int) '!')
             ch = (int) 'n';

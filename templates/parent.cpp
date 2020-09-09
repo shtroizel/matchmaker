@@ -387,24 +387,31 @@ namespace matchmaker
         if ((int) word.size() <= depth)
             return lookup_snth_A(word, found);
 
-        if ((word[depth] < 'A' || (word[depth] > 'Z' && word[depth] < 'a') || word[depth] > 'z') &&
-                word[depth] != ' ' && word[depth] != '-' && word[depth] != '/' && word[depth] != '\'')
+        if (word[depth] < 32 || word[depth] > 126)
             goto lookup_failed;
 
         {
             int i = word[depth];
-            if (word[depth] == ' ' || word[depth] == '-' || word[depth] == '/' || word[depth] == '\'')
+            if (word[depth] < 'A')
             {
                 i = 0;
             }
-            else if (word[depth] > 'Z')
+            else if (word[depth] <= 'Z')
+            {
+                i -= 'A';
+            }
+            else if (word[depth] < 'a')
+            {
+                i = 0;
+            }
+            else if (word[depth] <= 'z')
             {
                 i -= 'a';
                 i += 26;
             }
-            else
+            else // word[depth] < 127
             {
-                i -= 'A';
+                i = 0;
             }
 
             if (i < 0 || i > 51)
