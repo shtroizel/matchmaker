@@ -382,17 +382,20 @@ int main(int argc, char ** argv)
         fclose(mobypos_file);
     }
 
-    {
-        std::string const FN_51155{DATA_DIR + "/51155/51155-0.txt"};
-        FILE * f = fopen(FN_51155.c_str(), "r");
-        if (f == 0)
-        {
-            perror(FN_51155.c_str());
-            exit(1);
-        }
-        read_51155(f, l0, l1, l2, l3, l4, l5, prefix, mm);
-        fclose(f);
-    }
+    // parsing 51155 broken since supporting all matchable symbols
+    // this file contains a lot of garbage so its parser is currently confused
+    // TODO FIXME BROKEN
+//     {
+//         std::string const FN_51155{DATA_DIR + "/51155/51155-0.txt"};
+//         FILE * f = fopen(FN_51155.c_str(), "r");
+//         if (f == 0)
+//         {
+//             perror(FN_51155.c_str());
+//             exit(1);
+//         }
+//         read_51155(f, l0, l1, l2, l3, l4, l5, prefix, mm);
+//         fclose(f);
+//     }
 
 
     // remove leading underscore
