@@ -26,7 +26,7 @@ if(NOT MATCHMAKER_ROOT)
 endif()
 
 add_definitions(-DMATCHABLE_OMIT_BY_INDEX)
-find_package(matchable 10.2.0 REQUIRED)
+find_package(matchable 10.2.1 REQUIRED)
 include_directories(${matchable_DIR}/../../../include)
 
 set(lib_list)
