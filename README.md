@@ -28,7 +28,8 @@ namespace matchmaker
      *     ignored when nullptr
      * @returns
      *     the alphabetic index of the given word if it exists,
-     *     or the index that the given word would have if it did exist
+     *     or the index that the given word would have if it did exist.
+     *     note that this could be size() if *found == false
      */
     int lookup(std::string const & word, bool * found);
 

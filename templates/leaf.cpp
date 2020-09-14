@@ -82,12 +82,7 @@ namespace matchmaker
 
     int lookup_snth(std::string const & word, bool * found)
     {
-        word_snth::Type w{word_snth::lookup(word, found)};
-
-        if (nullptr != found)
-            *found = w.as_string() == word;
-
-        return w.as_by_string_index();
+        return word_snth::variants_by_string_index_of(word, found);
     }
 
 
