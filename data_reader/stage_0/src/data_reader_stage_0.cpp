@@ -45,7 +45,8 @@ MATCHABLE(
     word_status,
     invisible_ascii,
     has_matchable_symbols,
-    has_unmatchable_symbols
+    has_unmatchable_symbols,
+    has_spaces
 )
 
 
@@ -127,11 +128,13 @@ bool read_3203_mobypos_line(
 void add_word(
     std::string const & word,
     std::string const & prefix,
+    word_status::Flags const & wsf,
     matchable::MatchableMaker & mm
 );
 void add_word(
     std::string const & word,
     std::string const & prefix,
+    word_status::Flags const & wsf,
     parts_of_speech::Flags const & pos_flags,
     matchable::MatchableMaker & mm
 );
@@ -249,6 +252,7 @@ int main(int argc, char ** argv)
     mm.grab("word" + prefix)->add_property("int", "syn");
     mm.grab("word" + prefix)->add_property("int", "ant");
     mm.grab("word" + prefix)->add_property("int", "by_longest_index");
+    mm.grab("word" + prefix)->add_property("int8_t", "contains_spaces");
 
     {
         std::string const FN_3201_SINGLE{DATA_DIR + "/3201/files/SINGLE.TXT"};
@@ -689,7 +693,7 @@ void read_3201_default(
         if (!passes_filter(word, status, l0, l1, l2, l3, l4, l5))
             continue;
 
-        add_word(word, prefix, mm);
+        add_word(word, prefix, status, mm);
     }
 }
 
@@ -722,7 +726,7 @@ void read_3203_mobypos(
         if (!passes_filter(word, status, l0, l1, l2, l3, l4, l5))
             continue;
 
-        add_word(word, prefix, pos_flags, mm);
+        add_word(word, prefix, status, pos_flags, mm);
     }
 }
 
@@ -832,7 +836,7 @@ void read_51155(
                 }
 
                 if (passes_filter(word, status, l0, l1, l2, l3, l4, l5))
-                    add_word(word, prefix, mm);
+                    add_word(word, prefix, status, mm);
             }
         }
 
@@ -866,21 +870,27 @@ void update_word_status(word_status::Flags & flags, int & ch)
         flags.set(word_status::invisible_ascii::grab());
         ch = '?';
     }
-    else if (ch < 'A' || (ch > 'Z' && ch < 'a') || ch > 'z')
+    else
     {
-        bool found{false};
-        for (auto const & [code, symbol] : matchable::escapable::code_symbol_pairs())
+        if (ch < 'A' || (ch > 'Z' && ch < 'a') || ch > 'z')
         {
-            if (symbol.length() > 0 && symbol[0] == ch)
+            bool found{false};
+            for (auto const & [code, symbol] : matchable::escapable::code_symbol_pairs())
             {
-                found = true;
-                break;
+                if (symbol.length() > 0 && symbol[0] == ch)
+                {
+                    found = true;
+                    break;
+                }
             }
+            if (found)
+                flags.set(word_status::has_matchable_symbols::grab());
+            else
+                flags.set(word_status::has_unmatchable_symbols::grab());
         }
-        if (found)
-            flags.set(word_status::has_matchable_symbols::grab());
-        else
-            flags.set(word_status::has_unmatchable_symbols::grab());
+
+        if (ch == ' ')
+            flags.set(word_status::has_spaces::grab());
     }
 }
 
@@ -985,11 +995,12 @@ bool read_3203_mobypos_line(
 void add_word(
     std::string const & word,
     std::string const & prefix,
+    word_status::Flags const & wsf,
     matchable::MatchableMaker & mm
 )
 {
     static parts_of_speech::Flags const empty_pos_flags;
-    add_word(word, prefix, empty_pos_flags, mm);
+    add_word(word, prefix, wsf, empty_pos_flags, mm);
 }
 
 
@@ -997,6 +1008,7 @@ void add_word(
 void add_word(
     std::string const & word,
     std::string const & prefix,
+    word_status::Flags const & wsf,
     parts_of_speech::Flags const & pos_flags,
     matchable::MatchableMaker & mm
 )
@@ -1012,4 +1024,9 @@ void add_word(
             property_values.push_back("0");
     }
     mm.grab("word" + prefix)->set_propertyvect(escaped, "pos", property_values);
+
+    if (wsf.is_set(word_status::has_spaces::grab()))
+        mm.grab("word" + prefix)->set_property(escaped, "has_spaces", "1");
+    else
+        mm.grab("word" + prefix)->set_property(escaped, "has_spaces", "0");
 }
