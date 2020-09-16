@@ -102,18 +102,6 @@ void read_3203_mobypos(
     matchable::MatchableMaker & mm
 );
 
-void read_51155(
-    FILE * input_file,
-    std::string const & l0,
-    std::string const & l1,
-    std::string const & l2,
-    std::string const & l3,
-    std::string const & l4,
-    std::string const & l5,
-    std::string const & prefix,
-    matchable::MatchableMaker & mm
-);
-
 void update_word_status(word_status::Flags & flags, int & ch);
 
 bool read_3201_default_line(FILE * f, std::string & word, word_status::Flags & status);
@@ -385,21 +373,6 @@ int main(int argc, char ** argv)
         read_3203_mobypos(mobypos_file, l0, l1, l2, l3, l4, l5, prefix, mm);
         fclose(mobypos_file);
     }
-
-    // parsing 51155 broken since supporting all matchable symbols
-    // this file contains a lot of garbage so its parser is currently confused
-    // TODO FIXME BROKEN
-//     {
-//         std::string const FN_51155{DATA_DIR + "/51155/51155-0.txt"};
-//         FILE * f = fopen(FN_51155.c_str(), "r");
-//         if (f == 0)
-//         {
-//             perror(FN_51155.c_str());
-//             exit(1);
-//         }
-//         read_51155(f, l0, l1, l2, l3, l4, l5, prefix, mm);
-//         fclose(f);
-//     }
 
 
     // remove leading underscore
@@ -727,137 +700,6 @@ void read_3203_mobypos(
             continue;
 
         add_word(word, prefix, status, pos_flags, mm);
-    }
-}
-
-
-
-void read_51155(
-    FILE * input_file,
-    std::string const & l0,
-    std::string const & l1,
-    std::string const & l2,
-    std::string const & l3,
-    std::string const & l4,
-    std::string const & l5,
-    std::string const & prefix,
-    matchable::MatchableMaker & mm
-)
-{
-    std::string word;
-    word_status::Flags status;
-    bool ok{false};
-    int ch{0};
-
-    while (true)
-    {
-        ok = false;
-
-        ch = fgetc(input_file);
-        if (ch == 'K')
-        {
-            ch = fgetc(input_file);
-            if (ch == 'E')
-            {
-                ch = fgetc(input_file);
-                if (ch == 'Y')
-                {
-                    ch = fgetc(input_file);
-                    if (ch == ':')
-                    {
-                        ch = fgetc(input_file);
-                        if (ch == ' ')
-                            ok = true;
-                    }
-                }
-            }
-        }
-        else if (ch == 'S')
-        {
-            ch = fgetc(input_file);
-            if (ch == 'Y')
-            {
-                ch = fgetc(input_file);
-                if (ch == 'N')
-                {
-                    ch = fgetc(input_file);
-                    if (ch == ':')
-                    {
-                        ch = fgetc(input_file);
-                        if (ch == ' ')
-                            ok = true;
-                    }
-                }
-            }
-        }
-        else if (ch == 'A')
-        {
-            ch = fgetc(input_file);
-            if (ch == 'N')
-            {
-                ch = fgetc(input_file);
-                if (ch == 'T')
-                {
-                    ch = fgetc(input_file);
-                    if (ch == ':')
-                    {
-                        ch = fgetc(input_file);
-                        if (ch == ' ')
-                            ok = true;
-                    }
-                }
-            }
-        }
-
-        if (ok)
-        {
-            while (ch != '.')
-            {
-                word.clear();
-                status.clear();
-
-                // read word
-                while (true)
-                {
-                    ch = fgetc(input_file);
-
-                    if (ch == EOF)
-                        return;
-
-                    if (ch == '{' || ch == '}' || ch == '[' || ch == ']' || ch == '_' || ch == ' ' ||
-                            ch == '.' || ch == ',' || ch == 10 || ch == 13)
-                        break;
-
-                    if (ch >= 'A' && ch <= 'Z')
-                        ch += 32;
-
-                    update_word_status(status, ch);
-                    word += (char) ch;
-                }
-
-                if (passes_filter(word, status, l0, l1, l2, l3, l4, l5))
-                    add_word(word, prefix, status, mm);
-            }
-        }
-
-        // skip to end of line
-        while (ch != 10 && ch != 13)
-        {
-            ch = fgetc(input_file);
-            if (ch == EOF)
-                return;
-        }
-
-        // skip to beginning of next line
-        while (ch == 10 || ch == 13)
-        {
-            ch = fgetc(input_file);
-            if (ch == EOF)
-                return;
-
-            if (ch != 10 && ch != 13)
-                ungetc(ch, input_file);
-        }
     }
 }
 
