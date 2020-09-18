@@ -90,6 +90,18 @@ void read_3201_default(
     matchable::MatchableMaker & mm
 );
 
+void read_3202(
+    FILE * input_file,
+    std::string const & l0,
+    std::string const & l1,
+    std::string const & l2,
+    std::string const & l3,
+    std::string const & l4,
+    std::string const & l5,
+    std::string const & prefix,
+    matchable::MatchableMaker & mm
+);
+
 void read_3203_mobypos(
     FILE * input_file,
     std::string const & l0,
@@ -360,6 +372,18 @@ int main(int argc, char ** argv)
         }
         read_3201_default(acronyms_file, l0, l1, l2, l3, l4, l5, prefix, mm);
         fclose(acronyms_file);
+    }
+
+    {
+        std::string const FN_3202{DATA_DIR + "/3202/files/mthesaur.txt"};
+        FILE * input_file = fopen(FN_3202.c_str(), "r");
+        if (input_file == 0)
+        {
+            perror(FN_3202.c_str());
+            exit(1);
+        }
+        read_3202(input_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        fclose(input_file);
     }
 
     {
@@ -667,6 +691,45 @@ void read_3201_default(
             continue;
 
         add_word(word, prefix, status, mm);
+    }
+}
+
+
+
+void read_3202(
+    FILE * input_file,
+    std::string const & l0,
+    std::string const & l1,
+    std::string const & l2,
+    std::string const & l3,
+    std::string const & l4,
+    std::string const & l5,
+    std::string const & prefix,
+    matchable::MatchableMaker & mm
+)
+{
+    std::string word;
+    parts_of_speech::Flags pos_flags;
+    word_status::Flags status;
+
+    int ch = 0;
+    while (true)
+    {
+        word.clear();
+        while (true)
+        {
+            ch = fgetc(input_file);
+            if (ch == EOF || ch == 10 || ch == 13 || ch == ',')
+                break;
+
+            word += (char) ch;
+        }
+
+        if (passes_filter(word, status, l0, l1, l2, l3, l4, l5) && word.size() > 0)
+            add_word(word, prefix, status, pos_flags, mm);
+
+        if (ch == EOF)
+            break;
     }
 }
 
