@@ -52,7 +52,7 @@ MATCHABLE(
 )
 
 
-struct entry_51155
+struct syn_ant
 {
     std::vector<std::string> syn;
     std::vector<std::string> ant;
@@ -92,14 +92,19 @@ void print_usage();
 
 void read_51155(
     FILE * input_file,
-    std::map<std::string, entry_51155> & contents_51155
+    std::map<std::string, syn_ant> & contents_syn_ant
+);
+
+void read_3202(
+    FILE * input_file,
+    std::map<std::string, syn_ant> & contents_syn_ant
 );
 
 void update_word_status(word_status::Flags & flags, int & ch);
 
 bool patch_matchable_header(
     std::vector<HeaderEntry> const & matchable_headers,
-    std::map<std::string, entry_51155> const & contents_51155,
+    std::map<std::string, syn_ant> const & contents_syn_ant,
     std::vector<int> const & by_longest,
     std::map<int, std::pair<int, int>> const & longest_offsets
 );
@@ -127,7 +132,7 @@ int main(int argc, char ** argv)
         STAGE_1_WORKSPACE_DIR + "/generated_include/matchmaker/generated_matchables"
     };
 
-    std::map<std::string, entry_51155> contents_51155;
+    std::map<std::string, syn_ant> contents_syn_ant;
 
     std::cout << "******* stage 1 data reader *******\n" << std::endl;
 
@@ -141,7 +146,22 @@ int main(int argc, char ** argv)
             perror(FN_51155.c_str());
             return 1;
         }
-        read_51155(f, contents_51155);
+        read_51155(f, contents_syn_ant);
+        fclose(f);
+    }
+    std::cout << "done" << std::endl;
+
+    // process 3202
+    std::cout << "       ------> reading 3202 ...............: " << std::flush;
+    {
+        std::string const FN_3202{DATA_DIR + "/3202/files/mthesaur.txt"};
+        FILE * f = fopen(FN_3202.c_str(), "r");
+        if (f == 0)
+        {
+            perror(FN_3202.c_str());
+            return 1;
+        }
+        read_3202(f, contents_syn_ant);
         fclose(f);
     }
     std::cout << "done" << std::endl;
@@ -302,7 +322,7 @@ end:
             threads.emplace_back(
                 std::thread(
                     [&](){
-                        if (all_ok && !patch_matchable_header(deal, contents_51155, by_longest, offsets))
+                        if (all_ok && !patch_matchable_header(deal, contents_syn_ant, by_longest, offsets))
                             all_ok = false;
                     }
                 )
@@ -329,7 +349,7 @@ void print_usage()
 }
 
 
-void read_51155(FILE * input_file, std::map<std::string, entry_51155> & contents_51155)
+void read_51155(FILE * input_file, std::map<std::string, syn_ant> & contents_syn_ant)
 {
     std::string word;
     std::string cur_key{"-1"};
@@ -461,10 +481,10 @@ void read_51155(FILE * input_file, std::map<std::string, entry_51155> & contents
                         continue;
 
                     if (syn)
-                        contents_51155[cur_key].syn.push_back(word);
+                        contents_syn_ant[cur_key].syn.push_back(word);
 
                     if (ant)
-                        contents_51155[cur_key].ant.push_back(word);
+                        contents_syn_ant[cur_key].ant.push_back(word);
                 }
             }
         }
@@ -477,18 +497,74 @@ void read_51155(FILE * input_file, std::map<std::string, entry_51155> & contents
                 return;
         }
 
-        ungetc(ch, input_file);
-
         // skip to beginning of next line
-        while (ch == 10 || ch == 13)
+        do
+        {
+            ch = fgetc(input_file);
+            if (ch == EOF)
+                return;
+        }
+        while (ch == 10 || ch == 13);
+        ungetc(ch, input_file);
+    }
+}
+
+
+
+void read_3202(
+    FILE * input_file,
+    std::map<std::string, syn_ant> & contents_syn_ant
+)
+{
+    std::string syn;
+    std::string key;
+
+    int ch = 0;
+    while (true)
+    {
+        // read key (up to first ',')
+        key.clear();
+        while (true)
         {
             ch = fgetc(input_file);
             if (ch == EOF)
                 return;
 
-            if (ch != 10 && ch != 13)
-                ungetc(ch, input_file);
+            if (ch == ',')
+                break;
+
+            key += (char) ch;
         }
+
+        // read each comma separated synonym
+        do
+        {
+            // read next synonym
+            syn.clear();
+            while (true)
+            {
+                ch = fgetc(input_file);
+                if (ch == EOF)
+                    return;
+
+                if (ch == ',' || ch == 10 || ch == 13)
+                    break;
+
+                syn += (char) ch;
+            }
+            contents_syn_ant[key].syn.push_back(syn);
+        }
+        while (ch == ',');
+
+        // skip to beginning of next line
+        do
+        {
+            ch = fgetc(input_file);
+            if (ch == EOF)
+                return;
+        }
+        while (ch == 10 || ch == 13);
+        ungetc(ch, input_file);
     }
 }
 
@@ -516,7 +592,7 @@ void update_word_status(word_status::Flags & flags, int & ch)
 
 bool patch_matchable_header(
     std::vector<HeaderEntry> const & matchable_headers,
-    std::map<std::string, entry_51155> const & contents_51155,
+    std::map<std::string, syn_ant> const & contents_syn_ant,
     std::vector<int> const & by_longest,
     std::map<int, std::pair<int, int>> const & longest_offsets
 )
@@ -534,7 +610,8 @@ bool patch_matchable_header(
 
         std::string existing_word;
         std::string prefix;
-        bool found{false};
+        bool word_in_dictionary{false};
+        bool variant_found{false};
         int index{-1};
 
         for (auto const & [str, m] : mm.matchables)
@@ -557,19 +634,20 @@ bool patch_matchable_header(
 
                     existing_word = matchable::escapable::unescape_all(v.variant_name);
 
-                    auto contents_51155_iter = contents_51155.find(existing_word);
-                    if (contents_51155_iter != contents_51155.end())
+                    // gather synonyms and antonynms
+                    auto contents_syn_ant_iter = contents_syn_ant.find(existing_word);
+                    if (contents_syn_ant_iter != contents_syn_ant.end())
                     {
-                        for (auto const & s : contents_51155_iter->second.syn)
+                        for (auto const & s : contents_syn_ant_iter->second.syn)
                         {
-                            index = matchmaker::lookup(s, &found);
-                            if (found)
+                            index = matchmaker::lookup(s, &word_in_dictionary);
+                            if (word_in_dictionary)
                                 syn_vect.push_back(std::to_string(index));
                         }
-                        for (auto const & a : contents_51155_iter->second.ant)
+                        for (auto const & a : contents_syn_ant_iter->second.ant)
                         {
-                            index = matchmaker::lookup(a, &found);
-                            if (found)
+                            index = matchmaker::lookup(a, &word_in_dictionary);
+                            if (word_in_dictionary)
                                 ant_vect.push_back(std::to_string(index));
                         }
                     }
@@ -601,7 +679,7 @@ bool patch_matchable_header(
                     }
                 }
 
-                found = true;
+                variant_found = true;
                 break;
             }
         }
@@ -612,7 +690,7 @@ bool patch_matchable_header(
         for (int i = prefix.size(); i < 11; ++i)
             std::cout << ".";
         std::cout << "........: " << std::flush;
-        if (!found)
+        if (!variant_found)
         {
             std::cout << "failed to find \"word\" matchable" << std::endl;
             return false;
