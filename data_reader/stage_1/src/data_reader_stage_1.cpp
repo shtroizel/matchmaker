@@ -457,12 +457,6 @@ void read_51155(FILE * input_file, std::map<std::string, entry_51155> & contents
                     if (status.is_set(word_status::not_printable_ascii::grab()))
                         continue;
 
-                    if (status.is_set(word_status::has_spaces::grab()))
-                        continue;
-
-                    if (status.is_set(word_status::has_hyphens::grab()))
-                        continue;
-
                     if (status.is_set(word_status::has_other_symbols::grab()))
                         continue;
 
