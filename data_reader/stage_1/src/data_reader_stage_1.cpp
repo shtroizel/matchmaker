@@ -483,10 +483,24 @@ void read_51155(FILE * input_file, syn_ant_table & contents_syn_ant)
                     if (status.is_set(word_status::has_other_symbols::grab()))
                         continue;
 
-                    if (syn)
+                    if (
+                        syn &&
+                        std::find(
+                            contents_syn_ant[cur_key].syn.begin(),
+                            contents_syn_ant[cur_key].syn.end(),
+                            word
+                        ) == contents_syn_ant[cur_key].syn.end()
+                    )
                         contents_syn_ant[cur_key].syn.push_back(word);
 
-                    if (ant)
+                    if (
+                        ant &&
+                        std::find(
+                            contents_syn_ant[cur_key].ant.begin(),
+                            contents_syn_ant[cur_key].ant.end(),
+                            word
+                        ) == contents_syn_ant[cur_key].ant.end()
+                    )
                         contents_syn_ant[cur_key].ant.push_back(word);
                 }
             }
@@ -555,6 +569,13 @@ void read_3202(
 
                 syn += (char) ch;
             }
+            if (
+                std::find(
+                    contents_syn_ant[key].syn.begin(),
+                    contents_syn_ant[key].syn.end(),
+                    syn
+                ) == contents_syn_ant[key].syn.end()
+            )
             contents_syn_ant[key].syn.push_back(syn);
         }
         while (ch == ',');
