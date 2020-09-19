@@ -105,6 +105,8 @@ void read_3202(
 
 void update_word_status(word_status::Flags & flags, int & ch);
 
+void infer_missing(syn_ant_table & contents_syn_ant);
+
 bool patch_matchable_header(
     std::vector<HeaderEntry> const & matchable_headers,
     syn_ant_table const & contents_syn_ant,
@@ -167,6 +169,11 @@ int main(int argc, char ** argv)
         read_3202(f, contents_syn_ant);
         fclose(f);
     }
+    std::cout << "done" << std::endl;
+
+    // infer missing data
+    std::cout << "       ------> inferring missing data .....: " << std::flush;
+    infer_missing(contents_syn_ant);
     std::cout << "done" << std::endl;
 
     std::cout << "       ------> calculating longest words...: " << std::flush;
@@ -612,6 +619,25 @@ void update_word_status(word_status::Flags & flags, int & ch)
     }
 }
 
+
+void infer_missing(syn_ant_table & contents_syn_ant)
+{
+    for (auto & [w, sa] : contents_syn_ant)
+    {
+        for (auto const & s : sa.syn)
+        {
+            auto & other_syn = contents_syn_ant[s].syn;
+            if (std::find(other_syn.begin(), other_syn.end(), w) == other_syn.end())
+                other_syn.push_back(w);
+        }
+        for (auto const & a : sa.ant)
+        {
+            auto & other_ant = contents_syn_ant[a].ant;
+            if (std::find(other_ant.begin(), other_ant.end(), w) == other_ant.end())
+                other_ant.push_back(w);
+        }
+    }
+}
 
 
 bool patch_matchable_header(
