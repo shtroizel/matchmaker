@@ -52,14 +52,14 @@ MATCHABLE(
 )
 
 
-struct syn_ant
+struct SynAnt
 {
     std::vector<std::string> syn;
     std::vector<std::string> ant;
 };
 
 
-using syn_ant_table = std::map<std::string, syn_ant>;
+using SynAntTable = std::map<std::string, SynAnt>;
 
 
 // used for longest words calculation (priority q)
@@ -95,21 +95,21 @@ void print_usage();
 
 void read_51155(
     FILE * input_file,
-    syn_ant_table & contents_syn_ant
+    SynAntTable & contents_SynAnt
 );
 
 void read_3202(
     FILE * input_file,
-    syn_ant_table & contents_syn_ant
+    SynAntTable & contents_SynAnt
 );
 
 void update_word_status(word_status::Flags & flags, int & ch);
 
-void infer_missing(syn_ant_table & contents_syn_ant);
+void infer_missing(SynAntTable & contents_SynAnt);
 
 bool patch_matchable_header(
     std::vector<HeaderEntry> const & matchable_headers,
-    syn_ant_table const & contents_syn_ant,
+    SynAntTable const & contents_SynAnt,
     std::vector<int> const & by_longest,
     std::map<int, std::pair<int, int>> const & longest_offsets
 );
@@ -137,7 +137,7 @@ int main(int argc, char ** argv)
         STAGE_1_WORKSPACE_DIR + "/generated_include/matchmaker/generated_matchables"
     };
 
-    syn_ant_table contents_syn_ant;
+    SynAntTable contents_SynAnt;
 
     std::cout << "******* stage 1 data reader *******\n" << std::endl;
 
@@ -151,7 +151,7 @@ int main(int argc, char ** argv)
             perror(FN_51155.c_str());
             return 1;
         }
-        read_51155(f, contents_syn_ant);
+        read_51155(f, contents_SynAnt);
         fclose(f);
     }
     std::cout << "done" << std::endl;
@@ -166,14 +166,14 @@ int main(int argc, char ** argv)
             perror(FN_3202.c_str());
             return 1;
         }
-        read_3202(f, contents_syn_ant);
+        read_3202(f, contents_SynAnt);
         fclose(f);
     }
     std::cout << "done" << std::endl;
 
     // infer missing data
     std::cout << "       ------> inferring missing data .....: " << std::flush;
-    infer_missing(contents_syn_ant);
+    infer_missing(contents_SynAnt);
     std::cout << "done" << std::endl;
 
     std::cout << "       ------> calculating longest words...: " << std::flush;
@@ -332,7 +332,7 @@ end:
             threads.emplace_back(
                 std::thread(
                     [&](){
-                        if (all_ok && !patch_matchable_header(deal, contents_syn_ant, by_longest, offsets))
+                        if (all_ok && !patch_matchable_header(deal, contents_SynAnt, by_longest, offsets))
                             all_ok = false;
                     }
                 )
@@ -359,7 +359,7 @@ void print_usage()
 }
 
 
-void read_51155(FILE * input_file, syn_ant_table & contents_syn_ant)
+void read_51155(FILE * input_file, SynAntTable & contents_SynAnt)
 {
     std::string word;
     std::string cur_key{"-1"};
@@ -493,22 +493,22 @@ void read_51155(FILE * input_file, syn_ant_table & contents_syn_ant)
                     if (
                         syn &&
                         std::find(
-                            contents_syn_ant[cur_key].syn.begin(),
-                            contents_syn_ant[cur_key].syn.end(),
+                            contents_SynAnt[cur_key].syn.begin(),
+                            contents_SynAnt[cur_key].syn.end(),
                             word
-                        ) == contents_syn_ant[cur_key].syn.end()
+                        ) == contents_SynAnt[cur_key].syn.end()
                     )
-                        contents_syn_ant[cur_key].syn.push_back(word);
+                        contents_SynAnt[cur_key].syn.push_back(word);
 
                     if (
                         ant &&
                         std::find(
-                            contents_syn_ant[cur_key].ant.begin(),
-                            contents_syn_ant[cur_key].ant.end(),
+                            contents_SynAnt[cur_key].ant.begin(),
+                            contents_SynAnt[cur_key].ant.end(),
                             word
-                        ) == contents_syn_ant[cur_key].ant.end()
+                        ) == contents_SynAnt[cur_key].ant.end()
                     )
-                        contents_syn_ant[cur_key].ant.push_back(word);
+                        contents_SynAnt[cur_key].ant.push_back(word);
                 }
             }
         }
@@ -537,7 +537,7 @@ void read_51155(FILE * input_file, syn_ant_table & contents_syn_ant)
 
 void read_3202(
     FILE * input_file,
-    syn_ant_table & contents_syn_ant
+    SynAntTable & contents_SynAnt
 )
 {
     std::string syn;
@@ -578,12 +578,12 @@ void read_3202(
             }
             if (
                 std::find(
-                    contents_syn_ant[key].syn.begin(),
-                    contents_syn_ant[key].syn.end(),
+                    contents_SynAnt[key].syn.begin(),
+                    contents_SynAnt[key].syn.end(),
                     syn
-                ) == contents_syn_ant[key].syn.end()
+                ) == contents_SynAnt[key].syn.end()
             )
-            contents_syn_ant[key].syn.push_back(syn);
+            contents_SynAnt[key].syn.push_back(syn);
         }
         while (ch == ',');
 
@@ -620,19 +620,19 @@ void update_word_status(word_status::Flags & flags, int & ch)
 }
 
 
-void infer_missing(syn_ant_table & contents_syn_ant)
+void infer_missing(SynAntTable & contents_SynAnt)
 {
-    for (auto & [w, sa] : contents_syn_ant)
+    for (auto & [w, sa] : contents_SynAnt)
     {
         for (auto const & s : sa.syn)
         {
-            auto & other_syn = contents_syn_ant[s].syn;
+            auto & other_syn = contents_SynAnt[s].syn;
             if (std::find(other_syn.begin(), other_syn.end(), w) == other_syn.end())
                 other_syn.push_back(w);
         }
         for (auto const & a : sa.ant)
         {
-            auto & other_ant = contents_syn_ant[a].ant;
+            auto & other_ant = contents_SynAnt[a].ant;
             if (std::find(other_ant.begin(), other_ant.end(), w) == other_ant.end())
                 other_ant.push_back(w);
         }
@@ -642,7 +642,7 @@ void infer_missing(syn_ant_table & contents_syn_ant)
 
 bool patch_matchable_header(
     std::vector<HeaderEntry> const & matchable_headers,
-    syn_ant_table const & contents_syn_ant,
+    SynAntTable const & contents_SynAnt,
     std::vector<int> const & by_longest,
     std::map<int, std::pair<int, int>> const & longest_offsets
 )
@@ -685,16 +685,16 @@ bool patch_matchable_header(
                     existing_word = matchable::escapable::unescape_all(v.variant_name);
 
                     // gather synonyms and antonynms
-                    auto contents_syn_ant_iter = contents_syn_ant.find(existing_word);
-                    if (contents_syn_ant_iter != contents_syn_ant.end())
+                    auto contents_SynAnt_iter = contents_SynAnt.find(existing_word);
+                    if (contents_SynAnt_iter != contents_SynAnt.end())
                     {
-                        for (auto const & s : contents_syn_ant_iter->second.syn)
+                        for (auto const & s : contents_SynAnt_iter->second.syn)
                         {
                             index = matchmaker::lookup(s, &word_in_dictionary);
                             if (word_in_dictionary)
                                 syn_vect.push_back(std::to_string(index));
                         }
-                        for (auto const & a : contents_syn_ant_iter->second.ant)
+                        for (auto const & a : contents_SynAnt_iter->second.ant)
                         {
                             index = matchmaker::lookup(a, &word_in_dictionary);
                             if (word_in_dictionary)
