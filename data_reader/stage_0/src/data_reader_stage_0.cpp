@@ -42,11 +42,16 @@ int const MAX_WORD_LENGTH{44};
 
 
 MATCHABLE(
-    word_status,
+    word_attribute,
     invisible_ascii,
-    has_matchable_symbols,
-    has_unmatchable_symbols,
-    has_spaces
+    matchable_symbols,
+    unmatchable_symbols,
+    name,
+    male_name,
+    female_name,
+    place,
+    compound,
+    acronym
 )
 
 
@@ -65,11 +70,11 @@ bool passes_prefix_filter(
     std::string const & l5  // sixth letter
 );
 
-bool passes_status_filter(word_status::Flags const & status);
+bool passes_status_filter(word_attribute::Flags const & status);
 
 bool passes_filter(
     std::string const & word,
-    word_status::Flags const & status,
+    word_attribute::Flags const & status,
     std::string const & l0,
     std::string const & l1,
     std::string const & l2,
@@ -87,6 +92,7 @@ void read_3201_default(
     std::string const & l4,
     std::string const & l5,
     std::string const & prefix,
+    word_attribute::Flags const & base_attributes,
     matchable::MatchableMaker & mm
 );
 
@@ -114,27 +120,27 @@ void read_3203_mobypos(
     matchable::MatchableMaker & mm
 );
 
-void update_word_status(word_status::Flags & flags, int & ch);
+void update_word_attribute(word_attribute::Flags & flags, int & ch);
 
-bool read_3201_default_line(FILE * f, std::string & word, word_status::Flags & status);
+bool read_3201_default_line(FILE * f, std::string & word, word_attribute::Flags & status);
 
 bool read_3203_mobypos_line(
     FILE * f,
     std::string & word,
-    word_status::Flags & status,
+    word_attribute::Flags & status,
     parts_of_speech::Flags & pos
 );
 
 void add_word(
     std::string const & word,
     std::string const & prefix,
-    word_status::Flags const & wsf,
+    word_attribute::Flags const & wsf,
     matchable::MatchableMaker & mm
 );
 void add_word(
     std::string const & word,
     std::string const & prefix,
-    word_status::Flags const & wsf,
+    word_attribute::Flags const & wsf,
     parts_of_speech::Flags const & pos_flags,
     matchable::MatchableMaker & mm
 );
@@ -252,7 +258,23 @@ int main(int argc, char ** argv)
     mm.grab("word" + prefix)->add_property("int", "syn");
     mm.grab("word" + prefix)->add_property("int", "ant");
     mm.grab("word" + prefix)->add_property("int", "by_longest_index");
-    mm.grab("word" + prefix)->add_property("int8_t", "has_spaces");
+
+    // "word_attribute" properties
+    {
+    auto add_att_prop =
+        [&](word_attribute::Type att)
+        {
+            std::string const prop_name = "is_" + att.as_string();
+            mm.grab("word" + prefix)->add_property("int8_t", prop_name);
+        };
+
+        add_att_prop(word_attribute::name::grab());
+        add_att_prop(word_attribute::male_name::grab());
+        add_att_prop(word_attribute::female_name::grab());
+        add_att_prop(word_attribute::place::grab());
+        add_att_prop(word_attribute::compound::grab());
+        add_att_prop(word_attribute::acronym::grab());
+    }
 
     {
         std::string const FN_3201_SINGLE{DATA_DIR + "/3201/files/SINGLE.TXT"};
@@ -262,7 +284,8 @@ int main(int argc, char ** argv)
             perror(FN_3201_SINGLE.c_str());
             exit(1);
         }
-        read_3201_default(single_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        word_attribute::Flags base_attributes;
+        read_3201_default(single_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
         fclose(single_file);
     }
 
@@ -274,7 +297,8 @@ int main(int argc, char ** argv)
             perror(FN_3201_COMPOUND.c_str());
             exit(1);
         }
-        read_3201_default(compound_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        word_attribute::Flags base_attributes{word_attribute::compound::grab()};
+        read_3201_default(compound_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
         fclose(compound_file);
     }
 
@@ -286,7 +310,8 @@ int main(int argc, char ** argv)
             perror(FN_3201_COMMON.c_str());
             exit(1);
         }
-        read_3201_default(common_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        word_attribute::Flags base_attributes;
+        read_3201_default(common_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
         fclose(common_file);
     }
 
@@ -298,7 +323,8 @@ int main(int argc, char ** argv)
             perror(FN_3201_NAMES.c_str());
             exit(1);
         }
-        read_3201_default(names_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        word_attribute::Flags base_attributes{word_attribute::name::grab()};
+        read_3201_default(names_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
         fclose(names_file);
     }
 
@@ -310,7 +336,11 @@ int main(int argc, char ** argv)
             perror(FN_3201_NAMES_F.c_str());
             exit(1);
         }
-        read_3201_default(names_f_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        word_attribute::Flags base_attributes{
+            word_attribute::name::grab(),
+            word_attribute::female_name::grab()
+        };
+        read_3201_default(names_f_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
         fclose(names_f_file);
     }
 
@@ -322,7 +352,11 @@ int main(int argc, char ** argv)
             perror(FN_3201_NAMES_M.c_str());
             exit(1);
         }
-        read_3201_default(names_m_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        word_attribute::Flags base_attributes{
+            word_attribute::name::grab(),
+            word_attribute::male_name::grab()
+        };
+        read_3201_default(names_m_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
         fclose(names_m_file);
     }
 
@@ -334,7 +368,8 @@ int main(int argc, char ** argv)
             perror(FN_3201_PLACES.c_str());
             exit(1);
         }
-        read_3201_default(places_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        word_attribute::Flags base_attributes{word_attribute::place::grab()};
+        read_3201_default(places_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
         fclose(places_file);
     }
 
@@ -346,7 +381,8 @@ int main(int argc, char ** argv)
             perror(FN_3201_CROSSWD.c_str());
             exit(1);
         }
-        read_3201_default(crosswd_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        word_attribute::Flags base_attributes;
+        read_3201_default(crosswd_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
         fclose(crosswd_file);
     }
 
@@ -358,7 +394,8 @@ int main(int argc, char ** argv)
             perror(FN_3201_CRSWD_D.c_str());
             exit(1);
         }
-        read_3201_default(crswd_d_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        word_attribute::Flags base_attributes;
+        read_3201_default(crswd_d_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
         fclose(crswd_d_file);
     }
 
@@ -370,7 +407,8 @@ int main(int argc, char ** argv)
             perror(FN_3201_ACRONYMS.c_str());
             exit(1);
         }
-        read_3201_default(acronyms_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+        word_attribute::Flags base_attributes{word_attribute::acronym::grab()};
+        read_3201_default(acronyms_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
         fclose(acronyms_file);
     }
 
@@ -625,12 +663,12 @@ bool passes_prefix_filter(
 }
 
 
-bool passes_status_filter(word_status::Flags const & status)
+bool passes_status_filter(word_attribute::Flags const & status)
 {
-    if (status.is_set(word_status::invisible_ascii::grab()))
+    if (status.is_set(word_attribute::invisible_ascii::grab()))
         return false;
 
-    if (status.is_set(word_status::has_unmatchable_symbols::grab()))
+    if (status.is_set(word_attribute::unmatchable_symbols::grab()))
         return false;
 
     return true;
@@ -639,7 +677,7 @@ bool passes_status_filter(word_status::Flags const & status)
 
 bool passes_filter(
     std::string const & word,
-    word_status::Flags const & status,
+    word_attribute::Flags const & status,
     std::string const & l0,
     std::string const & l1,
     std::string const & l2,
@@ -673,24 +711,27 @@ void read_3201_default(
     std::string const & l4,
     std::string const & l5,
     std::string const & prefix,
+    word_attribute::Flags const & base_attributes,
     matchable::MatchableMaker & mm
 )
 {
     std::string word;
-    word_status::Flags status;
+    word_attribute::Flags attributes;
 
     while (true)
     {
-        if (!read_3201_default_line(input_file, word, status))
+        attributes = base_attributes;
+
+        if (!read_3201_default_line(input_file, word, attributes))
             break;
 
         if (word.size() == 0)
             continue;
 
-        if (!passes_filter(word, status, l0, l1, l2, l3, l4, l5))
+        if (!passes_filter(word, attributes, l0, l1, l2, l3, l4, l5))
             continue;
 
-        add_word(word, prefix, status, mm);
+        add_word(word, prefix, attributes, mm);
     }
 }
 
@@ -710,7 +751,7 @@ void read_3202(
 {
     std::string word;
     parts_of_speech::Flags pos_flags;
-    word_status::Flags status;
+    word_attribute::Flags attributes;
 
     int ch = 0;
     while (true)
@@ -725,8 +766,8 @@ void read_3202(
             word += (char) ch;
         }
 
-        if (passes_filter(word, status, l0, l1, l2, l3, l4, l5) && word.size() > 0)
-            add_word(word, prefix, status, pos_flags, mm);
+        if (passes_filter(word, attributes, l0, l1, l2, l3, l4, l5) && word.size() > 0)
+            add_word(word, prefix, attributes, pos_flags, mm);
 
         if (ch == EOF)
             break;
@@ -749,30 +790,30 @@ void read_3203_mobypos(
 {
     std::string word;
     parts_of_speech::Flags pos_flags;
-    word_status::Flags status;
+    word_attribute::Flags attributes;
 
     while (true)
     {
-        if (!read_3203_mobypos_line(input_file, word, status, pos_flags))
+        if (!read_3203_mobypos_line(input_file, word, attributes, pos_flags))
             break;
 
         if (word.size() == 0)
             continue;
 
-        if (!passes_filter(word, status, l0, l1, l2, l3, l4, l5))
+        if (!passes_filter(word, attributes, l0, l1, l2, l3, l4, l5))
             continue;
 
-        add_word(word, prefix, status, pos_flags, mm);
+        add_word(word, prefix, attributes, pos_flags, mm);
     }
 }
 
 
 
-void update_word_status(word_status::Flags & flags, int & ch)
+void update_word_attribute(word_attribute::Flags & flags, int & ch)
 {
     if (ch < 32 || ch > 126)
     {
-        flags.set(word_status::invisible_ascii::grab());
+        flags.set(word_attribute::invisible_ascii::grab());
         ch = '?';
     }
     else
@@ -789,13 +830,10 @@ void update_word_status(word_status::Flags & flags, int & ch)
                 }
             }
             if (found)
-                flags.set(word_status::has_matchable_symbols::grab());
+                flags.set(word_attribute::matchable_symbols::grab());
             else
-                flags.set(word_status::has_unmatchable_symbols::grab());
+                flags.set(word_attribute::unmatchable_symbols::grab());
         }
-
-        if (ch == ' ')
-            flags.set(word_status::has_spaces::grab());
     }
 }
 
@@ -804,11 +842,10 @@ void update_word_status(word_status::Flags & flags, int & ch)
 bool read_3201_default_line(
     FILE * f,
     std::string & word,
-    word_status::Flags & status
+    word_attribute::Flags & attributes
 )
 {
     word.clear();
-    status.clear();
 
     int ch;
     while (true)
@@ -834,7 +871,7 @@ bool read_3201_default_line(
             break;
         }
 
-        update_word_status(status, ch);
+        update_word_attribute(attributes, ch);
         word += (char) ch;
     }
 
@@ -846,12 +883,12 @@ bool read_3201_default_line(
 bool read_3203_mobypos_line(
     FILE * f,
     std::string & word,
-    word_status::Flags & status,
+    word_attribute::Flags & attributes,
     parts_of_speech::Flags & pos_flags
 )
 {
     word.clear();
-    status.clear();
+    attributes.clear();
     pos_flags.clear();
 
     int ch;
@@ -867,7 +904,7 @@ bool read_3203_mobypos_line(
         if (ch == (int) '\\')
             break;
 
-        update_word_status(status, ch);
+        update_word_attribute(attributes, ch);
         word += (char) ch;
     }
 
@@ -881,7 +918,7 @@ bool read_3203_mobypos_line(
             break;
 
         if (ch < 32 || ch > 126)
-            status.set(word_status::invisible_ascii::grab());
+            attributes.set(word_attribute::invisible_ascii::grab());
 
         if (ch == (int) '!')
             ch = (int) 'n';
@@ -900,7 +937,7 @@ bool read_3203_mobypos_line(
 void add_word(
     std::string const & word,
     std::string const & prefix,
-    word_status::Flags const & wsf,
+    word_attribute::Flags const & wsf,
     matchable::MatchableMaker & mm
 )
 {
@@ -913,7 +950,7 @@ void add_word(
 void add_word(
     std::string const & word,
     std::string const & prefix,
-    word_status::Flags const & wsf,
+    word_attribute::Flags const & wsf,
     parts_of_speech::Flags const & pos_flags,
     matchable::MatchableMaker & mm
 )
@@ -930,8 +967,23 @@ void add_word(
     }
     mm.grab("word" + prefix)->set_propertyvect(escaped, "pos", property_values);
 
-    if (wsf.is_set(word_status::has_spaces::grab()))
-        mm.grab("word" + prefix)->set_property(escaped, "has_spaces", "1");
-    else
-        mm.grab("word" + prefix)->set_property(escaped, "has_spaces", "0");
+    // properties from word attributes
+    {
+        auto set_prop =
+            [&](word_attribute::Type att)
+            {
+                if (wsf.is_set(att))
+                {
+                    std::string const prop_name = std::string("is_") + att.as_string();
+                    mm.grab("word" + prefix)->set_property(escaped, prop_name, "1");
+                }
+            };
+
+        set_prop(word_attribute::name::grab());
+        set_prop(word_attribute::male_name::grab());
+        set_prop(word_attribute::female_name::grab());
+        set_prop(word_attribute::place::grab());
+        set_prop(word_attribute::compound::grab());
+        set_prop(word_attribute::acronym::grab());
+    }
 }
