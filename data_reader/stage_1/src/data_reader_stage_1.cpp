@@ -59,6 +59,9 @@ struct syn_ant
 };
 
 
+using syn_ant_table = std::map<std::string, syn_ant>;
+
+
 // used for longest words calculation (priority q)
 struct LengthIndex
 {
@@ -92,19 +95,19 @@ void print_usage();
 
 void read_51155(
     FILE * input_file,
-    std::map<std::string, syn_ant> & contents_syn_ant
+    syn_ant_table & contents_syn_ant
 );
 
 void read_3202(
     FILE * input_file,
-    std::map<std::string, syn_ant> & contents_syn_ant
+    syn_ant_table & contents_syn_ant
 );
 
 void update_word_status(word_status::Flags & flags, int & ch);
 
 bool patch_matchable_header(
     std::vector<HeaderEntry> const & matchable_headers,
-    std::map<std::string, syn_ant> const & contents_syn_ant,
+    syn_ant_table const & contents_syn_ant,
     std::vector<int> const & by_longest,
     std::map<int, std::pair<int, int>> const & longest_offsets
 );
@@ -132,7 +135,7 @@ int main(int argc, char ** argv)
         STAGE_1_WORKSPACE_DIR + "/generated_include/matchmaker/generated_matchables"
     };
 
-    std::map<std::string, syn_ant> contents_syn_ant;
+    syn_ant_table contents_syn_ant;
 
     std::cout << "******* stage 1 data reader *******\n" << std::endl;
 
@@ -349,7 +352,7 @@ void print_usage()
 }
 
 
-void read_51155(FILE * input_file, std::map<std::string, syn_ant> & contents_syn_ant)
+void read_51155(FILE * input_file, syn_ant_table & contents_syn_ant)
 {
     std::string word;
     std::string cur_key{"-1"};
@@ -513,7 +516,7 @@ void read_51155(FILE * input_file, std::map<std::string, syn_ant> & contents_syn
 
 void read_3202(
     FILE * input_file,
-    std::map<std::string, syn_ant> & contents_syn_ant
+    syn_ant_table & contents_syn_ant
 )
 {
     std::string syn;
@@ -592,7 +595,7 @@ void update_word_status(word_status::Flags & flags, int & ch)
 
 bool patch_matchable_header(
     std::vector<HeaderEntry> const & matchable_headers,
-    std::map<std::string, syn_ant> const & contents_syn_ant,
+    syn_ant_table const & contents_syn_ant,
     std::vector<int> const & by_longest,
     std::map<int, std::pair<int, int>> const & longest_offsets
 )
