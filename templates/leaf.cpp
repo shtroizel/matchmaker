@@ -99,6 +99,84 @@ namespace matchmaker
     }
 
 
+    bool is_name_snth(int index)
+    {
+        if (index < 0 || index >= size_snth())
+        {
+            std::cout << "is_name_snth(" << index << ") out of bounds with size_snth() of: "
+                      << size_snth() << std::endl;
+            return false;
+        }
+
+        return word_snth::from_by_string_index(index).as_is_name();
+    }
+
+
+    bool is_male_name_snth(int index)
+    {
+        if (index < 0 || index >= size_snth())
+        {
+            std::cout << "is_male_name_snth(" << index << ") out of bounds with size_snth() of: "
+                      << size_snth() << std::endl;
+            return false;
+        }
+
+        return word_snth::from_by_string_index(index).as_is_male_name();
+    }
+
+
+    bool is_female_name_snth(int index)
+    {
+        if (index < 0 || index >= size_snth())
+        {
+            std::cout << "is_female_name_snth(" << index << ") out of bounds with size_snth() of: "
+                      << size_snth() << std::endl;
+            return false;
+        }
+
+        return word_snth::from_by_string_index(index).as_is_female_name();
+    }
+
+
+    bool is_place_snth(int index)
+    {
+        if (index < 0 || index >= size_snth())
+        {
+            std::cout << "is_place_snth(" << index << ") out of bounds with size_snth() of: "
+                      << size_snth() << std::endl;
+            return false;
+        }
+
+        return word_snth::from_by_string_index(index).as_is_place();
+    }
+
+
+    bool is_compound_snth(int index)
+    {
+        if (index < 0 || index >= size_snth())
+        {
+            std::cout << "is_compound(" << index << ") out of bounds with size_snth() of: "
+                      << size_snth() << std::endl;
+            return false;
+        }
+
+        return word_snth::from_by_string_index(index).as_is_compound();
+    }
+
+
+    bool is_acronym_snth(int index)
+    {
+        if (index < 0 || index >= size_snth())
+        {
+            std::cout << "is_acronym(" << index << ") out of bounds with size_snth() of: "
+                      << size_snth() << std::endl;
+            return false;
+        }
+
+        return word_snth::from_by_string_index(index).as_is_acronym();
+    }
+
+
     std::vector<int> const & synonyms_snth(int index)
     {
         static std::vector<int> const empty{};

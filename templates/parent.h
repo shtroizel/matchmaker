@@ -52,4 +52,10 @@ namespace matchmaker
     std::vector<int8_t> const & flagged_parts_of_speech_snth(int index);
     std::vector<int> const & synonyms_snth(int index);
     std::vector<int> const & antonyms_snth(int index);
+    bool is_name_snth(int index);
+    bool is_male_name_snth(int index);
+    bool is_female_name_snth(int index);
+    bool is_place_snth(int index);
+    bool is_compound_snth(int index);
+    bool is_acronym_snth(int index);
 }

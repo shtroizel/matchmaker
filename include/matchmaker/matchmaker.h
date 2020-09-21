@@ -159,6 +159,54 @@ namespace matchmaker
      * @param[in] index
      *     index of a word in the dictionary
      * @returns
+     *     true if the given word is a name, false otherwise
+     */
+    bool is_name(int index);
+
+    /**
+     * @param[in] index
+     *     index of a word in the dictionary
+     * @returns
+     *     true if the given word is a male name, false otherwise
+     */
+    bool is_male_name(int index);
+
+    /**
+     * @param[in] index
+     *     index of a word in the dictionary
+     * @returns
+     *     true if the given word is a female name, false otherwise
+     */
+    bool is_female_name(int index);
+
+    /**
+     * @param[in] index
+     *     index of a word in the dictionary
+     * @returns
+     *     true if the given word is a place, false otherwise
+     */
+    bool is_place(int index);
+
+    /**
+     * @param[in] index
+     *     index of a word in the dictionary
+     * @returns
+     *     true if the given word is a compound word, false otherwise
+     */
+    bool is_compound(int index);
+
+    /**
+     * @param[in] index
+     *     index of a word in the dictionary
+     * @returns
+     *     true if the given word is an acronym, false otherwise
+     */
+    bool is_acronym(int index);
+
+    /**
+     * @param[in] index
+     *     index of a word in the dictionary
+     * @returns
      *     vector of indexes of synonyms
      */
     std::vector<int> const & synonyms(int index);

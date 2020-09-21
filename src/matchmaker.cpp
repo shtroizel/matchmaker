@@ -111,8 +111,14 @@ namespace matchmaker
     using flagged_parts_of_speech_func = std::function<std::vector<int8_t> const & (int)>;
     using synonyms_func = std::function<std::vector<int> const & (int)>;
     using antonyms_func = std::function<std::vector<int> const & (int)>;
+    using is_name_func = std::function<bool (int)>;
+    using is_male_name_func = std::function<bool (int)>;
+    using is_female_name_func = std::function<bool (int)>;
+    using is_place_func = std::function<bool (int)>;
+    using is_compound_func = std::function<bool (int)>;
+    using is_acronym_func = std::function<bool (int)>;
 
-    PROPERTYx7_MATCHABLE(
+    PROPERTYx13_MATCHABLE(
         size_func,
         size,
         as_longest_func,
@@ -127,6 +133,18 @@ namespace matchmaker
         synonyms,
         antonyms_func,
         antonyms,
+        is_name_func,
+        is_name,
+        is_male_name_func,
+        is_male_name,
+        is_female_name_func,
+        is_female_name,
+        is_place_func,
+        is_place,
+        is_compound_func,
+        is_compound,
+        is_acronym_func,
+        is_acronym,
         letter,
 #ifdef Q_ONLY
         Q, q
@@ -143,7 +161,13 @@ namespace matchmaker
     SET_PROPERTY(letter, _letter, lookup, &lookup_##_letter)                                               \
     SET_PROPERTY(letter, _letter, flagged_parts_of_speech, &flagged_parts_of_speech_##_letter)             \
     SET_PROPERTY(letter, _letter, synonyms, &synonyms_##_letter)                                           \
-    SET_PROPERTY(letter, _letter, antonyms, &antonyms_##_letter)
+    SET_PROPERTY(letter, _letter, antonyms, &antonyms_##_letter)                                           \
+    SET_PROPERTY(letter, _letter, is_name, &is_name_##_letter)                                             \
+    SET_PROPERTY(letter, _letter, is_male_name, &is_male_name_##_letter)                                   \
+    SET_PROPERTY(letter, _letter, is_female_name, &is_female_name_##_letter)                               \
+    SET_PROPERTY(letter, _letter, is_place, &is_place_##_letter)                                           \
+    SET_PROPERTY(letter, _letter, is_compound, &is_compound_##_letter)                                     \
+    SET_PROPERTY(letter, _letter, is_acronym, &is_acronym_##_letter)
 
 #ifdef Q_ONLY
     _set_properties(Q)
@@ -531,6 +555,114 @@ lookup_failed:
         for (int i = 0; i < (int) flagged.size(); ++i)
             if (flagged[i] != 0)
                 pos.push_back(&all_parts_of_speech()[i]);
+    }
+
+
+    bool is_name(int index)
+    {
+        if (index < 0 || index >= size())
+            return false;
+
+        auto iter = std::lower_bound(
+            letter_boundries.begin(),
+            letter_boundries.end(),
+            index,
+            [](auto const & b, auto const & i){ return b.first <= i; }
+        );
+        if (iter != letter_boundries.begin())
+            --iter;
+
+        return iter->second.as_is_name()(index - iter->first) != 0;
+    }
+
+
+    bool is_male_name(int index)
+    {
+        if (index < 0 || index >= size())
+            return false;
+
+        auto iter = std::lower_bound(
+            letter_boundries.begin(),
+            letter_boundries.end(),
+            index,
+            [](auto const & b, auto const & i){ return b.first <= i; }
+        );
+        if (iter != letter_boundries.begin())
+            --iter;
+
+        return iter->second.as_is_male_name()(index - iter->first) != 0;
+    }
+
+
+    bool is_female_name(int index)
+    {
+        if (index < 0 || index >= size())
+            return false;
+
+        auto iter = std::lower_bound(
+            letter_boundries.begin(),
+            letter_boundries.end(),
+            index,
+            [](auto const & b, auto const & i){ return b.first <= i; }
+        );
+        if (iter != letter_boundries.begin())
+            --iter;
+
+        return iter->second.as_is_female_name()(index - iter->first) != 0;
+    }
+
+
+    bool is_place(int index)
+    {
+        if (index < 0 || index >= size())
+            return false;
+
+        auto iter = std::lower_bound(
+            letter_boundries.begin(),
+            letter_boundries.end(),
+            index,
+            [](auto const & b, auto const & i){ return b.first <= i; }
+        );
+        if (iter != letter_boundries.begin())
+            --iter;
+
+        return iter->second.as_is_place()(index - iter->first) != 0;
+    }
+
+
+    bool is_compound(int index)
+    {
+        if (index < 0 || index >= size())
+            return false;
+
+        auto iter = std::lower_bound(
+            letter_boundries.begin(),
+            letter_boundries.end(),
+            index,
+            [](auto const & b, auto const & i){ return b.first <= i; }
+        );
+        if (iter != letter_boundries.begin())
+            --iter;
+
+        return iter->second.as_is_compound()(index - iter->first) != 0;
+    }
+
+
+    bool is_acronym(int index)
+    {
+        if (index < 0 || index >= size())
+            return false;
+
+        auto iter = std::lower_bound(
+            letter_boundries.begin(),
+            letter_boundries.end(),
+            index,
+            [](auto const & b, auto const & i){ return b.first <= i; }
+        );
+        if (iter != letter_boundries.begin())
+            --iter;
+
+        return iter->second.as_is_acronym()(index - iter->first) != 0;
     }
 
 
