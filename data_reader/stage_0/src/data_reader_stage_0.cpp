@@ -731,6 +731,10 @@ void read_3201_default(
         if (!passes_filter(word, attributes, l0, l1, l2, l3, l4, l5))
             continue;
 
+        if (attributes.is_set(word_attribute::compound::grab()) &&
+                word.find('-') == std::string::npos && word.find(' ') == std::string::npos)
+            attributes.unset(word_attribute::compound::grab());
+
         add_word(word, prefix, attributes, mm);
     }
 }
