@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(matchmaker VERSION 1.5.0)
+project(matchmaker VERSION 1.6.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -27,7 +27,7 @@ if(NOT MATCHMAKER_ROOT)
 endif()
 
 add_definitions(-DMATCHABLE_OMIT_BY_INDEX)
-find_package(matchable 11.0.1 REQUIRED)
+find_package(matchable 11.2.0 REQUIRED)
 include_directories(${matchable_DIR}/../../../include)
 
 set(lib_list)
