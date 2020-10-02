@@ -75,7 +75,7 @@ inline bool operator<(LengthIndex const & l, LengthIndex const & r)
         return true;
     if (l.length > r.length)
         return false;
-    return matchmaker::at(r.index) < matchmaker::at(l.index);
+    return mm_at(r.index) < mm_at(l.index);
 }
 
 
@@ -187,9 +187,9 @@ int main(int argc, char ** argv)
             std::less<std::vector<LengthIndex>::value_type>
         > q;
         LengthIndex cur;
-        for (int i = 0; i < matchmaker::size(); ++i)
+        for (int i = 0; i < mm_size(); ++i)
         {
-            cur.length = matchmaker::at(i).size();
+            cur.length = mm_at(i).size();
             cur.index = i;
             q.push(cur);
         }
@@ -234,13 +234,13 @@ int main(int argc, char ** argv)
             int cur_length{0};
             for (int i = (int) by_longest.size() - 1; i-- >= 0;)
             {
-                if (matchmaker::at(by_longest[i]).size() == matchmaker::at(by_longest[cur_end]).size())
+                if (mm_at(by_longest[i]).size() == mm_at(by_longest[cur_end]).size())
                 {
                     cur_start = i;
                 }
                 else
                 {
-                    cur_length = matchmaker::at(by_longest[cur_start]).size();
+                    cur_length = mm_at(by_longest[cur_start]).size();
                     offsets[cur_length] = std::make_pair(cur_start, cur_end);
                     cur_start = cur_end = i;
                 }
@@ -690,13 +690,13 @@ bool patch_matchable_header(
                     {
                         for (auto const & s : contents_SynAnt_iter->second.syn)
                         {
-                            index = matchmaker::lookup(s, &word_in_dictionary);
+                            index = mm_lookup(s, &word_in_dictionary);
                             if (word_in_dictionary)
                                 syn_vect.push_back(std::to_string(index));
                         }
                         for (auto const & a : contents_SynAnt_iter->second.ant)
                         {
-                            index = matchmaker::lookup(a, &word_in_dictionary);
+                            index = mm_lookup(a, &word_in_dictionary);
                             if (word_in_dictionary)
                                 ant_vect.push_back(std::to_string(index));
                         }
@@ -715,13 +715,13 @@ bool patch_matchable_header(
                         {
                             mid = lower + (upper - lower) / 2;
 
-                            if (existing_word == matchmaker::at(by_longest[mid]))
+                            if (existing_word == mm_at(by_longest[mid]))
                             {
                                 m->set_property(v.variant_name, "by_longest_index", std::to_string(mid));
                                 break;
                             }
 
-                            if (existing_word < matchmaker::at(by_longest[mid]))
+                            if (existing_word < mm_at(by_longest[mid]))
                                 upper = mid;
                             else
                                 lower = mid;

@@ -43,19 +43,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 
-namespace matchmaker
-{
-    int size_snth();
-    int as_longest_snth(int index);
-    std::string const & at_snth(int index);
-    int lookup_snth(std::string const & word, bool * found);
-    std::vector<int8_t> const & flagged_parts_of_speech_snth(int index);
-    std::vector<int> const & synonyms_snth(int index);
-    std::vector<int> const & antonyms_snth(int index);
-    bool is_name_snth(int index);
-    bool is_male_name_snth(int index);
-    bool is_female_name_snth(int index);
-    bool is_place_snth(int index);
-    bool is_compound_snth(int index);
-    bool is_acronym_snth(int index);
-}
+int mm_size_snth();
+std::string const & mm_at_snth(int index);
+int mm_lookup_snth(std::string const & word, bool * found);
+int mm_as_longest_snth(int index);
+std::vector<int8_t> const & mm_flagged_parts_of_speech_snth(int index);
+bool mm_is_name_snth(int index);
+bool mm_is_male_name_snth(int index);
+bool mm_is_female_name_snth(int index);
+bool mm_is_place_snth(int index);
+bool mm_is_compound_snth(int index);
+bool mm_is_acronym_snth(int index);
+std::vector<int> const & mm_synonyms_snth(int index);
+std::vector<int> const & mm_antonyms_snth(int index);

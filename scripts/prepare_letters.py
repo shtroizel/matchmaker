@@ -38,9 +38,9 @@ def prepare_letters(workspace_root, q, parents_only):
 
     matchmaker_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
 
-    leaf_h = matchmaker_root + 'templates/leaf.h'
+    leaf_h = matchmaker_root + 'templates/internal_interface.h'
     leaf_cpp = matchmaker_root + 'templates/leaf.cpp'
-    parent_h = matchmaker_root + 'templates/parent.h'
+    parent_h = matchmaker_root + 'templates/internal_interface.h'
     parent_cpp = matchmaker_root + 'templates/parent.cpp'
 
     for l0 in ascii_uppercase + ascii_lowercase:
