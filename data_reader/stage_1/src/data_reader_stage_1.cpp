@@ -622,6 +622,8 @@ void update_word_status(word_status::Flags & flags, int & ch)
 
 void infer_missing(SynAntTable & contents_SynAnt)
 {
+    // if you belong to me then I belong to you...
+
     for (auto & [w, sa] : contents_SynAnt)
     {
         for (auto const & s : sa.syn)
