@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <matchmaker/matchmaker.h>
 
 #include <array>
+#include <cstring>
 #include <functional>
 #include <iostream>
 #include <string>
@@ -102,7 +103,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-using size_func = std::function<int ()>;
+using count_func = std::function<int ()>;
 using as_longest_func = std::function<int (int)>;
 using at_func = std::function<std::string const & (int)>;
 using lookup_func = std::function<int (std::string const &, bool *)>;
@@ -118,8 +119,8 @@ using is_acronym_func = std::function<bool (int)>;
 
 PROPERTYx13_MATCHABLE(
     // properties
-    size_func,
-    size,
+    count_func,
+    count,
     as_longest_func,
     as_longest,
     at_func,
@@ -158,7 +159,7 @@ PROPERTYx13_MATCHABLE(
 )
 
 #define _set_properties(_letter)                                                                           \
-SET_PROPERTY(letter, _letter, size, &mm_size_##_letter)                                                    \
+SET_PROPERTY(letter, _letter, count, &mm_count_##_letter)                                                  \
 SET_PROPERTY(letter, _letter, as_longest, &mm_as_longest_##_letter)                                        \
 SET_PROPERTY(letter, _letter, at, &mm_at_##_letter)                                                        \
 SET_PROPERTY(letter, _letter, lookup, &mm_lookup_##_letter)                                                \
@@ -241,20 +242,20 @@ static std::vector<std::pair<int, letter::Type>> const letter_boundries =
         for (auto const & l : letter::variants())
         {
             boundries.push_back(std::make_pair(b, l));
-            b += l.as_size()();
+            b += l.as_count()();
         }
         return boundries;
     }();
 
 
 
-int mm_size()
+int mm_count()
 {
     static int const ret =
         [&](){
             int r{0};
             for (auto const & l : letter::variants())
-                r += l.as_size()();
+                r += l.as_count()();
             return r;
         }();
 
@@ -262,12 +263,16 @@ int mm_size()
 }
 
 
-std::string const & mm_at(int index)
+char const * mm_at(int index, int * length)
 {
-    static std::string const empty_str;
+    static char const * empty_str = "";
 
-    if (index < 0 || index >= mm_size())
+    if (index < 0 || index >= mm_count())
+    {
+        if (nullptr != length)
+            *length = 0;
         return empty_str;
+    }
 
     auto iter = std::lower_bound(
         letter_boundries.begin(),
@@ -278,11 +283,14 @@ std::string const & mm_at(int index)
     if (iter != letter_boundries.begin())
         --iter;
 
-    return iter->second.as_at()(index - iter->first);
+    auto & w = iter->second.as_at()(index - iter->first);
+    if (nullptr != length)
+        *length = (int) w.length();
+    return w.c_str();
 }
 
 
-int mm_lookup(std::string const & word, bool * found)
+int mm_lookup(char const * word, bool * found)
 {
     static std::array<std::pair<letter::Type, int>, 52> const io {
 #ifdef Q_ONLY
@@ -394,7 +402,7 @@ int mm_lookup(std::string const & word, bool * found)
 #endif
     };
 
-    if (word.size() == 0)
+    if (strlen(word) == 0)
         goto lookup_failed;
 
     if (word[0] < 32 || word[0] > 126)
@@ -450,7 +458,7 @@ lookup_failed:
 
 int mm_as_longest(int index)
 {
-    if (index < 0 || index >= mm_size())
+    if (index < 0 || index >= mm_count())
         return -1;
 
     auto iter = std::lower_bound(
@@ -468,56 +476,53 @@ int mm_as_longest(int index)
 
 int mm_from_longest(int length_index)
 {
-    if (length_index < 0 || length_index >= mm_size())
+    if (length_index < 0 || length_index >= mm_count())
         return -1;
 
     return LONGEST_WORDS[length_index];
 }
 
 
-std::vector<std::size_t> const & mm_lengths()
+void mm_lengths(int const * * lengths, int * count)
 {
-    static std::vector<std::size_t> const ret = []()
-                                                {
-                                                    std::vector<std::size_t> v;
-                                                    for (auto const & [l, o] : LONGEST_WORDS_OFFSETS)
-                                                        v.push_back(l);
-                                                    return v;
-                                                }();
-    return ret;
+    static std::vector<int> const v = []()
+                                      {
+                                          std::vector<int> v;
+                                          for (auto const & [l, o] : LONGEST_WORDS_OFFSETS)
+                                              v.push_back(l);
+                                          return v;
+                                      }();
+    *lengths = v.data();
+    *count = v.size();
 }
 
 
-bool mm_length_location(std::size_t length, int & index, int & count)
+bool mm_length_location(int length, int * index, int * count)
 {
     auto iter = LONGEST_WORDS_OFFSETS.find(length);
     if (iter == LONGEST_WORDS_OFFSETS.end())
         return false;
 
-    index = iter->second.first;
-    count = iter->second.second - iter->second.first + 1;
+    *index = iter->second.first;
+    *count = iter->second.second - iter->second.first + 1;
     return true;
 }
 
 
-std::vector<std::string> const & mm_all_parts_of_speech()
+bool mm_parts_of_speech(int index, char const * const * * pos, int8_t const * * flagged, int * count)
 {
-    static std::vector<std::string> const pos = []()
-                                                {
-                                                    std::vector<std::string> ret;
-                                                    for (auto p : parts_of_speech::variants())
-                                                        ret.push_back(p.as_pos_desc().as_string());
-                                                            return ret;
-                                                }();
-    return pos;
-}
+    static std::vector<char const *> const all = []()
+                                                 {
+                                                     std::vector<char const *> ret;
+                                                     for (auto p : parts_of_speech::variants())
+                                                         ret.push_back(p.as_pos_desc().as_string().c_str());
+                                                             return ret;
+                                                 }();
+    *pos = all.data();
+    *count = (int) all.size();
 
-
-std::vector<int8_t> const & mm_flagged_parts_of_speech(int index)
-{
-    static std::vector<int8_t> const empty{};
-    if (index < 0 || index >= mm_size())
-        return empty;
+    if (index < 0 || index >= mm_count())
+        return false;
 
     auto iter = std::lower_bound(
                     letter_boundries.begin(),
@@ -528,31 +533,23 @@ std::vector<int8_t> const & mm_flagged_parts_of_speech(int index)
     if (iter != letter_boundries.begin())
         --iter;
 
-    auto const & ret = iter->second.as_flagged_parts_of_speech()(index - iter->first);
-    if (ret.size() != mm_all_parts_of_speech().size())
-        std::cout << "******* flagged_parts_of_speech().size != all_parts_of_speech().size *******"
-                    << "buggy code detected!" << std::endl;
-    return ret;
-}
+    auto const & f = iter->second.as_flagged_parts_of_speech()(index - iter->first);
+    if (f.size() != all.size())
+    {
+        std::cout << "******* mm_parts_of_speech() -> f.size() != all.size() *******"
+                  << "buggy code detected!" << std::endl;
+        return false;
+    }
 
+    *flagged = f.data();
 
-void mm_parts_of_speech(int index, std::vector<std::string const *> & pos)
-{
-    pos.clear();
-    if (index < 0 || index >= mm_size())
-        return;
-
-    auto const & flagged = mm_flagged_parts_of_speech(index);
-
-    for (int i = 0; i < (int) flagged.size(); ++i)
-        if (flagged[i] != 0)
-            pos.push_back(&mm_all_parts_of_speech()[i]);
+    return true;
 }
 
 
 bool mm_is_name(int index)
 {
-    if (index < 0 || index >= mm_size())
+    if (index < 0 || index >= mm_count())
         return false;
 
     auto iter = std::lower_bound(
@@ -570,7 +567,7 @@ bool mm_is_name(int index)
 
 bool mm_is_male_name(int index)
 {
-    if (index < 0 || index >= mm_size())
+    if (index < 0 || index >= mm_count())
         return false;
 
     auto iter = std::lower_bound(
@@ -588,7 +585,7 @@ bool mm_is_male_name(int index)
 
 bool mm_is_female_name(int index)
 {
-    if (index < 0 || index >= mm_size())
+    if (index < 0 || index >= mm_count())
         return false;
 
     auto iter = std::lower_bound(
@@ -606,7 +603,7 @@ bool mm_is_female_name(int index)
 
 bool mm_is_place(int index)
 {
-    if (index < 0 || index >= mm_size())
+    if (index < 0 || index >= mm_count())
         return false;
 
     auto iter = std::lower_bound(
@@ -624,7 +621,7 @@ bool mm_is_place(int index)
 
 bool mm_is_compound(int index)
 {
-    if (index < 0 || index >= mm_size())
+    if (index < 0 || index >= mm_count())
         return false;
 
     auto iter = std::lower_bound(
@@ -642,7 +639,7 @@ bool mm_is_compound(int index)
 
 bool mm_is_acronym(int index)
 {
-    if (index < 0 || index >= mm_size())
+    if (index < 0 || index >= mm_count())
         return false;
 
     auto iter = std::lower_bound(
@@ -658,63 +655,75 @@ bool mm_is_acronym(int index)
 }
 
 
-std::vector<int> const & mm_synonyms(int index)
+void mm_synonyms(int index, int const * * synonyms, int * count)
 {
-    static std::vector<int> const empty{};
-    if (index < 0 || index >= mm_size())
-        return empty;
-
-    auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
-                    index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
-                );
-    if (iter != letter_boundries.begin())
-        --iter;
-
-    return iter->second.as_synonyms()(index - iter->first);
-}
-
-
-std::vector<int> const & mm_antonyms(int index)
-{
-    static std::vector<int> const empty{};
-    if (index < 0 || index >= mm_size())
-        return empty;
-
-    auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
-                    index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
-                );
-    if (iter != letter_boundries.begin())
-        --iter;
-
-    return iter->second.as_antonyms()(index - iter->first);
-}
-
-
-void mm_complete(std::string const & prefix, int & start, int & length)
-{
-    if (prefix.size() == 0)
+    if (index < 0 || index >= mm_count())
     {
-        start = 0;
-        length = mm_size();
+        *synonyms = nullptr;
+        *count = 0;
         return;
     }
 
-    length = 0;
+    auto iter = std::lower_bound(
+                    letter_boundries.begin(),
+                    letter_boundries.end(),
+                    index,
+                    [](auto const & b, auto const & i){ return b.first <= i; }
+                );
+    if (iter != letter_boundries.begin())
+        --iter;
+
+    auto & s = iter->second.as_synonyms()(index - iter->first);
+    *synonyms = s.data();
+    *count = (int) s.size();
+}
+
+
+void mm_antonyms(int index, int const * * antonyms, int * count)
+{
+    if (index < 0 || index >= mm_count())
+    {
+        *antonyms = nullptr;
+        *count = 0;
+        return;
+    }
+
+    auto iter = std::lower_bound(
+                    letter_boundries.begin(),
+                    letter_boundries.end(),
+                    index,
+                    [](auto const & b, auto const & i){ return b.first <= i; }
+                );
+    if (iter != letter_boundries.begin())
+        --iter;
+
+    auto & s = iter->second.as_synonyms()(index - iter->first);
+    *antonyms = s.data();
+    *count = (int) s.size();
+}
+
+
+void mm_complete(char const * prefix, int * start, int * length)
+{
+    int const prefix_len = strlen(prefix);
+    if (prefix_len == 0)
+    {
+        *start = 0;
+        *length = mm_count();
+        return;
+    }
+
+    *length = 0;
 
     int index{mm_lookup(prefix, nullptr)};
-    start = index;
+    *start = index;
 
-    for (; index < mm_size(); ++index)
+    for (; index < mm_count(); ++index)
     {
-        std::string const & s = mm_at(index);
-        if (s.size() >= prefix.size() && s.substr(0, prefix.size()) == prefix)
-            ++length;
+        // TODO FIXME
+        std::string const s = mm_at(index, nullptr);
+        if ((int) s.size() >= prefix_len && strcmp(s.substr(0, prefix_len).c_str(), prefix) == 0)
+            *length += 1;
         else
             break;
     }

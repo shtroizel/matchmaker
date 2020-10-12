@@ -29,6 +29,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
+#include <cstring>
+
 #include <chrono>
 #include <filesystem>
 #include <iostream>
@@ -75,7 +77,7 @@ inline bool operator<(LengthIndex const & l, LengthIndex const & r)
         return true;
     if (l.length > r.length)
         return false;
-    return mm_at(r.index) < mm_at(l.index);
+    return strcmp(mm_at(r.index, nullptr), mm_at(l.index, nullptr)) < 0;
 }
 
 
@@ -187,9 +189,9 @@ int main(int argc, char ** argv)
             std::less<std::vector<LengthIndex>::value_type>
         > q;
         LengthIndex cur;
-        for (int i = 0; i < mm_size(); ++i)
+        for (int i = 0; i < mm_count(); ++i)
         {
-            cur.length = mm_at(i).size();
+            mm_at(i, &cur.length);
             cur.index = i;
             q.push(cur);
         }
@@ -234,13 +236,19 @@ int main(int argc, char ** argv)
             int cur_length{0};
             for (int i = (int) by_longest.size() - 1; i-- >= 0;)
             {
-                if (mm_at(by_longest[i]).size() == mm_at(by_longest[cur_end]).size())
+                int by_longest_i_len{0};
+                int by_longest_cur_end_len{0};
+
+                mm_at(by_longest[i], &by_longest_i_len);
+                mm_at(by_longest[cur_end], &by_longest_cur_end_len);
+
+                if (by_longest_i_len == by_longest_cur_end_len)
                 {
                     cur_start = i;
                 }
                 else
                 {
-                    cur_length = mm_at(by_longest[cur_start]).size();
+                    mm_at(by_longest[cur_start], &cur_length);
                     offsets[cur_length] = std::make_pair(cur_start, cur_end);
                     cur_start = cur_end = i;
                 }
@@ -692,13 +700,13 @@ bool patch_matchable_header(
                     {
                         for (auto const & s : contents_SynAnt_iter->second.syn)
                         {
-                            index = mm_lookup(s, &word_in_dictionary);
+                            index = mm_lookup(s.c_str(), &word_in_dictionary);
                             if (word_in_dictionary)
                                 syn_vect.push_back(std::to_string(index));
                         }
                         for (auto const & a : contents_SynAnt_iter->second.ant)
                         {
-                            index = mm_lookup(a, &word_in_dictionary);
+                            index = mm_lookup(a.c_str(), &word_in_dictionary);
                             if (word_in_dictionary)
                                 ant_vect.push_back(std::to_string(index));
                         }
@@ -717,13 +725,13 @@ bool patch_matchable_header(
                         {
                             mid = lower + (upper - lower) / 2;
 
-                            if (existing_word == mm_at(by_longest[mid]))
+                            if (existing_word == std::string(mm_at(by_longest[mid], nullptr)))
                             {
                                 m->set_property(v.variant_name, "by_longest_index", std::to_string(mid));
                                 break;
                             }
 
-                            if (existing_word < mm_at(by_longest[mid]))
+                            if (existing_word < std::string(mm_at(by_longest[mid], nullptr)))
                                 upper = mid;
                             else
                                 lower = mid;

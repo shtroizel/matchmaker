@@ -100,7 +100,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-using size_func = std::function<int ()>;
+using count_func = std::function<int ()>;
 using as_longest_func = std::function<int (int)>;
 using at_func = std::function<std::string const & (int)>;
 using lookup_func = std::function<int (std::string const &, bool *)>;
@@ -115,8 +115,8 @@ using is_compound_func = std::function<bool (int)>;
 using is_acronym_func = std::function<bool (int)>;
 
 PROPERTYx13_MATCHABLE(
-    size_func,
-    size,
+    count_func,
+    count,
     as_longest_func,
     as_longest,
     at_func,
@@ -148,7 +148,7 @@ PROPERTYx13_MATCHABLE(
 
 
 #define _set_properties(_letter)                                                                           \
-SET_PROPERTY(letter_snth, _letter, size, &mm_size_snth_##_letter)                                          \
+SET_PROPERTY(letter_snth, _letter, count, &mm_count_snth_##_letter)                                         \
 SET_PROPERTY(letter_snth, _letter, as_longest, &mm_as_longest_snth_##_letter)                              \
 SET_PROPERTY(letter_snth, _letter, at, &mm_at_snth_##_letter)                                              \
 SET_PROPERTY(letter_snth, _letter, lookup, &mm_lookup_snth_##_letter)                                      \
@@ -217,63 +217,63 @@ _set_properties(z)
 #undef _set_properties
 
 
-int mm_size_snth()
+int mm_count_snth()
 {
     static int const ret =
         [&](){
             int r{0};
-            r += mm_size_snth_A();
-            r += mm_size_snth_B();
-            r += mm_size_snth_C();
-            r += mm_size_snth_D();
-            r += mm_size_snth_E();
-            r += mm_size_snth_F();
-            r += mm_size_snth_G();
-            r += mm_size_snth_H();
-            r += mm_size_snth_I();
-            r += mm_size_snth_J();
-            r += mm_size_snth_K();
-            r += mm_size_snth_L();
-            r += mm_size_snth_M();
-            r += mm_size_snth_N();
-            r += mm_size_snth_O();
-            r += mm_size_snth_P();
-            r += mm_size_snth_Q();
-            r += mm_size_snth_R();
-            r += mm_size_snth_S();
-            r += mm_size_snth_T();
-            r += mm_size_snth_U();
-            r += mm_size_snth_V();
-            r += mm_size_snth_W();
-            r += mm_size_snth_X();
-            r += mm_size_snth_Y();
-            r += mm_size_snth_Z();
-            r += mm_size_snth_a();
-            r += mm_size_snth_b();
-            r += mm_size_snth_c();
-            r += mm_size_snth_d();
-            r += mm_size_snth_e();
-            r += mm_size_snth_f();
-            r += mm_size_snth_g();
-            r += mm_size_snth_h();
-            r += mm_size_snth_i();
-            r += mm_size_snth_j();
-            r += mm_size_snth_k();
-            r += mm_size_snth_l();
-            r += mm_size_snth_m();
-            r += mm_size_snth_n();
-            r += mm_size_snth_o();
-            r += mm_size_snth_p();
-            r += mm_size_snth_q();
-            r += mm_size_snth_r();
-            r += mm_size_snth_s();
-            r += mm_size_snth_t();
-            r += mm_size_snth_u();
-            r += mm_size_snth_v();
-            r += mm_size_snth_w();
-            r += mm_size_snth_x();
-            r += mm_size_snth_y();
-            r += mm_size_snth_z();
+            r += mm_count_snth_A();
+            r += mm_count_snth_B();
+            r += mm_count_snth_C();
+            r += mm_count_snth_D();
+            r += mm_count_snth_E();
+            r += mm_count_snth_F();
+            r += mm_count_snth_G();
+            r += mm_count_snth_H();
+            r += mm_count_snth_I();
+            r += mm_count_snth_J();
+            r += mm_count_snth_K();
+            r += mm_count_snth_L();
+            r += mm_count_snth_M();
+            r += mm_count_snth_N();
+            r += mm_count_snth_O();
+            r += mm_count_snth_P();
+            r += mm_count_snth_Q();
+            r += mm_count_snth_R();
+            r += mm_count_snth_S();
+            r += mm_count_snth_T();
+            r += mm_count_snth_U();
+            r += mm_count_snth_V();
+            r += mm_count_snth_W();
+            r += mm_count_snth_X();
+            r += mm_count_snth_Y();
+            r += mm_count_snth_Z();
+            r += mm_count_snth_a();
+            r += mm_count_snth_b();
+            r += mm_count_snth_c();
+            r += mm_count_snth_d();
+            r += mm_count_snth_e();
+            r += mm_count_snth_f();
+            r += mm_count_snth_g();
+            r += mm_count_snth_h();
+            r += mm_count_snth_i();
+            r += mm_count_snth_j();
+            r += mm_count_snth_k();
+            r += mm_count_snth_l();
+            r += mm_count_snth_m();
+            r += mm_count_snth_n();
+            r += mm_count_snth_o();
+            r += mm_count_snth_p();
+            r += mm_count_snth_q();
+            r += mm_count_snth_r();
+            r += mm_count_snth_s();
+            r += mm_count_snth_t();
+            r += mm_count_snth_u();
+            r += mm_count_snth_v();
+            r += mm_count_snth_w();
+            r += mm_count_snth_x();
+            r += mm_count_snth_y();
+            r += mm_count_snth_z();
             return r;
         }();
 
@@ -290,7 +290,7 @@ static std::vector<std::pair<int, letter_snth::Type>> const letter_boundries =
         for (auto const & l : letter_snth::variants())
         {
             boundries.push_back(std::make_pair(b, l));
-            b += l.as_size()();
+            b += l.as_count()();
         }
 
         return boundries;
@@ -299,10 +299,10 @@ static std::vector<std::pair<int, letter_snth::Type>> const letter_boundries =
 
 int mm_as_longest_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
-        std::cout << "mm_as_longest_snth(" << index << ") out of bounds with mm_size_snth() of: "
-                    << mm_size_snth() << std::endl;
+        std::cout << "mm_as_longest_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                    << mm_count_snth() << std::endl;
         return 0;
     }
 
@@ -322,10 +322,10 @@ int mm_as_longest_snth(int index)
 
 std::string const & mm_at_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
-        std::cout << "mm_at_snth(" << index << ") out of bounds with mm_size_snth() of: "
-                    << mm_size_snth() << std::endl;
+        std::cout << "mm_at_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                    << mm_count_snth() << std::endl;
         static std::string const empty_str_snth;
         return empty_str_snth;
     }
@@ -461,10 +461,10 @@ std::vector<int8_t> const & mm_flagged_parts_of_speech_snth(int index)
     static std::vector<int8_t> const empty{};
 
     // only possible when parts_of_speech() buggy (matchmaker.cpp)
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
         std::cout << "mm_flagged_parts_of_speech_snth(" << index
-                  << ") out of bounds with mm_size_snth() of: " << mm_size_snth() << std::endl;
+                  << ") out of bounds with mm_count_snth() of: " << mm_count_snth() << std::endl;
         return empty;
     }
 
@@ -484,7 +484,7 @@ std::vector<int8_t> const & mm_flagged_parts_of_speech_snth(int index)
 
 bool mm_is_name_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
         return false;
 
     auto iter = std::lower_bound(
@@ -503,7 +503,7 @@ bool mm_is_name_snth(int index)
 
 bool mm_is_male_name_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
         return false;
 
     auto iter = std::lower_bound(
@@ -522,7 +522,7 @@ bool mm_is_male_name_snth(int index)
 
 bool mm_is_female_name_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
         return false;
 
     auto iter = std::lower_bound(
@@ -541,7 +541,7 @@ bool mm_is_female_name_snth(int index)
 
 bool mm_is_place_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
         return false;
 
     auto iter = std::lower_bound(
@@ -559,7 +559,7 @@ bool mm_is_place_snth(int index)
 
 bool mm_is_compound_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
         return false;
 
     auto iter = std::lower_bound(
@@ -578,7 +578,7 @@ bool mm_is_compound_snth(int index)
 
 bool mm_is_acronym_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
         return false;
 
     auto iter = std::lower_bound(
@@ -599,10 +599,10 @@ std::vector<int> const & mm_synonyms_snth(int index)
 {
     static std::vector<int> const empty{};
 
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
-        std::cout << "mm_synonyms_snth(" << index << ") out of bounds with mm_size_snth() of: "
-                    << mm_size_snth() << std::endl;
+        std::cout << "mm_synonyms_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                    << mm_count_snth() << std::endl;
         return empty;
     }
 
@@ -624,10 +624,10 @@ std::vector<int> const & mm_antonyms_snth(int index)
 {
     static std::vector<int> const empty{};
 
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
-        std::cout << "mm_antonyms_snth(" << index << ") out of bounds with mm_size_snth() of: "
-                    << mm_size_snth() << std::endl;
+        std::cout << "mm_antonyms_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                    << mm_count_snth() << std::endl;
         return empty;
     }
 

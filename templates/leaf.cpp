@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <matchmaker/generated_matchables/aoeu/snth.h>
 
 
-int mm_size_snth()
+int mm_count_snth()
 {
     return word_snth::variants_by_string().size();
 }
@@ -51,10 +51,10 @@ int mm_size_snth()
 
 int mm_as_longest_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
-        std::cout << "mm_as_longest_snth(" << index << ") out of bounds with mm_size_snth() of: "
-                  << mm_size_snth() << std::endl;
+        std::cout << "mm_as_longest_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                  << mm_count_snth() << std::endl;
         static std::string const empty_str;
         return 0;
     }
@@ -65,10 +65,10 @@ int mm_as_longest_snth(int index)
 
 std::string const & mm_at_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
-        std::cout << "mm_at_snth(" << index << ") out of bounds with mm_size_snth() of: "
-                  << mm_size_snth() << std::endl;
+        std::cout << "mm_at_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                  << mm_count_snth() << std::endl;
         static std::string const empty_str;
         return empty_str;
     }
@@ -87,10 +87,10 @@ int mm_lookup_snth(std::string const & word, bool * found)
 std::vector<int8_t> const & mm_flagged_parts_of_speech_snth(int index)
 {
     static std::vector<int8_t> const empty{};
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
         std::cout << "mm_flagged_parts_of_speech_snth(" << index
-                  << ") out of bounds with mm_size_snth() of: " << mm_size_snth() << std::endl;
+                  << ") out of bounds with mm_count_snth() of: " << mm_count_snth() << std::endl;
         return empty;
     }
     return word_snth::from_by_string_index(index).as_pos_vect();
@@ -99,10 +99,10 @@ std::vector<int8_t> const & mm_flagged_parts_of_speech_snth(int index)
 
 bool mm_is_name_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
-        std::cout << "mm_is_name_snth(" << index << ") out of bounds with mm_size_snth() of: "
-                  << mm_size_snth() << std::endl;
+        std::cout << "mm_is_name_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                  << mm_count_snth() << std::endl;
         return false;
     }
 
@@ -112,10 +112,10 @@ bool mm_is_name_snth(int index)
 
 bool mm_is_male_name_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
-        std::cout << "mm_is_male_name_snth(" << index << ") out of bounds with mm_size_snth() of: "
-                  << mm_size_snth() << std::endl;
+        std::cout << "mm_is_male_name_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                  << mm_count_snth() << std::endl;
         return false;
     }
 
@@ -125,10 +125,10 @@ bool mm_is_male_name_snth(int index)
 
 bool mm_is_female_name_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
-        std::cout << "mm_is_female_name_snth(" << index << ") out of bounds with mm_size_snth() of: "
-                  << mm_size_snth() << std::endl;
+        std::cout << "mm_is_female_name_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                  << mm_count_snth() << std::endl;
         return false;
     }
 
@@ -138,10 +138,10 @@ bool mm_is_female_name_snth(int index)
 
 bool mm_is_place_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
-        std::cout << "mm_is_place_snth(" << index << ") out of bounds with mm_size_snth() of: "
-                  << mm_size_snth() << std::endl;
+        std::cout << "mm_is_place_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                  << mm_count_snth() << std::endl;
         return false;
     }
 
@@ -151,10 +151,10 @@ bool mm_is_place_snth(int index)
 
 bool mm_is_compound_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
-        std::cout << "mm_is_compound(" << index << ") out of bounds with mm_size_snth() of: "
-                  << mm_size_snth() << std::endl;
+        std::cout << "mm_is_compound(" << index << ") out of bounds with mm_count_snth() of: "
+                  << mm_count_snth() << std::endl;
         return false;
     }
 
@@ -164,10 +164,10 @@ bool mm_is_compound_snth(int index)
 
 bool mm_is_acronym_snth(int index)
 {
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
-        std::cout << "mm_is_acronym(" << index << ") out of bounds with mm_size_snth() of: "
-                  << mm_size_snth() << std::endl;
+        std::cout << "mm_is_acronym(" << index << ") out of bounds with mm_count_snth() of: "
+                  << mm_count_snth() << std::endl;
         return false;
     }
 
@@ -178,10 +178,10 @@ bool mm_is_acronym_snth(int index)
 std::vector<int> const & mm_synonyms_snth(int index)
 {
     static std::vector<int> const empty{};
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
-        std::cout << "mm_synonyms_snth(" << index << ") out of bounds with mm_size_snth() of: "
-                  << mm_size_snth() << std::endl;
+        std::cout << "mm_synonyms_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                  << mm_count_snth() << std::endl;
         return empty;
     }
     return word_snth::from_by_string_index(index).as_syn_vect();
@@ -191,10 +191,10 @@ std::vector<int> const & mm_synonyms_snth(int index)
 std::vector<int> const & mm_antonyms_snth(int index)
 {
     static std::vector<int> const empty{};
-    if (index < 0 || index >= mm_size_snth())
+    if (index < 0 || index >= mm_count_snth())
     {
-        std::cout << "mm_antonyms_snth(" << index << ") out of bounds with mm_size_snth() of: "
-                  << mm_size_snth() << std::endl;
+        std::cout << "mm_antonyms_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                  << mm_count_snth() << std::endl;
         return empty;
     }
     return word_snth::from_by_string_index(index).as_ant_vect();

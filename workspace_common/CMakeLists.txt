@@ -1,14 +1,11 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(matchmaker VERSION 2.0.0)
+project(matchmaker VERSION 3.0.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra")
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-type-c-linkage")
-endif()
 
 if(CMAKE_SYSTEM_PROCESSOR STREQUAL "sparc64")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mcmodel=medany")

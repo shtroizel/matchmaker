@@ -33,181 +33,186 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include <string>
-#include <vector>
+#include <stdbool.h>
+#include <stdint.h>
 
 
 
-extern "C"
-{
-    /**
-     * @returns
-     *     The number of words in the dictionary
-     */
-    int mm_size();
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    /**
-     * @param[in] index
-     *     An index into an alphabetically sorted dictionary with 0 for the first word
-     *     and size() - 1 for the last.
-     * @returns
-     *     The word at the given index, or empty string when index is out of range
-     */
-    std::string const & mm_at(int index);
 
-    /**
-     * @param[in] word
-     *     string to look up in the dictionary
-     * @param[out] found
-     *     true if word is found, false otherwise
-     *     ignored when nullptr
-     * @returns
-     *     the alphabetic index of the given word if it exists,
-     *     or the index that the given word would have if it did exist.
-     *     note that this could be size() if *found == false
-     */
-    int mm_lookup(std::string const & word, bool * found);
+/**
+ * @returns
+ *     the number of words in the dictionary
+ */
+int mm_count();
 
-    /**
-     * @param[in] index
-     *     index of a word in the dictionary
-     * @returns
-     *     A "length index", which is the index the given word would have in a dictionary
-     *     sorted from longest to shortest, with 0 for the longest word and size() - 1 for
-     *     the shortest.
-     * @see from_longest()
-     */
-    int mm_as_longest(int index);
+/**
+ * @param[in] index
+ *     index of a word in the dictionary
+ * @param[out] length
+ *     the length of the given word (ignored if NULL)
+ * @returns
+ *     the word at the given index, or empty string when index is out of range
+ */
+char const * mm_at(int index, int * length);
 
-    /**
-     * @param[in] length_index
-     *     The index a word would have in a dictionary sorted from longest to shortest,
-     *     with 0 for the longest word and size() - 1 for the shortest.
-     * @returns
-     *     An alphabetic index for the word of the given length index
-     * @see as_longest()
-     */
-    int mm_from_longest(int length_index);
+/**
+ * @param[in] word
+ *     string to look up in the dictionary
+ * @param[out] found
+ *     true if word is found, false otherwise
+ *     ignored when nullptr
+ * @returns
+ *     the alphabetic index of the given word if it exists,
+ *     or the index that the given word would have if it did exist.
+ *     note that this could be mm_count() if *found == false
+ */
+int mm_lookup(char const * word, bool * found);
 
-    /**
-     * @returns
-     *     all possible lengths that a matchmaker word could have in ascending order
-     * @see
-     *     length_location()
-     */
-    std::vector<std::size_t> const & mm_lengths();
+/**
+ * @param[in] index
+ *     index of a word in the dictionary
+ * @returns
+ *     a "length index", which is the index the given word would have in a dictionary
+ *     sorted from longest to shortest, with 0 for the longest word and mm_count() - 1 for
+ *     the shortest.
+ * @see from_longest()
+ */
+int mm_as_longest(int index);
 
-    /**
-     * @param[in] length
-     *     length of a word
-     * @param[out] length_index
-     *     words of given length begin at this "length index"
-     * @param[out] count
-     *     number of words with the given length
-     * @returns
-     *     true if any word has the given length,
-     *     false otherwise for invalid input (in which case length_index and count remain unchanged)
-     * @see lengths()
-     */
-    bool mm_length_location(std::size_t length, int & length_index, int & count);
+/**
+ * @param[in] length_index
+ *     the index a word would have in a dictionary sorted from longest to shortest,
+ *     with 0 for the longest word and mm_count() - 1 for the shortest.
+ * @returns
+ *     an alphabetic index for the word of the given length index
+ * @see as_longest()
+ */
+int mm_from_longest(int length_index);
 
-    /**
-     * @returns
-     *     A vector containing all parts of speech known to matchmaker
-     */
-    std::vector<std::string> const & mm_all_parts_of_speech();
+/**
+ * @param[out] lengths
+ *     array of all possible lengths that a matchmaker word could have in ascending order
+ * @param[out] count
+ *     number of elements in the array
+ * @see
+ *     length_location()
+ */
+void mm_lengths(int const * * lengths, int * count);
 
-    /**
-     * @param[in] index
-     *     index of a word in the dictionary
-     * @returns
-     *     A vector of booleans such that the vector's size is equal to mm_all_parts_of_speech.size().
-     *     Elements are set to 1 if their cooresponding all_parts_of_speech() index pertains to the
-     *     given word, or 0 otherwise.
-     * @see all_parts_of_speech()
-     */
-    std::vector<int8_t> const & mm_flagged_parts_of_speech(int index);
+/**
+ * @param[in] length
+ *     length of a word
+ * @param[out] length_index
+ *     words of given length begin at this "length index"
+ * @param[out] count
+ *     number of words with the given length
+ * @returns
+ *     true if any word has the given length,
+ *     false otherwise for invalid input (in which case length_index and count remain unchanged)
+ * @see lengths()
+ */
+bool mm_length_location(int length, int * length_index, int * count);
 
-    /**
-     * @param[in] index
-     *     index of a word in the dictionary
-     * @param[out] pos
-     *     A vector containing the parts of speech associated with the given word as pointers
-     *     to static strings
-     */
-    void mm_parts_of_speech(int index, std::vector<std::string const *> & pos);
 
-    /**
-     * @param[in] index
-     *     index of a word in the dictionary
-     * @returns
-     *     true if the given word is a name, false otherwise
-     */
-    bool mm_is_name(int index);
+/**
+ * @param[in] index
+ *     index of a word in the dictionary
+ * @param[out] pos
+ *     pointer to an array of strings representing all parts of speech known to matchmaker
+ * @param[out] flagged
+ *     pointer to an array of booleans (stored as int8_t) such that the array's length is equal to the
+ *     length of the array pointed to by pos
+ *     elements are set to 1 if their cooresponding pos index pertains to the
+ *     given word, or 0 otherwise.
+ * @param[out] count
+ *     number of array elements (same for both pos and flagged)
+ * @returns true when index in range [0..mm_count() - 1] and false when index out of range
+ */
+bool mm_parts_of_speech(int index, char const * const * * pos, int8_t const * * flagged, int * count);
 
-    /**
-     * @param[in] index
-     *     index of a word in the dictionary
-     * @returns
-     *     true if the given word is a male name, false otherwise
-     */
-    bool mm_is_male_name(int index);
+/**
+ * @param[in] index
+ *     index of a word in the dictionary
+ * @returns
+ *     true if the given word is a name, false otherwise
+ */
+bool mm_is_name(int index);
 
-    /**
-     * @param[in] index
-     *     index of a word in the dictionary
-     * @returns
-     *     true if the given word is a female name, false otherwise
-     */
-    bool mm_is_female_name(int index);
+/**
+ * @param[in] index
+ *     index of a word in the dictionary
+ * @returns
+ *     true if the given word is a male name, false otherwise
+ */
+bool mm_is_male_name(int index);
 
-    /**
-     * @param[in] index
-     *     index of a word in the dictionary
-     * @returns
-     *     true if the given word is a place, false otherwise
-     */
-    bool mm_is_place(int index);
+/**
+ * @param[in] index
+ *     index of a word in the dictionary
+ * @returns
+ *     true if the given word is a female name, false otherwise
+ */
+bool mm_is_female_name(int index);
 
-    /**
-     * @param[in] index
-     *     index of a word in the dictionary
-     * @returns
-     *     true if the given word is a compound word, false otherwise
-     */
-    bool mm_is_compound(int index);
+/**
+ * @param[in] index
+ *     index of a word in the dictionary
+ * @returns
+ *     true if the given word is a place, false otherwise
+ */
+bool mm_is_place(int index);
 
-    /**
-     * @param[in] index
-     *     index of a word in the dictionary
-     * @returns
-     *     true if the given word is an acronym, false otherwise
-     */
-    bool mm_is_acronym(int index);
+/**
+ * @param[in] index
+ *     index of a word in the dictionary
+ * @returns
+ *     true if the given word is a compound word, false otherwise
+ */
+bool mm_is_compound(int index);
 
-    /**
-     * @param[in] index
-     *     index of a word in the dictionary
-     * @returns
-     *     vector of indexes of synonyms
-     */
-    std::vector<int> const & mm_synonyms(int index);
+/**
+ * @param[in] index
+ *     index of a word in the dictionary
+ * @returns
+ *     true if the given word is an acronym, false otherwise
+ */
+bool mm_is_acronym(int index);
 
-    /**
-     * @param[in] index
-     *     index of a word in the dictionary
-     * @returns
-     *     vector of indexes of antonyms
-     */
-    std::vector<int> const & mm_antonyms(int index);
+/**
+ * @param[in] index
+ *     index of a word in the dictionary
+ * @param[out] synonyms
+ *     pointer to an array of indexes to synonyms of the given word
+ * @param[out] count
+ *     number of synonyms in the array
+ */
+void mm_synonyms(int index, int const * * synonyms, int * count);
 
-    /**
-     * @param[in] prefix
-     *     prefix to complete
-     * @param[out] start
-     *     index of first word with the given prefix, or -1 if length is 0
-     * @param[out] length
-     *     number of words with the given prefix
-     */
-    void mm_complete(std::string const & prefix, int & start, int & length);
+/**
+ * @param[in] index
+ *     index of a word in the dictionary
+ * @param[out] antonyms
+ *     pointer to an array of indexes to antonyms of the given word
+ * @param[out] count
+ *     number of antonyms in the array
+ */
+void mm_antonyms(int index, int const * * antonyms, int * count);
+
+/**
+ * @param[in] prefix
+ *     prefix to complete
+ * @param[out] start
+ *     index of first word with the given prefix, or -1 if length is 0
+ * @param[out] length
+ *     number of words with the given prefix
+ */
+void mm_complete(char const * prefix, int * start, int * length);
+
+
+#ifdef __cplusplus
 }
+#endif

@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 
-int mm_size_snth();
+int mm_count_snth();
 std::string const & mm_at_snth(int index);
 int mm_lookup_snth(std::string const & word, bool * found);
 int mm_as_longest_snth(int index);
