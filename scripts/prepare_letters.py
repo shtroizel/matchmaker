@@ -239,6 +239,8 @@ def prepare_letters(workspace_root, q, parents_only):
                     (l0 == 'j' and l1 == 'a') or                                                           \
                     (l0 == 'u' and l1 == 'p') or                                                           \
                     (l0 == 'B' and l1 == 'o') or                                                           \
+                    (l0 == 'o' and l1 == 'b') or                                                           \
+                    (l0 == 'm' and l1 == 'y') or                                                           \
                     (l0 == 'r' and l1 == 'i'):
 
                 # two letter parent
@@ -372,6 +374,10 @@ def prepare_letters(workspace_root, q, parents_only):
                             (l0 == 'c' and l1 == 'r' and l2 == 'o') or                                     \
                             (l0 == 'p' and l1 == 'a' and l2 == 'l') or                                     \
                             (l0 == 'a' and l1 == 'u' and l2 == 't') or                                     \
+                            (l0 == 'c' and l1 == 'h' and l2 == 'o') or                                     \
+                            (l0 == 'w' and l1 == 'e' and l2 == 'l') or                                     \
+                            (l0 == 's' and l1 == 'c' and l2 == 'r') or                                     \
+                            (l0 == 'c' and l1 == 'l' and l2 == 'a') or                                     \
                             (l0 == 'c' and l1 == 'o' and l2 == 'u'):
 
                         # three letter parent
@@ -416,6 +422,7 @@ def prepare_letters(workspace_root, q, parents_only):
                                     (l0 == 's' and l1 == 'e' and l2 == 'l' and l3 == 'f') or               \
                                     (l0 == 't' and l1 == 'r' and l2 == 'a' and l3 == 'n') or               \
                                     (l0 == 'f' and l1 == 'o' and l2 == 'r' and l3 == 'e') or               \
+                                    (l0 == 'p' and l1 == 's' and l2 == 'e' and l3 == 'u') or               \
                                     (l0 == 'n' and l1 == 'o' and l2 == 'n' and l3 == 'c'):
 
                                 # four letter parent
@@ -451,6 +458,12 @@ def prepare_letters(workspace_root, q, parents_only):
                                                                                                            \
                                             (l0 == 'q' and l1 == 'u' and l2 == 'a' and l3 == 's' and       \
                                                     l4 == 'i') or                                          \
+                                                                                                           \
+                                            (l0 == 'c' and l1 == 'o' and l2 == 'u' and l3 == 'n' and       \
+                                                    l4 == 't') or                                          \
+                                                                                                           \
+                                            (l0 == 't' and l1 == 'r' and l2 == 'a' and l3 == 'n' and       \
+                                                    l4 == 's') or                                          \
                                                                                                            \
                                             (l0 == 'u' and l1 == 'n' and l2 == 'd' and l3 == 'e' and       \
                                                     l4 == 'r'):

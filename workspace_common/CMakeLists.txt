@@ -247,6 +247,8 @@ foreach(l0 ${l0_A_z_letters})
             (l0 STREQUAL "j" AND l1 STREQUAL "a") OR
             (l0 STREQUAL "u" AND l1 STREQUAL "p") OR
             (l0 STREQUAL "B" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "o" AND l1 STREQUAL "b") OR
+            (l0 STREQUAL "m" AND l1 STREQUAL "y") OR
             (l0 STREQUAL "r" AND l1 STREQUAL "i")
         )
             # two letter parents
@@ -361,6 +363,10 @@ foreach(l0 ${l0_A_z_letters})
                     (l0 STREQUAL "c" AND l1 STREQUAL "r" AND l2 STREQUAL "o") OR
                     (l0 STREQUAL "p" AND l1 STREQUAL "a" AND l2 STREQUAL "l") OR
                     (l0 STREQUAL "a" AND l1 STREQUAL "u" AND l2 STREQUAL "t") OR
+                    (l0 STREQUAL "c" AND l1 STREQUAL "h" AND l2 STREQUAL "o") OR
+                    (l0 STREQUAL "w" AND l1 STREQUAL "e" AND l2 STREQUAL "l") OR
+                    (l0 STREQUAL "s" AND l1 STREQUAL "c" AND l2 STREQUAL "r") OR
+                    (l0 STREQUAL "c" AND l1 STREQUAL "l" AND l2 STREQUAL "a") OR
                     (l0 STREQUAL "c" AND l1 STREQUAL "o" AND l2 STREQUAL "u")
                 )
                     # three letter parents
@@ -386,6 +392,7 @@ foreach(l0 ${l0_A_z_letters})
                             (l0 STREQUAL "s" AND l1 STREQUAL "e" AND l2 STREQUAL "l" AND l3 STREQUAL "f") OR
                             (l0 STREQUAL "t" AND l1 STREQUAL "r" AND l2 STREQUAL "a" AND l3 STREQUAL "n") OR
                             (l0 STREQUAL "f" AND l1 STREQUAL "o" AND l2 STREQUAL "r" AND l3 STREQUAL "e") OR
+                            (l0 STREQUAL "p" AND l1 STREQUAL "s" AND l2 STREQUAL "e" AND l3 STREQUAL "u") OR
                             (l0 STREQUAL "n" AND l1 STREQUAL "o" AND l2 STREQUAL "n" AND l3 STREQUAL "c")
                         )
                             # four letter parents
@@ -400,7 +407,11 @@ foreach(l0 ${l0_A_z_letters})
                                     (l0 STREQUAL "u" AND l1 STREQUAL "n" AND l2 STREQUAL "d"
                                             AND l3 STREQUAL "e" AND l4 STREQUAL "r") OR
                                     (l0 STREQUAL "q" AND l1 STREQUAL "u" AND l2 STREQUAL "a"
-                                            AND l3 STREQUAL "s" AND l4 STREQUAL "i")
+                                            AND l3 STREQUAL "s" AND l4 STREQUAL "i") OR
+                                    (l0 STREQUAL "t" AND l1 STREQUAL "r" AND l2 STREQUAL "a"
+                                            AND l3 STREQUAL "n" AND l4 STREQUAL "s") OR
+                                    (l0 STREQUAL "c" AND l1 STREQUAL "o" AND l2 STREQUAL "u"
+                                            AND l3 STREQUAL "n" AND l4 STREQUAL "t")
                                 )
                                     # five letter parents
                                     list(
