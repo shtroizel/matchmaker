@@ -16,7 +16,7 @@ option(q "build q (and Q) only" OFF)
 
 set(LEAFLIB_COUNT 10)
 
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/matchmaker")
+set(CMAKE_INSTALL_RPATH $ORIGIN)
 
 if(q)
     add_definitions(-DQ_ONLY)
