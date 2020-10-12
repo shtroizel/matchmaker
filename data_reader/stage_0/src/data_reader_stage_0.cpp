@@ -29,6 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
+#include <cstring>
 #include <iostream>
 
 #include <matchable/matchable.h>
@@ -146,10 +147,16 @@ void add_word(
 );
 
 
+// allow Q to build quickly by eliminating quasi-words
+//   * q u a s i A    is very large because of all these words with symbols
+//
+// optional last argv can set this to true making Q quick again
+bool symbols_off = false;
+
 
 int main(int argc, char ** argv)
 {
-    if (argc != 9)
+    if (argc < 9)
     {
         print_usage();
         return 2;
@@ -229,6 +236,9 @@ int main(int argc, char ** argv)
         print_usage();
         return 2;
     }
+
+    if (argc == 10 && strcmp(argv[9], "symbols_off") == 0)
+        symbols_off = true;
 
     std::string prefix{"_" + l0};
     if (l1 != "nil")
@@ -669,6 +679,9 @@ bool passes_status_filter(word_attribute::Flags const & status)
         return false;
 
     if (status.is_set(word_attribute::unmatchable_symbols::grab()))
+        return false;
+
+    if (symbols_off && status.is_set(word_attribute::matchable_symbols::grab()))
         return false;
 
     return true;

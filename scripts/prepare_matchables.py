@@ -34,6 +34,9 @@ def prepare_matchables(workspace_dir, reader_loc, q):
 
     data_reader_stage_0 = reader_loc + '/bin/data_reader_stage_0'
     data_reader_stage_0_data = reader_loc + '/share/matchmaker/data_reader_stage_0/data'
+    symbols_off = "107"
+    if q:
+        symbols_off = "symbols_off"
 
     out_dir += '/'
     cmds = []
@@ -374,7 +377,8 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                                                 l2,
                                                 l3,
                                                 l4,
-                                                l5
+                                                l5,
+                                                symbols_off
                                             ])
                                     else:
 
@@ -388,7 +392,8 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                                             l2,
                                             l3,
                                             l4,
-                                            'nil'
+                                            'nil',
+                                            symbols_off
                                         ])
                             else:
 
@@ -402,7 +407,8 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                                     l2,
                                     l3,
                                     'nil',
-                                    'nil'
+                                    'nil',
+                                    symbols_off
                                 ])
                     else:
 
@@ -416,7 +422,8 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                             l2,
                             'nil',
                             'nil',
-                            'nil'
+                            'nil',
+                            symbols_off
                         ])
 
             else:
@@ -431,7 +438,8 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                     'nil',
                     'nil',
                     'nil',
-                    'nil'
+                    'nil',
+                    symbols_off
                 ])
 
     error_filename = '/tmp/prepare_matchables_failed'
