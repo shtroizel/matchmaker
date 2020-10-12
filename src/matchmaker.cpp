@@ -697,7 +697,7 @@ void mm_antonyms(int index, int const * * antonyms, int * count)
     if (iter != letter_boundries.begin())
         --iter;
 
-    auto & s = iter->second.as_synonyms()(index - iter->first);
+    auto & s = iter->second.as_antonyms()(index - iter->first);
     *antonyms = s.data();
     *count = (int) s.size();
 }
