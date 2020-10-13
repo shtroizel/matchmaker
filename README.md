@@ -1,6 +1,6 @@
 # MATCHMAKER
 
-The English Dictionary C++ Library<br>
+The English Dictionary C Library<br>
 
 ## clone and initialize
 ```
