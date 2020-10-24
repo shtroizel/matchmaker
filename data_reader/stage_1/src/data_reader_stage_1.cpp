@@ -306,6 +306,12 @@ end:
 
 
     {
+        // Here we patch all the matchable headers using multiple threads
+        // No pools, no libraries, no needless complexity - just divide the patching work up by # of cpus,
+        // creating a list of entries for each cpu. Then just start a thread for each cpu and wait for them
+        // all to finish
+
+        // sort headers by file size (largest files first)
         std::priority_queue<
             HeaderEntry,
             std::vector<HeaderEntry>,
@@ -318,12 +324,14 @@ end:
 
         header_count = (int) header_entries.size();
 
+        // create vector of header entries for each thread
         int const CPU_COUNT = std::thread::hardware_concurrency();
         std::vector<std::vector<HeaderEntry>> dealt_header_entries;
         dealt_header_entries.reserve(CPU_COUNT);
         for (int i = 0; i < CPU_COUNT; ++i)
             dealt_header_entries.push_back(std::vector<HeaderEntry>());
 
+        // deal out headers to each thread
         int i = 0;
         while (!header_entries.empty())
         {
@@ -334,12 +342,14 @@ end:
                 i = 0;
         }
 
+        // los gehts
         std::vector<std::thread> threads;
         bool all_ok{true};
         for (auto const & deal : dealt_header_entries)
             threads.emplace_back(
                 std::thread(
-                    [&](){
+                    [&]()
+                    {
                         if (all_ok && !patch_matchable_header(deal, contents_SynAnt, by_longest, offsets))
                             all_ok = false;
                     }
