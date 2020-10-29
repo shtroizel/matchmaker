@@ -11,20 +11,20 @@ from shutil import which
 
 def usage():
     print('options for building data_reader_stage_1:\n')
-    print('    -h, --help            print this message\n')
-    print('    -b  --build_dir       build directory')
-    print('                            * defaults to <data_reader_stage_1 root>/build')
-    print('                            * relative paths are relative to <data_reader_stage_1 root>\n')
-    print('    -i  --install_dir     install directory')
-    print('                            * defaults to <data_reader_stage_1 root>/install')
-    print('                            * relative paths are relative to build_dir\n')
-    print('    -m  --matchable_dir   matchable install directory')
-    print('                            * defaults to <data_reader_stage_1 root>/../matchable/install_mm\n')
-    print('    -s  --stage_0_dir     matchmaker stage 0 install directory\n')
-    print('    -c  --clang           force use of clang compiler')
-    print('                            * system compiler used by default\n')
-    print('    -d  --debug           debug build')
-    print('                            * default is release\n')
+    print('    -h, --help              print this message\n')
+    print('    -b  --build_dir         build directory')
+    print('                              * defaults to <data_reader_stage_1 root>/build')
+    print('                              * relative paths are relative to <data_reader_stage_1 root>\n')
+    print('    -i  --install_dir       install directory')
+    print('                              * defaults to <data_reader_stage_1 root>/install')
+    print('                              * relative paths are relative to build_dir\n')
+    print('    -m  --matchable_dir     location of installed matchable cmake directory')
+    print('                              * defaults to <data_reader_stage_1 root>/../matchable/install_mm'\
+                                                       '/lib/matchable/cmake\n')
+    print('    -s  --stage_0_dir       location of installed stage 0 matchmaker cmake directory\n')
+    print('    -c  --clang             force use of clang compiler')
+    print('                              * system compiler used by default\n')
+    print('    -d  --debug             debug build\n')
 
 
 
@@ -45,17 +45,10 @@ def build_and_install(build_dir, install_dir, matchable_dir, stage_0_dir, use_cl
         install_dir = install_dir[:-1]
 
     if matchable_dir == '':
-        matchable_dir = data_reader_stage_1_root + '/../../matchable/install_mm'
-    while matchable_dir[-1] == '/':
-        matchable_dir = matchable_dir[:-1]
-
-    while stage_0_dir[-1] == '/':
-        stage_0_dir = stage_0_dir[:-1]
-
+        matchable_dir = data_reader_stage_1_root + '/../../matchable/install_mm/lib/matchable/cmake'
 
     build_dir = build_dir + '/'
     install_dir = install_dir + '/'
-    matchable_dir = matchable_dir + '/'
 
     shutil.rmtree(build_dir, ignore_errors=True)
     os.makedirs(build_dir)
@@ -65,8 +58,8 @@ def build_and_install(build_dir, install_dir, matchable_dir, stage_0_dir, use_cl
     os.makedirs(install_dir)
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + install_dir]
-    cmake_cmd.append('-Dmatchable_DIR=' + matchable_dir + '/lib/matchable/cmake')
-    cmake_cmd.append('-Dmatchmaker_DIR=' + stage_0_dir + '/lib/matchmaker/cmake')
+    cmake_cmd.append('-Dmatchable_DIR=' + matchable_dir)
+    cmake_cmd.append('-Dmatchmaker_DIR=' + stage_0_dir)
 
     if use_clang:
         clang_c = which('clang')

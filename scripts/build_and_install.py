@@ -81,19 +81,18 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
         install_dir = matchmaker_root + 'install'
     while install_dir[-1] == '/':
         install_dir = install_dir[:-1]
-    install_dir = install_dir + suffix + '/'
-    stage_0_install_dir = stage_0_build_dir + 'install/'
+    install_dir = install_dir + '/'
+    stage_0_install_prefix = stage_0_build_dir + 'install/'
 
     if not retain and not retain_leaves:
-        shutil.rmtree(install_dir, ignore_errors=True)
         shutil.rmtree(stage_0_build_dir, ignore_errors=True)
         shutil.rmtree(build_dir, ignore_errors=True)
     if not os.path.exists(build_dir):
         os.makedirs(build_dir)
     if not os.path.exists(stage_0_build_dir):
         os.makedirs(stage_0_build_dir)
-    if not os.path.exists(stage_0_install_dir):
-        os.makedirs(stage_0_install_dir)
+    if not os.path.exists(stage_0_install_prefix):
+        os.makedirs(stage_0_install_prefix)
 
     stage_0_workspace_dir = stage_0_build_dir + 'workspace/'
 
@@ -189,7 +188,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
 
     print('\n\nMATCHMAKER!\n\n')
 
-    cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + stage_0_install_dir]
+    cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + stage_0_install_prefix]
 
     if debug:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
@@ -276,9 +275,9 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             build_data_reader_cmd.append('-i')
             build_data_reader_cmd.append('../install_mm' + suffix)
             build_data_reader_cmd.append('-m')
-            build_data_reader_cmd.append('../../matchable/install_mm' + suffix)
+            build_data_reader_cmd.append('../../matchable/install_mm' + suffix + '/lib/matchable/cmake')
             build_data_reader_cmd.append('-s')
-            build_data_reader_cmd.append(stage_0_install_dir)
+            build_data_reader_cmd.append(stage_0_install_prefix + '/lib/matchmaker' + suffix + '/cmake')
             if use_clang:
                 build_data_reader_cmd.append('-c')
             if subprocess.run(build_data_reader_cmd).returncode != 0:

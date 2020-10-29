@@ -18,7 +18,11 @@ set(LEAFLIB_COUNT 10)
 
 set(CMAKE_INSTALL_RPATH $ORIGIN)
 
+set(lib_destination ${CMAKE_INSTALL_PREFIX}/lib/matchmaker)
+set(inc_destination ${CMAKE_INSTALL_PREFIX}/include/matchmaker)
 if(q)
+    set(lib_destination "${lib_destination}_q")
+    set(inc_destination "${inc_destination}_q")
     add_definitions(-DQ_ONLY)
 endif()
 
@@ -45,7 +49,7 @@ macro(add_lib_finalization lib_name)
     set_target_properties(matchmaker_${lib_name} PROPERTIES POSITION_INDEPENDENT_CODE 1)
     install(
         TARGETS matchmaker_${lib_name}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/matchmaker
+        DESTINATION ${lib_destination}
         EXPORT matchmaker
     )
 endmacro()
@@ -499,24 +503,25 @@ if(NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "sparc64")
 endif()
 install(
     TARGETS matchmaker
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/matchmaker
+    DESTINATION ${lib_destination}
     EXPORT matchmaker
 )
 install(
-    DIRECTORY ${MATCHMAKER_ROOT}/include/matchmaker
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/include
+    DIRECTORY ${MATCHMAKER_ROOT}/include/matchmaker/
+    DESTINATION ${inc_destination}
+    FILES_MATCHING PATTERN "*.h"
 )
 
 
 # play nice with others
-install(EXPORT matchmaker FILE matchmaker.cmake DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/matchmaker/cmake)
+install(EXPORT matchmaker FILE matchmaker.cmake DESTINATION ${lib_destination}/cmake)
 
 include(CMakePackageConfigHelpers)
 
 configure_package_config_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/config.cmake.in
     "${CMAKE_CURRENT_BINARY_DIR}/matchmaker-config.cmake"
-    INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/matchmaker/cmake"
+    INSTALL_DESTINATION "${lib_destination}/cmake"
     NO_SET_AND_CHECK_MACRO
     NO_CHECK_REQUIRED_COMPONENTS_MACRO
 )
@@ -531,5 +536,5 @@ install(
     FILES
     ${CMAKE_CURRENT_BINARY_DIR}/matchmaker-config.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/matchmaker-config-version.cmake
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/matchmaker/cmake
+    DESTINATION ${lib_destination}/cmake
 )

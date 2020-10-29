@@ -42,7 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <matchable/matchable.h>
 
 #include <matchable/MatchableMaker.h>
+
+#ifdef Q_ONLY
+#include <matchmaker_q/matchmaker.h>
+#else
 #include <matchmaker/matchmaker.h>
+#endif
 
 
 MATCHABLE(
