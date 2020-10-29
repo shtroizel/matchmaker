@@ -17,7 +17,7 @@ if ("${matchmaker_folder_name}" STREQUAL "matchmaker_q")
     add_definitions(-DQ_ONLY)
 endif()
 
-find_package(matchable 11.2.0 REQUIRED)
+find_package(matchable 11.3.0 REQUIRED)
 include_directories(${matchable_DIR}/../../../include)
 
 get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
