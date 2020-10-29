@@ -333,10 +333,21 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
         os.chdir(start_dir)
         exit(1)
 
-    if subprocess.run(['make', '-j' + jobs, 'install']).returncode != 0:
+    if subprocess.run(['make', '-j' + jobs]).returncode != 0:
         print('make failed')
         os.chdir(start_dir)
         exit(1)
+
+    if os.access(install_dir, os.W_OK):
+        if subprocess.run(['make', '-j' + jobs, 'install']).returncode != 0:
+            print('make install failed')
+            os.chdir(start_dir)
+            exit(1)
+    else:
+        if subprocess.run(['sudo', 'make', '-j' + jobs, 'install']).returncode != 0:
+            print('make install failed')
+            os.chdir(start_dir)
+            exit(1)
 
 
     os.chdir(start_dir)
