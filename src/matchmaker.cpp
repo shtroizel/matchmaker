@@ -706,6 +706,8 @@ void mm_antonyms(int index, int const * * antonyms, int * count)
 void mm_complete(char const * prefix, int * start, int * length)
 {
     int const prefix_len = strlen(prefix);
+
+    // shortcut empty prefix to everything
     if (prefix_len == 0)
     {
         *start = 0;
@@ -713,16 +715,33 @@ void mm_complete(char const * prefix, int * start, int * length)
         return;
     }
 
-    *length = 0;
+    auto str_starts_with =
+        [&prefix_len](char const * str, int str_len, char const * starts_with)
+        {
+            int starts_with_len = strlen(starts_with);
 
-    int index{mm_lookup(prefix, nullptr)};
+            if (starts_with_len > str_len)
+                return false;
+
+            for (int i = 0; i < starts_with_len; ++i)
+                if (str[i] != starts_with[i])
+                    return false;
+
+            return true;
+        };
+
+
+    int index = mm_lookup(prefix, nullptr);
+
     *start = index;
-
+    *length = 0;
+    int s_len = 0;
+    char const * s = nullptr;
     for (; index < mm_count(); ++index)
     {
-        // TODO FIXME
-        std::string const s = mm_at(index, nullptr);
-        if ((int) s.size() >= prefix_len && strcmp(s.substr(0, prefix_len).c_str(), prefix) == 0)
+        s = mm_at(index, &s_len);
+
+        if (str_starts_with(s, s_len, prefix))
             *length += 1;
         else
             break;
