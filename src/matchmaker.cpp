@@ -730,7 +730,6 @@ void mm_complete(char const * prefix, int * start, int * length)
             return true;
         };
 
-
     int index = mm_lookup(prefix, nullptr);
 
     *start = index;
