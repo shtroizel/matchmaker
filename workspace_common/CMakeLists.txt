@@ -31,7 +31,7 @@ if(NOT MATCHMAKER_ROOT)
 endif()
 
 add_definitions(-DMATCHABLE_OMIT_BY_INDEX)
-find_package(matchable 11.3.0 REQUIRED)
+find_package(matchable 11.3.2 REQUIRED)
 include_directories(${matchable_DIR}/../../../include)
 
 set(lib_list)
