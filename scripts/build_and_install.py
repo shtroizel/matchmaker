@@ -84,15 +84,25 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
     install_dir = install_dir + '/'
     stage_0_install_prefix = stage_0_build_dir + 'install/'
 
-    if not retain and not retain_leaves:
-        shutil.rmtree(stage_0_build_dir, ignore_errors=True)
-        shutil.rmtree(build_dir, ignore_errors=True)
-    if not os.path.exists(build_dir):
-        os.makedirs(build_dir)
-    if not os.path.exists(stage_0_build_dir):
-        os.makedirs(stage_0_build_dir)
-    if not os.path.exists(stage_0_install_prefix):
-        os.makedirs(stage_0_install_prefix)
+    try:
+        if not retain and not retain_leaves and os.path.exists(stage_0_build_dir):
+            shutil.rmtree(stage_0_build_dir)
+        if not os.path.exists(stage_0_build_dir):
+            os.makedirs(stage_0_build_dir)
+        if not os.path.exists(stage_0_install_prefix):
+            os.makedirs(stage_0_install_prefix)
+    except OSError as error:
+        print("Failed to create matchmaker stage 0 build directory '%s'" % os.path.abspath(stage_0_build_dir))
+        exit(1)
+
+    try:
+        if not retain and not retain_leaves and os.path.exists(build_dir):
+            shutil.rmtree(build_dir)
+        if not os.path.exists(build_dir):
+            os.makedirs(build_dir)
+    except OSError as error:
+        print("Failed to create matchmaker stage 1 build directory '%s'" % os.path.abspath(build_dir))
+        exit(1)
 
     stage_0_workspace_dir = stage_0_build_dir + 'workspace/'
 
