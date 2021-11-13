@@ -100,6 +100,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <matchmaker/parts_of_speech.h>
 #include <matchmaker/longest_words.h>
+#include <matchmaker/ordinal_summation.h>
 
 
 
@@ -107,6 +108,7 @@ using count_func = std::function<int ()>;
 using as_longest_func = std::function<int (int)>;
 using at_func = std::function<std::string const & (int)>;
 using lookup_func = std::function<int (std::string const &, bool *)>;
+using ordinal_summation_func = std::function<int (int)>;
 using flagged_parts_of_speech_func = std::function<std::vector<int8_t> const & (int)>;
 using synonyms_func = std::function<std::vector<int> const & (int)>;
 using antonyms_func = std::function<std::vector<int> const & (int)>;
@@ -117,7 +119,7 @@ using is_place_func = std::function<bool (int)>;
 using is_compound_func = std::function<bool (int)>;
 using is_acronym_func = std::function<bool (int)>;
 
-PROPERTYx13_MATCHABLE(
+PROPERTYx14_MATCHABLE(
     // properties
     count_func,
     count,
@@ -127,6 +129,8 @@ PROPERTYx13_MATCHABLE(
     at,
     lookup_func,
     lookup,
+    ordinal_summation_func,
+    ordinal_summation,
     flagged_parts_of_speech_func,
     flagged_parts_of_speech,
     synonyms_func,
@@ -163,6 +167,7 @@ SET_PROPERTY(letter, _letter, count, &mm_count_##_letter)                       
 SET_PROPERTY(letter, _letter, as_longest, &mm_as_longest_##_letter)                                        \
 SET_PROPERTY(letter, _letter, at, &mm_at_##_letter)                                                        \
 SET_PROPERTY(letter, _letter, lookup, &mm_lookup_##_letter)                                                \
+SET_PROPERTY(letter, _letter, ordinal_summation, &mm_ordinal_summation_##_letter)                          \
 SET_PROPERTY(letter, _letter, flagged_parts_of_speech, &mm_flagged_parts_of_speech_##_letter)              \
 SET_PROPERTY(letter, _letter, synonyms, &mm_synonyms_##_letter)                                            \
 SET_PROPERTY(letter, _letter, antonyms, &mm_antonyms_##_letter)                                            \
@@ -506,6 +511,40 @@ bool mm_length_location(int length, int * index, int * count)
     *index = iter->second.first;
     *count = iter->second.second - iter->second.first + 1;
     return true;
+}
+
+
+int mm_ordinal_summation(int index)
+{
+    if (index < 0 || index >= mm_count())
+        return 0;
+
+    auto iter = std::lower_bound(
+                    letter_boundries.begin(),
+                    letter_boundries.end(),
+                    index,
+                    [](auto const & b, auto const & i){ return b.first <= i; }
+                );
+    if (iter != letter_boundries.begin())
+        --iter;
+
+    return iter->second.as_ordinal_summation()(index - iter->first);
+}
+
+
+void mm_from_ordinal_summation(int summation, int const * * words, int * count)
+{
+    if (count == nullptr)
+        return;
+
+    if (summation < 0 || summation >= (int) ORDINAL_SUMMATIONS.size())
+    {
+        words = nullptr;
+        *count = 0;
+    }
+
+    *words = ORDINAL_SUMMATIONS[summation].data();
+    *count = (int) ORDINAL_SUMMATIONS[summation].size();
 }
 
 

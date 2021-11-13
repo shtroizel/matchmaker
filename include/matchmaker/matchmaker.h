@@ -79,7 +79,7 @@ int mm_lookup(char const * word, bool * found);
  *     a "length index", which is the index the given word would have in a dictionary
  *     sorted from longest to shortest, with 0 for the longest word and mm_count() - 1 for
  *     the shortest.
- * @see from_longest()
+ * @see mm_from_longest()
  */
 int mm_as_longest(int index);
 
@@ -89,7 +89,7 @@ int mm_as_longest(int index);
  *     with 0 for the longest word and mm_count() - 1 for the shortest.
  * @returns
  *     an alphabetic index for the word of the given length index
- * @see as_longest()
+ * @see mm_as_longest()
  */
 int mm_from_longest(int length_index);
 
@@ -99,7 +99,7 @@ int mm_from_longest(int length_index);
  * @param[out] count
  *     number of elements in the array
  * @see
- *     length_location()
+ *     mm_length_location()
  */
 void mm_lengths(int const * * lengths, int * count);
 
@@ -117,6 +117,24 @@ void mm_lengths(int const * * lengths, int * count);
  */
 bool mm_length_location(int length, int * length_index, int * count);
 
+/**
+ * @param[in] index
+ *     index of a word in the dictionary
+ * @returns
+ *     the sum of each of the word's letter's ordinal values, such that upper and lower case share
+ *     the same value and that only letters are evaluated (no spaces, hyphens, etc)
+ */
+int mm_ordinal_summation(int index);
+
+/**
+ * @param[in] summation
+ *     an ordinal summation for which pertaining words are to be retrieved
+ * @param[out] words
+ *     an array of word indexes containing all words with the given ordinal sum
+ * @param[out] count
+ *     number of words found with the given ordinal sum
+ */
+void mm_from_ordinal_summation(int summation, int const * * words, int * count);
 
 /**
  * @param[in] index

@@ -140,6 +140,9 @@ int main(int argc, char ** argv)
     std::string const LONGEST_WORDS_HEADER{
         STAGE_1_WORKSPACE_DIR + "/generated_include/matchmaker/longest_words.h"
     };
+    std::string const ORDINAL_SUMMATION_HEADER{
+        STAGE_1_WORKSPACE_DIR + "/generated_include/matchmaker/ordinal_summation.h"
+    };
     std::string const STAGE_1_MATCHABLES_DIR{
         STAGE_1_WORKSPACE_DIR + "/generated_include/matchmaker/generated_matchables"
     };
@@ -149,7 +152,7 @@ int main(int argc, char ** argv)
     std::cout << "******* stage 1 data reader *******\n" << std::endl;
 
     // process 51155
-    std::cout << "       ------> reading 51155 ..............: " << std::flush;
+    std::cout << "       ------> reading 51155 .................: " << std::flush;
     {
         std::string const FN_51155{DATA_DIR + "/51155/51155-0.txt"};
         FILE * f = fopen(FN_51155.c_str(), "r");
@@ -164,7 +167,7 @@ int main(int argc, char ** argv)
     std::cout << "done" << std::endl;
 
     // process 3202
-    std::cout << "       ------> reading 3202 ...............: " << std::flush;
+    std::cout << "       ------> reading 3202 ..................: " << std::flush;
     {
         std::string const FN_3202{DATA_DIR + "/3202/files/mthesaur.txt"};
         FILE * f = fopen(FN_3202.c_str(), "r");
@@ -179,11 +182,11 @@ int main(int argc, char ** argv)
     std::cout << "done" << std::endl;
 
     // infer missing data
-    std::cout << "       ------> inferring missing data .....: " << std::flush;
+    std::cout << "       ------> inferring missing data ........: " << std::flush;
     infer_missing(contents_SynAnt);
     std::cout << "done" << std::endl;
 
-    std::cout << "       ------> calculating longest words...: " << std::flush;
+    std::cout << "       ------> calculating longest words......: " << std::flush;
     std::vector<int> by_longest;
     std::map<int, std::pair<int, int>> offsets;
     {
@@ -213,26 +216,26 @@ int main(int argc, char ** argv)
 
         if (fputs("#pragma once\n#include <vector>\n#include <map>\n"
                   "inline std::vector<int> const LONGEST_WORDS{\n", f) == EOF)
-            goto err;
+            goto lw_err;
 
         // write initialization code for LONGEST_WORDS
         while (!q.empty())
         {
             if (fputs("    ", f) == EOF)
-                goto err;
+                goto lw_err;
 
             index_to_print = std::to_string(q.top().index);
             if (fputs(index_to_print.c_str(), f) == EOF)
-                goto err;
+                goto lw_err;
 
             if (fputs(",\n", f) == EOF)
-                goto err;
+                goto lw_err;
 
             by_longest.push_back(q.top().index);
             q.pop();
         }
         if (fputs("};\n\n", f) == EOF)
-            goto err;
+            goto lw_err;
 
         // calculate offsets
         {
@@ -265,46 +268,106 @@ int main(int argc, char ** argv)
             std::string index;
 
             if (fputs("inline std::map<int, std::pair<int, int>> const LONGEST_WORDS_OFFSETS{\n", f) == EOF)
-                goto err;
+                goto lw_err;
 
             for (auto const & [l, o] : offsets)
             {
                 if (fputs("    { ", f) == EOF)
-                    goto err;
+                    goto lw_err;
 
                 index = std::to_string(l);
                 if (fputs(index.c_str(), f) == EOF)
-                    goto err;
+                    goto lw_err;
 
                 if (fputs(", { ", f) == EOF)
-                    goto err;
+                    goto lw_err;
 
                 index = std::to_string(o.first);
                 if (fputs(index.c_str(), f) == EOF)
-                    goto err;
+                    goto lw_err;
 
                 if (fputs(", ", f) == EOF)
-                    goto err;
+                    goto lw_err;
 
                 index = std::to_string(o.second);
                 if (fputs(index.c_str(), f) == EOF)
-                    goto err;
+                    goto lw_err;
 
                 if (fputs("} },\n", f) == EOF)
-                    goto err;
+                    goto lw_err;
             }
 
             if (fputs("};\n\n", f) == EOF)
-                goto err;
+                goto lw_err;
         }
 
         fclose(f);
-        goto end;
-err:
+        goto lw_end;
+lw_err:
         std::cout << "failed" << std::endl;
         fclose(f);
         return 1;
-end:
+lw_end:
+        ;
+    }
+    std::cout << "done" << std::endl;
+
+    std::cout << "       ------> calculate ordinal summations...: " << std::flush;
+
+    // calculate ordinal summations for each word
+    {
+        std::array<std::vector<int>, 2782> all_ord_sums;
+        {
+            int word_ord_sum = 0;
+            for (int word_index = 0; word_index < mm_count(); ++word_index)
+            {
+                word_ord_sum = mm_ordinal_summation(word_index);
+                if (word_ord_sum >= 0 && word_ord_sum < 2782)
+                    all_ord_sums[word_ord_sum].push_back(word_index);
+            }
+        }
+
+        FILE * f = fopen(ORDINAL_SUMMATION_HEADER.c_str(), "w");
+        if (nullptr == f)
+        {
+            std::cout << "failed to open " << ORDINAL_SUMMATION_HEADER << std::endl;
+            std::cout << "unable to save ordinal summation info, aborting..." << std::endl;
+            return 1;
+        }
+
+        if (fputs("#pragma once\n"
+                  "#include <array>\n"
+                  "#include <vector>\n"
+                  "inline std::array<std::vector<int>, 2782> const ORDINAL_SUMMATIONS{{\n", f) == EOF)
+            goto ord_sum_err;
+
+        for (auto const & words : all_ord_sums)
+        {
+            if (fputs("    { ", f) == EOF)
+                goto ord_sum_err;
+
+            for (auto word_index : words)
+            {
+                std::string word_str = std::to_string(word_index);
+                word_str += ", ";
+                if (fputs(word_str.c_str(), f) == EOF)
+                    goto ord_sum_err;
+            }
+            if (fputs("},\n", f) == EOF)
+                goto ord_sum_err;
+        }
+        if (fputs("}};\n\n", f) == EOF)
+            goto ord_sum_err;
+
+        fclose(f);
+        goto ord_sum_end;
+
+ord_sum_err:
+        std::cout << "failed" << std::endl;
+        fclose(f);
+        return 1;
+
+ord_sum_end:
         ;
     }
     std::cout << "done" << std::endl;

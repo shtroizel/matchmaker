@@ -47,6 +47,7 @@ int mm_count_snth();
 std::string const & mm_at_snth(int index);
 int mm_lookup_snth(std::string const & word, bool * found);
 int mm_as_longest_snth(int index);
+int mm_ordinal_summation_snth(int index);
 std::vector<int8_t> const & mm_flagged_parts_of_speech_snth(int index);
 bool mm_is_name_snth(int index);
 bool mm_is_male_name_snth(int index);

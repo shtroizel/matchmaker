@@ -84,6 +84,19 @@ int mm_lookup_snth(std::string const & word, bool * found)
 }
 
 
+int mm_ordinal_summation_snth(int index)
+{
+    if (index < 0 || index >= mm_count_snth())
+    {
+        std::cout << "mm_ordinal_summation(" << index << ") out of bounds with mm_count_snth() of: "
+                  << mm_count_snth() << std::endl;
+        return 0;
+    }
+
+    return word_snth::from_by_string_index(index).as_ordinal_summation();
+}
+
+
 std::vector<int8_t> const & mm_flagged_parts_of_speech_snth(int index)
 {
     static std::vector<int8_t> const empty{};

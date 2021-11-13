@@ -37,7 +37,7 @@ def usage():
     print('                                    * incremental as having -r, -l, or -m options\n')
     print('    -j  --jobs                    max jobs')
     print('                                    * default is cpu count [' +                                 \
-            str(multiprocessing.cpu_count()) + '])\n')
+            str(multiprocessing.cpu_count()) + ']\n')
     print('    -a, --atomic_libs             instead of multi-libs, each prefix gets its own lib')
     print('                                    * increases startup time for programs 80x')
     print('                                    * adds \'_atomic\' suffix to build_dir')
@@ -103,6 +103,12 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
     except OSError as error:
         print("Failed to create matchmaker stage 1 build directory '%s'" % os.path.abspath(build_dir))
         exit(1)
+
+    try:
+        if not os.path.exists(install_dir):
+            os.makedirs(install_dir)
+    except OSError as error:
+        pass
 
     stage_0_workspace_dir = stage_0_build_dir + 'workspace/'
 
@@ -184,12 +190,18 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
                 exit(1)
             print('\n\nstage 0 matchables ready!')
 
-        # create longest_word_stage_0.h
+        # create longest_words.h for stage 0
         stage_0_longest_word_file = stage_0_workspace_dir + 'generated_include/matchmaker/longest_words.h'
         with open(stage_0_longest_word_file, 'w') as f:
             f.write('#pragma once\n#include<vector>\n#include<map>\n')
             f.write('inline std::vector<int> const LONGEST_WORDS{0};\n')
-            f.write('static std::map<int, std::pair<int, int>> const LONGEST_WORDS_OFFSETS;\n\n')
+            f.write('inline std::map<int, std::pair<int, int>> const LONGEST_WORDS_OFFSETS;\n\n')
+
+        # create ordinal_summation.h for stage 0
+        stage_0_ord_sum_file = stage_0_workspace_dir + 'generated_include/matchmaker/ordinal_summation.h'
+        with open(stage_0_ord_sum_file, 'w') as f:
+            f.write('#pragma once\n#include<array>\n#include<vector>\n')
+            f.write('inline std::array<std::vector<int>, 2782> const ORDINAL_SUMMATIONS;\n\n')
 
 
 

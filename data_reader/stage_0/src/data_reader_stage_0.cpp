@@ -268,15 +268,16 @@ int main(int argc, char ** argv)
     mm.grab("word" + prefix)->add_property("int", "syn");
     mm.grab("word" + prefix)->add_property("int", "ant");
     mm.grab("word" + prefix)->add_property("int", "by_longest_index");
+    mm.grab("word" + prefix)->add_property("int", "ordinal_summation");
 
     // "word_attribute" properties
     {
-    auto add_att_prop =
-        [&](word_attribute::Type att)
-        {
-            std::string const prop_name = "is_" + att.as_string();
-            mm.grab("word" + prefix)->add_property("int8_t", prop_name);
-        };
+        auto add_att_prop =
+            [&](word_attribute::Type att)
+            {
+                std::string const prop_name = "is_" + att.as_string();
+                mm.grab("word" + prefix)->add_property("int8_t", prop_name);
+            };
 
         add_att_prop(word_attribute::name::grab());
         add_att_prop(word_attribute::male_name::grab());
@@ -972,8 +973,11 @@ void add_word(
     matchable::MatchableMaker & mm
 )
 {
+    // create new variant
     std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
     mm.grab("word" + prefix)->add_variant(escaped);
+
+    // property for parts of speech
     std::vector<std::string> property_values;
     for (auto p : parts_of_speech::variants_by_string())
     {
@@ -983,6 +987,24 @@ void add_word(
             property_values.push_back("0");
     }
     mm.grab("word" + prefix)->set_propertyvect(escaped, "pos", property_values);
+
+    // property for ordinal sum
+    {
+        int ordinal_sum = 0;
+        int letter = 0;
+        for (int letter_index = 0; letter_index < (int) word.size(); ++letter_index)
+        {
+            letter = (int) word[letter_index];
+            if (letter > 96)
+                letter -= 96;
+            else if (letter > 64)
+                letter -= 64;
+
+            if (letter >= 1 && letter <= 26)
+                ordinal_sum += letter;
+        }
+        mm.grab("word" + prefix)->set_property(escaped, "ordinal_summation", std::to_string(ordinal_sum));
+    }
 
     // properties from word attributes
     {

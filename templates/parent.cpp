@@ -104,6 +104,7 @@ using count_func = std::function<int ()>;
 using as_longest_func = std::function<int (int)>;
 using at_func = std::function<std::string const & (int)>;
 using lookup_func = std::function<int (std::string const &, bool *)>;
+using ordinal_summation_func = std::function<int (int)>;
 using flagged_parts_of_speech_func = std::function<std::vector<int8_t> const & (int)>;
 using synonyms_func = std::function<std::vector<int> const & (int)>;
 using antonyms_func = std::function<std::vector<int> const & (int)>;
@@ -114,7 +115,7 @@ using is_place_func = std::function<bool (int)>;
 using is_compound_func = std::function<bool (int)>;
 using is_acronym_func = std::function<bool (int)>;
 
-PROPERTYx13_MATCHABLE(
+PROPERTYx14_MATCHABLE(
     count_func,
     count,
     as_longest_func,
@@ -123,6 +124,8 @@ PROPERTYx13_MATCHABLE(
     at,
     lookup_func,
     lookup,
+    ordinal_summation_func,
+    ordinal_summation,
     flagged_parts_of_speech_func,
     flagged_parts_of_speech,
     synonyms_func,
@@ -148,10 +151,11 @@ PROPERTYx13_MATCHABLE(
 
 
 #define _set_properties(_letter)                                                                           \
-SET_PROPERTY(letter_snth, _letter, count, &mm_count_snth_##_letter)                                         \
+SET_PROPERTY(letter_snth, _letter, count, &mm_count_snth_##_letter)                                        \
 SET_PROPERTY(letter_snth, _letter, as_longest, &mm_as_longest_snth_##_letter)                              \
 SET_PROPERTY(letter_snth, _letter, at, &mm_at_snth_##_letter)                                              \
 SET_PROPERTY(letter_snth, _letter, lookup, &mm_lookup_snth_##_letter)                                      \
+SET_PROPERTY(letter_snth, _letter, ordinal_summation, &mm_ordinal_summation_snth_##_letter)                \
 SET_PROPERTY(letter_snth, _letter, flagged_parts_of_speech, &mm_flagged_parts_of_speech_snth_##_letter)    \
 SET_PROPERTY(letter_snth, _letter, synonyms, &mm_synonyms_snth_##_letter)                                  \
 SET_PROPERTY(letter_snth, _letter, antonyms, &mm_antonyms_snth_##_letter)                                  \
@@ -453,6 +457,24 @@ lookup_failed:
     if (nullptr != found)
         *found = false;
     return 0;
+}
+
+
+int mm_ordinal_summation_snth(int index)
+{
+    if (index < 0 || index >= mm_count_snth())
+        return 0;
+
+    auto iter = std::lower_bound(
+                    letter_boundries.begin(),
+                    letter_boundries.end(),
+                    index,
+                    [](auto const & b, auto const & i){ return b.first <= i; }
+                );
+    if (iter != letter_boundries.begin())
+        --iter;
+
+    return iter->second.as_ordinal_summation()(index - iter->first);
 }
 
 
