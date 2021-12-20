@@ -6,21 +6,19 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra")
 
-find_package(matchable 11.3.2 REQUIRED)
+find_package(matchable 12.0.0 REQUIRED)
 include_directories(
     ${matchable_DIR}/../../../include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../common
 )
-
-add_executable(${CMAKE_PROJECT_NAME} src/${CMAKE_PROJECT_NAME}.cpp)
-target_link_libraries(${CMAKE_PROJECT_NAME} matchablemaker_static)
-install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION bin)
 
 ##### install extracted data #####
 file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/3201)
 file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/3202)
 file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/3203)
 file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/51155)
+file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/Crumbs)
 add_custom_target(ex_3201 ALL)
 add_custom_command(
     TARGET ex_3201
@@ -60,3 +58,21 @@ add_custom_command(
     COMMENT "Unpacking 5115-0..."
     VERBATIM
 )
+add_custom_target(ex_Crumbs ALL)
+add_custom_command(
+    TARGET ex_Crumbs
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/../data/Crumbs/Crumbs.tar.gz
+    WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/Crumbs
+    COMMENT "Unpacking Crumbs..."
+    VERBATIM
+)
+
+add_executable(${CMAKE_PROJECT_NAME} src/${CMAKE_PROJECT_NAME}.cpp)
+target_link_libraries(${CMAKE_PROJECT_NAME} matchablemaker_static)
+add_dependencies(${CMAKE_PROJECT_NAME} ex_3201)
+add_dependencies(${CMAKE_PROJECT_NAME} ex_3202)
+add_dependencies(${CMAKE_PROJECT_NAME} ex_3203)
+add_dependencies(${CMAKE_PROJECT_NAME} ex_51155-0)
+add_dependencies(${CMAKE_PROJECT_NAME} ex_Crumbs)
+install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION bin)

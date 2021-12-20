@@ -44,6 +44,8 @@ def usage():
     print('                                    * adds \'_atomic\' suffix to install_dir')
     print('                                    * avoidance recommended\n')
     print('    -q, --q                       q only')
+    print('                                    * only build about 1% of the dictionary')
+    print('                                    * builds much faster')
     print('                                    * adds \'_q\' suffix to build_dir')
     print('                                    * adds \'_q\' suffix to install_dir\n')
     print('    -d, --debug                   debug build\n')
@@ -60,8 +62,10 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
     matchmaker_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
     os.chdir(matchmaker_root)
 
+    q_mode = "included"
     suffix = ''
     if q:
+        q_mode = "only"
         suffix = '_q'
     if atomic_libs:
         suffix = suffix + '_atomic'
@@ -133,8 +137,6 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
 
         print('preparing matchmaker code...\n')
         prepare_letters_cmd = ['scripts/prepare_letters.py', '-w', stage_0_workspace_dir]
-        if q:
-            prepare_letters_cmd.append('-q')
         if retain_leaves:
             prepare_letters_cmd.append('-p')
         if subprocess.run(prepare_letters_cmd).returncode != 0:
@@ -201,7 +203,32 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
         stage_0_ord_sum_file = stage_0_workspace_dir + 'generated_include/matchmaker/ordinal_summation.h'
         with open(stage_0_ord_sum_file, 'w') as f:
             f.write('#pragma once\n#include<array>\n#include<vector>\n')
-            f.write('inline std::array<std::vector<int>, 2782> const ORDINAL_SUMMATIONS;\n\n')
+            f.write('inline std::array<std::vector<int>, 1> const ORDINAL_SUMMATIONS;\n\n')
+
+        # create books.h for stage 0
+        stage_0_books_file = stage_0_workspace_dir + 'generated_include/matchmaker/books.h'
+        with open(stage_0_books_file, 'w') as f:
+            f.write('#pragma once\n')
+            f.write('#include <vector>\n\n\n')
+            f.write('struct BookWord\n')
+            f.write('{\n')
+            f.write('    int word{-1};\n')
+            f.write('    int parent_phrase{-1};\n')
+            f.write('    int parent_phrase_start_index{-1};\n')
+            f.write('};\n\n')
+            f.write('struct Chapter\n')
+            f.write('{\n')
+            f.write('    std::vector<int> title;\n')
+            f.write('    std::vector<int> subtitle;\n')
+            f.write('    std::vector<std::vector<BookWord>> paragraphs;\n')
+            f.write('};\n\n')
+            f.write('struct Book\n')
+            f.write('{\n')
+            f.write('    std::vector<int> title;\n')
+            f.write('    std::vector<int> author;\n')
+            f.write('    std::vector<Chapter> chapters;\n')
+            f.write('};\n')
+            f.write('inline std::vector<Book> const books;\n\n')
 
 
 
@@ -277,9 +304,12 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
                         stage_1_workspace_dir + 'config.cmake.in')
 
             os.symlink(stage_0_workspace_dir + 'generated_src', stage_1_workspace_dir + 'generated_src')
+            os.symlink(stage_0_workspace_dir + 'book_vocabulary', stage_1_workspace_dir + 'book_vocabulary')
             os.makedirs(stage_1_workspace_dir + 'generated_include/matchmaker')
             os.symlink(stage_0_workspace_dir + 'generated_include/matchmaker/generated_letters',
                        stage_1_workspace_dir + 'generated_include/matchmaker/generated_letters')
+            os.symlink(stage_0_workspace_dir + 'generated_include/matchmaker/generated_symbols',
+                       stage_1_workspace_dir + 'generated_include/matchmaker/generated_symbols')
 
         if (not retain_matchables and not retain_leaves) or not os.path.exists(stage_1_workspace_dir       \
                 + 'generated_include/matchmaker/generated_matchables'):
@@ -314,7 +344,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             dr_stage_1_binary = dr_stage_1_install_dir + '/bin/data_reader_stage_1'
             dr_stage_1_data = dr_stage_1_install_dir + '/share/matchmaker/data_reader_stage_1/data'
 
-            run_dr_stage_1_cmd = [dr_stage_1_binary, dr_stage_1_data, stage_1_workspace_dir]
+            run_dr_stage_1_cmd = [dr_stage_1_binary, dr_stage_1_data, stage_1_workspace_dir, q_mode]
             if subprocess.run(run_dr_stage_1_cmd).returncode != 0:
                 print('data_reader_stage_1 failed')
                 exit(1)

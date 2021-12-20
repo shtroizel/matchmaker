@@ -558,6 +558,22 @@ def prepare_letters(workspace_root, q, parents_only):
                         print(replaced, end='')
 
 
+    if not parents_only:
+        os.makedirs(generated_include + '/matchmaker/generated_symbols')
+        for sym in ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'mns',
+                    'dot', 'slsh', 'cln', 'quot', 'hsh', 'dol', 'sqt', 'pl', 'pls', 'gt', 'uscr', 'tld']:
+            os.makedirs(generated_include + '/matchmaker/generated_symbols/' + sym)
+            sym_h = generated_include + 'matchmaker/generated_symbols/' + sym + '/' + sym + '.h'
+            sym_cpp = generated_src + sym + '.cpp'
+            shutil.copy(leaf_h, sym_h)
+            shutil.copy(leaf_cpp, sym_cpp)
+            for filename in [sym_h, sym_cpp]:
+                for line in fileinput.input(filename, inplace=True):
+                    replaced = line.replace("aoeu", sym)
+                    replaced = replaced.replace("snth", sym)
+                    replaced = replaced.replace("generated_letters", "generated_symbols")
+                    print(replaced, end='')
+
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hw:qp', ['help', 'workspace_root', 'q', 'parents_only'])

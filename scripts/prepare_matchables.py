@@ -25,27 +25,27 @@ def usage():
 def prepare_matchables(workspace_dir, reader_loc, q):
 
     out_dir = workspace_dir + '/generated_include/matchmaker/generated_matchables/'
-
     shutil.rmtree(out_dir, ignore_errors=True)
     os.makedirs(out_dir)
+
+    book_vocabulary_dir = workspace_dir + '/book_vocabulary/'
+    shutil.rmtree(book_vocabulary_dir, ignore_errors=True)
+    os.makedirs(book_vocabulary_dir)
 
     start_dir = os.getcwd()
     os.chdir(reader_loc)
 
     data_reader_stage_0 = reader_loc + '/bin/data_reader_stage_0'
     data_reader_stage_0_data = reader_loc + '/share/matchmaker/data_reader_stage_0/data'
-    symbols_off = "107"
+    q_mode = "included"
     if q:
-        symbols_off = "symbols_off"
+        q_mode = "only"
+
 
     out_dir += '/'
     cmds = []
 
     for l0 in ascii_uppercase + ascii_lowercase:
-        if q:
-            if l0 != "q" and l0 != "Q":
-                continue
-
         os.makedirs(out_dir + l0)
 
         for l1 in ascii_uppercase + ascii_lowercase:
@@ -383,6 +383,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                                             cmds.append([
                                                 data_reader_stage_0,
                                                 data_reader_stage_0_data,
+                                                book_vocabulary_dir,
                                                 out_dir + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4   \
                                                         + '/' + l5,
                                                 l0,
@@ -391,7 +392,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                                                 l3,
                                                 l4,
                                                 l5,
-                                                symbols_off
+                                                q_mode
                                             ])
                                     else:
 
@@ -399,6 +400,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                                         cmds.append([
                                             data_reader_stage_0,
                                             data_reader_stage_0_data,
+                                            book_vocabulary_dir,
                                             out_dir + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4,
                                             l0,
                                             l1,
@@ -406,7 +408,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                                             l3,
                                             l4,
                                             'nil',
-                                            symbols_off
+                                            q_mode
                                         ])
                             else:
 
@@ -414,6 +416,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                                 cmds.append([
                                     data_reader_stage_0,
                                     data_reader_stage_0_data,
+                                    book_vocabulary_dir,
                                     out_dir + l0 + '/' + l1 + '/' + l2 + '/' + l3,
                                     l0,
                                     l1,
@@ -421,7 +424,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                                     l3,
                                     'nil',
                                     'nil',
-                                    symbols_off
+                                    q_mode
                                 ])
                     else:
 
@@ -429,6 +432,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                         cmds.append([
                             data_reader_stage_0,
                             data_reader_stage_0_data,
+                            book_vocabulary_dir,
                             out_dir + l0 + '/' + l1 + '/' + l2,
                             l0,
                             l1,
@@ -436,7 +440,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                             'nil',
                             'nil',
                             'nil',
-                            symbols_off
+                            q_mode
                         ])
 
             else:
@@ -445,6 +449,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                 cmds.append([
                     data_reader_stage_0,
                     data_reader_stage_0_data,
+                    book_vocabulary_dir,
                     out_dir + l0 + '/' + l1,
                     l0,
                     l1,
@@ -452,8 +457,47 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                     'nil',
                     'nil',
                     'nil',
-                    symbols_off
+                    q_mode
                 ])
+
+
+    for sym in [('0', 'zero'),
+                ('1', 'one'),
+                ('2', 'two'),
+                ('3', 'three'),
+                ('4', 'four'),
+                ('5', 'five'),
+                ('6', 'six'),
+                ('7', 'seven'),
+                ('8', 'eight'),
+                ('9', 'nine'),
+                ('-', 'mns'),
+                ('.', 'dot'),
+                ('/', 'slsh'),
+                (':', 'cln'),
+                ('"', 'quot'),
+                ('#', 'hsh'),
+                ('$', 'dol'),
+                ('\'', 'sqt'),
+                ('(', 'pl'),
+                ('+', 'pls'),
+                ('>', 'gt'),
+                ('_', 'uscr'),
+                ('~', 'tld')]:
+        os.makedirs(out_dir + sym[1])
+        cmds.append([
+            data_reader_stage_0,
+            data_reader_stage_0_data,
+            book_vocabulary_dir,
+            out_dir + sym[1],
+            sym[0],
+            'nil',
+            'nil',
+            'nil',
+            'nil',
+            'nil',
+            q_mode
+        ])
 
     error_filename = '/tmp/prepare_matchables_failed'
     def prepare(cmd):

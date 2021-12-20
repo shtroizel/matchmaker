@@ -108,14 +108,23 @@ using ordinal_summation_func = std::function<int (int)>;
 using flagged_parts_of_speech_func = std::function<std::vector<int8_t> const & (int)>;
 using synonyms_func = std::function<std::vector<int> const & (int)>;
 using antonyms_func = std::function<std::vector<int> const & (int)>;
+using embedded_func = std::function<std::vector<int> const & (int)>;
 using is_name_func = std::function<bool (int)>;
 using is_male_name_func = std::function<bool (int)>;
 using is_female_name_func = std::function<bool (int)>;
 using is_place_func = std::function<bool (int)>;
 using is_compound_func = std::function<bool (int)>;
 using is_acronym_func = std::function<bool (int)>;
+using is_phrase_func = std::function<bool (int)>;
+using is_used_in_book_func = std::function<bool (int, int)>;
+using locations_func = std::function<void (int,
+                                           int const * *,
+                                           int const * *,
+                                           int const * *,
+                                           int const * *,
+                                           int *)>;
 
-PROPERTYx14_MATCHABLE(
+PROPERTYx18_MATCHABLE(
     count_func,
     count,
     as_longest_func,
@@ -132,6 +141,10 @@ PROPERTYx14_MATCHABLE(
     synonyms,
     antonyms_func,
     antonyms,
+    embedded_func,
+    embedded,
+    locations_func,
+    locations,
     is_name_func,
     is_name,
     is_male_name_func,
@@ -144,6 +157,11 @@ PROPERTYx14_MATCHABLE(
     is_compound,
     is_acronym_func,
     is_acronym,
+    is_phrase_func,
+    is_phrase,
+    is_used_in_book_func,
+    is_used_in_book,
+
     letter_snth,
     A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
     a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
@@ -159,12 +177,16 @@ SET_PROPERTY(letter_snth, _letter, ordinal_summation, &mm_ordinal_summation_snth
 SET_PROPERTY(letter_snth, _letter, flagged_parts_of_speech, &mm_flagged_parts_of_speech_snth_##_letter)    \
 SET_PROPERTY(letter_snth, _letter, synonyms, &mm_synonyms_snth_##_letter)                                  \
 SET_PROPERTY(letter_snth, _letter, antonyms, &mm_antonyms_snth_##_letter)                                  \
+SET_PROPERTY(letter_snth, _letter, embedded, &mm_embedded_snth_##_letter)                                  \
+SET_PROPERTY(letter_snth, _letter, locations, &mm_locations_snth_##_letter)                                \
 SET_PROPERTY(letter_snth, _letter, is_name, &mm_is_name_snth_##_letter)                                    \
 SET_PROPERTY(letter_snth, _letter, is_male_name, &mm_is_male_name_snth_##_letter)                          \
 SET_PROPERTY(letter_snth, _letter, is_female_name, &mm_is_female_name_snth_##_letter)                      \
 SET_PROPERTY(letter_snth, _letter, is_place, &mm_is_place_snth_##_letter)                                  \
 SET_PROPERTY(letter_snth, _letter, is_compound, &mm_is_compound_snth_##_letter)                            \
-SET_PROPERTY(letter_snth, _letter, is_acronym, &mm_is_acronym_snth_##_letter)
+SET_PROPERTY(letter_snth, _letter, is_acronym, &mm_is_acronym_snth_##_letter)                              \
+SET_PROPERTY(letter_snth, _letter, is_phrase, &mm_is_phrase_snth_##_letter)                                \
+SET_PROPERTY(letter_snth, _letter, is_used_in_book, &mm_is_used_in_book_snth_##_letter)
 
 _set_properties(A)
 _set_properties(B)
@@ -417,6 +439,10 @@ int mm_lookup_snth(std::string const & word, bool * found)
     if (word[depth] < 32 || word[depth] > 126)
         goto lookup_failed;
 
+    for (int i = 0; i <= depth; ++i)
+        if (word[i] < 'A' || (word[i] > 'Z' && word[i] < 'a') || word[i] > 'z')
+            return mm_lookup_snth_A(word, found);
+
     {
         int i = word[depth];
         if (word[depth] < 'A')
@@ -617,6 +643,44 @@ bool mm_is_acronym_snth(int index)
 }
 
 
+bool mm_is_phrase_snth(int index)
+{
+    if (index < 0 || index >= mm_count_snth())
+        return false;
+
+    auto iter = std::lower_bound(
+                    letter_boundries.begin(),
+                    letter_boundries.end(),
+                    index,
+                    [](auto const & b, auto const & i){ return b.first <= i; }
+                );
+
+    if (iter != letter_boundries.begin())
+        --iter;
+
+    return iter->second.as_is_phrase()(index - iter->first) != 0;
+}
+
+
+bool mm_is_used_in_book_snth(int book_index, int index)
+{
+    if (index < 0 || index >= mm_count_snth())
+        return false;
+
+    auto iter = std::lower_bound(
+                    letter_boundries.begin(),
+                    letter_boundries.end(),
+                    index,
+                    [](auto const & b, auto const & i){ return b.first <= i; }
+                );
+
+    if (iter != letter_boundries.begin())
+        --iter;
+
+    return iter->second.as_is_used_in_book()(book_index, index - iter->first) != 0;
+}
+
+
 std::vector<int> const & mm_synonyms_snth(int index)
 {
     static std::vector<int> const empty{};
@@ -664,4 +728,69 @@ std::vector<int> const & mm_antonyms_snth(int index)
         --iter;
 
     return iter->second.as_antonyms()(index - iter->first);
+}
+
+
+std::vector<int> const & mm_embedded_snth(int index)
+{
+    static std::vector<int> const empty{};
+
+    if (index < 0 || index >= mm_count_snth())
+    {
+        std::cout << "mm_embedded_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                  << mm_count_snth() << std::endl;
+        return empty;
+    }
+
+    auto iter = std::lower_bound(
+                    letter_boundries.begin(),
+                    letter_boundries.end(),
+                    index,
+                    [](auto const & b, auto const & i){ return b.first <= i; }
+                );
+
+    if (iter != letter_boundries.begin())
+        --iter;
+
+    return iter->second.as_embedded()(index - iter->first);
+}
+
+
+void mm_locations_snth(
+    int index,
+    int const * * book_indexes,
+    int const * * chapter_indexes,
+    int const * * paragraph_indexes,
+    int const * * word_indexes,
+    int * count
+)
+{
+    if (index < 0 || index >= mm_count_snth())
+    {
+        std::cout << "mm_locations_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                  << mm_count_snth() << std::endl;
+        *book_indexes = nullptr;
+        *chapter_indexes = nullptr;
+        *paragraph_indexes = nullptr;
+        *word_indexes = nullptr;
+        *count = 0;
+        return;
+    }
+
+    auto iter = std::lower_bound(
+                    letter_boundries.begin(),
+                    letter_boundries.end(),
+                    index,
+                    [](auto const & b, auto const & i){ return b.first <= i; }
+                );
+
+    if (iter != letter_boundries.begin())
+        --iter;
+
+    iter->second.as_locations()(index - iter->first,
+                                book_indexes,
+                                chapter_indexes,
+                                paragraph_indexes,
+                                word_indexes,
+                                count);
 }

@@ -17,8 +17,12 @@ if ("${matchmaker_folder_name}" STREQUAL "matchmaker_q")
     add_definitions(-DQ_ONLY)
 endif()
 
-find_package(matchable 11.3.2 REQUIRED)
-include_directories(${matchable_DIR}/../../../include)
+message(STATUS "matchable_DIR: ${matchable_DIR}")
+find_package(matchable 12.0.0 REQUIRED)
+include_directories(
+    ${matchable_DIR}/../../../include
+    ${PROJECT_SOURCE_DIR}/../common
+)
 
 get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
 set(CMAKE_INSTALL_RPATH "${rpath_dir}")
@@ -26,13 +30,11 @@ find_package(matchmaker 3.0.1 REQUIRED)
 
 find_package(Threads REQUIRED)
 
-add_executable(${CMAKE_PROJECT_NAME} src/${CMAKE_PROJECT_NAME}.cpp)
-target_link_libraries(${CMAKE_PROJECT_NAME} matchablemaker_static matchmaker stdc++fs Threads::Threads)
-install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION bin)
 
 ##### install extracted data #####
 file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/3202)
 file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/51155)
+file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/Crumbs)
 add_custom_target(ex_3202 ALL)
 add_custom_command(
     TARGET ex_3202
@@ -52,3 +54,35 @@ add_custom_command(
     COMMENT "Unpacking 5115-0..."
     VERBATIM
 )
+add_custom_target(ex_Crumbs ALL)
+add_custom_command(
+    TARGET ex_Crumbs
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar xvf ${PROJECT_SOURCE_DIR}/../data/Crumbs/Crumbs.tar.gz
+    WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/matchmaker/${CMAKE_PROJECT_NAME}/data/Crumbs
+    COMMENT "Unpacking crumbs..."
+    VERBATIM
+)
+
+set(
+    srcs
+    src/${CMAKE_PROJECT_NAME}.cpp
+    src/discover_book_vocabulary.cpp
+    src/read_51155.cpp
+    src/read_3202.cpp
+    src/fill_reflections.cpp
+    src/calculate_longest_words.cpp
+    src/discover_embedded_words.cpp
+    src/generate_ordinal_summation_header.cpp
+    src/read_crumbs.cpp
+    src/create_books.cpp
+    src/record_word_locations.cpp
+    src/patch_matchables.cpp
+)
+
+add_executable(${CMAKE_PROJECT_NAME} ${srcs})
+target_link_libraries(${CMAKE_PROJECT_NAME} matchablemaker_static matchmaker stdc++fs Threads::Threads)
+add_dependencies(${CMAKE_PROJECT_NAME} ex_3202)
+add_dependencies(${CMAKE_PROJECT_NAME} ex_51155-0)
+add_dependencies(${CMAKE_PROJECT_NAME} ex_Crumbs)
+install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION bin)

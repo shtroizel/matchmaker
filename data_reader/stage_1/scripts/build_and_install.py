@@ -19,8 +19,8 @@ def usage():
     print('                              * defaults to <data_reader_stage_1 root>/install')
     print('                              * relative paths are relative to build_dir\n')
     print('    -m  --matchable_dir     location of installed matchable cmake directory')
-    print('                              * defaults to <data_reader_stage_1 root>/../matchable/install_mm'\
-                                                       '/lib/matchable/cmake\n')
+    print('                              * defaults to <data_reader_stage_1 root>/../../matchable/'\
+                                               'install_mm/lib/matchable/cmake\n')
     print('    -s  --stage_0_dir       location of installed stage 0 matchmaker cmake directory\n')
     print('    -c  --clang             force use of clang compiler')
     print('                              * system compiler used by default\n')
