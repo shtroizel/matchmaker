@@ -40,82 +40,82 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <matchable/matchable.h>
 
-#include <matchmaker/generated_letters/A/A.h>
-#include <matchmaker/generated_letters/B/B.h>
-#include <matchmaker/generated_letters/C/C.h>
-#include <matchmaker/generated_letters/D/D.h>
-#include <matchmaker/generated_letters/E/E.h>
-#include <matchmaker/generated_letters/F/F.h>
-#include <matchmaker/generated_letters/G/G.h>
-#include <matchmaker/generated_letters/H/H.h>
-#include <matchmaker/generated_letters/I/I.h>
-#include <matchmaker/generated_letters/J/J.h>
-#include <matchmaker/generated_letters/K/K.h>
-#include <matchmaker/generated_letters/L/L.h>
-#include <matchmaker/generated_letters/M/M.h>
-#include <matchmaker/generated_letters/N/N.h>
-#include <matchmaker/generated_letters/O/O.h>
-#include <matchmaker/generated_letters/P/P.h>
-#include <matchmaker/generated_letters/Q/Q.h>
-#include <matchmaker/generated_letters/R/R.h>
-#include <matchmaker/generated_letters/S/S.h>
-#include <matchmaker/generated_letters/T/T.h>
-#include <matchmaker/generated_letters/U/U.h>
-#include <matchmaker/generated_letters/V/V.h>
-#include <matchmaker/generated_letters/W/W.h>
-#include <matchmaker/generated_letters/X/X.h>
-#include <matchmaker/generated_letters/Y/Y.h>
-#include <matchmaker/generated_letters/Z/Z.h>
-#include <matchmaker/generated_letters/a/a.h>
-#include <matchmaker/generated_letters/b/b.h>
-#include <matchmaker/generated_letters/c/c.h>
-#include <matchmaker/generated_letters/d/d.h>
-#include <matchmaker/generated_letters/e/e.h>
-#include <matchmaker/generated_letters/f/f.h>
-#include <matchmaker/generated_letters/g/g.h>
-#include <matchmaker/generated_letters/h/h.h>
-#include <matchmaker/generated_letters/i/i.h>
-#include <matchmaker/generated_letters/j/j.h>
-#include <matchmaker/generated_letters/k/k.h>
-#include <matchmaker/generated_letters/l/l.h>
-#include <matchmaker/generated_letters/m/m.h>
-#include <matchmaker/generated_letters/n/n.h>
-#include <matchmaker/generated_letters/o/o.h>
-#include <matchmaker/generated_letters/p/p.h>
-#include <matchmaker/generated_letters/q/q.h>
-#include <matchmaker/generated_letters/r/r.h>
-#include <matchmaker/generated_letters/s/s.h>
-#include <matchmaker/generated_letters/t/t.h>
-#include <matchmaker/generated_letters/u/u.h>
-#include <matchmaker/generated_letters/v/v.h>
-#include <matchmaker/generated_letters/w/w.h>
-#include <matchmaker/generated_letters/x/x.h>
-#include <matchmaker/generated_letters/y/y.h>
-#include <matchmaker/generated_letters/z/z.h>
+#include <matchmaker/generated_symbols/esc_0/esc_0.h>
+#include <matchmaker/generated_symbols/esc_1/esc_1.h>
+#include <matchmaker/generated_symbols/esc_2/esc_2.h>
+#include <matchmaker/generated_symbols/esc_3/esc_3.h>
+#include <matchmaker/generated_symbols/esc_4/esc_4.h>
+#include <matchmaker/generated_symbols/esc_5/esc_5.h>
+#include <matchmaker/generated_symbols/esc_6/esc_6.h>
+#include <matchmaker/generated_symbols/esc_7/esc_7.h>
+#include <matchmaker/generated_symbols/esc_8/esc_8.h>
+#include <matchmaker/generated_symbols/esc_9/esc_9.h>
+#include <matchmaker/generated_symbols/_mns_/_mns_.h>
+#include <matchmaker/generated_symbols/_dot_/_dot_.h>
+#include <matchmaker/generated_symbols/_slsh_/_slsh_.h>
+#include <matchmaker/generated_symbols/_cln_/_cln_.h>
+#include <matchmaker/generated_symbols/_quot_/_quot_.h>
+#include <matchmaker/generated_symbols/_hsh_/_hsh_.h>
+#include <matchmaker/generated_symbols/_dol_/_dol_.h>
+#include <matchmaker/generated_symbols/_sqt_/_sqt_.h>
+#include <matchmaker/generated_symbols/_pl_/_pl_.h>
+#include <matchmaker/generated_symbols/_pls_/_pls_.h>
+#include <matchmaker/generated_symbols/_gt_/_gt_.h>
+#include <matchmaker/generated_symbols/_/_.h>
+#include <matchmaker/generated_symbols/_tld_/_tld_.h>
+#include <matchmaker/generated_symbols/A/A.h>
+#include <matchmaker/generated_symbols/B/B.h>
+#include <matchmaker/generated_symbols/C/C.h>
+#include <matchmaker/generated_symbols/D/D.h>
+#include <matchmaker/generated_symbols/E/E.h>
+#include <matchmaker/generated_symbols/F/F.h>
+#include <matchmaker/generated_symbols/G/G.h>
+#include <matchmaker/generated_symbols/H/H.h>
+#include <matchmaker/generated_symbols/I/I.h>
+#include <matchmaker/generated_symbols/J/J.h>
+#include <matchmaker/generated_symbols/K/K.h>
+#include <matchmaker/generated_symbols/L/L.h>
+#include <matchmaker/generated_symbols/M/M.h>
+#include <matchmaker/generated_symbols/N/N.h>
+#include <matchmaker/generated_symbols/O/O.h>
+#include <matchmaker/generated_symbols/P/P.h>
+#include <matchmaker/generated_symbols/Q/Q.h>
+#include <matchmaker/generated_symbols/R/R.h>
+#include <matchmaker/generated_symbols/S/S.h>
+#include <matchmaker/generated_symbols/T/T.h>
+#include <matchmaker/generated_symbols/U/U.h>
+#include <matchmaker/generated_symbols/V/V.h>
+#include <matchmaker/generated_symbols/W/W.h>
+#include <matchmaker/generated_symbols/X/X.h>
+#include <matchmaker/generated_symbols/Y/Y.h>
+#include <matchmaker/generated_symbols/Z/Z.h>
+#include <matchmaker/generated_symbols/a/a.h>
+#include <matchmaker/generated_symbols/b/b.h>
+#include <matchmaker/generated_symbols/c/c.h>
+#include <matchmaker/generated_symbols/d/d.h>
+#include <matchmaker/generated_symbols/e/e.h>
+#include <matchmaker/generated_symbols/f/f.h>
+#include <matchmaker/generated_symbols/g/g.h>
+#include <matchmaker/generated_symbols/h/h.h>
+#include <matchmaker/generated_symbols/i/i.h>
+#include <matchmaker/generated_symbols/j/j.h>
+#include <matchmaker/generated_symbols/k/k.h>
+#include <matchmaker/generated_symbols/l/l.h>
+#include <matchmaker/generated_symbols/m/m.h>
+#include <matchmaker/generated_symbols/n/n.h>
+#include <matchmaker/generated_symbols/o/o.h>
+#include <matchmaker/generated_symbols/p/p.h>
+#include <matchmaker/generated_symbols/q/q.h>
+#include <matchmaker/generated_symbols/r/r.h>
+#include <matchmaker/generated_symbols/s/s.h>
+#include <matchmaker/generated_symbols/t/t.h>
+#include <matchmaker/generated_symbols/u/u.h>
+#include <matchmaker/generated_symbols/v/v.h>
+#include <matchmaker/generated_symbols/w/w.h>
+#include <matchmaker/generated_symbols/x/x.h>
+#include <matchmaker/generated_symbols/y/y.h>
+#include <matchmaker/generated_symbols/z/z.h>
 
-#include <matchmaker/generated_symbols/zero/zero.h>
-#include <matchmaker/generated_symbols/one/one.h>
-#include <matchmaker/generated_symbols/two/two.h>
-#include <matchmaker/generated_symbols/three/three.h>
-#include <matchmaker/generated_symbols/four/four.h>
-#include <matchmaker/generated_symbols/five/five.h>
-#include <matchmaker/generated_symbols/six/six.h>
-#include <matchmaker/generated_symbols/seven/seven.h>
-#include <matchmaker/generated_symbols/eight/eight.h>
-#include <matchmaker/generated_symbols/nine/nine.h>
-#include <matchmaker/generated_symbols/mns/mns.h>
-#include <matchmaker/generated_symbols/dot/dot.h>
-#include <matchmaker/generated_symbols/slsh/slsh.h>
-#include <matchmaker/generated_symbols/cln/cln.h>
-#include <matchmaker/generated_symbols/quot/quot.h>
-#include <matchmaker/generated_symbols/hsh/hsh.h>
-#include <matchmaker/generated_symbols/dol/dol.h>
-#include <matchmaker/generated_symbols/sqt/sqt.h>
-#include <matchmaker/generated_symbols/pl/pl.h>
-#include <matchmaker/generated_symbols/pls/pls.h>
-#include <matchmaker/generated_symbols/gt/gt.h>
-#include <matchmaker/generated_symbols/uscr/uscr.h>
-#include <matchmaker/generated_symbols/tld/tld.h>
 
 #include <matchmaker/parts_of_speech.h>
 #include <matchmaker/longest_words.h>
@@ -192,56 +192,57 @@ PROPERTYx18_MATCHABLE(
     symbol,
 
     // variants
-    quot, hsh, dol, sqt, pl, pls, mns, dot, slsh, zero,
-    one, two, three, four, five, six, seven, eight, nine,
-    cln, gt, uscr, tld,
+    _quot_, _hsh_, _dol_, _sqt_, _pl_, _pls_, _mns_, _dot_, _slsh_,
+    esc_0, esc_1, esc_2, esc_3, esc_4, esc_5, esc_6, esc_7, esc_8, esc_9,
+    _cln_, _gt_, _, _tld_,
     A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
     a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
 )
 
 #define _set_properties(_symbol)                                                                           \
-SET_PROPERTY(symbol, _symbol, count, &mm_count_##_symbol)                                                  \
-SET_PROPERTY(symbol, _symbol, as_longest, &mm_as_longest_##_symbol)                                        \
-SET_PROPERTY(symbol, _symbol, at, &mm_at_##_symbol)                                                        \
-SET_PROPERTY(symbol, _symbol, lookup, &mm_lookup_##_symbol)                                                \
-SET_PROPERTY(symbol, _symbol, ordinal_summation, &mm_ordinal_summation_##_symbol)                          \
-SET_PROPERTY(symbol, _symbol, flagged_parts_of_speech, &mm_flagged_parts_of_speech_##_symbol)              \
-SET_PROPERTY(symbol, _symbol, synonyms, &mm_synonyms_##_symbol)                                            \
-SET_PROPERTY(symbol, _symbol, antonyms, &mm_antonyms_##_symbol)                                            \
-SET_PROPERTY(symbol, _symbol, embedded, &mm_embedded_##_symbol)                                            \
-SET_PROPERTY(symbol, _symbol, locations, &mm_locations_##_symbol)                                          \
-SET_PROPERTY(symbol, _symbol, is_name, &mm_is_name_##_symbol)                                              \
-SET_PROPERTY(symbol, _symbol, is_male_name, &mm_is_male_name_##_symbol)                                    \
-SET_PROPERTY(symbol, _symbol, is_female_name, &mm_is_female_name_##_symbol)                                \
-SET_PROPERTY(symbol, _symbol, is_place, &mm_is_place_##_symbol)                                            \
-SET_PROPERTY(symbol, _symbol, is_compound, &mm_is_compound_##_symbol)                                      \
-SET_PROPERTY(symbol, _symbol, is_acronym, &mm_is_acronym_##_symbol)                                        \
-SET_PROPERTY(symbol, _symbol, is_phrase, &mm_is_phrase_##_symbol)                                          \
-SET_PROPERTY(symbol, _symbol, is_used_in_book, &mm_is_used_in_book_##_symbol)
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, count, &mm_count_##_symbol)                              \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, as_longest, &mm_as_longest_##_symbol)                    \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, at, &mm_at_##_symbol)                                    \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, lookup, &mm_lookup_##_symbol)                            \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, ordinal_summation, &mm_ordinal_summation_##_symbol)      \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol,                                                          \
+                                 flagged_parts_of_speech, &mm_flagged_parts_of_speech_##_symbol)           \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, synonyms, &mm_synonyms_##_symbol)                        \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, antonyms, &mm_antonyms_##_symbol)                        \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, embedded, &mm_embedded_##_symbol)                        \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, locations, &mm_locations_##_symbol)                      \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, is_name, &mm_is_name_##_symbol)                          \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, is_male_name, &mm_is_male_name_##_symbol)                \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, is_female_name, &mm_is_female_name_##_symbol)            \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, is_place, &mm_is_place_##_symbol)                        \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, is_compound, &mm_is_compound_##_symbol)                  \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, is_acronym, &mm_is_acronym_##_symbol)                    \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, is_phrase, &mm_is_phrase_##_symbol)                      \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, is_used_in_book, &mm_is_used_in_book_##_symbol)
 
-_set_properties(quot)
-_set_properties(hsh)
-_set_properties(dol)
-_set_properties(sqt)
-_set_properties(pl)
-_set_properties(pls)
-_set_properties(mns)
-_set_properties(dot)
-_set_properties(slsh)
-_set_properties(zero)
-_set_properties(one)
-_set_properties(two)
-_set_properties(three)
-_set_properties(four)
-_set_properties(five)
-_set_properties(six)
-_set_properties(seven)
-_set_properties(eight)
-_set_properties(nine)
-_set_properties(cln)
-_set_properties(gt)
-_set_properties(uscr)
-_set_properties(tld)
+_set_properties(_quot_)
+_set_properties(_hsh_)
+_set_properties(_dol_)
+_set_properties(_sqt_)
+_set_properties(_pl_)
+_set_properties(_pls_)
+_set_properties(_mns_)
+_set_properties(_dot_)
+_set_properties(_slsh_)
+_set_properties(esc_0)
+_set_properties(esc_1)
+_set_properties(esc_2)
+_set_properties(esc_3)
+_set_properties(esc_4)
+_set_properties(esc_5)
+_set_properties(esc_6)
+_set_properties(esc_7)
+_set_properties(esc_8)
+_set_properties(esc_9)
+_set_properties(_cln_)
+_set_properties(_gt_)
+_set_properties(_)
+_set_properties(_tld_)
 _set_properties(A)
 _set_properties(B)
 _set_properties(C)
@@ -338,74 +339,74 @@ static std::vector<std::pair<int, symbol::Type>> const boundries_by_index =
         int b{0};
         std::vector<std::pair<int, symbol::Type>> boundries;
 
-        boundries.push_back(std::make_pair(b, symbol::quot::grab()));
-        b += symbol::quot::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::_quot_::grab()));
+        b += symbol::_quot_::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::hsh::grab()));
-        b += symbol::hsh::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::_hsh_::grab()));
+        b += symbol::_hsh_::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::dol::grab()));
-        b += symbol::dol::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::_dol_::grab()));
+        b += symbol::_dol_::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::sqt::grab()));
-        b += symbol::sqt::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::_sqt_::grab()));
+        b += symbol::_sqt_::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::pl::grab()));
-        b += symbol::pl::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::_pl_::grab()));
+        b += symbol::_pl_::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::pls::grab()));
-        b += symbol::pls::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::_pls_::grab()));
+        b += symbol::_pls_::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::mns::grab()));
-        b += symbol::mns::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::_mns_::grab()));
+        b += symbol::_mns_::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::dot::grab()));
-        b += symbol::dot::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::_dot_::grab()));
+        b += symbol::_dot_::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::slsh::grab()));
-        b += symbol::slsh::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::_slsh_::grab()));
+        b += symbol::_slsh_::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::zero::grab()));
-        b += symbol::zero::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_0::grab()));
+        b += symbol::esc_0::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::one::grab()));
-        b += symbol::one::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_1::grab()));
+        b += symbol::esc_1::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::two::grab()));
-        b += symbol::two::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_2::grab()));
+        b += symbol::esc_2::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::three::grab()));
-        b += symbol::three::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_3::grab()));
+        b += symbol::esc_3::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::four::grab()));
-        b += symbol::four::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_4::grab()));
+        b += symbol::esc_4::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::five::grab()));
-        b += symbol::five::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_5::grab()));
+        b += symbol::esc_5::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::six::grab()));
-        b += symbol::six::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_6::grab()));
+        b += symbol::esc_6::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::seven::grab()));
-        b += symbol::seven::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_7::grab()));
+        b += symbol::esc_7::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::eight::grab()));
-        b += symbol::eight::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_8::grab()));
+        b += symbol::esc_8::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::nine::grab()));
-        b += symbol::nine::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_9::grab()));
+        b += symbol::esc_9::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::cln::grab()));
-        b += symbol::cln::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::_cln_::grab()));
+        b += symbol::_cln_::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::gt::grab()));
-        b += symbol::gt::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::_gt_::grab()));
+        b += symbol::_gt_::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::uscr::grab()));
-        b += symbol::uscr::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::_::grab()));
+        b += symbol::_::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::tld::grab()));
-        b += symbol::tld::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::_tld_::grab()));
+        b += symbol::_tld_::grab().as_count()();
 
         boundries.push_back(std::make_pair(b, symbol::A::grab()));
         b += symbol::A::grab().as_count()();
@@ -612,29 +613,29 @@ char const * mm_at(int index, int * length)
 int mm_lookup(char const * word, bool * found)
 {
     static std::array<std::pair<symbol::Type, int>, 75> const boundries_by_symbol {
-        std::make_pair(symbol::quot::grab(), boundries_by_index[0].first),
-        std::make_pair(symbol::hsh::grab(), boundries_by_index[1].first),
-        std::make_pair(symbol::dol::grab(), boundries_by_index[2].first),
-        std::make_pair(symbol::sqt::grab(), boundries_by_index[3].first),
-        std::make_pair(symbol::pl::grab(), boundries_by_index[4].first),
-        std::make_pair(symbol::pls::grab(), boundries_by_index[5].first),
-        std::make_pair(symbol::mns::grab(), boundries_by_index[6].first),
-        std::make_pair(symbol::dot::grab(), boundries_by_index[7].first),
-        std::make_pair(symbol::slsh::grab(), boundries_by_index[8].first),
-        std::make_pair(symbol::zero::grab(), boundries_by_index[9].first),
-        std::make_pair(symbol::one::grab(), boundries_by_index[10].first),
-        std::make_pair(symbol::two::grab(), boundries_by_index[11].first),
-        std::make_pair(symbol::three::grab(), boundries_by_index[12].first),
-        std::make_pair(symbol::four::grab(), boundries_by_index[13].first),
-        std::make_pair(symbol::five::grab(), boundries_by_index[14].first),
-        std::make_pair(symbol::six::grab(), boundries_by_index[15].first),
-        std::make_pair(symbol::seven::grab(), boundries_by_index[16].first),
-        std::make_pair(symbol::eight::grab(), boundries_by_index[17].first),
-        std::make_pair(symbol::nine::grab(), boundries_by_index[18].first),
-        std::make_pair(symbol::cln::grab(), boundries_by_index[19].first),
-        std::make_pair(symbol::gt::grab(), boundries_by_index[20].first),
-        std::make_pair(symbol::uscr::grab(), boundries_by_index[21].first),
-        std::make_pair(symbol::tld::grab(), boundries_by_index[22].first),
+        std::make_pair(symbol::_quot_::grab(), boundries_by_index[0].first),
+        std::make_pair(symbol::_hsh_::grab(), boundries_by_index[1].first),
+        std::make_pair(symbol::_dol_::grab(), boundries_by_index[2].first),
+        std::make_pair(symbol::_sqt_::grab(), boundries_by_index[3].first),
+        std::make_pair(symbol::_pl_::grab(), boundries_by_index[4].first),
+        std::make_pair(symbol::_pls_::grab(), boundries_by_index[5].first),
+        std::make_pair(symbol::_mns_::grab(), boundries_by_index[6].first),
+        std::make_pair(symbol::_dot_::grab(), boundries_by_index[7].first),
+        std::make_pair(symbol::_slsh_::grab(), boundries_by_index[8].first),
+        std::make_pair(symbol::esc_0::grab(), boundries_by_index[9].first),
+        std::make_pair(symbol::esc_1::grab(), boundries_by_index[10].first),
+        std::make_pair(symbol::esc_2::grab(), boundries_by_index[11].first),
+        std::make_pair(symbol::esc_3::grab(), boundries_by_index[12].first),
+        std::make_pair(symbol::esc_4::grab(), boundries_by_index[13].first),
+        std::make_pair(symbol::esc_5::grab(), boundries_by_index[14].first),
+        std::make_pair(symbol::esc_6::grab(), boundries_by_index[15].first),
+        std::make_pair(symbol::esc_7::grab(), boundries_by_index[16].first),
+        std::make_pair(symbol::esc_8::grab(), boundries_by_index[17].first),
+        std::make_pair(symbol::esc_9::grab(), boundries_by_index[18].first),
+        std::make_pair(symbol::_cln_::grab(), boundries_by_index[19].first),
+        std::make_pair(symbol::_gt_::grab(), boundries_by_index[20].first),
+        std::make_pair(symbol::_::grab(), boundries_by_index[21].first),
+        std::make_pair(symbol::_tld_::grab(), boundries_by_index[22].first),
         std::make_pair(symbol::A::grab(), boundries_by_index[23].first),
         std::make_pair(symbol::B::grab(), boundries_by_index[24].first),
         std::make_pair(symbol::C::grab(), boundries_by_index[25].first),
@@ -1162,10 +1163,8 @@ void mm_locations(
 
 void mm_complete(char const * prefix, int * start, int * length)
 {
-    int const prefix_len = strlen(prefix);
-
     // shortcut empty prefix to everything
-    if (prefix_len == 0)
+    if (0 == strlen(prefix))
     {
         *start = 0;
         *length = mm_count();
@@ -1173,7 +1172,7 @@ void mm_complete(char const * prefix, int * start, int * length)
     }
 
     auto str_starts_with =
-        [&prefix_len](char const * str, int str_len, char const * starts_with)
+        [](char const * str, int str_len, char const * starts_with)
         {
             int starts_with_len = strlen(starts_with);
 

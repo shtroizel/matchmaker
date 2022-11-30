@@ -29,8 +29,8 @@ def prepare_letters(workspace_root, q, parents_only):
 
     if not parents_only:
         # reset header location
-        shutil.rmtree(generated_include + '/matchmaker/generated_letters', ignore_errors=True)
-        os.makedirs(generated_include + '/matchmaker/generated_letters')
+        shutil.rmtree(generated_include + '/matchmaker/generated_symbols', ignore_errors=True)
+        os.makedirs(generated_include + '/matchmaker/generated_symbols')
 
         # reset impl location
         shutil.rmtree(generated_src, ignore_errors=True)
@@ -50,9 +50,9 @@ def prepare_letters(workspace_root, q, parents_only):
                 continue
 
         if not parents_only:
-            os.makedirs(generated_include + '/matchmaker/generated_letters/' + l0)
+            os.makedirs(generated_include + '/matchmaker/generated_symbols/' + l0)
 
-        letter_x1_h = generated_include + '/matchmaker/generated_letters/' + l0 + '/' + l0 + '.h'
+        letter_x1_h = generated_include + '/matchmaker/generated_symbols/' + l0 + '/' + l0 + '.h'
         letter_x1_cpp = generated_src + l0 + '.cpp'
 
         print(letter_x1_h)
@@ -70,9 +70,9 @@ def prepare_letters(workspace_root, q, parents_only):
 
         for l1 in ascii_uppercase + ascii_lowercase:
             if not parents_only:
-                os.makedirs(generated_include + '/matchmaker/generated_letters/' + l0 + '/' + l1)
+                os.makedirs(generated_include + '/matchmaker/generated_symbols/' + l0 + '/' + l1)
 
-            letter_x2_h = generated_include + '/matchmaker/generated_letters/'                             \
+            letter_x2_h = generated_include + '/matchmaker/generated_symbols/'                             \
                     + l0 + '/' + l1 + '/' + l0 + '_' + l1 + '.h'
 
             letter_x2_cpp = generated_src + l0 + '_' + l1 + '.cpp'
@@ -255,10 +255,10 @@ def prepare_letters(workspace_root, q, parents_only):
 
                 for l2 in ascii_uppercase + ascii_lowercase:
                     if not parents_only:
-                        os.makedirs(generated_include + '/matchmaker/generated_letters/'                   \
+                        os.makedirs(generated_include + '/matchmaker/generated_symbols/'                   \
                                 + l0 + '/' + l1 + '/' + l2)
 
-                    letter_x3_h = generated_include + '/matchmaker/generated_letters/'                     \
+                    letter_x3_h = generated_include + '/matchmaker/generated_symbols/'                     \
                             + l0 + '/' + l1 + '/' + l2 + '/' + l0 + '_' + l1 + '_' + l2 + '.h'
 
                     letter_x3_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '.cpp'
@@ -392,10 +392,10 @@ def prepare_letters(workspace_root, q, parents_only):
 
                         for l3 in ascii_uppercase + ascii_lowercase:
                             if not parents_only:
-                                os.makedirs(generated_include + '/matchmaker/generated_letters/'           \
+                                os.makedirs(generated_include + '/matchmaker/generated_symbols/'           \
                                         + l0 + '/' + l1 + '/' + l2 + '/' + l3)
 
-                            letter_x4_h = generated_include + '/matchmaker/generated_letters/'             \
+                            letter_x4_h = generated_include + '/matchmaker/generated_symbols/'             \
                                     + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/'                            \
                                     + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '.h'
 
@@ -437,10 +437,10 @@ def prepare_letters(workspace_root, q, parents_only):
 
                                 for l4 in ascii_uppercase + ascii_lowercase:
                                     if not parents_only:
-                                        os.makedirs(generated_include + '/matchmaker/generated_letters/'   \
+                                        os.makedirs(generated_include + '/matchmaker/generated_symbols/'   \
                                                 + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4)
 
-                                    letter_x5_h = generated_include + '/matchmaker/generated_letters/'     \
+                                    letter_x5_h = generated_include + '/matchmaker/generated_symbols/'     \
                                             + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4 + '/'         \
                                             + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '_' + l4 + '.h'
 
@@ -484,11 +484,11 @@ def prepare_letters(workspace_root, q, parents_only):
 
                                         for l5 in ascii_uppercase + ascii_lowercase:
                                             os.makedirs(generated_include                                  \
-                                                    + '/matchmaker/generated_letters/' + l0 + '/' + l1     \
+                                                    + '/matchmaker/generated_symbols/' + l0 + '/' + l1     \
                                                     + '/' + l2 + '/' + l3 + '/' + l4 + '/' + l5)
 
                                             letter_x6_h = generated_include                                \
-                                                    + '/matchmaker/generated_letters/' + l0 + '/' + l1     \
+                                                    + '/matchmaker/generated_symbols/' + l0 + '/' + l1     \
                                                     + '/' + l2 + '/' + l3 + '/' + l4 + '/' + l5 + '/'      \
                                                     + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '_' + l4 + '_' \
                                                     + l5 + '.h'
@@ -559,19 +559,40 @@ def prepare_letters(workspace_root, q, parents_only):
 
 
     if not parents_only:
-        os.makedirs(generated_include + '/matchmaker/generated_symbols')
-        for sym in ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'mns',
-                    'dot', 'slsh', 'cln', 'quot', 'hsh', 'dol', 'sqt', 'pl', 'pls', 'gt', 'uscr', 'tld']:
+        for sym in ['esc_0',
+                    'esc_1',
+                    'esc_2',
+                    'esc_3',
+                    'esc_4',
+                    'esc_5',
+                    'esc_6',
+                    'esc_7',
+                    'esc_8',
+                    'esc_9',
+                    '_mns_',
+                    '_dot_',
+                    '_slsh_',
+                    '_cln_',
+                    '_quot_',
+                    '_hsh_',
+                    '_dol_',
+                    '_sqt_',
+                    '_pl_',
+                    '_pls_',
+                    '_gt_',
+                    '_',
+                    '_tld_']:
             os.makedirs(generated_include + '/matchmaker/generated_symbols/' + sym)
             sym_h = generated_include + 'matchmaker/generated_symbols/' + sym + '/' + sym + '.h'
             sym_cpp = generated_src + sym + '.cpp'
             shutil.copy(leaf_h, sym_h)
             shutil.copy(leaf_cpp, sym_cpp)
+            print(sym_h)
+            print(sym_cpp)
             for filename in [sym_h, sym_cpp]:
                 for line in fileinput.input(filename, inplace=True):
                     replaced = line.replace("aoeu", sym)
                     replaced = replaced.replace("snth", sym)
-                    replaced = replaced.replace("generated_letters", "generated_symbols")
                     print(replaced, end='')
 
 def main():

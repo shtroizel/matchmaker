@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2020, Eric Hyer
+Copyright (c) 2020-2022, shtroizel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-// 'aoeu' replaced by letters deliminated by '/'
-// 'snth' replaced by letters deliminated by '_'
+// 'a o e u' (without spaces) replaced by letters deliminated by '/' (aoeu)
+// 's n t h' (without spaces) replaced by letters deliminated by '_' (snth)
 
 
 
@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
-#include <matchmaker/generated_letters/aoeu/snth.h>
+#include <matchmaker/generated_symbols/aoeu/snth.h>
 #include <matchmaker/generated_matchables/aoeu/snth.h>
 
 

@@ -138,6 +138,7 @@ bool discover_book_vocabulary(
         if (f == nullptr)
         {
             perror(entry.path().c_str());
+            abort();
             return false;
         }
 
@@ -148,8 +149,9 @@ bool discover_book_vocabulary(
                 term = mm_lookup(s.c_str(), &ok);
                 if (!ok)
                 {
-                    std::cout << "discover_book_vocabulary() --> failed to lookup '" << s << "' within "
+                    std::cout << " --> failed to lookup '" << s << "' within "
                               << entry.path() << std::endl;
+                    abort();
                     return false;
                 }
 
@@ -169,8 +171,12 @@ bool discover_book_vocabulary(
         std::lock_guard<std::mutex> const lock(progress_mutex);
         ++progress;
 
-        if (progress % (goal / steps) == 0)
-            std::cout << "." << std::flush;
+        if (goal < steps && progress == goal)
+            for (int i = 0; i < steps; ++i)
+                std::cout << "." << std::flush;
+        else
+            if (progress % (goal / steps) == 0)
+                std::cout << "." << std::flush;
     }
 
     return true;

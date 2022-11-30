@@ -18,8 +18,7 @@ def usage():
     print('    -i  --install_dir     install directory')
     print('                            * defaults to <data_reader_stage_0 root>/install')
     print('                            * relative paths are relative to build_dir\n')
-    print('    -m  --matchable_dir   matchable install directory')
-    print('                            * defaults to <data_reader_stage_0 root>/../../matchable/install\n')
+    print('    -m  --matchable_dir   matchable install directory\n')
     print('    -c  --clang           force use of clang compiler')
     print('                            * system compiler used by default\n')
     print('    -d  --debug           debug build')
@@ -43,8 +42,6 @@ def build_and_install(build_dir, install_dir, matchable_dir, use_clang, debug):
     while install_dir[-1] == '/':
         install_dir = install_dir[:-1]
 
-    if matchable_dir == '':
-        matchable_dir = data_reader_stage_0_root + '/../../matchable/install'
     while matchable_dir[-1] == '/':
         matchable_dir = matchable_dir[:-1]
 

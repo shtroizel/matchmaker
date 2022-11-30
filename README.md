@@ -101,11 +101,11 @@ https://github.com/shtroizel/completable/blob/master/CMakeLists.txt <br>
 
 ## current progress and direction
 * matchmaker currently supports several hundreds of thousands of symbols, words and phrases<br>
-* support for books is new and experimental - the first book has just been added<br>
+* support for books is new and experimental - the first incomplete book has just been added<br>
 * recent addition of symbol-littered phrases exposed some lookup issues that have now been fixed<br>
 * matchmaker currently uses poor and incomplete raw input data from free sources containing some misspelled words<br>
-* matchmaker needs its own defined raw input data formats as a basis for many fixes to the poor data problem<br>
-* the scalability of book support is unknown - more books need to be added to see how things break<br>
+* matchmaker needs its own defined raw input data format as a basis for many fixes to the poor data problem<br>
+* the scalability of book support is unknown - the first book needs finished and more need to be added to see how things break<br>
 
 ## donating to this project
 donations are greatly appreciated, thank you!<br>

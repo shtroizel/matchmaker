@@ -175,6 +175,8 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             build_data_reader_cmd.append('../../matchable/install_mm' + suffix)
             if use_clang:
                 build_data_reader_cmd.append('-c')
+            if debug:
+                build_data_reader_cmd.append('-d')
             if subprocess.run(build_data_reader_cmd).returncode != 0:
                 print('data reader failed to build')
                 exit(1)
@@ -188,9 +190,10 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             if q:
                 prepare_matchables_cmd.append('-q')
             if subprocess.run(prepare_matchables_cmd).returncode != 0:
-                print('failed to prepare matchables for stage 0')
+                print('failed to prepare matchables for stage 0!')
                 exit(1)
             print('\n\nstage 0 matchables ready!')
+
 
         # create longest_words.h for stage 0
         stage_0_longest_word_file = stage_0_workspace_dir + 'generated_include/matchmaker/longest_words.h'
@@ -306,8 +309,6 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             os.symlink(stage_0_workspace_dir + 'generated_src', stage_1_workspace_dir + 'generated_src')
             os.symlink(stage_0_workspace_dir + 'book_vocabulary', stage_1_workspace_dir + 'book_vocabulary')
             os.makedirs(stage_1_workspace_dir + 'generated_include/matchmaker')
-            os.symlink(stage_0_workspace_dir + 'generated_include/matchmaker/generated_letters',
-                       stage_1_workspace_dir + 'generated_include/matchmaker/generated_letters')
             os.symlink(stage_0_workspace_dir + 'generated_include/matchmaker/generated_symbols',
                        stage_1_workspace_dir + 'generated_include/matchmaker/generated_symbols')
 
@@ -333,7 +334,12 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             if use_clang:
                 build_data_reader_cmd.append('-c')
             if subprocess.run(build_data_reader_cmd).returncode != 0:
-                print('data_reader_stage_1 failed to build')
+                print('\ndata_reader_stage_1 failed to build')
+                cmd_as_str = ''
+                for c in build_data_reader_cmd:
+                    cmd_as_str += ' '
+                    cmd_as_str += c
+                print('command was:' + cmd_as_str)
                 exit(1)
 
             print('\n\ndata reader for stage 1 ready!\n\n')
@@ -346,7 +352,17 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
 
             run_dr_stage_1_cmd = [dr_stage_1_binary, dr_stage_1_data, stage_1_workspace_dir, q_mode]
             if subprocess.run(run_dr_stage_1_cmd).returncode != 0:
-                print('data_reader_stage_1 failed')
+                print('\ndata_reader_stage_1 failed')
+                build_cmd_as_str = ''
+                for c in build_data_reader_cmd:
+                    build_cmd_as_str += ' '
+                    build_cmd_as_str += c
+                print('build command was:' + build_cmd_as_str)
+                cmd_as_str = ''
+                for c in run_dr_stage_1_cmd:
+                    cmd_as_str += ' '
+                    cmd_as_str += c
+                print('command was:' + cmd_as_str)
                 exit(1)
 
     print('\n\nMATCHMAKER!\n\n')

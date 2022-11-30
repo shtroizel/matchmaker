@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2020, Eric Hyer
+Copyright (c) 2020-2022, shtroizel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <matchmaker/data_reader_common.h>
 
 
-int const MAX_WORD_LENGTH{4953};
-
 
 MATCHABLE(
     word_attribute,
@@ -59,86 +57,211 @@ MATCHABLE(
     phrase
 )
 
+int const MAX_PREFIX_DEPTH{6};
+
+
+class Prefix
+{
+public:
+    Prefix() : maker{new matchable::MatchableMaker()} {}
+    ~Prefix() {}
+    Prefix(Prefix const &) = delete;
+    Prefix(Prefix && other) : str{other.str}, maker{std::move(other.maker)}
+    {
+        other.str.clear();
+        other.maker = nullptr;
+    }
+    Prefix & operator=(Prefix const &) = delete;
+    Prefix & operator=(Prefix && other)
+    {
+        if (this != &other)
+        {
+            str = std::move(other.str);
+            maker = std::move(other.maker);
+        }
+        return *this;
+    }
+
+    void initialize(std::string const & prefix)
+    {
+        str = prefix;
+        std::string const matchable_name = "word_" + escaped_and_delimited('_');
+        maker->grab(matchable_name)->add_property("int8_t", "pos");
+        maker->grab(matchable_name)->add_property("int", "syn");
+        maker->grab(matchable_name)->add_property("int", "ant");
+        maker->grab(matchable_name)->add_property("int", "by_longest_index");
+        maker->grab(matchable_name)->add_property("int", "ordinal_summation");
+        maker->grab(matchable_name)->add_property("int", "embedded");
+        maker->grab(matchable_name)->add_property("int", "book_index");
+        maker->grab(matchable_name)->add_property("int", "chapter_index");
+        maker->grab(matchable_name)->add_property("int", "paragraph_index");
+        maker->grab(matchable_name)->add_property("int", "word_index");
+
+        // "word_attribute" properties
+        {
+            auto add_bool_prop =
+                [&](std::string const & prop)
+                {
+                    std::string const prop_name = "is_" + prop;
+                    maker->grab(matchable_name)->add_property("int8_t", prop_name);
+                };
+
+            add_bool_prop(word_attribute::name::grab().as_string());
+            add_bool_prop(word_attribute::male_name::grab().as_string());
+            add_bool_prop(word_attribute::female_name::grab().as_string());
+            add_bool_prop(word_attribute::place::grab().as_string());
+            add_bool_prop(word_attribute::compound::grab().as_string());
+            add_bool_prop(word_attribute::acronym::grab().as_string());
+            add_bool_prop(word_attribute::phrase::grab().as_string());
+            add_bool_prop("used_in_book");
+        }
+    }
+
+    std::string const & as_string() const { return str; }
+    std::string & as_mutable_string() { return str; }
+    matchable::MatchableMaker const & as_maker() const { return *maker; }
+    matchable::MatchableMaker & as_mutable_maker() { return *maker; }
+
+
+    // bool operator<(Prefix const & other) const
+    // {
+    //     return str  < other.str;
+    // }
+
+
+    std::string escaped_and_delimited(char delim) const
+    {
+        std::string ret;
+
+        if (str.empty())
+        {
+            std::cout << "Prefix::escaped_and_delimited('"
+                      << delim << "') --> str is empty!" << std::endl;
+            abort();
+        }
+
+        for (size_t i = 0; i < str.size(); ++i)
+        {
+            std::string escaped = matchable::escapable::escape(str.substr(i, 1));
+            if (escaped.size() > 2)
+            {
+                if (escaped[0] != escaped[escaped.size() - 1])
+                {
+                    std::cout << "Prefix::escaped_and_delimited('" << delim << "')\n"
+                              << "    --> escaped.size() > 2 but first and last do not match!\n"
+                              << "    --> str is: '" << str << "'" << std::endl;
+                    abort();
+                }
+            }
+            else if (escaped.size() != 1)
+            {
+                std::cout << "Prefix::escaped_and_delimited('" << delim << "')\n"
+                        << "    --> escape failed with: '" << escaped << "'\n"
+                        << "    -->             str is: '" << str << "'" << std::endl;
+                abort();
+            }
+
+            if (i > 0)
+                ret += delim;
+
+            // manually explicitly escape numbers since matchable escapes numbers to themselves.
+            if (str[i] >= '0' && str[i] <= '9')
+                ret += "esc_";
+            ret += escaped;
+        }
+
+        // std::cout << "Prefix::escaped_and_delimited('"
+        //           << delim << "') /* with str: '" << str << "' */ -> " << ret << "\n" << std::endl;
+        return ret;
+    }
+
+    std::string save_path(std::string const OUTPUT_DIR) const
+    {
+        if (str.empty())
+        {
+            std::cout << "Prefix::save_path() called but str is empty!" << std::endl;
+            abort();
+        }
+
+        std::string ret = OUTPUT_DIR;
+        ret += "/";
+        ret += escaped_and_delimited('/');
+        ret += "/";
+        ret += escaped_and_delimited('_');
+        ret += ".h";
+        // std::cout << "Prefix::save_path('" << OUTPUT_DIR << "') -> '" << ret << "'\n" << std::endl;
+        return ret;
+    }
+
+private:
+    std::string str;
+    std::unique_ptr<matchable::MatchableMaker> maker;
+};
+
+// all prefixes of depth 1 are symbols, and their makers are stored here
+std::array<Prefix, 23> symbols_1d_prefixes;
+
+
+// matchable makers for prefixes of depth 2 to 5
+std::vector<Prefix> prefixes_2d_to_5d;
+
+// index lookup table for "prefixes_2d_to_5d"
+using LookupTable2dTo5d =
+        std::array<std::array<std::array<std::array<std::array<int16_t, 52>, 52>, 52>, 52>, 52>;
+static LookupTable2dTo5d lookup_table_2d_to_5d =
+    []()
+    {
+        LookupTable2dTo5d t;
+        for (auto & d1 : t)
+            for (auto & d2 : d1)
+                for (auto & d3 : d2)
+                    for (auto & d4 : d3)
+                        for (int16_t & i : d4)
+                            i = -1;
+        return t;
+    }();
+
+// A 6D lookup table would require too much RAM,
+// so the 6th dimension is handled separately
+std::vector<Prefix> prefixes_6d;
+
+
+int16_t calc_letter_index(char ch);
+
+Prefix * prefix_for_d1_symbol(char sym);
+
+bool read_prefixes(FILE * f,
+                   std::string const & OUTPUT_DIR,
+                   LookupTable2dTo5d & lookup_table_2d_to_5d,
+                   std::vector<Prefix> & prefixes_6d);
+
+bool read_prefix(FILE * f, std::array<std::string, MAX_PREFIX_DEPTH> & prefix, bool & ok);
+
+bool char_is_letter(char ch);
+
+Prefix * lookup(std::string const & str);
+
+
+
 
 MATCHABLE(Encountered, Yes)
 
 
 void print_usage();
 
-bool has_responsibility(char letter, char prefix_element);
-
-bool passes_prefix_filter(
-    std::string const & word,
-    std::string const & l0, // first letter
-    std::string const & l1, // second letter
-    std::string const & l2, // third letter
-    std::string const & l3, // fourth letter
-    std::string const & l4, // fifth letter
-    std::string const & l5  // sixth letter
-);
-
-bool passes_status_filter(word_attribute::Flags const & status);
-
-bool passes_filter(
-    std::string const & word,
-    word_attribute::Flags const & status,
-    std::string const & l0,
-    std::string const & l1,
-    std::string const & l2,
-    std::string const & l3,
-    std::string const & l4,
-    std::string const & l5
-);
-
 void read_3201_default(
     FILE * input_file,
-    std::string const & l0,
-    std::string const & l1,
-    std::string const & l2,
-    std::string const & l3,
-    std::string const & l4,
-    std::string const & l5,
-    std::string const & prefix,
-    word_attribute::Flags const & base_attributes,
-    matchable::MatchableMaker & mm
+    word_attribute::Flags const & base_attributes
 );
 
-void read_3202(
-    FILE * input_file,
-    std::string const & l0,
-    std::string const & l1,
-    std::string const & l2,
-    std::string const & l3,
-    std::string const & l4,
-    std::string const & l5,
-    std::string const & prefix,
-    matchable::MatchableMaker & mm
-);
+void read_3202(FILE * input_file);
 
-void read_3203_mobypos(
-    FILE * input_file,
-    std::string const & l0,
-    std::string const & l1,
-    std::string const & l2,
-    std::string const & l3,
-    std::string const & l4,
-    std::string const & l5,
-    std::string const & prefix,
-    matchable::MatchableMaker & mm
-);
+void read_3203_mobypos(FILE * input_file);
 
 bool read_crumbs(
-    std::string const & l0,
-    std::string const & l1,
-    std::string const & l2,
-    std::string const & l3,
-    std::string const & l4,
-    std::string const & l5,
-    std::string const & prefix,
     word_attribute::Flags const & base_attributes,
     FILE * input_file,
     FILE * book_vocab_file,
-    matchable::MatchableMaker & mm,
     int & text
 );
 
@@ -171,42 +294,21 @@ bool read_3203_mobypos_line(
     parts_of_speech::Flags & pos
 );
 
-bool add_book_vocab_if_passes_filter(
-    std::string const & word,
-    std::string const & l0,
-    std::string const & l1,
-    std::string const & l2,
-    std::string const & l3,
-    std::string const & l4,
-    std::string const & l5,
-    std::string const & prefix,
-    word_attribute::Flags const & wsf,
-    FILE * vocab_file,
-    std::map<std::string, Encountered::Type> & encounters,
-    matchable::MatchableMaker & mm
-);
-
 bool add_book_vocab(
     std::string const & word,
-    std::string const & prefix,
     word_attribute::Flags const & wsf,
     FILE * vocab_file,
-    std::map<std::string, Encountered::Type> & encounters,
-    matchable::MatchableMaker & mm
+    std::map<std::string, Encountered::Type> & encounters
 );
 
 void add_word(
     std::string const & word,
-    std::string const & prefix,
-    word_attribute::Flags const & wsf,
-    matchable::MatchableMaker & mm
+    word_attribute::Flags const & wsf
 );
 void add_word(
     std::string const & word,
-    std::string const & prefix,
     word_attribute::Flags const & wsf,
-    parts_of_speech::Flags const & pos_flags,
-    matchable::MatchableMaker & mm
+    parts_of_speech::Flags const & pos_flags
 );
 
 void tokenize(std::string const & str, char const delim, std::vector<std::string> & out);
@@ -215,223 +317,79 @@ void tokenize(std::string const & str, char const delim, std::vector<std::string
 bool symbols_off = false; // disables words with symbols when this is true
 
 
+void foreach_prefix(std::function<void (Prefix & p)> func)
+{
+    for (auto & p : symbols_1d_prefixes)
+        func(p);
+
+    for (auto & p : prefixes_2d_to_5d)
+        func(p);
+
+    for (auto & p : prefixes_6d)
+        func(p);
+}
+
+
 
 int main(int argc, char ** argv)
 {
-    if (argc < 10)
+    if (argc < 5 || argc > 6)
     {
-        print_usage();
+        std::cout << "invalid usage!" << std::endl;
         return 2;
     }
 
     std::string const DATA_DIR{argv[1]};
     std::string const BOOK_VOCAB_DIR{argv[2]};
     std::string const OUTPUT_DIR{argv[3]};
-
-    std::string l0{argv[4]};
-    std::string l1{argv[5]};
-    std::string l2{argv[6]};
-    std::string l3{argv[7]};
-    std::string l4{argv[8]};
-    std::string l5{argv[9]};
-
-    bool l0_is_symbol{false};
-
-//     std::cout << "running stage 0 data reader for " << l0 << " " << l1 << " " << l2 << " "
-//               << l3 << " " << l4 << " " << l5 << std::endl;
-
-    if (l0.size() != 1)
-    {
-        print_usage();
-        return 2;
-    }
-    else if (l0[0] < 'A' || (l0[0] > 'Z' && l0[0] < 'a') || l0[0] > 'z')
-    {
-        if (l1 == "nil")  // allow symbols for l0 only
-        {
-            l0_is_symbol = true;
-        }
-        else
-        {
-            print_usage();
-            return 2;
-        }
-    }
-
-    if (l1.size() != 1 && l1 != "nil")
-    {
-        print_usage();
-        return 2;
-    }
-    else if (l1[0] < 'A' || (l1[0] > 'Z' && l1[0] < 'a') || l1[0] > 'z')
-    {
-        print_usage();
-        return 2;
-    }
-
-    if (l2.size() != 1 && l2 != "nil")
-    {
-        print_usage();
-        return 2;
-    }
-    else if (l2[0] < 'A' || (l2[0] > 'Z' && l2[0] < 'a') || l2[0] > 'z')
-    {
-        print_usage();
-        return 2;
-    }
-
-    if (l3.size() != 1 && l3 != "nil")
-    {
-        print_usage();
-        return 2;
-    }
-    else if (l3[0] < 'A' || (l3[0] > 'Z' && l3[0] < 'a') || l3[0] > 'z')
-    {
-        print_usage();
-        return 2;
-    }
-
-    if (l4.size() != 1 && l4 != "nil")
-    {
-        print_usage();
-        return 2;
-    }
-    else if (l4[0] < 'A' || (l4[0] > 'Z' && l4[0] < 'a') || l4[0] > 'z')
-    {
-        print_usage();
-        return 2;
-    }
-
-    if (l5.size() != 1 && l5 != "nil")
-    {
-        print_usage();
-        return 2;
-    }
-    else if (l5[0] < 'A' || (l5[0] > 'Z' && l5[0] < 'a') || l5[0] > 'z')
-    {
-        print_usage();
-        return 2;
-    }
+    std::string const PREFIX_FILENAME{argv[4]};
 
     q_usage::Type q_mode;
-    if (argc == 11)
-        q_mode = q_usage::from_string(argv[10]);
-    if (q_mode.is_nil())
-        q_mode = q_usage::included::grab();
-
-//     std::cout << "q_mode: " << q_mode << std::endl;
-
-    std::string prefix{"_"};
-    if (l0_is_symbol)
+    if (argc == 6)
     {
-        if (l0 == "0")
-            prefix += "zero";
-        else if (l0 == "1")
-            prefix += "one";
-        else if (l0 == "2")
-            prefix += "two";
-        else if (l0 == "3")
-            prefix += "three";
-        else if (l0 == "4")
-            prefix += "four";
-        else if (l0 == "5")
-            prefix += "five";
-        else if (l0 == "6")
-            prefix += "six";
-        else if (l0 == "7")
-            prefix += "seven";
-        else if (l0 == "8")
-            prefix += "eight";
-        else if (l0 == "9")
-            prefix += "nine";
-        else if (l0 == "-")
-            prefix += "mns";
-        else if (l0 == ".")
-            prefix += "dot";
-        else if (l0 == "/")
-            prefix += "slsh";
-        else if (l0 == ":")
-            prefix += "cln";
-        else if (l0 == "\"")
-            prefix += "quot";
-        else if (l0 == "#")
-            prefix += "hsh";
-        else if (l0 == "$")
-            prefix += "dol";
-        else if (l0 == "'")
-            prefix += "sqt";
-        else if (l0 == "(")
-            prefix += "pl";
-        else if (l0 == "+")
-            prefix += "pls";
-        else if (l0 == ">")
-            prefix += "gt";
-        else if (l0 == "_")
-            prefix += "uscr";
-        else if (l0 == "~")
-            prefix += "tld";
-        else
+        q_mode = q_usage::from_string(argv[5]);
+        if (q_mode.is_nil())
         {
-            std::cout << "ERROR: unknown symbol for l0 --> '" << l0 << "'" << std::endl;
-            return 2;
+            std::cout << "\"" << argv[5] << "\"is not a variant of q_usage. valid variants are:"
+                      << std::endl;
+            for (auto v : q_usage::variants_by_string())
+                std::cout << "  --> " << v << std::endl;
+
+            std::cout << "\nusing default q_usage of: \"" << q_usage::included::grab() << "\"" << std::endl;
         }
     }
     else
     {
-        prefix += l0;
-        if (l1 != "nil")
+        std::cout << "\"q_usage\" not specified, defaulting to \""
+                  << q_usage::included::grab() << "\"" << std::endl;
+    }
+    if (q_mode.is_nil())
+        q_mode = q_usage::included::grab();
+
+    prefixes_2d_to_5d.reserve(1000);
+
+    // get all prefixes from file
+    {
+        FILE * f = fopen(PREFIX_FILENAME.c_str(), "r");
+        if (nullptr == f)
         {
-            prefix += "_" + l1;
-            if (l2 != "nil")
-            {
-                prefix += "_" + l2;
-                if (l3 != "nil")
-                {
-                    prefix += "_" + l3;
-                    if (l4 != "nil")
-                    {
-                        prefix += "_" + l4;
-                        if (l5 != "nil")
-                        {
-                            prefix += "_" + l5;
-                        }
-                    }
-                }
-            }
+            perror(PREFIX_FILENAME.c_str());
+            exit(1);
+        }
+        bool ok = read_prefixes(f, OUTPUT_DIR, lookup_table_2d_to_5d, prefixes_6d);
+        fclose(f);
+        if (!ok)
+        {
+            std::cout << "failed to read prefix file: " << PREFIX_FILENAME << std::endl;
+            exit(1);
         }
     }
 
-    matchable::MatchableMaker mm;
+    // std::stable_sort(prefixes_6d.begin(), prefixes_6d.end());
 
-    mm.grab("word" + prefix)->add_property("int8_t", "pos");
-    mm.grab("word" + prefix)->add_property("int", "syn");
-    mm.grab("word" + prefix)->add_property("int", "ant");
-    mm.grab("word" + prefix)->add_property("int", "by_longest_index");
-    mm.grab("word" + prefix)->add_property("int", "ordinal_summation");
-    mm.grab("word" + prefix)->add_property("int", "embedded");
-    mm.grab("word" + prefix)->add_property("int", "book_index");
-    mm.grab("word" + prefix)->add_property("int", "chapter_index");
-    mm.grab("word" + prefix)->add_property("int", "paragraph_index");
-    mm.grab("word" + prefix)->add_property("int", "word_index");
 
-    // "word_attribute" properties
-    {
-        auto add_bool_prop =
-            [&](std::string const & prop)
-            {
-                std::string const prop_name = "is_" + prop;
-                mm.grab("word" + prefix)->add_property("int8_t", prop_name);
-            };
 
-        add_bool_prop(word_attribute::name::grab().as_string());
-        add_bool_prop(word_attribute::male_name::grab().as_string());
-        add_bool_prop(word_attribute::female_name::grab().as_string());
-        add_bool_prop(word_attribute::place::grab().as_string());
-        add_bool_prop(word_attribute::compound::grab().as_string());
-        add_bool_prop(word_attribute::acronym::grab().as_string());
-        add_bool_prop(word_attribute::phrase::grab().as_string());
-        add_bool_prop("used_in_book");
-    }
+
 
     if (q_mode != q_usage::only::grab())
     {
@@ -444,9 +402,10 @@ int main(int argc, char ** argv)
                 exit(1);
             }
             word_attribute::Flags base_attributes;
-            read_3201_default(single_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
+            read_3201_default(single_file, base_attributes);
             fclose(single_file);
         }
+
 
         {
             std::string const FN_3201_COMPOUND{DATA_DIR + "/3201/files/COMPOUND.TXT"};
@@ -457,7 +416,7 @@ int main(int argc, char ** argv)
                 exit(1);
             }
             word_attribute::Flags base_attributes{word_attribute::compound::grab()};
-            read_3201_default(compound_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
+            read_3201_default(compound_file, base_attributes);
             fclose(compound_file);
         }
 
@@ -470,7 +429,7 @@ int main(int argc, char ** argv)
                 exit(1);
             }
             word_attribute::Flags base_attributes;
-            read_3201_default(common_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
+            read_3201_default(common_file, base_attributes);
             fclose(common_file);
         }
 
@@ -483,7 +442,7 @@ int main(int argc, char ** argv)
                 exit(1);
             }
             word_attribute::Flags base_attributes{word_attribute::name::grab()};
-            read_3201_default(names_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
+            read_3201_default(names_file, base_attributes);
             fclose(names_file);
         }
 
@@ -499,7 +458,7 @@ int main(int argc, char ** argv)
                 word_attribute::name::grab(),
                 word_attribute::female_name::grab()
             };
-            read_3201_default(names_f_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
+            read_3201_default(names_f_file, base_attributes);
             fclose(names_f_file);
         }
 
@@ -515,7 +474,7 @@ int main(int argc, char ** argv)
                 word_attribute::name::grab(),
                 word_attribute::male_name::grab()
             };
-            read_3201_default(names_m_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
+            read_3201_default(names_m_file, base_attributes);
             fclose(names_m_file);
         }
 
@@ -528,7 +487,7 @@ int main(int argc, char ** argv)
                 exit(1);
             }
             word_attribute::Flags base_attributes{word_attribute::place::grab()};
-            read_3201_default(places_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
+            read_3201_default(places_file, base_attributes);
             fclose(places_file);
         }
 
@@ -541,7 +500,7 @@ int main(int argc, char ** argv)
                 exit(1);
             }
             word_attribute::Flags base_attributes;
-            read_3201_default(crosswd_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
+            read_3201_default(crosswd_file, base_attributes);
             fclose(crosswd_file);
         }
 
@@ -554,7 +513,7 @@ int main(int argc, char ** argv)
                 exit(1);
             }
             word_attribute::Flags base_attributes;
-            read_3201_default(crswd_d_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
+            read_3201_default(crswd_d_file, base_attributes);
             fclose(crswd_d_file);
         }
 
@@ -567,7 +526,7 @@ int main(int argc, char ** argv)
                 exit(1);
             }
             word_attribute::Flags base_attributes{word_attribute::acronym::grab()};
-            read_3201_default(acronyms_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm);
+            read_3201_default(acronyms_file, base_attributes);
             fclose(acronyms_file);
         }
 
@@ -579,7 +538,7 @@ int main(int argc, char ** argv)
                 perror(FN_3202.c_str());
                 exit(1);
             }
-            read_3202(input_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+            read_3202(input_file);
             fclose(input_file);
         }
 
@@ -591,7 +550,7 @@ int main(int argc, char ** argv)
                 perror(FN_3203_MOBYPOS.c_str());
                 exit(1);
             }
-            read_3203_mobypos(mobypos_file, l0, l1, l2, l3, l4, l5, prefix, mm);
+            read_3203_mobypos(mobypos_file);
             fclose(mobypos_file);
         }
     }
@@ -603,7 +562,7 @@ int main(int argc, char ** argv)
 
         std::string const crumbs_path = BOOK_VOCAB_DIR + "/Crumbs";
         std::filesystem::create_directory(crumbs_path);
-        std::string const crumbs_vocab = BOOK_VOCAB_DIR + "/Crumbs/" + prefix.substr(1);
+        std::string const crumbs_vocab = BOOK_VOCAB_DIR + "/Crumbs/vocabulary";
         FILE * vocab_file = fopen(crumbs_vocab.c_str(), "w");
         if (vocab_file == 0)
         {
@@ -634,8 +593,7 @@ int main(int argc, char ** argv)
                 exit(1);
             }
             word_attribute::Flags base_attributes;
-            bool ok = read_crumbs(l0, l1, l2, l3, l4, l5, prefix, base_attributes,
-                                  q_file, vocab_file, mm, text);
+            bool ok = read_crumbs(base_attributes, q_file, vocab_file, text);
             fclose(q_file);
             if (!ok)
             {
@@ -670,7 +628,7 @@ int main(int argc, char ** argv)
 //             exit(1);
 //         }
 //         word_attribute::Flags base_attributes;
-//         bool ok = read_crumbs(q_file, l0, l1, l2, l3, l4, l5, prefix, base_attributes, mm, text);
+//         bool ok = read_crumbs(q_file, base_attributes, text);
 //         fclose(q_file);
 //         if (!ok)
 //         {
@@ -687,48 +645,32 @@ int main(int argc, char ** argv)
         parts_of_speech::Flags pos{parts_of_speech::N::grab()};
 
         for (auto const & s : shtroizel)
-            if (passes_filter(s, word_attributes, l0, l1, l2, l3, l4, l5))
-                add_word(s, prefix, word_attributes, pos, mm);
+            add_word(s, word_attributes, pos);
     }
 
-    // remove leading underscore
-    prefix.erase(0, 1);
 
+    std::cout << "generating stage 0 matchables... " << std::endl;
 
-    std::cout << "generating stage 0 matchables: " << l0 << " ";
-    if (l1 == "nil")
-        std::cout << "--";
-    else
-        std::cout << l1 << " ";
-    if (l2 == "nil")
-        std::cout << "--";
-    else
-        std::cout << l2 << " ";
-    if (l3 == "nil")
-        std::cout << "--";
-    else
-        std::cout << l3 << " ";
-    if (l4 == "nil")
-        std::cout << "--";
-    else
-        std::cout << l4 << " ";
-    if (l5 == "nil")
-        std::cout << "--";
-    else
-        std::cout << l5 << " ";
-
-    // save file
-    std::string out_filename{OUTPUT_DIR + "/" + prefix + ".h"};
-    auto sa_status = mm.save_as(
-        out_filename,
-        {matchable::save_as__content::matchables::grab()},
-        matchable::save_as__spread_mode::wrap::grab()
+    // save save save
+    foreach_prefix(
+        [&OUTPUT_DIR](Prefix & p)
+        {
+            std::string path = p.save_path(OUTPUT_DIR);
+            // std::cout << "    --> " << path << std::endl;
+            auto sa_status = p.as_mutable_maker().save_as(
+                path,
+                {matchable::save__content::matchables::grab()},
+                matchable::save__grow_mode::wrap::grab()
+            );
+            if (sa_status != matchable::save__status::success::grab())
+            {
+                std::cout << "failed to save prefix: '" << p.as_string() << "'\n"
+                          << "              to file: '" << p.save_path(OUTPUT_DIR) << "'\n"
+                          << "    with save__status: '" << sa_status << "'" << std::endl;
+                abort();
+            }
+        }
     );
-
-    std::cout << "---------> " << sa_status << std::endl;
-
-    if (sa_status != matchable::save_as__status::success::grab())
-        return 1;
 
     return 0;
 }
@@ -737,274 +679,355 @@ int main(int argc, char ** argv)
 
 void print_usage()
 {
-    std::cout << "program expects 8 arguments:\n"
+    std::cout << "program expects 4 or 5 arguments:\n"
               << "    [1]  data directory\n"
-              << "    [2]  output directory\n"
-              << "\n"
-              << "    * letter arguments form an inclusive prefix filter\n"
-              << "    * letters are case sensitive\n"
-              << "\n"
-              << "    [3]  first letter\n"
-              << "         - include words starting with <first letter>\n"
-              << "         - single letter word of 'first letter' is included when second letter is 'a'\n"
-              << "           and 'third letter' is either 'a' or 'nil'\n"
-              << "    [4]  second letter\n"
-              << "         - include words seconding with <second letter>\n"
-              << "         - two letter word of 'first letter' + 'second letter' is included when \n"
-              << "           'third letter' is either 'a' or 'nil'\n"
-              << "         - can be disabled for single letter prefix by setting to 'nil'\n"
-              << "    [5]  third letter\n"
-              << "         - include words thirding with <third letter>\n"
-              << "         - can be disabled for two letter prefix by setting to 'nil'\n"
-              << "         - ignored when second letter is 'nil'\n"
-              << "    [6]  fourth letter\n"
-              << "         - include words fourthing with <fourth letter>\n"
-              << "         - can be disabled for three letter prefix by setting to 'nil'\n"
-              << "         - ignored when <second letter> or <third letter> is 'nil'\n"
-              << "    [7]  fifth letter\n"
-              << "         - include words fifthing with <fifth letter>\n"
-              << "         - can be disabled for four letter prefix by setting to 'nil'\n"
-              << "         - ignored when <second letter> or <third letter> or <fourth letter> is 'nil'\n"
-              << "    [8]  sixth letter\n"
-              << "         - include words sixthing with <sixth letter>\n"
-              << "         - can be disabled for five letter prefix by setting to 'nil'\n"
-              << "         - ignored when <second letter> or <third letter> or <fourth letter>\n"
-              << "           or <fifth letter> is 'nil'\n"
-              << std::flush;
+              << "    [2]  book vocabulary directory\n"
+              << "    [3]  output directory\n"
+              << "    [4]  prefix filename\n"
+              << "    [5]  one of the following q modes:";
+    for (auto v : q_usage::variants_by_string())
+        std::cout << " " << v;
+    std::cout << std::endl;
 }
 
 
-bool has_responsibility(std::string const & word, std::string prefix, size_t depth)
+bool read_prefixes(FILE * f,
+                   std::string const & OUTPUT_DIR,
+                   LookupTable2dTo5d & lookup_table_2d_to_5d,
+                   std::vector<Prefix> & prefixes_6d)
 {
-    if (word.length() == 0)
+    prefixes_6d.clear();
+
+    if (OUTPUT_DIR.empty())
+        return false;
+
+    std::array<std::string, MAX_PREFIX_DEPTH> p;
+    std::array<int16_t, 6> p_i = { -1, -1, -1, -1, -1, -1 };
+
+    bool ok{true};
+    while (read_prefix(f, p, ok))
     {
-        std::cout << "has_responsibility() --> empty word!" << std::endl;
-        return false;
-    }
+        if (!ok)
+            return false;
 
-    if (prefix.length() == 0)
-    {
-        std::cout << "has_responsibility() --> empty prefix!" << std::endl;
-        return false;
-    }
-
-    if (depth >= word.length() || depth >= prefix.length())
-    {
-        std::cout << "has_responsibility() --> depth out of bounds!" << std::endl;
-        return false;
-    }
-
-    // allow some symbols for depth 0 only
-    // the rest of the symbols are to be handled by left most leaf
-    // these symbols at other depths are also handled by the left most leaf
-    if (depth == 0 &&
-            ((word[0] >= '-' && word[0] <= ':') || // number or '-', '.', '/' or ':'
-             (word[0] >= '"' && word[0] <= '$') || // '"', '#' or '$'
-             word[0] == '\'' ||
-             word[0] == '(' ||
-             word[0] == '+' ||
-             word[0] == '>' ||
-             word[0] == '_' ||
-             word[0] == '~'))
-        return word[0] == prefix[0];
-
-    // find first occurance of symbol within prefix depth
-    size_t i = 0;
-    for (; i < word.length() && i < prefix.length(); ++i)
-        if (word[i] < 'A' || (word[i] > 'Z' && word[i] < 'a') || word[i] > 'z')
-            break;
-
-    // if no symbols then do normal check
-    if (i == word.length() || i == prefix.length())
-        return word[depth] == prefix[depth];
-
-    bool ok = prefix[i] == 'A';
-    for (; ok && i < prefix.length(); ++i)
-        ok = prefix[i] == 'A';
-
-    return ok;
-}
-
-
-
-bool passes_prefix_filter(
-    std::string const & word,
-    std::string const & l0,
-    std::string const & l1,
-    std::string const & l2,
-    std::string const & l3,
-    std::string const & l4,
-    std::string const & l5
-)
-{
-    if (word.size() == 0)
-        return false;
-
-    // if word does not start with l0 then fail
-    if (!has_responsibility(word, l0, 0))
-        return false;
-
-    if (l1 != "nil")
-    {
-        if (word.size() > 1)
+        std::string p_as_str;
+        for (int i = 0; i < MAX_PREFIX_DEPTH && p[i] != "nil"; ++i)
         {
-            // if word does not second with l1 then fail
-            if (!has_responsibility(word, l0 + l1, 1))
-                return false;
-
-            if (l2 != "nil")
+            if (p[i].empty())
             {
-                if (word.size() > 2)
+                std::string prefix;
+                for (auto const & sym : p)
                 {
-                    // if 3+ letter word does not third with l2 then fail
-                    if (!has_responsibility(word, l0 + l1 + l2, 2))
-                        return false;
-
-                    if (l3 != "nil")
-                    {
-                        if (word.size() > 3)
-                        {
-                            // if 4+ letter word does not fourth with l3 then fail
-                            if (!has_responsibility(word, l0 + l1 + l2 + l3, 3))
-                                return false;
-
-                            if (l4 != "nil")
-                            {
-                                if (word.size() > 4)
-                                {
-                                    // if 5+ letter word does not fifth with l4 then fail
-                                    if (!has_responsibility(word, l0 + l1 + l2 + l3 + l4, 4))
-                                        return false;
-
-                                    if (l5 != "nil")
-                                    {
-                                        if (word.size() > 5)
-                                        {
-                                            // if 6+ letter word does not sixth with l5 then fail
-                                            if (!has_responsibility(word, l0 + l1 + l2 + l3 + l4 + l5, 5))
-                                                return false;
-                                        }
-                                        else
-                                        {
-                                            // fail five letter word unless left leaf
-                                            bool left_leaf = (l5[0] == 'A');
-
-                                            if (!left_leaf)
-                                                return false;
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    // fail four letter word unless left leaf
-                                    bool left_leaf =
-                                        (l4[0] == 'A' && l5[0] == 'A') ||
-                                        (l4[0] == 'A' && l5 == "nil");
-
-                                    if (!left_leaf)
-                                        return false;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // fail three letter word unless left leaf
-                            bool left_leaf =
-                                (l3[0] == 'A' && l4[0] == 'A' && l5[0] == 'A') ||
-                                (l3[0] == 'A' && l4[0] == 'A' && l5 == "nil") ||
-                                (l3[0] == 'A' && l4 == "nil");
-
-                            if (!left_leaf)
-                                return false;
-                        }
-                    }
+                    if (prefix.empty())
+                        prefix += " ";
+                    prefix += "'";
+                    prefix += sym;
+                    prefix += "'";
                 }
-                else
-                {
-                    // fail two letter word unless left leaf
-                    bool left_leaf =
-                        (l2[0] == 'A' && l3[0] == 'A' && l4[0] == 'A' && l5[0] == 'A') ||
-                        (l2[0] == 'A' && l3[0] == 'A' && l4[0] == 'A' && l5 == "nil") ||
-                        (l2[0] == 'A' && l3[0] == 'A' && l4 == "nil") ||
-                        (l2[0] == 'A' && l3 == "nil");
-
-                    if (!left_leaf)
-                        return false;
-                }
+                std::cout << "read_prefixes() --> invalid prefix: " << prefix << std::endl;
+                abort();
             }
+            p_as_str += p[i];
         }
+
+        if (p[0] == "nil")
+        {
+            std::cout << "read_prefixes() --> invalid prefix: " << p_as_str << std::endl;
+            abort();
+        }
+
+        // handle 1d prefix (only symbols have depth of 1)
+        if (p[1] == "nil")
+        {
+            // std::cout << "    --> 1d prefix!" << std::endl;
+            if (p[0].empty())
+            {
+                std::cout << "first char of prefix is null (failed to load prefix file)" << std::endl;
+                return false;
+            }
+
+            Prefix * prefix = prefix_for_d1_symbol(p[0][0]);
+            if (nullptr == prefix)
+            {
+                std::cout << "depth is 1, failed to get maker for symbol: '" << p[0][0] << "'" << std::endl;
+                return false;
+            }
+
+            prefix->initialize(p_as_str);
+            continue;
+        }
+
+        int16_t const maker_index{(int16_t) prefixes_2d_to_5d.size()};
+
+        p_i[0] = calc_letter_index(p[0][0]);
+        p_i[1] = calc_letter_index(p[1][0]);
+        p_i[2] = calc_letter_index(p[2][0]);
+        p_i[3] = calc_letter_index(p[3][0]);
+        p_i[4] = calc_letter_index(p[4][0]);
+        p_i[5] = calc_letter_index(p[5][0]);
+
+        // handle 2d prefix
+        if (p[2] == "nil")
+        {
+            std::array<std::array<std::array<int16_t, 52>, 52>, 52> & d3 = lookup_table_2d_to_5d [p_i[0]] [p_i[1]];
+            for (auto & d4 : d3)
+                for (auto & d5 : d4)
+                    for (auto & i : d5)
+                        i = maker_index;
+        }
+
+        // handle 3d prefix
+        else if (p[3] == "nil")
+        {
+            std::array<std::array<int16_t, 52>, 52> & d4 = lookup_table_2d_to_5d [p_i[0]] [p_i[1]] [p_i[2]];
+            for (auto & d5 : d4)
+                for (auto & i : d5)
+                    i = maker_index;
+        }
+
+        // handle 4d prefix
+        else if (p[4] == "nil")
+        {
+            std::array<int16_t, 52> & d5 = lookup_table_2d_to_5d [p_i[0]] [p_i[1]] [p_i[2]] [p_i[3]];
+            for (auto & i : d5)
+                i = maker_index;
+        }
+
+        // handle 5d prefix
+        else if (p[5] == "nil")
+        {
+            lookup_table_2d_to_5d [p_i[0]] [p_i[1]] [p_i[2]] [p_i[3]] [p_i[4]] = maker_index;
+        }
+
+        // handle 6d prefix
         else
         {
-            // fail one letter word unless left leaf
-            bool left_leaf =
-                (l1[0] == 'A' && l2[0] == 'A' && l3[0] == 'A' && l4[0] == 'A' && l5[0] == 'A') ||
-                (l1[0] == 'A' && l2[0] == 'A' && l3[0] == 'A' && l4[0] == 'A' && l5 == "nil") ||
-                (l1[0] == 'A' && l2[0] == 'A' && l3[0] == 'A' && l4 == "nil") ||
-                (l1[0] == 'A' && l2[0] == 'A' && l3 == "nil") ||
-                (l1[0] == 'A' && l2 == "nil");
-
-            if (!left_leaf)
-                return false;
+            Prefix p_6d;
+            p_6d.initialize(p_as_str);
+            prefixes_6d.push_back(std::move(p_6d));
+            continue;
         }
+
+        // finish prefix for depths 2 to 5
+        Prefix p_2_to_5d;
+        p_2_to_5d.initialize(p_as_str);
+        prefixes_2d_to_5d.push_back(std::move(p_2_to_5d));
     }
 
     return true;
 }
 
 
-bool passes_status_filter(word_attribute::Flags const & status)
+bool read_prefix(FILE * f, std::array<std::string, MAX_PREFIX_DEPTH> & prefix, bool & ok)
 {
-    if (status.is_set(word_attribute::invisible_ascii::grab()))
-        return false;
+    for (auto & sym : prefix)
+        sym.clear();
 
-    if (status.is_set(word_attribute::unmatchable_symbols::grab()))
-        return false;
+    int ch;
+    int i{0};
 
-    if (symbols_off && status.is_set(word_attribute::matchable_symbols::grab()))
-        return false;
+    while (true)
+    {
+        ch = fgetc(f);
+        if (ch == EOF)
+            return false;
+
+        if (ch == '\n')
+            break;
+
+        if (ch == ' ')
+        {
+            ++i;
+            if (i < MAX_PREFIX_DEPTH)
+                continue;
+
+            ok = false;
+            return false;
+        }
+
+        prefix[i] += (char) ch;
+    }
 
     return true;
 }
 
 
-bool passes_filter(
-    std::string const & word,
-    word_attribute::Flags const & status,
-    std::string const & l0,
-    std::string const & l1,
-    std::string const & l2,
-    std::string const & l3,
-    std::string const & l4,
-    std::string const & l5
-)
+int16_t calc_letter_index(char ch)
 {
-    if (word.size() < 1)
-        return false;
+    int leaf_index{0};
 
-    if (word.size() > MAX_WORD_LENGTH)
-        return false;
+    if (ch >= 'A' && ch <= 'Z')
+    {
+        leaf_index = (int16_t) ch - 'A';
+    }
+    else if (ch >= 'a' && ch <= 'z')
+    {
+        leaf_index = (int16_t) ch - 'a' + ('Z' - 'A') + 1;
+    }
 
-    if (!passes_prefix_filter(word, l0, l1, l2, l3, l4, l5))
-        return false;
+    if (leaf_index < 0)
+    {
+        std::cout << "calc_letter_index(" << ch << ") --> leaf_index < 0!";
+        abort();
+    }
 
-    if (!passes_status_filter(status))
-        return false;
+    if (leaf_index > 51)
+    {
+        std::cout << "calc_letter_index(" << ch << ") --> leaf_index > 51!";
+        abort();
+    }
 
-    return true;
+    return leaf_index;
+}
+
+
+Prefix * prefix_for_d1_symbol(char sym)
+{
+    //  0  "\"
+    //  1  "#"
+    //  2  "$"
+
+    //  3  "'"
+    //  4  "("
+
+    //  5  "+"
+
+    //  6  "-"
+    //  7  "."
+    //  8  "/"
+    //  9  "0"
+    // 10  "1"
+    // 11  "2"
+    // 12  "3"
+    // 13  "4"
+    // 14  "5"
+    // 15  "6"
+    // 16  "7"
+    // 17  "8"
+    // 18  "9"
+    // 19  ":"
+
+    // 20  ">"
+
+    // 21  "_"
+
+    // 22  "~"
+
+    // check largest ranges first...
+
+
+    // 7th - 20th
+    if (sym >= '-' && sym <= ':')
+        return &symbols_1d_prefixes[(int16_t) (sym - '-' + 6)];
+
+    // first 3
+    if (sym >= '"' && sym <= '$')
+        return &symbols_1d_prefixes[(int16_t) (sym - '"')];
+
+    // 4th and 5th
+    if (sym >= '\'' && sym <= '(')
+        return &symbols_1d_prefixes[(int16_t) (sym - '\'' + 3)];
+
+    // 6th
+    if (sym == '+')
+        return &symbols_1d_prefixes[5];
+
+    // 21st
+    if (sym == '>')
+        return &symbols_1d_prefixes[20];
+
+    // 22nd
+    if (sym == '_')
+        return &symbols_1d_prefixes[21];
+
+    // 23rd
+    if (sym == '~')
+        return &symbols_1d_prefixes[22];
+
+    return nullptr;
+}
+
+
+bool char_is_letter(char ch)
+{
+    return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
+}
+
+
+Prefix * lookup(std::string const & str)
+{
+    if (str.empty())
+    {
+        std::cout << "lookup() called with empty string!" << std::endl;
+        abort();
+    }
+
+    // check for d1 symbol
+    {
+        Prefix * p = prefix_for_d1_symbol(str[0]);
+        if (nullptr != p)
+            return p;
+
+        // refer any symbols at 1d to deeper depth - but in a way that precedes all letters
+        if (str[0] < 'A' || (str[0] > 'Z' && str[0] < 'a') || str[0] > 'z')
+        {
+            int16_t l = lookup_table_2d_to_5d[0][0][0][0][0];
+            if (l < 0 || l >= (int16_t) prefixes_2d_to_5d.size())
+            {
+                std::cout << "lookup() failed given string: \"" << str << "\"" << std::endl;
+                abort();
+            }
+            return &prefixes_2d_to_5d[l];
+        }
+    }
+
+    // first six chars as a string with short strings filled with 'A'
+    std::string first_six{"AAAAAA"};
+    for
+    (
+        int16_t str_i = 0;
+        str_i < (int16_t) first_six.size() && str_i < (int16_t) str.size();
+        ++str_i
+    )
+        first_six[str_i] = str[str_i];
+
+    // check for 6D prefix
+    auto it = std::lower_bound(
+                    prefixes_6d.begin(),
+                    prefixes_6d.end(),
+                    first_six,
+                    [](Prefix const & l, std::string const & r) { return l.as_string() < r; }
+                );
+    if (it != prefixes_6d.end() && first_six == it->as_string())
+        return &*it;
+
+    // 6D prefix not found so look for a shorter prefix,
+    // but first we need the index for each dimension
+    std::array<int16_t, 5> i = { 0, 0, 0, 0, 0 };
+    for (int16_t str_i = 0; str_i < (int16_t) str.length() && str_i < 5; ++str_i)
+    {
+        i[str_i] = calc_letter_index(str[str_i]);
+    }
+
+    int16_t l = lookup_table_2d_to_5d[i[0]][i[1]][i[2]][i[3]][i[4]];
+    if (l < 0)
+        goto err;
+    if (l >= (int16_t) prefixes_2d_to_5d.size())
+        goto err;
+
+    return &prefixes_2d_to_5d[l];
+
+err:
+    std::cout << "lookup() failed given string: \"" << str << "\"" << std::endl;
+    abort();
+
+    return nullptr;
 }
 
 
 void read_3201_default(
     FILE * input_file,
-    std::string const & l0,
-    std::string const & l1,
-    std::string const & l2,
-    std::string const & l3,
-    std::string const & l4,
-    std::string const & l5,
-    std::string const & prefix,
-    word_attribute::Flags const & base_attributes,
-    matchable::MatchableMaker & mm
+    word_attribute::Flags const & base_attributes
 )
 {
     std::string word;
@@ -1020,30 +1043,17 @@ void read_3201_default(
         if (word.size() == 0)
             continue;
 
-        if (!passes_filter(word, attributes, l0, l1, l2, l3, l4, l5))
-            continue;
-
         if (attributes.is_set(word_attribute::compound::grab()) &&
                 word.find('-') == std::string::npos && word.find(' ') == std::string::npos)
             attributes.unset(word_attribute::compound::grab());
 
-        add_word(word, prefix, attributes, mm);
+        add_word(word, attributes);
     }
 }
 
 
 
-void read_3202(
-    FILE * input_file,
-    std::string const & l0,
-    std::string const & l1,
-    std::string const & l2,
-    std::string const & l3,
-    std::string const & l4,
-    std::string const & l5,
-    std::string const & prefix,
-    matchable::MatchableMaker & mm
-)
+void read_3202(FILE * input_file)
 {
     std::string word;
     parts_of_speech::Flags pos_flags;
@@ -1062,8 +1072,7 @@ void read_3202(
             word += (char) ch;
         }
 
-        if (passes_filter(word, attributes, l0, l1, l2, l3, l4, l5) && word.size() > 0)
-            add_word(word, prefix, attributes, pos_flags, mm);
+        add_word(word, attributes, pos_flags);
 
         if (ch == EOF)
             break;
@@ -1072,17 +1081,7 @@ void read_3202(
 
 
 
-void read_3203_mobypos(
-    FILE * input_file,
-    std::string const & l0,
-    std::string const & l1,
-    std::string const & l2,
-    std::string const & l3,
-    std::string const & l4,
-    std::string const & l5,
-    std::string const & prefix,
-    matchable::MatchableMaker & mm
-)
+void read_3203_mobypos(FILE * input_file)
 {
     std::string word;
     parts_of_speech::Flags pos_flags;
@@ -1096,27 +1095,16 @@ void read_3203_mobypos(
         if (word.size() == 0)
             continue;
 
-        if (!passes_filter(word, attributes, l0, l1, l2, l3, l4, l5))
-            continue;
-
-        add_word(word, prefix, attributes, pos_flags, mm);
+        add_word(word, attributes, pos_flags);
     }
 }
 
 
 
 bool read_crumbs(
-    std::string const & l0,
-    std::string const & l1,
-    std::string const & l2,
-    std::string const & l3,
-    std::string const & l4,
-    std::string const & l5,
-    std::string const & prefix,
     word_attribute::Flags const & base_attributes,
     FILE * input_file,
     FILE * vocab_file,
-    matchable::MatchableMaker & mm,
     int & text
 )
 {
@@ -1130,6 +1118,9 @@ bool read_crumbs(
 
         if (!read_crumbs_line(input_file, line, attributes))
             break;
+
+        if (line.empty())
+            continue;
 
         if (attributes.is_set(word_attribute::unmatchable_symbols::grab()))
         {
@@ -1154,10 +1145,7 @@ bool read_crumbs(
                 return false;
             }
 
-//             if (passes_filter(text_line, attributes, l0, l1, l2, l3, l4, l5))
-//                 add_word(text_line, prefix, attributes, mm);
-            if (!add_book_vocab_if_passes_filter(text_line, l0, l1, l2, l3, l4, l5, prefix, attributes,
-                                                 vocab_file, encounters, mm))
+            if (!add_book_vocab(text_line, attributes, vocab_file, encounters))
                 return false;
 
             // read date/time line
@@ -1224,10 +1212,7 @@ bool read_crumbs(
             words.insert(words.end(), tokenized_date.begin(), tokenized_date.end());
             words.insert(words.end(), tokenized_time.begin(), tokenized_time.end());
             for (auto const & word : words)
-//                 if (passes_filter(word, attributes, l0, l1, l2, l3, l4, l5))
-//                     add_word(word, prefix, attributes, mm);
-                if (!add_book_vocab_if_passes_filter(word, l0, l1, l2, l3, l4, l5, prefix, attributes,
-                                                     vocab_file, encounters, mm))
+                if (!add_book_vocab(word, attributes, vocab_file, encounters))
                     return false;
         }
         else
@@ -1249,13 +1234,7 @@ bool read_crumbs(
             {
                 word_attribute::Flags att = attributes;
                 att.set(word_attribute::phrase::grab());
-//                 if (passes_filter(line, att, l0, l1, l2, l3, l4, l5))
-//                 {
-//                     add_word(line, prefix, att, mm);
-// //                     std::cout << "adding line: " << line << std::endl;
-//                 }
-                if (!add_book_vocab_if_passes_filter(line, l0, l1, l2, l3, l4, l5, prefix, att,
-                                                     vocab_file, encounters, mm))
+                if (!add_book_vocab(line, att, vocab_file, encounters))
                     return false;
             }
 
@@ -1348,26 +1327,14 @@ bool read_crumbs(
                                 else if (!has_left_bracket && has_right_bracket)
                                     strip_word(']', slash_token);
 
-//                                 if (passes_filter(slash_token, attributes, l0, l1, l2, l3, l4, l5))
-//                                 {
-//                                     add_word(slash_token, prefix, attributes, mm);
-//
-// //                                     std::cout << "adding word: " << slash_token << std::endl;
-//                                 }
-                                if (!add_book_vocab_if_passes_filter(slash_token, l0, l1, l2, l3, l4, l5,
-                                                                     prefix, attributes, vocab_file,
-                                                                     encounters, mm))
+                                if (!add_book_vocab(slash_token, attributes, vocab_file, encounters))
                                     return false;
 
                                 // split on '='
                                 std::vector<std::string> tokenized_on_eq;
                                 tokenize(slash_token, '=', tokenized_on_eq);
                                 for (auto & eq_token : tokenized_on_eq)
-//                                     if (passes_filter(eq_token, attributes, l0, l1, l2, l3, l4, l5))
-//                                         add_word(eq_token, prefix, attributes, mm);
-                                    if (!add_book_vocab_if_passes_filter(eq_token, l0, l1, l2, l3, l4, l5,
-                                                                         prefix, attributes, vocab_file,
-                                                                         encounters, mm))
+                                    if (!add_book_vocab(eq_token, attributes, vocab_file, encounters))
                                         return false;
 
                                 // for words with brackets, add version of word without brackets
@@ -1375,21 +1342,15 @@ bool read_crumbs(
                                 had_brackets = strip_word(']', slash_token) || had_brackets;
                                 if (had_brackets)
                                 {
-//                                     if (passes_filter(slash_token, attributes, l0, l1, l2, l3, l4, l5))
-//                                         add_word(slash_token, prefix, attributes, mm);
-                                    if (!add_book_vocab_if_passes_filter(slash_token, l0, l1, l2, l3, l4,
-                                                                         l5, prefix, attributes,
-                                                                         vocab_file, encounters, mm))
+                                    if (!add_book_vocab(slash_token, attributes, vocab_file,
+                                                        encounters))
                                         return false;
                                 }
                             }
                         }
                         else
                         {
-//                             if (passes_filter(token, attributes, l0, l1, l2, l3, l4, l5))
-//                                 add_word(token, prefix, attributes, mm);
-                            if (!add_book_vocab_if_passes_filter(token, l0, l1, l2, l3, l4, l5, prefix,
-                                                                 attributes, vocab_file, encounters, mm))
+                            if (!add_book_vocab(token, attributes, vocab_file, encounters))
                                 return false;
                         }
 //                         std::cout << "adding word: " << token << std::endl;
@@ -1403,22 +1364,17 @@ bool read_crumbs(
                         for (auto const & phrase : phrases)
                         {
                             // first add entire quotation (without quotes but could be multiple words)
-                            if (passes_filter(phrase, attributes, l0, l1, l2, l3, l4, l5))
-                            {
-                                bool has_space = false;
-                                for (int i = 0; !has_space && i < (int) phrase.length(); ++i)
-                                    if (phrase[i] == ' ')
-                                        has_space = true;
+                            bool has_space = false;
+                            for (int i = 0; !has_space && i < (int) phrase.length(); ++i)
+                                if (phrase[i] == ' ')
+                                    has_space = true;
 
-                                word_attribute::Flags att = attributes;
-                                if (has_space)
-                                    att.set(word_attribute::phrase::grab());
-                                add_book_vocab(phrase, prefix, att, vocab_file, encounters, mm);
-//                                 add_word(phrase, prefix, attributes, mm);
-//                                 std::cout << "adding phrase: " << phrase << std::endl;
-                            }
-//                             std::cout << "adding phrase: " << phrase << std::endl;
+                            word_attribute::Flags att = attributes;
+                            if (has_space)
+                                att.set(word_attribute::phrase::grab());
 
+                            add_book_vocab(phrase, att, vocab_file, encounters);
+                            // std::cout << "adding phrase: " << phrase << std::endl;
                         }
                     };
 
@@ -1718,39 +1674,14 @@ bool read_3203_mobypos_line(
 
 
 
-bool add_book_vocab_if_passes_filter(
-    std::string const & word,
-    std::string const & l0,
-    std::string const & l1,
-    std::string const & l2,
-    std::string const & l3,
-    std::string const & l4,
-    std::string const & l5,
-    std::string const & prefix,
-    word_attribute::Flags const & wsf,
-    FILE * vocab_file,
-    std::map<std::string, Encountered::Type> & encounters,
-    matchable::MatchableMaker & mm
-)
-{
-    if (!passes_filter(word, wsf, l0, l1, l2, l3, l4, l5))
-        return true;
-
-    return add_book_vocab(word, prefix, wsf, vocab_file, encounters, mm);
-}
-
-
-
 bool add_book_vocab(
     std::string const & word,
-    std::string const & prefix,
     word_attribute::Flags const & wsf,
     FILE * vocab_file,
-    std::map<std::string, Encountered::Type> & encounters,
-    matchable::MatchableMaker & mm
+    std::map<std::string, Encountered::Type> & encounters
 )
 {
-    if (encounters[word].is_nil())
+    if (!word.empty() && encounters[word].is_nil())
     {
         encounters[word] = Encountered::Yes::grab();
 
@@ -1760,7 +1691,7 @@ bool add_book_vocab(
             return false;
         }
 
-        add_word(word, prefix, wsf, mm);
+        add_word(word, wsf);
     }
 
     return true;
@@ -1770,28 +1701,35 @@ bool add_book_vocab(
 
 void add_word(
     std::string const & word,
-    std::string const & prefix,
-    word_attribute::Flags const & wsf,
-    matchable::MatchableMaker & mm
+    word_attribute::Flags const & wsf
 )
 {
     static parts_of_speech::Flags const empty_pos_flags;
-    add_word(word, prefix, wsf, empty_pos_flags, mm);
+    add_word(word, wsf, empty_pos_flags);
 }
 
 
 
 void add_word(
     std::string const & word,
-    std::string const & prefix,
     word_attribute::Flags const & wsf,
-    parts_of_speech::Flags const & pos_flags,
-    matchable::MatchableMaker & mm
+    parts_of_speech::Flags const & pos_flags
 )
 {
+    Prefix * p = lookup(word);
+    if (nullptr == p)
+    {
+        std::cout << "add_word() --> lookup() failed for word: \"" << word << "\"" << std::endl;
+        abort();
+    }
+
+    matchable::MatchableMaker & mm = p->as_mutable_maker();
+
+    std::string const matchable_name = "word_" + p->escaped_and_delimited('_');
+
     // create new variant
     std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
-    mm.grab("word" + prefix)->add_variant(escaped);
+    mm.grab(matchable_name)->add_variant(escaped);
 
     // property for parts of speech
     std::vector<std::string> property_values;
@@ -1802,7 +1740,7 @@ void add_word(
         else
             property_values.push_back("0");
     }
-    mm.grab("word" + prefix)->set_propertyvect(escaped, "pos", property_values);
+    mm.grab(matchable_name)->set_propertyvect(escaped, "pos", property_values);
 
     // property for ordinal sum
     {
@@ -1819,7 +1757,7 @@ void add_word(
             if (letter >= 1 && letter <= 26)
                 ordinal_sum += letter;
         }
-        mm.grab("word" + prefix)->set_property(escaped, "ordinal_summation", std::to_string(ordinal_sum));
+        mm.grab(matchable_name)->set_property(escaped, "ordinal_summation", std::to_string(ordinal_sum));
     }
 
     // properties from word attributes
@@ -1830,7 +1768,7 @@ void add_word(
                 if (wsf.is_set(att))
                 {
                     std::string const prop_name = std::string("is_") + att.as_string();
-                    mm.grab("word" + prefix)->set_property(escaped, prop_name, "1");
+                    mm.grab(matchable_name)->set_property(escaped, prop_name, "1");
                 }
             };
 

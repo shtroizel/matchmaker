@@ -234,7 +234,7 @@ bool read_chapter(
                 {
                     if (embedded_words[word].size() == 0)
                     {
-                        paragraph.push_back(BookWord(word, parent, parent_start));
+                        paragraph.push_back({word, parent, parent_start});
                     }
                     else
                     {

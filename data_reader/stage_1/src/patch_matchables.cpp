@@ -159,7 +159,6 @@ bool patch_matchable_header(std::vector<HeaderEntry> const & matchable_headers)
         }
 
         std::string existing_word;
-        std::string prefix;
         bool word_in_dictionary{false};
         bool found_word_matchable{false};
         int index{-1};
@@ -168,13 +167,6 @@ bool patch_matchable_header(std::vector<HeaderEntry> const & matchable_headers)
         {
             if (str.rfind("word", 0) != std::string::npos)
             {
-                prefix = str.substr(5);
-                prefix = std::regex_replace(
-                    prefix,
-                    std::regex("_"),
-                    " "
-                );
-
                 std::vector<std::string> syn_vect;
                 std::vector<std::string> ant_vect;
                 for (auto const & v : m->variants)
@@ -290,8 +282,6 @@ bool patch_matchable_header(std::vector<HeaderEntry> const & matchable_headers)
                         if (in_at_least_one_book)
                             m->set_propertyvect(v.variant_name, "is_used_in_book", used_in_book_vect);
                     }
-//                     std::lock_guard<std::mutex> const lock(patch_matchable_header_mutex);
-//                     std::cout << "procesed word, '" << v.variant_name << "'" << std::endl;
                 }
 
                 found_word_matchable = true;
@@ -301,10 +291,6 @@ bool patch_matchable_header(std::vector<HeaderEntry> const & matchable_headers)
 
         std::lock_guard<std::mutex> const lock(patch_matchable_header_mutex);
 
-//         std::cout << "       ------> patching " << prefix;
-//         for (int i = prefix.size(); i < 11; ++i)
-//             std::cout << ".";
-//         std::cout << "...........: " << std::flush;
         if (!found_word_matchable)
         {
             std::cout << "failed to find \"word\" matchable" << std::endl;
@@ -313,17 +299,16 @@ bool patch_matchable_header(std::vector<HeaderEntry> const & matchable_headers)
 
         auto sa_status = mm.save_as(
             matchable_header.entry.path(),
-            {matchable::save_as__content::matchables::grab()},
-            matchable::save_as__spread_mode::wrap::grab()
+            {matchable::save__content::matchables::grab()},
+            matchable::save__grow_mode::wrap::grab()
         );
 
         ++processed_headers;
-//         std::cout << sa_status << " (" << processed_headers << " / " << header_count << ")" << std::endl;
 
         if (processed_headers % (header_count / patch_matchables_progress_steps) == 0)
             std::cout << "." << std::flush;
 
-        if (sa_status != matchable::save_as__status::success::grab())
+        if (sa_status != matchable::save__status::success::grab())
             return false;
 
     }

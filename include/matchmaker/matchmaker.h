@@ -83,7 +83,7 @@ int mm_count();
  * @returns
  *     the alphabetic index of the given term if it exists,
  *     or the index that the given term would have if it did exist.
- *     note that this could be mm_count() if *found == false
+ *     note that this could be mm_count() if *found == false, which is an invalid index
  */
 int mm_lookup(char const * term, bool * found);
 

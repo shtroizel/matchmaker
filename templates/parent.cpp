@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2020, Eric Hyer
+Copyright (c) 2020-2022, shtroizel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,12 +30,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-// 'aoeu' replaced by letters deliminated by '/'
-// 'snth' replaced by letters deliminated by '_'
+// 'a o e u' (without spaces) replaced by letters deliminated by '/' (aoeu)
+// 's n t h' (without spaces) replaced by letters deliminated by '_' (snth)
 
 
 
-#include <matchmaker/generated_letters/aoeu/snth.h>
+#include <matchmaker/generated_symbols/aoeu/snth.h>
 
 #include <array>
 #include <functional>
@@ -45,58 +45,58 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <matchable/matchable.h>
 
-#include <matchmaker/generated_letters/aoeu/A/snth_A.h>
-#include <matchmaker/generated_letters/aoeu/B/snth_B.h>
-#include <matchmaker/generated_letters/aoeu/C/snth_C.h>
-#include <matchmaker/generated_letters/aoeu/D/snth_D.h>
-#include <matchmaker/generated_letters/aoeu/E/snth_E.h>
-#include <matchmaker/generated_letters/aoeu/F/snth_F.h>
-#include <matchmaker/generated_letters/aoeu/G/snth_G.h>
-#include <matchmaker/generated_letters/aoeu/H/snth_H.h>
-#include <matchmaker/generated_letters/aoeu/I/snth_I.h>
-#include <matchmaker/generated_letters/aoeu/J/snth_J.h>
-#include <matchmaker/generated_letters/aoeu/K/snth_K.h>
-#include <matchmaker/generated_letters/aoeu/L/snth_L.h>
-#include <matchmaker/generated_letters/aoeu/M/snth_M.h>
-#include <matchmaker/generated_letters/aoeu/N/snth_N.h>
-#include <matchmaker/generated_letters/aoeu/O/snth_O.h>
-#include <matchmaker/generated_letters/aoeu/P/snth_P.h>
-#include <matchmaker/generated_letters/aoeu/Q/snth_Q.h>
-#include <matchmaker/generated_letters/aoeu/R/snth_R.h>
-#include <matchmaker/generated_letters/aoeu/S/snth_S.h>
-#include <matchmaker/generated_letters/aoeu/T/snth_T.h>
-#include <matchmaker/generated_letters/aoeu/U/snth_U.h>
-#include <matchmaker/generated_letters/aoeu/V/snth_V.h>
-#include <matchmaker/generated_letters/aoeu/W/snth_W.h>
-#include <matchmaker/generated_letters/aoeu/X/snth_X.h>
-#include <matchmaker/generated_letters/aoeu/Y/snth_Y.h>
-#include <matchmaker/generated_letters/aoeu/Z/snth_Z.h>
-#include <matchmaker/generated_letters/aoeu/a/snth_a.h>
-#include <matchmaker/generated_letters/aoeu/b/snth_b.h>
-#include <matchmaker/generated_letters/aoeu/c/snth_c.h>
-#include <matchmaker/generated_letters/aoeu/d/snth_d.h>
-#include <matchmaker/generated_letters/aoeu/e/snth_e.h>
-#include <matchmaker/generated_letters/aoeu/f/snth_f.h>
-#include <matchmaker/generated_letters/aoeu/g/snth_g.h>
-#include <matchmaker/generated_letters/aoeu/h/snth_h.h>
-#include <matchmaker/generated_letters/aoeu/i/snth_i.h>
-#include <matchmaker/generated_letters/aoeu/j/snth_j.h>
-#include <matchmaker/generated_letters/aoeu/k/snth_k.h>
-#include <matchmaker/generated_letters/aoeu/l/snth_l.h>
-#include <matchmaker/generated_letters/aoeu/m/snth_m.h>
-#include <matchmaker/generated_letters/aoeu/n/snth_n.h>
-#include <matchmaker/generated_letters/aoeu/o/snth_o.h>
-#include <matchmaker/generated_letters/aoeu/p/snth_p.h>
-#include <matchmaker/generated_letters/aoeu/q/snth_q.h>
-#include <matchmaker/generated_letters/aoeu/r/snth_r.h>
-#include <matchmaker/generated_letters/aoeu/s/snth_s.h>
-#include <matchmaker/generated_letters/aoeu/t/snth_t.h>
-#include <matchmaker/generated_letters/aoeu/u/snth_u.h>
-#include <matchmaker/generated_letters/aoeu/v/snth_v.h>
-#include <matchmaker/generated_letters/aoeu/w/snth_w.h>
-#include <matchmaker/generated_letters/aoeu/x/snth_x.h>
-#include <matchmaker/generated_letters/aoeu/y/snth_y.h>
-#include <matchmaker/generated_letters/aoeu/z/snth_z.h>
+#include <matchmaker/generated_symbols/aoeu/A/snth_A.h>
+#include <matchmaker/generated_symbols/aoeu/B/snth_B.h>
+#include <matchmaker/generated_symbols/aoeu/C/snth_C.h>
+#include <matchmaker/generated_symbols/aoeu/D/snth_D.h>
+#include <matchmaker/generated_symbols/aoeu/E/snth_E.h>
+#include <matchmaker/generated_symbols/aoeu/F/snth_F.h>
+#include <matchmaker/generated_symbols/aoeu/G/snth_G.h>
+#include <matchmaker/generated_symbols/aoeu/H/snth_H.h>
+#include <matchmaker/generated_symbols/aoeu/I/snth_I.h>
+#include <matchmaker/generated_symbols/aoeu/J/snth_J.h>
+#include <matchmaker/generated_symbols/aoeu/K/snth_K.h>
+#include <matchmaker/generated_symbols/aoeu/L/snth_L.h>
+#include <matchmaker/generated_symbols/aoeu/M/snth_M.h>
+#include <matchmaker/generated_symbols/aoeu/N/snth_N.h>
+#include <matchmaker/generated_symbols/aoeu/O/snth_O.h>
+#include <matchmaker/generated_symbols/aoeu/P/snth_P.h>
+#include <matchmaker/generated_symbols/aoeu/Q/snth_Q.h>
+#include <matchmaker/generated_symbols/aoeu/R/snth_R.h>
+#include <matchmaker/generated_symbols/aoeu/S/snth_S.h>
+#include <matchmaker/generated_symbols/aoeu/T/snth_T.h>
+#include <matchmaker/generated_symbols/aoeu/U/snth_U.h>
+#include <matchmaker/generated_symbols/aoeu/V/snth_V.h>
+#include <matchmaker/generated_symbols/aoeu/W/snth_W.h>
+#include <matchmaker/generated_symbols/aoeu/X/snth_X.h>
+#include <matchmaker/generated_symbols/aoeu/Y/snth_Y.h>
+#include <matchmaker/generated_symbols/aoeu/Z/snth_Z.h>
+#include <matchmaker/generated_symbols/aoeu/a/snth_a.h>
+#include <matchmaker/generated_symbols/aoeu/b/snth_b.h>
+#include <matchmaker/generated_symbols/aoeu/c/snth_c.h>
+#include <matchmaker/generated_symbols/aoeu/d/snth_d.h>
+#include <matchmaker/generated_symbols/aoeu/e/snth_e.h>
+#include <matchmaker/generated_symbols/aoeu/f/snth_f.h>
+#include <matchmaker/generated_symbols/aoeu/g/snth_g.h>
+#include <matchmaker/generated_symbols/aoeu/h/snth_h.h>
+#include <matchmaker/generated_symbols/aoeu/i/snth_i.h>
+#include <matchmaker/generated_symbols/aoeu/j/snth_j.h>
+#include <matchmaker/generated_symbols/aoeu/k/snth_k.h>
+#include <matchmaker/generated_symbols/aoeu/l/snth_l.h>
+#include <matchmaker/generated_symbols/aoeu/m/snth_m.h>
+#include <matchmaker/generated_symbols/aoeu/n/snth_n.h>
+#include <matchmaker/generated_symbols/aoeu/o/snth_o.h>
+#include <matchmaker/generated_symbols/aoeu/p/snth_p.h>
+#include <matchmaker/generated_symbols/aoeu/q/snth_q.h>
+#include <matchmaker/generated_symbols/aoeu/r/snth_r.h>
+#include <matchmaker/generated_symbols/aoeu/s/snth_s.h>
+#include <matchmaker/generated_symbols/aoeu/t/snth_t.h>
+#include <matchmaker/generated_symbols/aoeu/u/snth_u.h>
+#include <matchmaker/generated_symbols/aoeu/v/snth_v.h>
+#include <matchmaker/generated_symbols/aoeu/w/snth_w.h>
+#include <matchmaker/generated_symbols/aoeu/x/snth_x.h>
+#include <matchmaker/generated_symbols/aoeu/y/snth_y.h>
+#include <matchmaker/generated_symbols/aoeu/z/snth_z.h>
 
 
 
@@ -169,24 +169,26 @@ PROPERTYx18_MATCHABLE(
 
 
 #define _set_properties(_letter)                                                                           \
-SET_PROPERTY(letter_snth, _letter, count, &mm_count_snth_##_letter)                                        \
-SET_PROPERTY(letter_snth, _letter, as_longest, &mm_as_longest_snth_##_letter)                              \
-SET_PROPERTY(letter_snth, _letter, at, &mm_at_snth_##_letter)                                              \
-SET_PROPERTY(letter_snth, _letter, lookup, &mm_lookup_snth_##_letter)                                      \
-SET_PROPERTY(letter_snth, _letter, ordinal_summation, &mm_ordinal_summation_snth_##_letter)                \
-SET_PROPERTY(letter_snth, _letter, flagged_parts_of_speech, &mm_flagged_parts_of_speech_snth_##_letter)    \
-SET_PROPERTY(letter_snth, _letter, synonyms, &mm_synonyms_snth_##_letter)                                  \
-SET_PROPERTY(letter_snth, _letter, antonyms, &mm_antonyms_snth_##_letter)                                  \
-SET_PROPERTY(letter_snth, _letter, embedded, &mm_embedded_snth_##_letter)                                  \
-SET_PROPERTY(letter_snth, _letter, locations, &mm_locations_snth_##_letter)                                \
-SET_PROPERTY(letter_snth, _letter, is_name, &mm_is_name_snth_##_letter)                                    \
-SET_PROPERTY(letter_snth, _letter, is_male_name, &mm_is_male_name_snth_##_letter)                          \
-SET_PROPERTY(letter_snth, _letter, is_female_name, &mm_is_female_name_snth_##_letter)                      \
-SET_PROPERTY(letter_snth, _letter, is_place, &mm_is_place_snth_##_letter)                                  \
-SET_PROPERTY(letter_snth, _letter, is_compound, &mm_is_compound_snth_##_letter)                            \
-SET_PROPERTY(letter_snth, _letter, is_acronym, &mm_is_acronym_snth_##_letter)                              \
-SET_PROPERTY(letter_snth, _letter, is_phrase, &mm_is_phrase_snth_##_letter)                                \
-SET_PROPERTY(letter_snth, _letter, is_used_in_book, &mm_is_used_in_book_snth_##_letter)
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, count, &mm_count_snth_##_letter)                    \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, as_longest, &mm_as_longest_snth_##_letter)          \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, at, &mm_at_snth_##_letter)                          \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, lookup, &mm_lookup_snth_##_letter)                  \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter,                                                     \
+                                 ordinal_summation, &mm_ordinal_summation_snth_##_letter)                  \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter,                                                     \
+                                 flagged_parts_of_speech, &mm_flagged_parts_of_speech_snth_##_letter)      \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, synonyms, &mm_synonyms_snth_##_letter)              \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, antonyms, &mm_antonyms_snth_##_letter)              \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, embedded, &mm_embedded_snth_##_letter)              \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, locations, &mm_locations_snth_##_letter)            \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_name, &mm_is_name_snth_##_letter)                \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_male_name, &mm_is_male_name_snth_##_letter)      \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_female_name, &mm_is_female_name_snth_##_letter)  \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_place, &mm_is_place_snth_##_letter)              \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_compound, &mm_is_compound_snth_##_letter)        \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_acronym, &mm_is_acronym_snth_##_letter)          \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_phrase, &mm_is_phrase_snth_##_letter)            \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_used_in_book, &mm_is_used_in_book_snth_##_letter)
 
 _set_properties(A)
 _set_properties(B)
@@ -427,8 +429,8 @@ int mm_lookup_snth(std::string const & word, bool * found)
         std::make_pair(letter_snth::z::grab(), letter_boundries[51].first),
     };
 
-    static std::string const snth{"snth"};
-    static int const depth = std::count(snth.begin(), snth.end(), '_') + 1;
+    static std::string const d_str{"aoeu"};
+    static int const depth = std::count(d_str.begin(), d_str.end(), '/') + 1;
 
     if (word.size() < 1)
         goto lookup_failed;
