@@ -43,20 +43,21 @@ def prepare_letters(workspace_root, q, parents_only):
     parent_h = matchmaker_root + 'templates/internal_interface.h'
     parent_cpp = matchmaker_root + 'templates/parent.cpp'
 
+
+    print('[                  generating source                  ]');
+    print('[', end='');
+
     for l0 in ascii_uppercase + ascii_lowercase:
 
-        if q:
-            if l0 != "q" and l0 != "Q":
-                continue
+        # update progress
+        print('-', end='')
+        sys.stdout.flush()
 
         if not parents_only:
             os.makedirs(generated_include + '/matchmaker/generated_symbols/' + l0)
 
         letter_x1_h = generated_include + '/matchmaker/generated_symbols/' + l0 + '/' + l0 + '.h'
         letter_x1_cpp = generated_src + l0 + '.cpp'
-
-        print(letter_x1_h)
-        print(letter_x1_cpp)
 
         # single letter parent
         shutil.copy(parent_h, letter_x1_h)
@@ -76,9 +77,6 @@ def prepare_letters(workspace_root, q, parents_only):
                     + l0 + '/' + l1 + '/' + l0 + '_' + l1 + '.h'
 
             letter_x2_cpp = generated_src + l0 + '_' + l1 + '.cpp'
-
-            print(letter_x2_h)
-            print(letter_x2_cpp)
 
             if (l0 == 'q' and l1 == 'u') or                                                                \
                     (l0 == 'p' and l1 == 'r') or                                                           \
@@ -263,9 +261,6 @@ def prepare_letters(workspace_root, q, parents_only):
 
                     letter_x3_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '.cpp'
 
-                    print(letter_x3_h)
-                    print(letter_x3_cpp)
-
                     if (l0 == 'p' and l1 == 'r' and l2 == 'e') or                                          \
                             (l0 == 'q' and l1 == 'u' and l2 == 'a') or                                     \
                             (l0 == 'q' and l1 == 'u' and l2 == 'i') or                                     \
@@ -401,9 +396,6 @@ def prepare_letters(workspace_root, q, parents_only):
 
                             letter_x4_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '.cpp'
 
-                            print(letter_x4_h)
-                            print(letter_x4_cpp)
-
                             if (l0 == 'o' and l1 == 'v' and l2 == 'e' and l3 == 'r') or                    \
                                     (l0 == 'i' and l1 == 'n' and l2 == 't' and l3 == 'e') or               \
                                     (l0 == 'u' and l1 == 'n' and l2 == 'd' and l3 == 'e') or               \
@@ -446,9 +438,6 @@ def prepare_letters(workspace_root, q, parents_only):
 
                                     letter_x5_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' + l3    \
                                             + '_' + l4 + '.cpp'
-
-                                    print(letter_x5_h)
-                                    print(letter_x5_cpp)
 
                                     if (l0 == 'i' and l1 == 'n' and l2 == 't' and l3 == 'e' and            \
                                                     l4 == 'r') or                                          \
@@ -495,9 +484,6 @@ def prepare_letters(workspace_root, q, parents_only):
 
                                             letter_x6_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' \
                                                     + l3 + '_' + l4 + '_' + l5 + '.cpp'
-
-                                            print(letter_x6_h)
-                                            print(letter_x6_cpp)
 
                                             # six letter leaf
                                             shutil.copy(leaf_h, letter_x6_h)
@@ -557,6 +543,8 @@ def prepare_letters(workspace_root, q, parents_only):
                         replaced = replaced.replace("snth", l0 + '_' + l1)
                         print(replaced, end='')
 
+    print('-]')
+
 
     if not parents_only:
         for sym in ['esc_0',
@@ -587,8 +575,6 @@ def prepare_letters(workspace_root, q, parents_only):
             sym_cpp = generated_src + sym + '.cpp'
             shutil.copy(leaf_h, sym_h)
             shutil.copy(leaf_cpp, sym_cpp)
-            print(sym_h)
-            print(sym_cpp)
             for filename in [sym_h, sym_cpp]:
                 for line in fileinput.input(filename, inplace=True):
                     replaced = line.replace("aoeu", sym)
