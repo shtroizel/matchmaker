@@ -18,7 +18,8 @@ def usage():
     print('    -i  --install_dir     install directory')
     print('                            * defaults to <data_reader_stage_0 root>/install')
     print('                            * relative paths are relative to build_dir\n')
-    print('    -m  --matchable_dir   matchable install directory\n')
+    print('    -m  --matchable_dir   matchable install directory')
+    print('                            * /path/to/matchable_install_prefix/lib/matchable/cmake\n')
     print('    -c  --clang           force use of clang compiler')
     print('                            * system compiler used by default\n')
     print('    -d  --debug           debug build')
@@ -47,7 +48,6 @@ def build_and_install(build_dir, install_dir, matchable_dir, use_clang, debug):
 
     build_dir = build_dir + '/'
     install_dir = install_dir + '/'
-    matchable_dir = matchable_dir + '/'
 
     shutil.rmtree(build_dir, ignore_errors=True)
     os.makedirs(build_dir)
@@ -57,7 +57,7 @@ def build_and_install(build_dir, install_dir, matchable_dir, use_clang, debug):
     os.makedirs(install_dir)
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + install_dir]
-    cmake_cmd.append('-Dmatchable_DIR=' + matchable_dir + '/lib/matchable/cmake')
+    cmake_cmd.append('-Dmatchable_DIR=' + matchable_dir)
 
     if use_clang:
         clang_c = which('clang')

@@ -1,7 +1,5 @@
-#pragma once
-
 /*
-Copyright (c) 2022, shtroizel
+Copyright (c) 2020-2022, shtroizel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,10 +30,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "SerialTask.h"
+#include <read_3201_crosswd.h>
+
+#include <filesystem>
+
+#include <Stage0Data.h>
+#include <read_3201.h>
 
 
-
-bool read_3202(int progress_steps);
-
-MATCHABLE_VARIANT_PROPERTY_VALUE(SerialTask, reading_spc_3202, run, &read_3202)
+void read_3201_crosswd(SerialTask::Type task)
+{
+   std::filesystem::path const path_3201_CROSSWD{Stage0Data::data_dir() + "/3201/files/CROSSWD.TXT"};
+   Stage0Data::word_attribute::Flags base_attributes;
+   read_3201_default(path_3201_CROSSWD, base_attributes, task);
+}

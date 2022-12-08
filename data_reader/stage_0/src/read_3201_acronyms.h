@@ -1,7 +1,7 @@
 #pragma once
 
 /*
-Copyright (c) 2022, shtroizel
+Copyright (c) 2020-2022, shtroizel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-bool read_3202(int progress_steps);
+void read_3201_acronyms(SerialTask::Type);
 
-MATCHABLE_VARIANT_PROPERTY_VALUE(SerialTask, reading_spc_3202, run, &read_3202)
+MATCHABLE_VARIANT_PROPERTY_VALUE(SerialTask, reading_spc_3201_spc__pl_ACRONYMS_pr_,
+                                 run, &read_3201_acronyms)

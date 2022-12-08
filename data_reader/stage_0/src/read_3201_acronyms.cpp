@@ -1,7 +1,5 @@
-#pragma once
-
 /*
-Copyright (c) 2022, shtroizel
+Copyright (c) 2020-2022, shtroizel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,10 +30,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "SerialTask.h"
+#include <read_3201_acronyms.h>
+
+#include <filesystem>
+
+#include <SerialTask.h>
+#include <Stage0Data.h>
+#include <read_3201.h>
 
 
 
-bool read_3202(int progress_steps);
-
-MATCHABLE_VARIANT_PROPERTY_VALUE(SerialTask, reading_spc_3202, run, &read_3202)
+void read_3201_acronyms(SerialTask::Type task)
+{
+   std::filesystem::path path_3201_ACRONYMS = Stage0Data::data_dir() + "/3201/files/ACRONYMS.TXT";
+   Stage0Data::word_attribute::Flags base_attributes{Stage0Data::word_attribute::acronym::grab()};
+   read_3201_default(path_3201_ACRONYMS, base_attributes, task);
+}

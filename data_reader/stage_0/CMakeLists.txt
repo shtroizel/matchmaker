@@ -68,8 +68,55 @@ add_custom_command(
     VERBATIM
 )
 
-add_executable(${CMAKE_PROJECT_NAME} src/${CMAKE_PROJECT_NAME}.cpp)
+set(
+    srcs
+
+    # compile these first
+    src/SerialTask.h
+    src/SerialTask.cpp
+    src/Stage0Data.cpp
+    src/Stage0Data.h
+    src/data_reader_stage_0.cpp
+
+    src/Prefix.cpp
+    src/Prefix.h
+    src/prepare_prefixes.cpp
+    src/prepare_prefixes.h
+    src/read_3201_acronyms.cpp
+    src/read_3201_acronyms.h
+    src/read_3201_common.cpp
+    src/read_3201_common.h
+    src/read_3201_compound.cpp
+    src/read_3201_compound.h
+    src/read_3201.cpp
+    src/read_3201_crosswd.cpp
+    src/read_3201_crosswd.h
+    src/read_3201_crswd_d.cpp
+    src/read_3201_crswd_d.h
+    src/read_3201_fnames.cpp
+    src/read_3201_fnames.h
+    src/read_3201.h
+    src/read_3201_mnames.cpp
+    src/read_3201_mnames.h
+    src/read_3201_names.cpp
+    src/read_3201_names.h
+    src/read_3201_places.cpp
+    src/read_3201_places.h
+    src/read_3201_single.cpp
+    src/read_3201_single.h
+    src/read_3202.cpp
+    src/read_3202.h
+    src/read_3203.cpp
+    src/read_3203.h
+    src/read_crumbs.cpp
+    src/read_crumbs.h
+    src/save_matchables.cpp
+    src/save_matchables.h
+)
+
+add_executable(${CMAKE_PROJECT_NAME} ${srcs})
 target_link_libraries(${CMAKE_PROJECT_NAME} matchablemaker_static)
+include_directories(src)
 add_dependencies(${CMAKE_PROJECT_NAME} ex_3201)
 add_dependencies(${CMAKE_PROJECT_NAME} ex_3202)
 add_dependencies(${CMAKE_PROJECT_NAME} ex_3203)

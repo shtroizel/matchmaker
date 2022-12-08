@@ -172,13 +172,19 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             build_data_reader_cmd.append('-i')
             build_data_reader_cmd.append('../install_mm' + suffix)
             build_data_reader_cmd.append('-m')
-            build_data_reader_cmd.append('../../matchable/install_mm' + suffix)
+            build_data_reader_cmd.append(matchmaker_root + '/matchable/install_mm' +
+                                         suffix + '/lib/matchable/cmake')
             if use_clang:
                 build_data_reader_cmd.append('-c')
             if debug:
                 build_data_reader_cmd.append('-d')
             if subprocess.run(build_data_reader_cmd).returncode != 0:
                 print('data reader failed to build')
+                cmd_as_str = ""
+                for c in build_data_reader_cmd:
+                    cmd_as_str += ' '
+                    cmd_as_str += c
+                print('command was: ' + cmd_as_str)
                 exit(1)
             print('\n\nstage 0 data reader ready!')
 

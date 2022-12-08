@@ -1,7 +1,7 @@
 #pragma once
 
 /*
-Copyright (c) 2022, shtroizel
+Copyright (c) 2020-2022, shtroizel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,10 +32,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "SerialTask.h"
+#include <matchable/matchable_fwd.h>
+
+#include <filesystem>
 
 
 
-bool read_3202(int progress_steps);
+namespace Stage0Data { MATCHABLE_FWD(word_attribute); }
+MATCHABLE_FWD(SerialTask);
 
-MATCHABLE_VARIANT_PROPERTY_VALUE(SerialTask, reading_spc_3202, run, &read_3202)
+
+
+void read_3201_default(
+    std::filesystem::path const file_path,
+    Stage0Data::word_attribute::Flags const & base_attributes,
+    SerialTask::Type task
+);

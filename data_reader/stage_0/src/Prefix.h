@@ -1,7 +1,7 @@
 #pragma once
 
 /*
-Copyright (c) 2022, shtroizel
+Copyright (c) 2020-2022, shtroizel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,10 +32,37 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "SerialTask.h"
+#include <memory>
+#include <string>
+#include <matchable/MatchableMaker.h>
 
 
 
-bool read_3202(int progress_steps);
+class Prefix
+{
+public:
+    Prefix();
+    ~Prefix();
 
-MATCHABLE_VARIANT_PROPERTY_VALUE(SerialTask, reading_spc_3202, run, &read_3202)
+    Prefix(Prefix const &) = delete;
+    Prefix(Prefix && other);
+    void initialize(std::string const & prefix);
+
+    Prefix & operator=(Prefix const &) = delete;
+    Prefix & operator=(Prefix && other);
+
+    bool operator<(Prefix const & other) const;
+
+    matchable::MatchableMaker const & as_maker() const;
+    matchable::MatchableMaker & as_mutable_maker();
+
+    std::string const & as_string() const;
+    std::string & as_mutable_string();
+
+    std::string escaped_and_delimited(char delim) const;
+    std::string save_path(std::string const & OUTPUT_DIR) const;
+
+private:
+    std::unique_ptr<matchable::MatchableMaker> maker;
+    std::string str;
+};

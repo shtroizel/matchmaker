@@ -1,7 +1,5 @@
-#pragma once
-
 /*
-Copyright (c) 2022, shtroizel
+Copyright (c) 2020-2022, shtroizel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,10 +30,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "SerialTask.h"
+#include <read_3201_mnames.h>
+
+#include <filesystem>
+
+#include <Stage0Data.h>
+#include <read_3201.h>
 
 
 
-bool read_3202(int progress_steps);
-
-MATCHABLE_VARIANT_PROPERTY_VALUE(SerialTask, reading_spc_3202, run, &read_3202)
+void read_3201_mnames(SerialTask::Type task)
+{
+   std::filesystem::path const path_3201_NAMES_M{Stage0Data::data_dir() + "/3201/files/NAMES-M.TXT"};
+   Stage0Data::word_attribute::Flags base_attributes{
+         Stage0Data::word_attribute::name::grab(),
+         Stage0Data::word_attribute::male_name::grab()
+   };
+   read_3201_default(path_3201_NAMES_M, base_attributes, task);
+}
