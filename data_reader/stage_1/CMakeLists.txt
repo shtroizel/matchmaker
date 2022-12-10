@@ -26,7 +26,7 @@ include_directories(
 
 get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
 set(CMAKE_INSTALL_RPATH "${rpath_dir}")
-find_package(matchmaker 3.0.1 REQUIRED)
+find_package(matchmaker 3.1.0 REQUIRED)
 
 find_package(Threads REQUIRED)
 
