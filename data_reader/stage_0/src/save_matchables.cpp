@@ -10,6 +10,20 @@
 
 void save_matchables(SerialTask::Type task)
 {
+    // before saving sneak in some important words...
+    {
+        std::vector<std::string> contributed_by_shtroizel
+        {
+            "shtroizel",
+            "Shtroizel",
+        };
+        Stage0Data::word_attribute::Flags word_attributes{Stage0Data::word_attribute::name::grab()};
+        parts_of_speech::Flags pos{parts_of_speech::N::grab()};
+
+        for (auto const & s : contributed_by_shtroizel)
+            Stage0Data::add_word(s, word_attributes, pos);
+    }
+
     task.set_progress(0);
     task.set_goal(Stage0Data::symbols_1d_prefixes().size() +
                   Stage0Data::prefixes_2d_to_5d().size() +

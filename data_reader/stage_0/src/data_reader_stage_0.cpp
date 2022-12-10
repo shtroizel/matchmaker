@@ -123,19 +123,6 @@ int main(int argc, char ** argv)
         std::cout << std::endl;
     }
 
-    {
-        std::vector<std::string> contributed_by_shtroizel
-        {
-            "shtroizel", "Shtroizel"
-        };
-        Stage0Data::word_attribute::Flags word_attributes{Stage0Data::word_attribute::name::grab()};
-        parts_of_speech::Flags pos{parts_of_speech::N::grab()};
-
-        for (auto const & s : contributed_by_shtroizel)
-            Stage0Data::add_word(s, word_attributes, pos);
-    }
-
-
     return 0;
 }
 
