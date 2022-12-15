@@ -1,6 +1,7 @@
 #include "record_word_locations.h"
 
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -44,7 +45,10 @@ bool record_word_locations(int progress_steps)
                     BookWord const & bw = books[b].chapters[ch].paragraphs[p][w];
 
                     s = mm_at(bw.word, &len);
-                    if (len != 1 || s[0] == 'Q' || s[0] == 'q')
+                    if ((len != 1 || s[0] == 'Q' || s[0] == 'q') &&
+                            strcmp(s, "the") != 0 && strcmp(s, "The") != 0 &&
+                            strcmp(s, "an") != 0 && strcmp(s, "An") != 0 &&
+                            strcmp(s, "I") != 0)
                     {
                         book_indexes[bw.word].push_back(b);
                         chapter_indexes[bw.word].push_back(ch);
@@ -52,24 +56,47 @@ bool record_word_locations(int progress_steps)
                         word_indexes[bw.word].push_back(w);
                     }
 
-                    if (bw.parent_phrase >= 0 && bw.parent_phrase_start_index >= 0)
+                    // record links
+                    // if (len > 3 && s[0] == '>' && s[1] == '>')
+                    // {
+                    //     IndexTable const & defs = Stage1Data::nil.as_definitions();
+                    //     for (auto d : defs[bw.word])
+                    //     {
+                    //         book_indexes[d].push_back(b);
+                    //         chapter_indexes[d].push_back(ch);
+                    //         paragraph_indexes[d].push_back(p);
+                    //         word_indexes[d].push_back(w);
+                    //     }
+                    // }
+
+
+                    int pp = -1;
+                    int ppsi = -1;
+                    if (bw.ancestors.size() > 0)
+                    {
+                        pp = bw.ancestors[0];
+                        ppsi = bw.first_ancestor_start_index;
+                    }
+
+                    if (pp >= 0 && ppsi >= 0)
                     {
                         bool parent_added = false;
-                        for (size_t i = 0; !parent_added && i < book_indexes[bw.parent_phrase].size(); ++i)
+                        size_t const location_count = book_indexes[pp].size();
+                        for (size_t i = 0; !parent_added && i < location_count; ++i)
                         {
-                            if (word_indexes[bw.parent_phrase][i] == bw.parent_phrase_start_index &&
-                                    paragraph_indexes[bw.parent_phrase][i] == p &&
-                                    chapter_indexes[bw.parent_phrase][i] == ch &&
-                                    book_indexes[bw.parent_phrase][i] == b)
+                            if (word_indexes[pp][i] == ppsi &&
+                                    paragraph_indexes[pp][i] == p &&
+                                    chapter_indexes[pp][i] == ch &&
+                                    book_indexes[pp][i] == b)
                                 parent_added = true;
                         }
 
                         if (!parent_added)
                         {
-                            book_indexes[bw.parent_phrase].push_back(b);
-                            chapter_indexes[bw.parent_phrase].push_back(ch);
-                            paragraph_indexes[bw.parent_phrase].push_back(p);
-                            word_indexes[bw.parent_phrase].push_back(bw.parent_phrase_start_index);
+                            book_indexes[pp].push_back(b);
+                            chapter_indexes[pp].push_back(ch);
+                            paragraph_indexes[pp].push_back(p);
+                            word_indexes[pp].push_back(ppsi);
                         }
                     }
 

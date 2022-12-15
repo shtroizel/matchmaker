@@ -82,7 +82,7 @@ int mm_count();
  * @returns
  *     the alphabetic index of the given term if it exists,
  *     or the index that the given term would have if it did exist.
- *     note that this could be mm_count() if *found == false, which is an invalid index
+ *     note that this could be mm_count() if *found == false, which is an invalid index!
  */
 int mm_lookup(char const * term, bool * found);
 
@@ -318,7 +318,20 @@ void mm_antonyms(int index, int const * * antonyms, int * count);
 void mm_embedded(int index, int const * * embedded, int * count);
 
 /**
- * retrieve all locations within books where a given term is used.
+ * retrieve the definition for a given term.
+ * note that definitions are still empty for almost all terms! (use mm_synonyms() instead)
+ * the complexity for this function is O(1).
+ * @param[in] index
+ *     alphabetic index of a term in the dictionary
+ * @param[out] definition
+ *     pointer to an array of alphabetic indexes of terms definining the given term
+ * @param[out] count
+ *     number of terms in the "definition" array
+ */
+void mm_definition(int index, int const * * embedded, int * count);
+
+/**
+ * instantly retrieve all locations within books where a given term is used.
  * for any i in [0..(count - 1)],
  * book_indexes[i], chapter_indexes[i], paragraph_indexes[i], and word_indexes[i] together make up
  * a "location" that could be passed to mm_word(), which would return the same alphabetic dictionary
@@ -350,7 +363,7 @@ void mm_locations(
 
 /**
  * retrieve all terms beginning with a given prefix.
- * the complexity for this function appears to be O(N)...
+ * the worst case complexity for this function appears to be O(N)...
  *     However, completing the entire dictionary (when prefix is empty) shortcuts to O(1).
  *     Assuming even distribution (it isn't),
  *     the worst case is actually mm_count() / 52 possible first letters.
@@ -472,12 +485,18 @@ int mm_word_count(int book_index, int chapter_index, int paragraph_index);
  *     index of a paragraph within the chapter
  * @param[in] word_index
  *     index of a word within the paragraph
- * @param[out] parent_phrase
- *     dictionary index of the given word's parent phrase if it has one or -1 otherwise.
- *     if the parent is not needed then this parameter should be NULL
- * @param[out] parent_phrase_word_index
- *     word index within the given word's parent phrase if it has one or -1 otherwise.
- *     if the parent is not needed then this parameter should be NULL
+ * @param[out] ancestors
+ *     list of ancestors (parent phrases) such that the immediate parent is first, followed by the
+ *     parent's parent and so on. If the word does not have any parent phrases then this value is set
+ *     to -1.
+ *     if ancestors are not needed then this parameter can be NULL and will be ignored.
+ *     if ancestor_count is NULL then both ancestors and ancestor_count will be ignored - both should
+ *     be either valid or NULL!
+ * @param[out] ancestor_count
+ *     the number of ancestors at the given location
+ * @param[out] index_within_first_ancestor
+ *     index within the first ancestor if there is one or -1 otherwise.
+ *     cat be NULL if not needed.
  * @returns
  *     the alphabetic dictionary index for a word in the paragraph or -1 if provided an invalid index
  */
@@ -486,8 +505,9 @@ int mm_word(
     int chapter_index,
     int paragraph_index,
     int word_index,
-    int * parent_phrase,
-    int * parent_phrase_word_index
+    int const * * ancestors,
+    int * ancestor_count,
+    int * index_within_first_ancestor
 );
 
 #ifdef __cplusplus

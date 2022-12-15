@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2020-2022, shtroizel
+Copyright (c) 2020-2023, shtroizel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -109,6 +109,7 @@ using flagged_parts_of_speech_func = std::function<std::vector<int8_t> const & (
 using synonyms_func = std::function<std::vector<int> const & (int)>;
 using antonyms_func = std::function<std::vector<int> const & (int)>;
 using embedded_func = std::function<std::vector<int> const & (int)>;
+using definition_func = std::function<std::vector<int> const & (int)>;
 using is_name_func = std::function<bool (int)>;
 using is_male_name_func = std::function<bool (int)>;
 using is_female_name_func = std::function<bool (int)>;
@@ -124,7 +125,7 @@ using locations_func = std::function<void (int,
                                            int const * *,
                                            int *)>;
 
-PROPERTYx18_MATCHABLE(
+PROPERTYx19_MATCHABLE(
     count_func,
     count,
     as_longest_func,
@@ -143,6 +144,8 @@ PROPERTYx18_MATCHABLE(
     antonyms,
     embedded_func,
     embedded,
+    definition_func,
+    definition,
     locations_func,
     locations,
     is_name_func,
@@ -180,6 +183,7 @@ MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter,                          
 MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, synonyms, &mm_synonyms_snth_##_letter)              \
 MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, antonyms, &mm_antonyms_snth_##_letter)              \
 MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, embedded, &mm_embedded_snth_##_letter)              \
+MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, definition, &mm_definition_snth_##_letter)          \
 MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, locations, &mm_locations_snth_##_letter)            \
 MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_name, &mm_is_name_snth_##_letter)                \
 MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_male_name, &mm_is_male_name_snth_##_letter)      \
@@ -755,6 +759,31 @@ std::vector<int> const & mm_embedded_snth(int index)
         --iter;
 
     return iter->second.as_embedded()(index - iter->first);
+}
+
+
+std::vector<int> const & mm_definition_snth(int index)
+{
+    static std::vector<int> const empty{};
+
+    if (index < 0 || index >= mm_count_snth())
+    {
+        std::cout << "mm_definition_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                  << mm_count_snth() << std::endl;
+        return empty;
+    }
+
+    auto iter = std::lower_bound(
+                    letter_boundries.begin(),
+                    letter_boundries.end(),
+                    index,
+                    [](auto const & b, auto const & i){ return b.first <= i; }
+                );
+
+    if (iter != letter_boundries.begin())
+        --iter;
+
+    return iter->second.as_definition()(index - iter->first);
 }
 
 

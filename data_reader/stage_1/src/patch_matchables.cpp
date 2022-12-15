@@ -109,6 +109,7 @@ bool patch_matchable_header(std::vector<HeaderEntry> const & matchable_headers)
     std::vector<int> const & by_longest = Stage1Data::nil.as_by_longest();
     std::map<int, std::pair<int, int>> const & longest_offsets = Stage1Data::nil.as_longest_offsets();
     IndexTable const & embedded_words = Stage1Data::nil.as_embedded_words();
+    IndexTable const & defs = Stage1Data::nil.as_definitions();
     IndexTable const & book_indexes = Stage1Data::nil.as_book_indexes();
     IndexTable const & chapter_indexes = Stage1Data::nil.as_chapter_indexes();
     IndexTable const & paragraph_indexes = Stage1Data::nil.as_paragraph_indexes();
@@ -202,6 +203,13 @@ bool patch_matchable_header(std::vector<HeaderEntry> const & matchable_headers)
                         for (int i : embedded_words[existing_word_index])
                             embedded_word_vect.push_back(std::to_string(i));
                         m->set_propertyvect(v.variant_name, "embedded", embedded_word_vect);
+                    }
+
+                    {
+                        std::vector<std::string> def_vect;
+                        for (int i : defs[existing_word_index])
+                            def_vect.push_back(std::to_string(i));
+                        m->set_propertyvect(v.variant_name, "def", def_vect);
                     }
 
                     {

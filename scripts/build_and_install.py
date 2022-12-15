@@ -146,22 +146,38 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
 
         if not retain_matchables and not retain_leaves:
 
-            # first build and install matchable
+            # first build and install matchable for each stage
+            # matchable is included (installed with) all stages
+            # for the final stage omit '-l' when building to offer a full install
             print('\n\nbuild and install matchable:\n\n')
+
+            # build matchable for stage 0
             build_matchable_cmd = ['matchable/scripts/build_and_install.py']
             build_matchable_cmd.append('-j' + jobs)
             build_matchable_cmd.append('-l')
             if use_clang:
                 build_matchable_cmd.append('-c')
-
             build_matchable_cmd.append('-b')
             build_matchable_cmd.append('build_mm' + suffix)
             build_matchable_cmd.append('-i')
-            build_matchable_cmd.append('../install_mm' + suffix)
-
+            build_matchable_cmd.append(stage_0_install_prefix)
             if subprocess.run(build_matchable_cmd).returncode != 0:
-                print('matchable failed to build')
+                print('matchable failed to build for stage 0')
                 exit(1)
+
+            # build matchable for stage 1
+            build_matchable_cmd = ['matchable/scripts/build_and_install.py']
+            build_matchable_cmd.append('-j' + jobs)
+            if use_clang:
+                build_matchable_cmd.append('-c')
+            build_matchable_cmd.append('-b')
+            build_matchable_cmd.append('build_mm' + suffix)
+            build_matchable_cmd.append('-i')
+            build_matchable_cmd.append(install_dir)
+            if subprocess.run(build_matchable_cmd).returncode != 0:
+                print('matchable failed to build for stage 1')
+                exit(1)
+
             print('\n\nmatchable ready!')
 
             # then build and install data reader for stage 0
@@ -172,8 +188,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             build_data_reader_cmd.append('-i')
             build_data_reader_cmd.append('../install_mm' + suffix)
             build_data_reader_cmd.append('-m')
-            build_data_reader_cmd.append(matchmaker_root + '/matchable/install_mm' +
-                                         suffix + '/lib/matchable/cmake')
+            build_data_reader_cmd.append(install_dir + '/lib/matchable/cmake')
             if use_clang:
                 build_data_reader_cmd.append('-c')
             if debug:
@@ -214,32 +229,6 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             f.write('#pragma once\n#include<array>\n#include<vector>\n')
             f.write('inline std::array<std::vector<int>, 1> const ORDINAL_SUMMATIONS;\n\n')
 
-        # create books.h for stage 0
-        stage_0_books_file = stage_0_workspace_dir + 'generated_include/matchmaker/books.h'
-        with open(stage_0_books_file, 'w') as f:
-            f.write('#pragma once\n')
-            f.write('#include <vector>\n\n\n')
-            f.write('struct BookWord\n')
-            f.write('{\n')
-            f.write('    int word{-1};\n')
-            f.write('    int parent_phrase{-1};\n')
-            f.write('    int parent_phrase_start_index{-1};\n')
-            f.write('};\n\n')
-            f.write('struct Chapter\n')
-            f.write('{\n')
-            f.write('    std::vector<int> title;\n')
-            f.write('    std::vector<int> subtitle;\n')
-            f.write('    std::vector<std::vector<BookWord>> paragraphs;\n')
-            f.write('};\n\n')
-            f.write('struct Book\n')
-            f.write('{\n')
-            f.write('    std::vector<int> title;\n')
-            f.write('    std::vector<int> author;\n')
-            f.write('    std::vector<Chapter> chapters;\n')
-            f.write('};\n')
-            f.write('inline std::vector<Book> const books;\n\n')
-
-
 
 
     os.chdir(stage_0_build_dir)
@@ -260,6 +249,8 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
     if atomic_libs:
         cmake_cmd.append('-DATOMIC_LIBS=ON')
 
+    cmake_cmd.append('-DSTAGE0=ON')
+
     if use_clang:
         clang_c = which('clang')
         clang_cxx = which('clang++')
@@ -269,8 +260,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
         cmake_cmd.append('-DCMAKE_C_COMPILER=' + clang_c)
         cmake_cmd.append('-DCMAKE_CXX_COMPILER=' + clang_cxx)
 
-    cmake_cmd.append('-Dmatchable_DIR=' + matchmaker_root + '/matchable/install_mm' + suffix + \
-            '/lib/matchable/cmake')
+    cmake_cmd.append('-Dmatchable_DIR=' + install_dir + '/lib/matchable/cmake')
     cmake_cmd.append(stage_0_workspace_dir)
 
     if subprocess.run(cmake_cmd).returncode != 0:
@@ -312,14 +302,20 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             shutil.copy(matchmaker_root + 'workspace_common/config.cmake.in',
                         stage_1_workspace_dir + 'config.cmake.in')
 
-            os.symlink(stage_0_workspace_dir + 'generated_src', stage_1_workspace_dir + 'generated_src')
+            # os.symlink(stage_0_workspace_dir + 'generated_src', stage_1_workspace_dir + 'generated_src')
+            shutil.copytree(stage_0_workspace_dir + 'generated_src', stage_1_workspace_dir + 'generated_src')
+            if not os.path.exists(stage_1_workspace_dir + 'generated_src/books'):
+                os.makedirs(stage_1_workspace_dir + 'generated_src/books')
+            shutil.copy(matchmaker_root + 'workspace_common/BookWord.h',
+                        stage_1_workspace_dir + 'generated_src/books/BookWord.h')
             os.symlink(stage_0_workspace_dir + 'book_vocabulary', stage_1_workspace_dir + 'book_vocabulary')
             os.makedirs(stage_1_workspace_dir + 'generated_include/matchmaker')
+            os.makedirs(stage_1_workspace_dir + 'generated_include/matchmaker/books')
             os.symlink(stage_0_workspace_dir + 'generated_include/matchmaker/generated_symbols',
                        stage_1_workspace_dir + 'generated_include/matchmaker/generated_symbols')
 
-        if (not retain_matchables and not retain_leaves) or not os.path.exists(stage_1_workspace_dir       \
-                + 'generated_include/matchmaker/generated_matchables'):
+        if (not retain_matchables and not retain_leaves) or not os.path.exists(
+                stage_1_workspace_dir + 'generated_include/matchmaker/generated_matchables'):
             shutil.rmtree(stage_1_workspace_dir + 'generated_include/matchmaker/generated_matchables',
                           ignore_errors=True)
             shutil.copytree(stage_0_workspace_dir + 'generated_include/matchmaker/generated_matchables',
@@ -334,7 +330,8 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             build_data_reader_cmd.append('-i')
             build_data_reader_cmd.append('../install_mm' + suffix)
             build_data_reader_cmd.append('-m')
-            build_data_reader_cmd.append('../../matchable/install_mm' + suffix + '/lib/matchable/cmake')
+            # build_data_reader_cmd.append('../../matchable/install_mm' + suffix + '/lib/matchable/cmake')
+            build_data_reader_cmd.append(install_dir + '/lib/matchable/cmake')
             build_data_reader_cmd.append('-s')
             build_data_reader_cmd.append(stage_0_install_prefix + '/lib/matchmaker' + suffix + '/cmake')
             if use_clang:
@@ -354,21 +351,22 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             # run stage 1 data reader to create matchables for stage 1
             dr_stage_1_install_dir = 'data_reader/stage_1/install_mm' + suffix
             dr_stage_1_binary = dr_stage_1_install_dir + '/bin/data_reader_stage_1'
+            template_dir = matchmaker_root + '/templates'
             dr_stage_1_data = dr_stage_1_install_dir + '/share/matchmaker/data_reader_stage_1/data'
 
-            run_dr_stage_1_cmd = [dr_stage_1_binary, dr_stage_1_data, stage_1_workspace_dir, q_mode]
+            run_dr_stage_1_cmd = [dr_stage_1_binary, dr_stage_1_data, stage_1_workspace_dir, template_dir, q_mode]
             if subprocess.run(run_dr_stage_1_cmd).returncode != 0:
                 print('\ndata_reader_stage_1 failed')
                 build_cmd_as_str = ''
                 for c in build_data_reader_cmd:
                     build_cmd_as_str += ' '
                     build_cmd_as_str += c
-                print('build command was:' + build_cmd_as_str)
+                print('\nbuild command was:' + build_cmd_as_str)
                 cmd_as_str = ''
                 for c in run_dr_stage_1_cmd:
                     cmd_as_str += ' '
                     cmd_as_str += c
-                print('command was:' + cmd_as_str)
+                print('  run command was:' + cmd_as_str)
                 exit(1)
 
     print('\n\nMATCHMAKER!\n\n')
@@ -386,6 +384,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
 
     if q:
         cmake_cmd.append('-Dq=ON')
+
     if atomic_libs:
         cmake_cmd.append('-DATOMIC_LIBS=ON')
 
@@ -398,8 +397,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
         cmake_cmd.append('-DCMAKE_C_COMPILER=' + clang_c)
         cmake_cmd.append('-DCMAKE_CXX_COMPILER=' + clang_cxx)
 
-    cmake_cmd.append('-Dmatchable_DIR=' + matchmaker_root + '/matchable/install_mm' + suffix + \
-            '/lib/matchable/cmake')
+    cmake_cmd.append('-Dmatchable_DIR=' + install_dir + '/lib/matchable/cmake')
     cmake_cmd.append(stage_1_workspace_dir)
 
     if subprocess.run(cmake_cmd).returncode != 0:

@@ -31,7 +31,7 @@ bool run_task(SerialTask::Type task);
 
 int main(int argc, char ** argv)
 {
-    if (argc != 4)
+    if (argc != 5)
     {
         print_usage();
         return 2;
@@ -41,13 +41,15 @@ int main(int argc, char ** argv)
 
     Stage1Data::nil.as_mutable_data_dir() = argv[1];
     Stage1Data::nil.as_mutable_workspace_dir() = argv[2];
-    q_usage::Type q_mode = q_usage::from_string(argv[3]);
+    Stage1Data::nil.as_mutable_template_dir() = argv[3];
+    q_usage::Type q_mode = q_usage::from_string(argv[4]);
     if (q_mode.is_nil())
         q_mode = q_usage::included::grab();
 
     Stage1Data::nil.as_mutable_used_in_book().reserve(mm_count());
     Stage1Data::nil.as_mutable_by_longest().reserve(mm_count());
     Stage1Data::nil.as_mutable_embedded_words().reserve(mm_count());
+    Stage1Data::nil.as_mutable_definitions().reserve(mm_count());
     Stage1Data::nil.as_mutable_book_indexes().reserve(mm_count());
     Stage1Data::nil.as_mutable_chapter_indexes().reserve(mm_count());
     Stage1Data::nil.as_mutable_paragraph_indexes().reserve(mm_count());
@@ -56,6 +58,7 @@ int main(int argc, char ** argv)
     {
         Stage1Data::nil.as_mutable_used_in_book().push_back(Buch::Flags{});
         Stage1Data::nil.as_mutable_embedded_words().push_back(std::vector<int>());
+        Stage1Data::nil.as_mutable_definitions().push_back(std::vector<int>());
         Stage1Data::nil.as_mutable_book_indexes().push_back(std::vector<int>());
         Stage1Data::nil.as_mutable_chapter_indexes().push_back(std::vector<int>());
         Stage1Data::nil.as_mutable_paragraph_indexes().push_back(std::vector<int>());
@@ -65,6 +68,37 @@ int main(int argc, char ** argv)
     SerialTask::Flags tasks;
     for (auto const & task : SerialTask::variants_by_index())
         tasks.set(task);
+
+
+
+
+
+
+
+
+
+
+
+
+    // TODO BROKEN FIXME REMOVEME_WHEN_FIXED
+    tasks.unset(SerialTask::reading_spc_links::grab());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     q_mode.match({
         {q_usage::only::grab(),
@@ -78,6 +112,7 @@ int main(int argc, char ** argv)
             [&tasks]()
             {
                 tasks.unset(SerialTask::reading_spc_crumbs::grab());
+                tasks.unset(SerialTask::reading_spc_links::grab());
             }}
     });
 
@@ -118,9 +153,10 @@ bool run_task(SerialTask::Type task)
 
 void print_usage()
 {
-    std::cout << "program expects 3 arguments:\n"
+    std::cout << "program expects 4 arguments:\n"
               << "    [1]  data directory\n"
               << "    [2]  stage 1 workspace directory\n"
-              << "    [3]  Q mode (one of \"included\", \"omitted\", or \"only\")\n"
+              << "    [3]  template directory\n"
+              << "    [4]  Q mode (one of \"included\", \"omitted\", or \"only\")\n"
               << std::flush;
 }

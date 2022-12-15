@@ -44,7 +44,7 @@ namespace Stage0Data
     std::string & prefixes_filename();
 
     // All prefixes with a depth of 1 are symbols
-    std::array<Prefix, 23> & symbols_1d_prefixes();
+    std::array<Prefix, 24> & symbols_1d_prefixes();
 
     // All prefixes with a depth > 1 are letters
     std::vector<Prefix> & prefixes_2d_to_5d();

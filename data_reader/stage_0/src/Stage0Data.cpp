@@ -11,9 +11,9 @@ namespace Stage0Data
     std::string & output_dir() { static std::string s; return s; }
     std::string & prefixes_filename() { static std::string s; return s; }
 
-    std::array<Prefix, 23> & symbols_1d_prefixes()
+    std::array<Prefix, 24> & symbols_1d_prefixes()
     {
-        static std::array<Prefix, 23> prefixes;
+        static std::array<Prefix, 24> prefixes;
         return prefixes;
     }
 
@@ -120,6 +120,17 @@ namespace Stage0Data
 
         // create new variant
         std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
+
+        // verify matchable escaped correctly
+        if (matchable::escapable::unescape_all(escaped) != word)
+        {
+            std::cout << "matchable::escapable::escape_all() FAILED!" << std::endl;
+            std::cout << "  escaped: " << escaped << std::endl;
+            std::cout << "unescaped: " << matchable::escapable::unescape_all(escaped) << std::endl;
+            std::cout << "     term: " << word << std::endl;
+            abort();
+        }
+
         mm.grab(matchable_name)->add_variant(escaped);
 
         // property for parts of speech
@@ -238,9 +249,11 @@ namespace Stage0Data
 
         // 20  ">"
 
-        // 21  "_"
+        // 21  "]"
 
-        // 22  "~"
+        // 22  "_"
+
+        // 23  "~"
 
         // check largest ranges first...
 
@@ -266,12 +279,16 @@ namespace Stage0Data
             return &symbols_1d_prefixes()[20];
 
         // 22nd
-        if (sym == '_')
+        if (sym == ']')
             return &symbols_1d_prefixes()[21];
 
         // 23rd
-        if (sym == '~')
+        if (sym == '_')
             return &symbols_1d_prefixes()[22];
+
+        // 24th
+        if (sym == '~')
+            return &symbols_1d_prefixes()[23];
 
         return nullptr;
     }

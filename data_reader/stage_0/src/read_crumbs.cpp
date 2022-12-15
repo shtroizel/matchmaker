@@ -20,9 +20,15 @@ bool read_crumbs(
 
 bool read_crumbs_line(
     FILE * f,
-    std::string & word,
+    std::string & line,
     Stage0Data::word_attribute::Flags & attributes,
     SerialTask::Type task
+);
+
+bool read_link_line(
+    FILE * f,
+    std::string & line,
+    Stage0Data::word_attribute::Flags & attributes
 );
 
 void find_quotes(std::string const & line, std::vector<std::string> & quotes);
@@ -54,7 +60,7 @@ void read_crumbs(SerialTask::Type task)
     std::filesystem::create_directory(crumbs_path);
     std::string const crumbs_vocab = Stage0Data::book_vocab_dir() + "/Crumbs/vocabulary";
     FILE * vocab_file = fopen(crumbs_vocab.c_str(), "w");
-    if (vocab_file == 0)
+    if (nullptr == vocab_file)
     {
         perror(crumbs_vocab.c_str());
         exit(1);
@@ -82,6 +88,7 @@ void read_crumbs(SerialTask::Type task)
     {
         ++files_processed;
 
+        // std::cout << "processing file: " << q_files.top().entry.path() << std::endl;
         q_file = fopen(q_files.top().entry.path().c_str(), "r");
         if (q_file == 0)
         {
@@ -99,9 +106,6 @@ void read_crumbs(SerialTask::Type task)
         }
         q_file = nullptr;
         q_files.pop();
-
-        if (files_processed >= 28)
-            break;
     }
 
     fclose(vocab_file);
@@ -144,6 +148,61 @@ bool read_crumbs(
         }
         attributes = base_attributes;
 
+        // check for hyperlinks
+        // TODO stop ignoring hyperlinks and handle them somehow without blowing up the library
+        if (line.size() > 3 && line[0] == ']' && line[1] == '~' && line[2] == '~')
+            continue;
+
+        // // check for linked post
+        // bool is_link = line.size() > 4;
+        // is_link = is_link && line[0] == '>' && line[1] == '>';
+        // for (size_t i = 2; is_link && i < line.size(); ++i)
+        //     is_link = line[i] >= '0' && line[i] <= '9';
+        //
+        // if (is_link)
+        // {
+        //     std::string link_name = line.substr(2);
+        //     std::string const link_dir = Stage0Data::data_dir() + "/Crumbs/linked_text/" + link_name;
+        //     std::string const link_path = link_dir + "/post";
+        //
+        //     FILE * link_file = fopen(link_path.c_str(), "r");
+        //     if (nullptr == link_file)
+        //     {
+        //         std::cout << std::endl;
+        //         perror(link_path.c_str());
+        //         std::cout << std::endl;
+        //         // return false;
+        //     }
+        //     else
+        //     {
+        //         Stage0Data::word_attribute::Flags link_attributes;
+        //         std::string link_line;
+        //         while (true)
+        //         {
+        //             link_attributes = base_attributes;
+        //             if (!read_link_line(link_file, link_line, link_attributes))
+        //                 break;
+        //
+        //             if (link_line.empty())
+        //                 continue;
+        //
+        //             if (link_attributes.is_set(Stage0Data::word_attribute::unmatchable_symbols::grab()))
+        //             {
+        //                 std::cout << "encountered unmatchable symbols in linked post: " << link_path << std::endl;
+        //                 return false;
+        //             }
+        //             if (link_attributes.is_set(Stage0Data::word_attribute::invisible_ascii::grab()))
+        //             {
+        //                 std::cout << "encountered invisible_ascii in linked post: " << link_path << std::endl;
+        //                 return false;
+        //             }
+        //
+        //             Stage0Data::add_word(link_line, link_attributes);
+        //         }
+        //         fclose(link_file);
+        //     }
+        // }
+
         if (line.rfind("~~:", 0) == 0)
         {
             ++text;
@@ -176,7 +235,7 @@ bool read_crumbs(
             // first split date/time from message board
             std::vector<std::string> tokenized_on_comma;
             tokenize(line, ',', tokenized_on_comma);
-            if (tokenized_on_comma.size() != 2)
+            if (tokenized_on_comma.size() != 2 && tokenized_on_comma.size() != 3)
             {
                 std::cout << "failed to parse header line! text: " << text << std::endl;
                 return false;
@@ -214,13 +273,16 @@ bool read_crumbs(
                 tokenized_time[0].insert(0, 1, '0');
 
             // now add them all including all tokens & symbols
-            std::vector<std::string> words{
+            std::vector<std::string> terms{
                 " ", "-", ":", ",", "=", "/", "%", "$", "\"", "|", "^", "!", "?", ".", "(", ")",
                 "[", "]", "#", ";", tokenized_date_time[2], tokenized_date_time[3], tokenized_on_comma[1]
             };
-            words.insert(words.end(), tokenized_date.begin(), tokenized_date.end());
-            words.insert(words.end(), tokenized_time.begin(), tokenized_time.end());
-            for (auto const & word : words)
+            if (tokenized_on_comma.size() > 2)
+                terms.push_back(tokenized_on_comma[2]);
+
+            terms.insert(terms.end(), tokenized_date.begin(), tokenized_date.end());
+            terms.insert(terms.end(), tokenized_time.begin(), tokenized_time.end());
+            for (auto const & word : terms)
                 Stage0Data::add_book_vocab(word, attributes, vocab_file, encounters);
         }
         else
@@ -235,7 +297,8 @@ bool read_crumbs(
             {
                 std::cout << "encountered error parsing '~;~' in text: " << text << std::endl;
                 return false;
-            } else
+            }
+            else
             //************************************************
 
             // each line is also just a "word"
@@ -246,7 +309,7 @@ bool read_crumbs(
             }
 
             // only parse out lines for non-images and non-archives
-            if (line.rfind("~~~", 0) != 0 && line.rfind("~:~", 0) != 0)
+            if (line.rfind("~~~", 0) != 0 && line.rfind("]~~", 0) != 0)
             {
                 // add each word within the line stripped of punctuation
                 {
@@ -255,13 +318,14 @@ bool read_crumbs(
                     for (auto & token : tokenized_on_space)
                     {
                         // check for use of 'single quotes' (apostrophes (') misused as quotes (") are banned)
-                        if (token[0] == '\'' ||
+                        if (token != "'Tis" && token != "o'" && token != "d'etat" &&
+                                (token[0] == '\'' ||
                                 (token.length() >= 2 &&
                                  token[token.length() - 1] == '\'' &&
                                  token[token.length() - 2] != 's' &&
                                  token[token.length() - 2] != 'S' &&
                                  token[token.length() - 2] != 'n' &&
-                                 token[token.length() - 2] != 'N'))
+                                 token[token.length() - 2] != 'N')))
                         {
                             std::cout << "encountered apostrophe misused as \" within q text "
                                       << text << " on line: " << line << std::endl;
@@ -413,12 +477,12 @@ bool read_crumbs(
 
 bool read_crumbs_line(
     FILE * f,
-    std::string & word,
+    std::string & line,
     Stage0Data::word_attribute::Flags & attributes,
     SerialTask::Type task
 )
 {
-    word.clear();
+    line.clear();
 
     int ch;
     while (true)
@@ -432,7 +496,34 @@ bool read_crumbs_line(
             break;
 
         Stage0Data::update_word_attribute(attributes, ch);
-        word += (char) ch;
+        line += (char) ch;
+    }
+
+    return true;
+}
+
+
+
+bool read_link_line(
+    FILE * f,
+    std::string & line,
+    Stage0Data::word_attribute::Flags & attributes
+)
+{
+    line.clear();
+
+    int ch;
+    while (true)
+    {
+        ch = fgetc(f);
+        if (ch == EOF)
+            return false;
+
+        if (ch == '\n')
+            break;
+
+        Stage0Data::update_word_attribute(attributes, ch);
+        line += (char) ch;
     }
 
     return true;

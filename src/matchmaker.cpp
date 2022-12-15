@@ -27,9 +27,10 @@
 #include <matchmaker/generated_symbols/_hsh_/_hsh_.h>
 #include <matchmaker/generated_symbols/_dol_/_dol_.h>
 #include <matchmaker/generated_symbols/_sqt_/_sqt_.h>
-#include <matchmaker/generated_symbols/_pl_/_pl_.h>
-#include <matchmaker/generated_symbols/_pls_/_pls_.h>
+#include <matchmaker/generated_symbols/_parl_/_parl_.h>
+#include <matchmaker/generated_symbols/_plus_/_plus_.h>
 #include <matchmaker/generated_symbols/_gt_/_gt_.h>
+#include <matchmaker/generated_symbols/_sbr_/_sbr_.h>
 #include <matchmaker/generated_symbols/_/_.h>
 #include <matchmaker/generated_symbols/_tld_/_tld_.h>
 #include <matchmaker/generated_symbols/A/A.h>
@@ -89,9 +90,11 @@
 #include <matchmaker/parts_of_speech.h>
 #include <matchmaker/longest_words.h>
 #include <matchmaker/ordinal_summation.h>
-#include <matchmaker/books.h>
 
-#include <matchmaker/generated_matchables/A/A/A_A.h>
+
+#ifndef STAGE0
+#include <matchmaker/books/books_content.h>
+#endif
 
 
 using count_func = std::function<int ()>;
@@ -103,6 +106,7 @@ using flagged_parts_of_speech_func = std::function<std::vector<int8_t> const & (
 using synonyms_func = std::function<std::vector<int> const & (int)>;
 using antonyms_func = std::function<std::vector<int> const & (int)>;
 using embedded_func = std::function<std::vector<int> const & (int)>;
+using definition_func = std::function<std::vector<int> const & (int)>;
 using is_name_func = std::function<bool (int)>;
 using is_male_name_func = std::function<bool (int)>;
 using is_female_name_func = std::function<bool (int)>;
@@ -118,7 +122,7 @@ using locations_func = std::function<void (int,
                                            int const * *,
                                            int *)>;
 
-PROPERTYx18_MATCHABLE(
+PROPERTYx19_MATCHABLE(
     // properties
     count_func,
     count,
@@ -138,6 +142,8 @@ PROPERTYx18_MATCHABLE(
     antonyms,
     embedded_func,
     embedded,
+    definition_func,
+    definition,
     locations_func,
     locations,
     is_name_func,
@@ -161,9 +167,9 @@ PROPERTYx18_MATCHABLE(
     symbol,
 
     // variants
-    _quot_, _hsh_, _dol_, _sqt_, _pl_, _pls_, _mns_, _dot_, _slsh_,
+    _quot_, _hsh_, _dol_, _sqt_, _parl_, _plus_, _mns_, _dot_, _slsh_,
     esc_0, esc_1, esc_2, esc_3, esc_4, esc_5, esc_6, esc_7, esc_8, esc_9,
-    _cln_, _gt_, _, _tld_,
+    _cln_, _gt_, _sbr_, _, _tld_,
     A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
     a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
 )
@@ -179,6 +185,7 @@ MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol,                               
 MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, synonyms, &mm_synonyms_##_symbol)                        \
 MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, antonyms, &mm_antonyms_##_symbol)                        \
 MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, embedded, &mm_embedded_##_symbol)                        \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, definition, &mm_definition_##_symbol)                    \
 MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, locations, &mm_locations_##_symbol)                      \
 MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, is_name, &mm_is_name_##_symbol)                          \
 MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, is_male_name, &mm_is_male_name_##_symbol)                \
@@ -193,8 +200,8 @@ _set_properties(_quot_)
 _set_properties(_hsh_)
 _set_properties(_dol_)
 _set_properties(_sqt_)
-_set_properties(_pl_)
-_set_properties(_pls_)
+_set_properties(_parl_)
+_set_properties(_plus_)
 _set_properties(_mns_)
 _set_properties(_dot_)
 _set_properties(_slsh_)
@@ -210,6 +217,7 @@ _set_properties(esc_8)
 _set_properties(esc_9)
 _set_properties(_cln_)
 _set_properties(_gt_)
+_set_properties(_sbr_)
 _set_properties(_)
 _set_properties(_tld_)
 _set_properties(A)
@@ -320,11 +328,11 @@ static std::vector<std::pair<int, symbol::Type>> const boundries_by_index =
         boundries.push_back(std::make_pair(b, symbol::_sqt_::grab()));
         b += symbol::_sqt_::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::_pl_::grab()));
-        b += symbol::_pl_::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::_parl_::grab()));
+        b += symbol::_parl_::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::_pls_::grab()));
-        b += symbol::_pls_::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::_plus_::grab()));
+        b += symbol::_plus_::grab().as_count()();
 
         boundries.push_back(std::make_pair(b, symbol::_mns_::grab()));
         b += symbol::_mns_::grab().as_count()();
@@ -370,6 +378,9 @@ static std::vector<std::pair<int, symbol::Type>> const boundries_by_index =
 
         boundries.push_back(std::make_pair(b, symbol::_gt_::grab()));
         b += symbol::_gt_::grab().as_count()();
+
+        boundries.push_back(std::make_pair(b, symbol::_sbr_::grab()));
+        b += symbol::_sbr_::grab().as_count()();
 
         boundries.push_back(std::make_pair(b, symbol::_::grab()));
         b += symbol::_::grab().as_count()();
@@ -581,13 +592,13 @@ char const * mm_at(int index, int * length)
 
 int mm_lookup(char const * word, bool * found)
 {
-    static std::array<std::pair<symbol::Type, int>, 75> const boundries_by_symbol {
+    static std::array<std::pair<symbol::Type, int>, 76> const boundries_by_symbol {
         std::make_pair(symbol::_quot_::grab(), boundries_by_index[0].first),
         std::make_pair(symbol::_hsh_::grab(), boundries_by_index[1].first),
         std::make_pair(symbol::_dol_::grab(), boundries_by_index[2].first),
         std::make_pair(symbol::_sqt_::grab(), boundries_by_index[3].first),
-        std::make_pair(symbol::_pl_::grab(), boundries_by_index[4].first),
-        std::make_pair(symbol::_pls_::grab(), boundries_by_index[5].first),
+        std::make_pair(symbol::_parl_::grab(), boundries_by_index[4].first),
+        std::make_pair(symbol::_plus_::grab(), boundries_by_index[5].first),
         std::make_pair(symbol::_mns_::grab(), boundries_by_index[6].first),
         std::make_pair(symbol::_dot_::grab(), boundries_by_index[7].first),
         std::make_pair(symbol::_slsh_::grab(), boundries_by_index[8].first),
@@ -603,60 +614,61 @@ int mm_lookup(char const * word, bool * found)
         std::make_pair(symbol::esc_9::grab(), boundries_by_index[18].first),
         std::make_pair(symbol::_cln_::grab(), boundries_by_index[19].first),
         std::make_pair(symbol::_gt_::grab(), boundries_by_index[20].first),
-        std::make_pair(symbol::_::grab(), boundries_by_index[21].first),
-        std::make_pair(symbol::_tld_::grab(), boundries_by_index[22].first),
-        std::make_pair(symbol::A::grab(), boundries_by_index[23].first),
-        std::make_pair(symbol::B::grab(), boundries_by_index[24].first),
-        std::make_pair(symbol::C::grab(), boundries_by_index[25].first),
-        std::make_pair(symbol::D::grab(), boundries_by_index[26].first),
-        std::make_pair(symbol::E::grab(), boundries_by_index[27].first),
-        std::make_pair(symbol::F::grab(), boundries_by_index[28].first),
-        std::make_pair(symbol::G::grab(), boundries_by_index[29].first),
-        std::make_pair(symbol::H::grab(), boundries_by_index[30].first),
-        std::make_pair(symbol::I::grab(), boundries_by_index[31].first),
-        std::make_pair(symbol::J::grab(), boundries_by_index[32].first),
-        std::make_pair(symbol::K::grab(), boundries_by_index[33].first),
-        std::make_pair(symbol::L::grab(), boundries_by_index[34].first),
-        std::make_pair(symbol::M::grab(), boundries_by_index[35].first),
-        std::make_pair(symbol::N::grab(), boundries_by_index[36].first),
-        std::make_pair(symbol::O::grab(), boundries_by_index[37].first),
-        std::make_pair(symbol::P::grab(), boundries_by_index[38].first),
-        std::make_pair(symbol::Q::grab(), boundries_by_index[39].first),
-        std::make_pair(symbol::R::grab(), boundries_by_index[40].first),
-        std::make_pair(symbol::S::grab(), boundries_by_index[41].first),
-        std::make_pair(symbol::T::grab(), boundries_by_index[42].first),
-        std::make_pair(symbol::U::grab(), boundries_by_index[43].first),
-        std::make_pair(symbol::V::grab(), boundries_by_index[44].first),
-        std::make_pair(symbol::W::grab(), boundries_by_index[45].first),
-        std::make_pair(symbol::X::grab(), boundries_by_index[46].first),
-        std::make_pair(symbol::Y::grab(), boundries_by_index[47].first),
-        std::make_pair(symbol::Z::grab(), boundries_by_index[48].first),
-        std::make_pair(symbol::a::grab(), boundries_by_index[49].first),
-        std::make_pair(symbol::b::grab(), boundries_by_index[50].first),
-        std::make_pair(symbol::c::grab(), boundries_by_index[51].first),
-        std::make_pair(symbol::d::grab(), boundries_by_index[52].first),
-        std::make_pair(symbol::e::grab(), boundries_by_index[53].first),
-        std::make_pair(symbol::f::grab(), boundries_by_index[54].first),
-        std::make_pair(symbol::g::grab(), boundries_by_index[55].first),
-        std::make_pair(symbol::h::grab(), boundries_by_index[56].first),
-        std::make_pair(symbol::i::grab(), boundries_by_index[57].first),
-        std::make_pair(symbol::j::grab(), boundries_by_index[58].first),
-        std::make_pair(symbol::k::grab(), boundries_by_index[59].first),
-        std::make_pair(symbol::l::grab(), boundries_by_index[60].first),
-        std::make_pair(symbol::m::grab(), boundries_by_index[61].first),
-        std::make_pair(symbol::n::grab(), boundries_by_index[62].first),
-        std::make_pair(symbol::o::grab(), boundries_by_index[63].first),
-        std::make_pair(symbol::p::grab(), boundries_by_index[64].first),
-        std::make_pair(symbol::q::grab(), boundries_by_index[65].first),
-        std::make_pair(symbol::r::grab(), boundries_by_index[66].first),
-        std::make_pair(symbol::s::grab(), boundries_by_index[67].first),
-        std::make_pair(symbol::t::grab(), boundries_by_index[68].first),
-        std::make_pair(symbol::u::grab(), boundries_by_index[69].first),
-        std::make_pair(symbol::v::grab(), boundries_by_index[70].first),
-        std::make_pair(symbol::w::grab(), boundries_by_index[71].first),
-        std::make_pair(symbol::x::grab(), boundries_by_index[72].first),
-        std::make_pair(symbol::y::grab(), boundries_by_index[73].first),
-        std::make_pair(symbol::z::grab(), boundries_by_index[74].first),
+        std::make_pair(symbol::_sbr_::grab(), boundries_by_index[21].first),
+        std::make_pair(symbol::_::grab(), boundries_by_index[22].first),
+        std::make_pair(symbol::_tld_::grab(), boundries_by_index[23].first),
+        std::make_pair(symbol::A::grab(), boundries_by_index[24].first),
+        std::make_pair(symbol::B::grab(), boundries_by_index[25].first),
+        std::make_pair(symbol::C::grab(), boundries_by_index[26].first),
+        std::make_pair(symbol::D::grab(), boundries_by_index[27].first),
+        std::make_pair(symbol::E::grab(), boundries_by_index[28].first),
+        std::make_pair(symbol::F::grab(), boundries_by_index[29].first),
+        std::make_pair(symbol::G::grab(), boundries_by_index[30].first),
+        std::make_pair(symbol::H::grab(), boundries_by_index[31].first),
+        std::make_pair(symbol::I::grab(), boundries_by_index[32].first),
+        std::make_pair(symbol::J::grab(), boundries_by_index[33].first),
+        std::make_pair(symbol::K::grab(), boundries_by_index[34].first),
+        std::make_pair(symbol::L::grab(), boundries_by_index[35].first),
+        std::make_pair(symbol::M::grab(), boundries_by_index[36].first),
+        std::make_pair(symbol::N::grab(), boundries_by_index[37].first),
+        std::make_pair(symbol::O::grab(), boundries_by_index[38].first),
+        std::make_pair(symbol::P::grab(), boundries_by_index[39].first),
+        std::make_pair(symbol::Q::grab(), boundries_by_index[40].first),
+        std::make_pair(symbol::R::grab(), boundries_by_index[41].first),
+        std::make_pair(symbol::S::grab(), boundries_by_index[42].first),
+        std::make_pair(symbol::T::grab(), boundries_by_index[43].first),
+        std::make_pair(symbol::U::grab(), boundries_by_index[44].first),
+        std::make_pair(symbol::V::grab(), boundries_by_index[45].first),
+        std::make_pair(symbol::W::grab(), boundries_by_index[46].first),
+        std::make_pair(symbol::X::grab(), boundries_by_index[47].first),
+        std::make_pair(symbol::Y::grab(), boundries_by_index[48].first),
+        std::make_pair(symbol::Z::grab(), boundries_by_index[49].first),
+        std::make_pair(symbol::a::grab(), boundries_by_index[50].first),
+        std::make_pair(symbol::b::grab(), boundries_by_index[51].first),
+        std::make_pair(symbol::c::grab(), boundries_by_index[52].first),
+        std::make_pair(symbol::d::grab(), boundries_by_index[53].first),
+        std::make_pair(symbol::e::grab(), boundries_by_index[54].first),
+        std::make_pair(symbol::f::grab(), boundries_by_index[55].first),
+        std::make_pair(symbol::g::grab(), boundries_by_index[56].first),
+        std::make_pair(symbol::h::grab(), boundries_by_index[57].first),
+        std::make_pair(symbol::i::grab(), boundries_by_index[58].first),
+        std::make_pair(symbol::j::grab(), boundries_by_index[59].first),
+        std::make_pair(symbol::k::grab(), boundries_by_index[60].first),
+        std::make_pair(symbol::l::grab(), boundries_by_index[61].first),
+        std::make_pair(symbol::m::grab(), boundries_by_index[62].first),
+        std::make_pair(symbol::n::grab(), boundries_by_index[63].first),
+        std::make_pair(symbol::o::grab(), boundries_by_index[64].first),
+        std::make_pair(symbol::p::grab(), boundries_by_index[65].first),
+        std::make_pair(symbol::q::grab(), boundries_by_index[66].first),
+        std::make_pair(symbol::r::grab(), boundries_by_index[67].first),
+        std::make_pair(symbol::s::grab(), boundries_by_index[68].first),
+        std::make_pair(symbol::t::grab(), boundries_by_index[69].first),
+        std::make_pair(symbol::u::grab(), boundries_by_index[70].first),
+        std::make_pair(symbol::v::grab(), boundries_by_index[71].first),
+        std::make_pair(symbol::w::grab(), boundries_by_index[72].first),
+        std::make_pair(symbol::x::grab(), boundries_by_index[73].first),
+        std::make_pair(symbol::y::grab(), boundries_by_index[74].first),
+        std::make_pair(symbol::z::grab(), boundries_by_index[75].first),
     };
 
     if (strlen(word) == 0)
@@ -670,16 +682,16 @@ int mm_lookup(char const * word, bool * found)
         if (word[0] >= 'a' && word[0] <= 'z')
         {
 //             i -= 'a';
-//             i += 49;
+//             i += 50;
             // "simplify for speed!
-            i -= 48;
+            i -= 47;
         }
         else if (word[0] >= 'A' && word[0] <= 'Z')
         {
 //             i -= 'A';  // ascii table location
-//             i += 23;   // boundries_by_index location
+//             i += 24;   // boundries_by_index location
             // "simplify" for speed!
-            i -= 42;
+            i -= 41;
         }
         else if (word[0] >= '-' && word[0] <= ':')
         {
@@ -707,19 +719,26 @@ int mm_lookup(char const * word, bool * found)
             // "simplify for speed!
             i -= 42;
         }
+        else if (word[0] == ']')
+        {
+//             i -= ']';
+//             i += 21;
+            // "simplify for speed!
+            i -= 72;
+        }
         else if (word[0] == '_')
         {
 //             i -= '_';
-//             i += 21;
+//             i += 22;
             // "simplify for speed!
-            i -= 74;
+            i -= 73;
         }
         else if (word[0] == '~')
         {
 //             i -= '~';
-//             i += 22;
+//             i += 23;
             // "simplify for speed!
-            i -= 104;
+            i -= 103;
         }
         else if (word[0] == '+')
         {
@@ -730,10 +749,10 @@ int mm_lookup(char const * word, bool * found)
         }
         else
         {
-            i = 23; // 'A'
+            i = 24; // 'A'
         }
 
-        if (i < 0 || i > 74)
+        if (i < 0 || i > 75)
         {
             std::cout << "\nmm_lookup() :  bug detected! index [" << i
                         << "] is out of bounds! (lookup failed)" << std::endl;
@@ -1093,6 +1112,30 @@ void mm_embedded(int index, int const * * embedded, int * count)
 }
 
 
+void mm_definition(int index, int const * * definition, int * count)
+{
+    if (index < 0 || index >= mm_count())
+    {
+        *definition = nullptr;
+        *count = 0;
+        return;
+    }
+
+    auto iter = std::lower_bound(
+                    boundries_by_index.begin(),
+                    boundries_by_index.end(),
+                    index,
+                    [](auto const & b, auto const & i){ return b.first <= i; }
+                );
+    if (iter != boundries_by_index.begin())
+        --iter;
+
+    auto & d = iter->second.as_definition()(index - iter->first);
+    *definition = d.data();
+    *count = (int) d.size();
+}
+
+
 void mm_locations(
     int index,
     int const * * book_indexes,
@@ -1175,50 +1218,75 @@ void mm_complete(char const * prefix, int * start, int * length)
 
 int mm_book_count()
 {
-    return books.size();
+#ifdef STAGE0
+    return 0;
+#else
+    return BOOK_COUNT;
+#endif
 }
 
 
 void mm_book_title(int book_index, int const * * book_title, int * word_count)
 {
-    if (book_index < 0 || book_index >= mm_book_count())
+#ifdef STAGE0
+    (void) book_index;
+    (void) book_title;
+    (void) word_count;
+#else
+    if (book_index < 0 || book_index >= BOOK_COUNT)
     {
         *book_title = nullptr;
         *word_count = 0;
         return;
     }
 
-    *book_title = books[book_index].title.data();
-    *word_count = (int) books[book_index].title.size();
+    book_title_funcs[book_index](book_title, word_count);
+#endif
 }
 
 
 void mm_book_author(int book_index, int const * * book_author, int * word_count)
 {
-    if (book_index < 0 || book_index >= mm_book_count())
+#ifdef STAGE0
+    (void) book_index;
+    (void) book_author;
+    (void) word_count;
+#else
+    if (book_index < 0 || book_index >= BOOK_COUNT)
     {
         *book_author = nullptr;
         *word_count = 0;
         return;
     }
 
-    *book_author = books[book_index].author.data();
-    *word_count = (int) books[book_index].author.size();
+    book_author_funcs[book_index](book_author, word_count);
+#endif
 }
 
 
 int mm_chapter_count(int book_index)
 {
-    if (book_index < 0 || book_index >= mm_book_count())
+#ifdef STAGE0
+    (void) book_index;
+    return 0;
+#else
+    if (book_index < 0 || book_index >= BOOK_COUNT)
         return 0;
 
-    return (int) books[book_index].chapters.size();
+    return chapter_count_funcs[book_index]();
+#endif
 }
 
 
 void mm_chapter_title(int book_index, int chapter_index, int const * * chapter_title, int * word_count)
 {
-    if (book_index < 0 || book_index >= mm_book_count() ||
+#ifdef STAGE0
+    (void) book_index;
+    (void) chapter_index;
+    (void) chapter_title;
+    (void) word_count;
+#else
+    if (book_index < 0 || book_index >= BOOK_COUNT ||
             chapter_index < 0 || chapter_index >= mm_chapter_count(book_index))
     {
         *chapter_title = nullptr;
@@ -1226,15 +1294,21 @@ void mm_chapter_title(int book_index, int chapter_index, int const * * chapter_t
         return;
     }
 
-    *chapter_title = books[book_index].chapters[chapter_index].title.data();
-    *word_count = (int) books[book_index].chapters[chapter_index].title.size();
+    chapter_title_funcs[book_index](chapter_index, chapter_title, word_count);
+#endif
 }
 
 
 void mm_chapter_subtitle(int book_index, int chapter_index,
                          int const * * chapter_subtitle, int * word_count)
 {
-    if (book_index < 0 || book_index >= mm_book_count() ||
+#ifdef STAGE0
+    (void) book_index;
+    (void) chapter_index;
+    (void) chapter_subtitle;
+    (void) word_count;
+#else
+    if (book_index < 0 || book_index >= BOOK_COUNT ||
             chapter_index < 0 || chapter_index >= mm_chapter_count(book_index))
     {
         *chapter_subtitle = nullptr;
@@ -1242,29 +1316,42 @@ void mm_chapter_subtitle(int book_index, int chapter_index,
         return;
     }
 
-    *chapter_subtitle = books[book_index].chapters[chapter_index].subtitle.data();
-    *word_count = (int) books[book_index].chapters[chapter_index].subtitle.size();
+    chapter_subtitle_funcs[book_index](chapter_index, chapter_subtitle, word_count);
+#endif
 }
 
 
 int mm_paragraph_count(int book_index, int chapter_index)
 {
-    if (book_index < 0 || book_index >= mm_book_count() ||
+#ifdef STAGE0
+    (void) book_index;
+    (void) chapter_index;
+    return 0;
+#else
+    if (book_index < 0 || book_index >= BOOK_COUNT ||
             chapter_index < 0 || chapter_index >= mm_chapter_count(book_index))
         return 0;
 
-    return (int) books[book_index].chapters[chapter_index].paragraphs.size();
+    return paragraph_count_funcs[book_index](chapter_index);
+#endif
 }
 
 
 int mm_word_count(int book_index, int chapter_index, int paragraph_index)
 {
-    if (book_index < 0 || book_index >= mm_book_count() ||
+#ifdef STAGE0
+    (void) book_index;
+    (void) chapter_index;
+    (void) paragraph_index;
+    return 0;
+#else
+    if (book_index < 0 || book_index >= BOOK_COUNT ||
             chapter_index < 0 || chapter_index >= mm_chapter_count(book_index) ||
             paragraph_index < 0 || paragraph_index >= mm_paragraph_count(book_index, chapter_index))
         return 0;
 
-    return (int) books[book_index].chapters[chapter_index].paragraphs[paragraph_index].size();
+    return word_count_funcs[book_index](chapter_index, paragraph_index);
+#endif
 }
 
 
@@ -1273,25 +1360,32 @@ int mm_word(
     int chapter_index,
     int paragraph_index,
     int word_index,
-    int * parent_phrase,
-    int * parent_phrase_word_index
+    int const * * ancestors,
+    int * ancestor_count,
+    int * index_within_first_ancestor
 )
 {
-    if (book_index < 0 || book_index >= mm_book_count() ||
+#ifdef STAGE0
+    (void) book_index;
+    (void) chapter_index;
+    (void) paragraph_index;
+    (void) word_index;
+    (void) ancestors;
+    (void) ancestor_count;
+    (void) index_within_first_ancestor;
+    return 0;
+#else
+    if (book_index < 0 || book_index >= BOOK_COUNT ||
             chapter_index < 0 || chapter_index >= mm_chapter_count(book_index) ||
             paragraph_index < 0 || paragraph_index >= mm_paragraph_count(book_index, chapter_index) ||
             word_index < 0 || word_index >= mm_word_count(book_index, chapter_index, paragraph_index))
         return -1;
 
-    if (nullptr != parent_phrase)
-        *parent_phrase = (int) books[book_index].
-                               chapters[chapter_index].
-                               paragraphs[paragraph_index][word_index].parent_phrase;
-
-    if (nullptr != parent_phrase_word_index)
-        *parent_phrase_word_index = (int) books[book_index].
-                                          chapters[chapter_index].
-                                          paragraphs[paragraph_index][word_index].parent_phrase_start_index;
-
-    return (int) books[book_index].chapters[chapter_index].paragraphs[paragraph_index][word_index].word;
+    return word_funcs[book_index](chapter_index,
+                                  paragraph_index,
+                                  word_index,
+                                  ancestors,
+                                  ancestor_count,
+                                  index_within_first_ancestor);
+#endif
 }

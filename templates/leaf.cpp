@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2020-2022, shtroizel
+Copyright (c) 2020-2023, shtroizel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -261,6 +261,19 @@ std::vector<int> const & mm_embedded_snth(int index)
         return empty;
     }
     return word_snth::from_by_string_index(index).as_embedded_vect();
+}
+
+
+std::vector<int> const & mm_definition_snth(int index)
+{
+    static std::vector<int> const empty{};
+    if (index < 0 || index >= mm_count_snth())
+    {
+        std::cout << "mm_definition_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                  << mm_count_snth() << std::endl;
+        return empty;
+    }
+    return word_snth::from_by_string_index(index).as_definition_vect();
 }
 
 

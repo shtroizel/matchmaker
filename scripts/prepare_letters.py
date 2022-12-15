@@ -44,7 +44,7 @@ def prepare_letters(workspace_root, q, parents_only):
     parent_cpp = matchmaker_root + 'templates/parent.cpp'
 
 
-    print('[                  generating source                  ]');
+    print('|                  generating source                  |');
     print('[', end='');
 
     for l0 in ascii_uppercase + ascii_lowercase:
@@ -239,6 +239,9 @@ def prepare_letters(workspace_root, q, parents_only):
                     (l0 == 'B' and l1 == 'o') or                                                           \
                     (l0 == 'o' and l1 == 'b') or                                                           \
                     (l0 == 'm' and l1 == 'y') or                                                           \
+                    (l0 == 'T' and l1 == 'h') or                                                           \
+                    (l0 == 'W' and l1 == 'h') or                                                           \
+                    (l0 == 'h' and l1 == 't') or                                                           \
                     (l0 == 'r' and l1 == 'i'):
 
                 # two letter parent
@@ -373,6 +376,7 @@ def prepare_letters(workspace_root, q, parents_only):
                             (l0 == 'w' and l1 == 'e' and l2 == 'l') or                                     \
                             (l0 == 's' and l1 == 'c' and l2 == 'r') or                                     \
                             (l0 == 'c' and l1 == 'l' and l2 == 'a') or                                     \
+                            (l0 == 'h' and l1 == 't' and l2 == 't') or                                     \
                             (l0 == 'c' and l1 == 'o' and l2 == 'u'):
 
                         # three letter parent
@@ -415,6 +419,7 @@ def prepare_letters(workspace_root, q, parents_only):
                                     (l0 == 't' and l1 == 'r' and l2 == 'a' and l3 == 'n') or               \
                                     (l0 == 'f' and l1 == 'o' and l2 == 'r' and l3 == 'e') or               \
                                     (l0 == 'p' and l1 == 's' and l2 == 'e' and l3 == 'u') or               \
+                                    (l0 == 'h' and l1 == 't' and l2 == 't' and l3 == 'p') or               \
                                     (l0 == 'n' and l1 == 'o' and l2 == 'n' and l3 == 'c'):
 
                                 # four letter parent
@@ -454,6 +459,9 @@ def prepare_letters(workspace_root, q, parents_only):
                                             (l0 == 't' and l1 == 'r' and l2 == 'a' and l3 == 'n' and       \
                                                     l4 == 's') or                                          \
                                                                                                            \
+                                            (l0 == 'h' and l1 == 't' and l2 == 't' and l3 == 'p' and       \
+                                                    l4 == 's') or                                          \
+                                                                                                           \
                                             (l0 == 'u' and l1 == 'n' and l2 == 'd' and l3 == 'e' and       \
                                                     l4 == 'r'):
 
@@ -484,6 +492,16 @@ def prepare_letters(workspace_root, q, parents_only):
 
                                             letter_x6_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' \
                                                     + l3 + '_' + l4 + '_' + l5 + '.cpp'
+
+
+
+
+
+
+
+
+
+
 
                                             # six letter leaf
                                             shutil.copy(leaf_h, letter_x6_h)
@@ -565,9 +583,10 @@ def prepare_letters(workspace_root, q, parents_only):
                     '_hsh_',
                     '_dol_',
                     '_sqt_',
-                    '_pl_',
-                    '_pls_',
+                    '_parl_',
+                    '_plus_',
                     '_gt_',
+                    '_sbr_',
                     '_',
                     '_tld_']:
             os.makedirs(generated_include + '/matchmaker/generated_symbols/' + sym)

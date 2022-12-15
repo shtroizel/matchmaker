@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.17)
 
 project(data_reader_stage_1)
 
@@ -18,7 +18,7 @@ if ("${matchmaker_folder_name}" STREQUAL "matchmaker_q")
 endif()
 
 message(STATUS "matchable_DIR: ${matchable_DIR}")
-find_package(matchable 13.0.0 REQUIRED)
+find_package(matchable 14.0.0 REQUIRED)
 include_directories(
     ${matchable_DIR}/../../../include
     ${PROJECT_SOURCE_DIR}/../common
@@ -26,7 +26,7 @@ include_directories(
 
 get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
 set(CMAKE_INSTALL_RPATH "${rpath_dir}")
-find_package(matchmaker 3.1.0 REQUIRED)
+find_package(matchmaker 4.0.0 REQUIRED)
 
 find_package(Threads REQUIRED)
 
@@ -75,6 +75,7 @@ set(
     src/discover_embedded_words.cpp
     src/generate_ordinal_summation_header.cpp
     src/read_crumbs.cpp
+    src/read_links.cpp
     src/create_books.cpp
     src/record_word_locations.cpp
     src/patch_matchables.cpp

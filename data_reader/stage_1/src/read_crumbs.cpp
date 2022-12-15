@@ -99,24 +99,18 @@ bool read_crumbs(int progress_steps)
             std::cout << "." << std::flush;
         }
 
-        // TODO FIXME REMOVEME!!!!!!!!!!!!!!!!!!!!!!!!
-        if (files_processed > 28)
-        {
-            q_files.pop();
-            continue;
-        }
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
         q_file = fopen(q_files.top().entry.path().c_str(), "r");
         if (q_file == 0)
         {
             perror(q_files.top().entry.path().c_str());
             exit(1);
         }
+
         ok = read_chapter(embedded_words, q_file, book, chapter);
         fclose(q_file);
         if (!ok)
             return false;
+
         q_file = nullptr;
         q_files.pop();
     }
@@ -133,8 +127,8 @@ bool read_chapter(
 {
     std::string text_number = "INVALID";
     std::string line;
-    bool word_in_dictionary{false};
-    int word{-1};
+    bool term_exists{false};
+    int term{-1};
 
     while (read_line(input_file, line))
     {
@@ -148,8 +142,8 @@ bool read_chapter(
 
             // first read the text number (chapter title)
             text_number = line.substr(3);
-            int index = mm_lookup(text_number.c_str(), &word_in_dictionary);
-            if (!word_in_dictionary)
+            int index = mm_lookup(text_number.c_str(), &term_exists);
+            if (!term_exists)
             {
                 std::cout << "FAILED!\nencountered '" << text_number << "' which is not in the dictionary!"
                           << std::endl;
@@ -176,11 +170,27 @@ bool read_chapter(
                 return false;
             }
         }
+
+
+
+        // TODO stop ignoring hyperlinks without blowing up the dictionary (9 deep prefixes!?!?!)
+        //
+        // note this would be 12 deep if we have the entire line including the ]~~ !!!
+        //
+        // when the time comes for 9 deep, instead of assuming entire line exists check for two words
+        // instead --> ]~~ and line.substr(3)
+        else if (line.rfind("]~~", 0) == 0)
+        {
+            continue;
+        }
+
+
+
         else
         {
-            // entire line should exist as a word
-            word = mm_lookup(line.c_str(), &word_in_dictionary);
-            if (!word_in_dictionary)
+            // entire line should exist as a term
+            term = mm_lookup(line.c_str(), &term_exists);
+            if (!term_exists)
             {
                 std::cout << "FAILED!\nword '" << line
                           << "' not in the dictionary! text: " << text_number << std::endl;
@@ -188,6 +198,7 @@ bool read_chapter(
             }
 
             std::function<void (int,
+                                std::deque<int>,
                                 int,
                                 int,
                                 IndexTable const &,
@@ -195,24 +206,32 @@ bool read_chapter(
                 [&add_to_paragraph]
                 (
                     int word,
-                    int parent,
+                    std::deque<int> parents,
                     int parent_start,
+                    int index_within_parent,
                     IndexTable const & embedded_words,
                     std::vector<BookWord> & paragraph
                 )
                 {
                     if (embedded_words[word].size() == 0)
                     {
-                        paragraph.push_back({word, parent, parent_start});
+                        BookWord bw;
+                        bw.word = word;
+                        bw.ancestors = parents;
+                        bw.first_ancestor_start_index = parent_start;
+                        bw.index_within_first_ancestor = index_within_parent;
+                        paragraph.push_back(bw);
                     }
                     else
                     {
                         parent_start = (int) paragraph.size();
+                        parents.push_front(word);
                         for (size_t i = 0; i < embedded_words[word].size(); ++i)
                         {
                             add_to_paragraph(embedded_words[word][i],
-                                             word,
+                                             parents,
                                              parent_start,
+                                             i,
                                              embedded_words,
                                              paragraph);
                         }
@@ -220,7 +239,8 @@ bool read_chapter(
                 };
 
             std::vector<BookWord> paragraph;
-            add_to_paragraph(word, -1, -1, embedded_words, paragraph);
+            std::deque<int> parents;
+            add_to_paragraph(term, parents, -1, -1, embedded_words, paragraph);
             crumbs.chapters.back().paragraphs.push_back(paragraph);
         }
     }
@@ -254,14 +274,14 @@ bool read_header(std::string const & header, Chapter & chapter)
     // first split date/time from message board
     std::vector<std::string> tokenized_on_comma;
     tokenize(header, ',', tokenized_on_comma);
-    if (tokenized_on_comma.size() != 2)
+    if (tokenized_on_comma.size() < 2 || tokenized_on_comma.size() > 3)
     {
         std::cout << "FAILED!\nfailed to parse header line! text: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
 
-    // then split date, time, zoneinfo (time is middle 2 tokens because of AM/PM)
+    // then split date, time, AM/PM, zoneinfo (time is middle 2 tokens because of AM/PM)
     std::vector<std::string> tokenized_date_time;
     tokenize(tokenized_on_comma[0], ' ', tokenized_date_time);
     if (tokenized_date_time.size() != 4)
@@ -292,30 +312,30 @@ bool read_header(std::string const & header, Chapter & chapter)
     }
 
     // cache repeatedly used indexes
-    bool word_in_dictionary{false};
-    int const dash = mm_lookup("-", &word_in_dictionary);
-    if (!word_in_dictionary)
+    bool found_in_dictionary{false};
+    int const dash = mm_lookup("-", &found_in_dictionary);
+    if (!found_in_dictionary)
     {
         std::cout << "FAILED!\n'-' is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
-    int const space = mm_lookup(" ", &word_in_dictionary);
-    if (!word_in_dictionary)
+    int const space = mm_lookup(" ", &found_in_dictionary);
+    if (!found_in_dictionary)
     {
         std::cout << "FAILED!\n' ' is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
-    int const colon = mm_lookup(":", &word_in_dictionary);
-    if (!word_in_dictionary)
+    int const colon = mm_lookup(":", &found_in_dictionary);
+    if (!found_in_dictionary)
     {
         std::cout << "FAILED!\n':' is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
-    int const comma = mm_lookup(",", &word_in_dictionary);
-    if (!word_in_dictionary)
+    int const comma = mm_lookup(",", &found_in_dictionary);
+    if (!found_in_dictionary)
     {
         std::cout << "FAILED!\n',' is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
@@ -325,8 +345,8 @@ bool read_header(std::string const & header, Chapter & chapter)
     // finally we can start creating the subtitle
     //
     // start by adding the year
-    chapter.subtitle.push_back(mm_lookup(tokenized_date[2].c_str(), &word_in_dictionary));
-    if (!word_in_dictionary)
+    chapter.subtitle.push_back(mm_lookup(tokenized_date[2].c_str(), &found_in_dictionary));
+    if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_date[2]
                   << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
@@ -337,8 +357,8 @@ bool read_header(std::string const & header, Chapter & chapter)
     chapter.subtitle.push_back(dash);
 
     // then add the month
-    chapter.subtitle.push_back(mm_lookup(tokenized_date[1].c_str(), &word_in_dictionary));
-    if (!word_in_dictionary)
+    chapter.subtitle.push_back(mm_lookup(tokenized_date[1].c_str(), &found_in_dictionary));
+    if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_date[1]
                   << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
@@ -349,8 +369,8 @@ bool read_header(std::string const & header, Chapter & chapter)
     chapter.subtitle.push_back(dash);
 
     // add the day
-    chapter.subtitle.push_back(mm_lookup(tokenized_date[0].c_str(), &word_in_dictionary));
-    if (!word_in_dictionary)
+    chapter.subtitle.push_back(mm_lookup(tokenized_date[0].c_str(), &found_in_dictionary));
+    if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_date[0]
                   << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
@@ -361,8 +381,8 @@ bool read_header(std::string const & header, Chapter & chapter)
     chapter.subtitle.push_back(space);
 
     // add the hour
-    chapter.subtitle.push_back(mm_lookup(tokenized_time[0].c_str(), &word_in_dictionary));
-    if (!word_in_dictionary)
+    chapter.subtitle.push_back(mm_lookup(tokenized_time[0].c_str(), &found_in_dictionary));
+    if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_time[0]
                   << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
@@ -374,8 +394,8 @@ bool read_header(std::string const & header, Chapter & chapter)
     chapter.subtitle.push_back(colon);
 
     // add the minute
-    chapter.subtitle.push_back(mm_lookup(tokenized_time[1].c_str(), &word_in_dictionary));
-    if (!word_in_dictionary)
+    chapter.subtitle.push_back(mm_lookup(tokenized_time[1].c_str(), &found_in_dictionary));
+    if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_time[1]
                   << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
@@ -387,8 +407,8 @@ bool read_header(std::string const & header, Chapter & chapter)
     chapter.subtitle.push_back(mm_lookup(":", nullptr));
 
     // add the second
-    chapter.subtitle.push_back(mm_lookup(tokenized_time[2].c_str(), &word_in_dictionary));
-    if (!word_in_dictionary)
+    chapter.subtitle.push_back(mm_lookup(tokenized_time[2].c_str(), &found_in_dictionary));
+    if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_time[2]
                   << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
@@ -399,8 +419,20 @@ bool read_header(std::string const & header, Chapter & chapter)
     chapter.subtitle.push_back(space);
 
     // add AM/PM
-    chapter.subtitle.push_back(mm_lookup(tokenized_date_time[3].c_str(), &word_in_dictionary));
-    if (!word_in_dictionary)
+    chapter.subtitle.push_back(mm_lookup(tokenized_date_time[2].c_str(), &found_in_dictionary));
+    if (!found_in_dictionary)
+    {
+        std::cout << "FAILED!\nencountered '" << tokenized_date_time[2]
+                  << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
+                  << std::endl;
+        return false;
+    }
+
+    chapter.subtitle.push_back(space);
+
+    // add time zone
+    chapter.subtitle.push_back(mm_lookup(tokenized_date_time[3].c_str(), &found_in_dictionary));
+    if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_date_time[3]
                   << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
@@ -411,13 +443,25 @@ bool read_header(std::string const & header, Chapter & chapter)
     chapter.subtitle.push_back(comma);
 
     // add message board
-    chapter.subtitle.push_back(mm_lookup(tokenized_on_comma[1].c_str(), &word_in_dictionary));
-    if (!word_in_dictionary)
+    chapter.subtitle.push_back(mm_lookup(tokenized_on_comma[1].c_str(), &found_in_dictionary));
+    if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_on_comma[1]
                   << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
+    }
+    if (tokenized_on_comma.size() == 3)
+    {
+        chapter.subtitle.push_back(space);
+        chapter.subtitle.push_back(mm_lookup(tokenized_on_comma[2].c_str(), &found_in_dictionary));
+        if (!found_in_dictionary)
+        {
+            std::cout << "FAILED!\nencountered '" << tokenized_on_comma[2]
+                    << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
+                    << std::endl;
+            return false;
+        }
     }
 
     return true;

@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.17)
 
-project(matchmaker VERSION 3.1.0)
+project(matchmaker VERSION 4.0.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -13,8 +13,9 @@ endif()
 
 option(ATOMIC_LIBS "builds a library for every prefix" OFF)
 option(q "suffix lib & inc destination with _q" OFF)
+option(STAGE0 "build stage 0" OFF)
 
-set(LEAFLIB_COUNT 10)
+set(LEAFLIB_COUNT 16)
 
 set(CMAKE_INSTALL_RPATH $ORIGIN)
 
@@ -25,12 +26,16 @@ if(q)
     set(inc_destination "${inc_destination}_q")
 endif()
 
+if(STAGE0)
+    add_definitions(-DSTAGE0)
+endif()
+
 if(NOT MATCHMAKER_ROOT)
     message(FATAL_ERROR "MATCHMAKER_ROOT must be set! please set to matchmaker repository root location")
 endif()
 
 add_definitions(-DMATCHABLE_OMIT_BY_INDEX)
-find_package(matchable 13.0.0 REQUIRED)
+find_package(matchable 14.0.0 REQUIRED)
 include_directories(${matchable_DIR}/../../../include)
 
 set(lib_list)
@@ -242,6 +247,9 @@ foreach(l0 ${l0_A_z_letters})
             (l0 STREQUAL "B" AND l1 STREQUAL "o") OR
             (l0 STREQUAL "o" AND l1 STREQUAL "b") OR
             (l0 STREQUAL "m" AND l1 STREQUAL "y") OR
+            (l0 STREQUAL "T" AND l1 STREQUAL "h") OR
+            (l0 STREQUAL "W" AND l1 STREQUAL "h") OR
+            (l0 STREQUAL "h" AND l1 STREQUAL "t") OR
             (l0 STREQUAL "r" AND l1 STREQUAL "i")
         )
             # two letter parents
@@ -360,6 +368,7 @@ foreach(l0 ${l0_A_z_letters})
                     (l0 STREQUAL "w" AND l1 STREQUAL "e" AND l2 STREQUAL "l") OR
                     (l0 STREQUAL "s" AND l1 STREQUAL "c" AND l2 STREQUAL "r") OR
                     (l0 STREQUAL "c" AND l1 STREQUAL "l" AND l2 STREQUAL "a") OR
+                    (l0 STREQUAL "h" AND l1 STREQUAL "t" AND l2 STREQUAL "t") OR
                     (l0 STREQUAL "c" AND l1 STREQUAL "o" AND l2 STREQUAL "u")
                 )
                     # three letter parents
@@ -386,6 +395,7 @@ foreach(l0 ${l0_A_z_letters})
                             (l0 STREQUAL "t" AND l1 STREQUAL "r" AND l2 STREQUAL "a" AND l3 STREQUAL "n") OR
                             (l0 STREQUAL "f" AND l1 STREQUAL "o" AND l2 STREQUAL "r" AND l3 STREQUAL "e") OR
                             (l0 STREQUAL "p" AND l1 STREQUAL "s" AND l2 STREQUAL "e" AND l3 STREQUAL "u") OR
+                            (l0 STREQUAL "h" AND l1 STREQUAL "t" AND l2 STREQUAL "t" AND l3 STREQUAL "p") OR
                             (l0 STREQUAL "n" AND l1 STREQUAL "o" AND l2 STREQUAL "n" AND l3 STREQUAL "c")
                         )
                             # four letter parents
@@ -403,6 +413,8 @@ foreach(l0 ${l0_A_z_letters})
                                             AND l3 STREQUAL "s" AND l4 STREQUAL "i") OR
                                     (l0 STREQUAL "t" AND l1 STREQUAL "r" AND l2 STREQUAL "a"
                                             AND l3 STREQUAL "n" AND l4 STREQUAL "s") OR
+                                    (l0 STREQUAL "h" AND l1 STREQUAL "t" AND l2 STREQUAL "t"
+                                            AND l3 STREQUAL "p" AND l4 STREQUAL "s") OR
                                     (l0 STREQUAL "c" AND l1 STREQUAL "o" AND l2 STREQUAL "u"
                                             AND l3 STREQUAL "n" AND l4 STREQUAL "t")
                                 )
@@ -457,14 +469,21 @@ list(APPEND prefix_list _quot_)
 list(APPEND prefix_list _hsh_)
 list(APPEND prefix_list _dol_)
 list(APPEND prefix_list _sqt_)
-list(APPEND prefix_list _pl_)
-list(APPEND prefix_list _pls_)
+list(APPEND prefix_list _parl_)
+list(APPEND prefix_list _plus_)
 list(APPEND prefix_list _gt_)
+list(APPEND prefix_list _sbr_)
 list(APPEND prefix_list _)
 list(APPEND prefix_list _tld_)
 
-# parent of all
-list(APPEND matchmaker_srcs ${MATCHMAKER_ROOT}/src/matchmaker.cpp)
+# books first
+file(GLOB book_srcs "generated_src/books/*.cpp")
+foreach(book_src ${book_srcs})
+    list(PREPEND matchmaker_srcs ${book_src})
+endforeach()
+
+# except for this
+list(PREPEND matchmaker_srcs ${MATCHMAKER_ROOT}/src/matchmaker.cpp)
 
 if(ATOMIC_LIBS)
     foreach(prefix ${prefix_list})
@@ -525,7 +544,10 @@ install(
 )
 
 
+
+
 # play nice with others
+
 install(EXPORT matchmaker FILE matchmaker.cmake DESTINATION ${lib_destination}/cmake)
 
 include(CMakePackageConfigHelpers)
