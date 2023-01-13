@@ -17,7 +17,11 @@ option(STAGE0 "build stage 0" OFF)
 
 set(LEAFLIB_COUNT 16)
 
-set(CMAKE_INSTALL_RPATH $ORIGIN)
+# set(CMAKE_INSTALL_RPATH $ORIGIN)
+
+# SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+# SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+SET(CMAKE_INSTALL_RPATH "$\{ORIGIN\}")
 
 set(lib_destination ${CMAKE_INSTALL_PREFIX}/lib/matchmaker)
 set(inc_destination ${CMAKE_INSTALL_PREFIX}/include/matchmaker)

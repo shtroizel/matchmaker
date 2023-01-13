@@ -209,7 +209,7 @@ bool patch_matchable_header(std::vector<HeaderEntry> const & matchable_headers)
                         std::vector<std::string> def_vect;
                         for (int i : defs[existing_word_index])
                             def_vect.push_back(std::to_string(i));
-                        m->set_propertyvect(v.variant_name, "def", def_vect);
+                        m->set_propertyvect(v.variant_name, "definition", def_vect);
                     }
 
                     {

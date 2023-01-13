@@ -69,37 +69,6 @@ int main(int argc, char ** argv)
     for (auto const & task : SerialTask::variants_by_index())
         tasks.set(task);
 
-
-
-
-
-
-
-
-
-
-
-
-    // TODO BROKEN FIXME REMOVEME_WHEN_FIXED
-    tasks.unset(SerialTask::reading_spc_links::grab());
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     q_mode.match({
         {q_usage::only::grab(),
             [&tasks]()

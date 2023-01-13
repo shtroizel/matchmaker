@@ -46,33 +46,6 @@ bool read_link_line(FILE * f, std::string & line);
 
 bool read_links(int progress_steps)
 {
-
-
-
-
-
-
-    // TODO BROKEN FIXME REMOVEME_WHEN_FIXED
-    abort();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     std::string const & DATA_DIR = Stage1Data::nil.as_data_dir();
 
     std::priority_queue<

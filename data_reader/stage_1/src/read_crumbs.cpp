@@ -239,6 +239,30 @@ bool read_chapter(
                 };
 
             std::vector<BookWord> paragraph;
+
+            // for linked text, include the link as a single term instead
+            // of using embedded terms
+            int s_len = 0;
+            char const * s = mm_at(term, &s_len);
+            if (s_len > 3 && s[0] == '>' && s[1] == '>')
+            {
+                bool numbers_only = true;
+                for (int si = 2; numbers_only && si < s_len; ++si)
+                    numbers_only = s[si] >= '0' && s[si] <= '9';
+
+                if (numbers_only)
+                {
+                    BookWord bw;
+                    bw.word = term;
+                    bw.ancestors.clear();
+                    bw.first_ancestor_start_index = -1;
+                    bw.index_within_first_ancestor = -1;
+                    paragraph.push_back(bw);
+                    crumbs.chapters.back().paragraphs.push_back(paragraph);
+                    continue; // to next line
+                }
+            }
+
             std::deque<int> parents;
             add_to_paragraph(term, parents, -1, -1, embedded_words, paragraph);
             crumbs.chapters.back().paragraphs.push_back(paragraph);
@@ -381,10 +405,28 @@ bool read_header(std::string const & header, Chapter & chapter)
     chapter.subtitle.push_back(space);
 
     // add the hour
-    chapter.subtitle.push_back(mm_lookup(tokenized_time[0].c_str(), &found_in_dictionary));
+    //
+    // but use the 24hr clock (military is the only way)
+    std::string hr_as_str = tokenized_time[0];
+    if (tokenized_date_time[2] == "PM")
+    {
+        int hr = std::stoi(hr_as_str);
+        hr += 12;
+        if (hr > 24)
+        {
+            std::cout << "FAILED\nam/pm time format but encountered hour: " << hr_as_str << std::endl;
+            abort();
+        }
+        else if (hr == 24)
+        {
+            hr = 0;
+        }
+        hr_as_str = std::to_string(hr);
+    }
+    chapter.subtitle.push_back(mm_lookup(hr_as_str.c_str(), &found_in_dictionary));
     if (!found_in_dictionary)
     {
-        std::cout << "FAILED!\nencountered '" << tokenized_time[0]
+        std::cout << "FAILED!\nencountered '" << hr_as_str
                   << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
@@ -411,18 +453,6 @@ bool read_header(std::string const & header, Chapter & chapter)
     if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_time[2]
-                  << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
-                  << std::endl;
-        return false;
-    }
-
-    chapter.subtitle.push_back(space);
-
-    // add AM/PM
-    chapter.subtitle.push_back(mm_lookup(tokenized_date_time[2].c_str(), &found_in_dictionary));
-    if (!found_in_dictionary)
-    {
-        std::cout << "FAILED!\nencountered '" << tokenized_date_time[2]
                   << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;

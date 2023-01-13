@@ -57,18 +57,27 @@ bool record_word_locations(int progress_steps)
                     }
 
                     // record links
-                    // if (len > 3 && s[0] == '>' && s[1] == '>')
-                    // {
-                    //     IndexTable const & defs = Stage1Data::nil.as_definitions();
-                    //     for (auto d : defs[bw.word])
-                    //     {
-                    //         book_indexes[d].push_back(b);
-                    //         chapter_indexes[d].push_back(ch);
-                    //         paragraph_indexes[d].push_back(p);
-                    //         word_indexes[d].push_back(w);
-                    //     }
-                    // }
+                    if (w == 0 && len > 5 && s[0] == '>' && s[1] == '>')
+                    {
+                        bool all_numbers = true;
+                        for (int i = 2; all_numbers && i < len; ++i)
+                            all_numbers = s[i] >= '0' && s[i] <= '9';
 
+                        if (all_numbers)
+                        {
+                            IndexTable const & defs = Stage1Data::nil.as_definitions();
+                            for (auto d : defs[bw.word])
+                            {
+                                book_indexes[d].push_back(b);
+                                chapter_indexes[d].push_back(ch);
+                                paragraph_indexes[d].push_back(p);
+                                word_indexes[d].push_back(w);
+                            }
+                        }
+                    }
+
+
+                    // record parents
 
                     int pp = -1;
                     int ppsi = -1;

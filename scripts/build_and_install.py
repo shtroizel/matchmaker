@@ -44,7 +44,7 @@ def usage():
     print('                                    * adds \'_atomic\' suffix to install_dir')
     print('                                    * avoidance recommended\n')
     print('    -q, --q                       q only')
-    print('                                    * only build about 1% of the dictionary')
+    print('                                    * only build minimal dictionary for "Crumbs"')
     print('                                    * builds much faster')
     print('                                    * adds \'_q\' suffix to build_dir')
     print('                                    * adds \'_q\' suffix to install_dir\n')

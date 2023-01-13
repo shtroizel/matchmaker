@@ -52,7 +52,6 @@ void Prefix::initialize(std::string const & prefix)
     str = prefix;
     std::string const matchable_name = "word_" + escaped_and_delimited('_');
     maker->grab(matchable_name)->add_property("int8_t", "pos");
-    maker->grab(matchable_name)->add_property("int", "def");
     maker->grab(matchable_name)->add_property("int", "syn");
     maker->grab(matchable_name)->add_property("int", "ant");
     maker->grab(matchable_name)->add_property("int", "by_longest_index");

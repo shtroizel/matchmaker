@@ -153,55 +153,53 @@ bool read_crumbs(
         if (line.size() > 3 && line[0] == ']' && line[1] == '~' && line[2] == '~')
             continue;
 
-        // // check for linked post
-        // bool is_link = line.size() > 4;
-        // is_link = is_link && line[0] == '>' && line[1] == '>';
-        // for (size_t i = 2; is_link && i < line.size(); ++i)
-        //     is_link = line[i] >= '0' && line[i] <= '9';
-        //
-        // if (is_link)
-        // {
-        //     std::string link_name = line.substr(2);
-        //     std::string const link_dir = Stage0Data::data_dir() + "/Crumbs/linked_text/" + link_name;
-        //     std::string const link_path = link_dir + "/post";
-        //
-        //     FILE * link_file = fopen(link_path.c_str(), "r");
-        //     if (nullptr == link_file)
-        //     {
-        //         std::cout << std::endl;
-        //         perror(link_path.c_str());
-        //         std::cout << std::endl;
-        //         // return false;
-        //     }
-        //     else
-        //     {
-        //         Stage0Data::word_attribute::Flags link_attributes;
-        //         std::string link_line;
-        //         while (true)
-        //         {
-        //             link_attributes = base_attributes;
-        //             if (!read_link_line(link_file, link_line, link_attributes))
-        //                 break;
-        //
-        //             if (link_line.empty())
-        //                 continue;
-        //
-        //             if (link_attributes.is_set(Stage0Data::word_attribute::unmatchable_symbols::grab()))
-        //             {
-        //                 std::cout << "encountered unmatchable symbols in linked post: " << link_path << std::endl;
-        //                 return false;
-        //             }
-        //             if (link_attributes.is_set(Stage0Data::word_attribute::invisible_ascii::grab()))
-        //             {
-        //                 std::cout << "encountered invisible_ascii in linked post: " << link_path << std::endl;
-        //                 return false;
-        //             }
-        //
-        //             Stage0Data::add_word(link_line, link_attributes);
-        //         }
-        //         fclose(link_file);
-        //     }
-        // }
+        // check for linked post
+        bool is_link = line.size() > 4;
+        is_link = is_link && line[0] == '>' && line[1] == '>';
+        for (size_t i = 2; is_link && i < line.size(); ++i)
+            is_link = line[i] >= '0' && line[i] <= '9';
+
+        if (is_link)
+        {
+            std::string link_name = line.substr(2);
+            std::string const link_dir = Stage0Data::data_dir() + "/Crumbs/linked_text/" + link_name;
+            std::string const link_path = link_dir + "/post";
+
+            FILE * link_file = fopen(link_path.c_str(), "r");
+            if (nullptr == link_file)
+            {
+                std::cout << "post: " << text << " --> failed to open file: " << link_path << std::endl;
+                return false;
+            }
+            else
+            {
+                Stage0Data::word_attribute::Flags link_attributes;
+                std::string link_line;
+                while (true)
+                {
+                    link_attributes = base_attributes;
+                    if (!read_link_line(link_file, link_line, link_attributes))
+                        break;
+
+                    if (link_line.empty())
+                        continue;
+
+                    if (link_attributes.is_set(Stage0Data::word_attribute::unmatchable_symbols::grab()))
+                    {
+                        std::cout << "encountered unmatchable symbols in linked post: " << link_path << std::endl;
+                        return false;
+                    }
+                    if (link_attributes.is_set(Stage0Data::word_attribute::invisible_ascii::grab()))
+                    {
+                        std::cout << "encountered invisible_ascii in linked post: " << link_path << std::endl;
+                        return false;
+                    }
+
+                    Stage0Data::add_word(link_line, link_attributes);
+                }
+                fclose(link_file);
+            }
+        }
 
         if (line.rfind("~~:", 0) == 0)
         {
@@ -270,7 +268,17 @@ bool read_crumbs(
 
             // guarantee 2 digit hour
             if (tokenized_time[0].length() == 1)
+            {
                 tokenized_time[0].insert(0, 1, '0');
+            }
+
+            // use 24 hr clock (military is the only way)
+            else if (tokenized_date_time[2] == "PM")
+            {
+                int hr = std::stoi(tokenized_time[0]);
+                hr += 12;
+                tokenized_time[0] = std::to_string(hr);
+            }
 
             // now add them all including all tokens & symbols
             std::vector<std::string> terms{
