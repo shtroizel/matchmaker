@@ -78,16 +78,16 @@ int main(int argc, char ** argv)
         {q_usage::only::grab(),
             [&tasks]()
             {
-                tasks.unset(SerialTask::reading_spc_3201_spc__pl_SINGLE_pr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__pl_COMPOUND_pr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__pl_COMMON_pr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__pl_NAMES_pr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__pl_NAMES_mns_F_pr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__pl_NAMES_mns_M_pr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__pl_PLACES_pr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__pl_CROSSWD_pr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__pl_CRSWD_spc_D_pr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__pl_ACRONYMS_pr_::grab());
+                tasks.unset(SerialTask::reading_spc_3201_spc__parl_SINGLE_parr_::grab());
+                tasks.unset(SerialTask::reading_spc_3201_spc__parl_COMPOUND_parr_::grab());
+                tasks.unset(SerialTask::reading_spc_3201_spc__parl_COMMON_parr_::grab());
+                tasks.unset(SerialTask::reading_spc_3201_spc__parl_NAMES_parr_::grab());
+                tasks.unset(SerialTask::reading_spc_3201_spc__parl_NAMES_mns_F_parr_::grab());
+                tasks.unset(SerialTask::reading_spc_3201_spc__parl_NAMES_mns_M_parr_::grab());
+                tasks.unset(SerialTask::reading_spc_3201_spc__parl_PLACES_parr_::grab());
+                tasks.unset(SerialTask::reading_spc_3201_spc__parl_CROSSWD_parr_::grab());
+                tasks.unset(SerialTask::reading_spc_3201_spc__parl_CRSWD_spc_D_parr_::grab());
+                tasks.unset(SerialTask::reading_spc_3201_spc__parl_ACRONYMS_parr_::grab());
                 tasks.unset(SerialTask::reading_spc_3202::grab());
                 tasks.unset(SerialTask::reading_spc_3203::grab());
             }},
