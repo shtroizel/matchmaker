@@ -81,7 +81,6 @@ int main(int argc, char ** argv)
             [&tasks]()
             {
                 tasks.unset(SerialTask::reading_spc_crumbs::grab());
-                tasks.unset(SerialTask::reading_spc_links::grab());
             }}
     });
 

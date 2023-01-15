@@ -24,7 +24,6 @@ PROPERTYx1_MATCHABLE(
     discover_spc_embedded_spc_words,
     generating_spc_ordinal_summation_dot_h,
     reading_spc_crumbs,
-    reading_spc_links,
     creating_spc_books,
     recording_spc_word_spc_locations,
     patching_spc_matchables

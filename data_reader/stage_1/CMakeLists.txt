@@ -75,7 +75,6 @@ set(
     src/discover_embedded_words.cpp
     src/generate_ordinal_summation_header.cpp
     src/read_crumbs.cpp
-    src/read_links.cpp
     src/create_books.cpp
     src/record_word_locations.cpp
     src/patch_matchables.cpp

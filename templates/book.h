@@ -50,5 +50,6 @@ int mm_aoeu_word(
     int word_index,
     int const * * ancestors,
     int * ancestor_count,
-    int * index_within_first_ancestor
+    int * index_within_first_ancestor,
+    bool * referenced
 );

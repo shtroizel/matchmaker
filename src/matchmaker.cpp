@@ -1362,7 +1362,8 @@ int mm_word(
     int word_index,
     int const * * ancestors,
     int * ancestor_count,
-    int * index_within_first_ancestor
+    int * index_within_first_ancestor,
+    bool * referenced
 )
 {
 #ifdef STAGE0
@@ -1373,6 +1374,7 @@ int mm_word(
     (void) ancestors;
     (void) ancestor_count;
     (void) index_within_first_ancestor;
+    (void) referenced;
     return 0;
 #else
     if (book_index < 0 || book_index >= BOOK_COUNT ||
@@ -1386,6 +1388,7 @@ int mm_word(
                                   word_index,
                                   ancestors,
                                   ancestor_count,
-                                  index_within_first_ancestor);
+                                  index_within_first_ancestor,
+                                  referenced);
 #endif
 }

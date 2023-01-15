@@ -47,8 +47,7 @@ bool record_word_locations(int progress_steps)
                     s = mm_at(bw.word, &len);
                     if ((len != 1 || s[0] == 'Q' || s[0] == 'q') &&
                             strcmp(s, "the") != 0 && strcmp(s, "The") != 0 &&
-                            strcmp(s, "an") != 0 && strcmp(s, "An") != 0 &&
-                            strcmp(s, "I") != 0)
+                            strcmp(s, "an") != 0 && strcmp(s, "An") != 0)
                     {
                         book_indexes[bw.word].push_back(b);
                         chapter_indexes[bw.word].push_back(ch);
@@ -65,14 +64,35 @@ bool record_word_locations(int progress_steps)
 
                         if (all_numbers)
                         {
+                            std::function<void (int)> add_term =
+                                [&](int term)
+                                {
+                                    // add term
+                                    if ((len != 1 || s[0] == 'Q' || s[0] == 'q') &&
+                                            strcmp(s, "the") != 0 && strcmp(s, "The") != 0 &&
+                                            strcmp(s, "an") != 0 && strcmp(s, "An") != 0)
+                                    {
+                                        book_indexes[term].push_back(b);
+                                        chapter_indexes[term].push_back(ch);
+                                        paragraph_indexes[term].push_back(p);
+                                        word_indexes[term].push_back(w);
+
+                                        int s_len = 0;
+                                        char const * s = mm_at(term, &s_len);
+                                        if (s_len > 2 && s[0] == '>' && s[1] == '>')
+                                            return;
+
+                                        // add embedded
+                                        std::vector<int> embedded =
+                                                Stage1Data::nil.as_embedded_words()[term];
+                                        for (int e : embedded)
+                                            add_term(e);
+                                    }
+                                };
+
                             IndexTable const & defs = Stage1Data::nil.as_definitions();
                             for (auto d : defs[bw.word])
-                            {
-                                book_indexes[d].push_back(b);
-                                chapter_indexes[d].push_back(ch);
-                                paragraph_indexes[d].push_back(p);
-                                word_indexes[d].push_back(w);
-                            }
+                                add_term(d);
                         }
                     }
 

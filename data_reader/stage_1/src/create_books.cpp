@@ -251,7 +251,8 @@ void create_books_content_and_get_book_identifiers(std::vector<std::string> & bo
 
 
     // word funcs
-    if (fputs("std::array<std::function<int (int, int, int, int const * *, int *, int *)>, BOOK_COUNT> word_funcs\n", f) == EOF) abort();
+    if (fputs("std::array<std::function<int (int, int, int, int const * *, int *, int *, bool *)>, "
+              "BOOK_COUNT> word_funcs\n", f) == EOF) abort();
     if (fputs("{\n", f) == EOF) abort();
     for (std::string const & bi : book_identifiers)
     {
@@ -390,7 +391,7 @@ void create_book_content(int book_index, std::string const & book_identifier)
     if (fputs("};\n\n\n", f) == EOF) abort();
 
     // write word funcs
-    if (fputs("std::array<std::function<int (int, int, int const * *, int *, int *)>, ", f) == EOF) abort();
+    if (fputs("std::array<std::function<int (int, int, int const * *, int *, int *, bool *)>, ", f) == EOF) abort();
     if (fputs(book_identifier.c_str(), f) == EOF) abort();
     if (fputs("_CHAPTER_COUNT> Crumbs_word_funcs\n{\n", f) == EOF) abort();
     for (size_t ch_i = 0; ch_i < books[book_index].chapters.size(); ++ch_i)
@@ -481,6 +482,15 @@ void create_chapter_content(int book_index, std::string const & book_identifier,
             if (fputs("}, ", f) == EOF) abort();
             std::string const iwfa_as_string = std::to_string(bw.index_within_first_ancestor);
             if (fputs(iwfa_as_string.c_str(), f) == EOF) abort();
+            if (fputs(", ", f) == EOF) abort();
+            if (bw.referenced)
+            {
+                if (fputs("true", f) == EOF) abort();
+            }
+            else
+            {
+                if (fputs("false", f) == EOF) abort();
+            }
             if (fputs(" },\n", f) == EOF) abort();
         }
         if (fputs("    },\n", f) == EOF) abort();

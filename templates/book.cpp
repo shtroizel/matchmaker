@@ -113,7 +113,8 @@ int mm_aoeu_word(
     int word_index,
     int const * * ancestors,
     int * ancestor_count,
-    int * index_within_first_ancestor
+    int * index_within_first_ancestor,
+    bool * referenced
 )
 {
     if (chapter_index < 0 || chapter_index >= mm_aoeu_chapter_count() ||
@@ -122,8 +123,9 @@ int mm_aoeu_word(
         return -1;
 
     return aoeu_word_funcs[chapter_index](paragraph_index,
-                                            word_index,
-                                            ancestors,
-                                            ancestor_count,
-                                            index_within_first_ancestor);
+                                          word_index,
+                                          ancestors,
+                                          ancestor_count,
+                                          index_within_first_ancestor,
+                                          referenced);
 }

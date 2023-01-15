@@ -46,6 +46,9 @@ bool read_header(std::string const & header, Chapter & chapter);
 void tokenize(std::string const & str, char const delim, std::vector<std::string> & out);
 
 
+bool read_link(int link_as_term, std::vector<int> & lines);
+
+bool read_link_line(FILE * f, std::string & line);
 
 
 
@@ -128,7 +131,7 @@ bool read_chapter(
     std::string text_number = "INVALID";
     std::string line;
     bool term_exists{false};
-    int term{-1};
+    int line_as_term{-1};
 
     while (read_line(input_file, line))
     {
@@ -189,7 +192,7 @@ bool read_chapter(
         else
         {
             // entire line should exist as a term
-            term = mm_lookup(line.c_str(), &term_exists);
+            line_as_term = mm_lookup(line.c_str(), &term_exists);
             if (!term_exists)
             {
                 std::cout << "FAILED!\nword '" << line
@@ -201,6 +204,7 @@ bool read_chapter(
                                 std::deque<int>,
                                 int,
                                 int,
+                                bool,
                                 IndexTable const &,
                                 std::vector<BookWord> &)> add_to_paragraph =
                 [&add_to_paragraph]
@@ -209,6 +213,7 @@ bool read_chapter(
                     std::deque<int> parents,
                     int parent_start,
                     int index_within_parent,
+                    bool referenced,
                     IndexTable const & embedded_words,
                     std::vector<BookWord> & paragraph
                 )
@@ -220,6 +225,7 @@ bool read_chapter(
                         bw.ancestors = parents;
                         bw.first_ancestor_start_index = parent_start;
                         bw.index_within_first_ancestor = index_within_parent;
+                        bw.referenced = referenced;
                         paragraph.push_back(bw);
                     }
                     else
@@ -232,18 +238,18 @@ bool read_chapter(
                                              parents,
                                              parent_start,
                                              i,
+                                             referenced,
                                              embedded_words,
                                              paragraph);
                         }
                     }
                 };
 
-            std::vector<BookWord> paragraph;
-
-            // for linked text, include the link as a single term instead
-            // of using embedded terms
+            // current line as string
             int s_len = 0;
-            char const * s = mm_at(term, &s_len);
+            char const * s = mm_at(line_as_term, &s_len);
+
+            // check for linked text
             if (s_len > 3 && s[0] == '>' && s[1] == '>')
             {
                 bool numbers_only = true;
@@ -252,20 +258,98 @@ bool read_chapter(
 
                 if (numbers_only)
                 {
-                    BookWord bw;
-                    bw.word = term;
-                    bw.ancestors.clear();
-                    bw.first_ancestor_start_index = -1;
-                    bw.index_within_first_ancestor = -1;
-                    paragraph.push_back(bw);
-                    crumbs.chapters.back().paragraphs.push_back(paragraph);
+                    {
+                        std::vector<BookWord> link_paragraph;
+                        BookWord link_bw;
+                        link_bw.word = line_as_term;
+                        link_bw.ancestors.clear();
+                        link_bw.first_ancestor_start_index = -1;
+                        link_bw.index_within_first_ancestor = -1;
+                        link_bw.referenced = false;
+                        link_paragraph.push_back(link_bw);
+                        crumbs.chapters.back().paragraphs.push_back(link_paragraph);
+                    }
+
+                    std::vector<int> link_lines;
+
+                    if (!read_link(line_as_term, link_lines))
+                        return false;
+
+                    for (int link_line : link_lines)
+                    {
+                        int ll_s_len = 0;
+                        char const * ll_s = mm_at(link_line, &ll_s_len);
+
+                        bool is_link = ll_s_len > 3;
+                        is_link = is_link && ll_s[0] == '>' && ll_s[1] == '>';
+                        for (int i = 2; is_link && i < s_len; ++i)
+                            is_link = s[i] >= '0' && s[i] <= '9';
+
+                        // check for lines that must be added as whole paragraphs
+                        if (
+                            ll_s_len > 3 &&
+                            (
+                                is_link ||
+                                (ll_s[0] == '~' && ll_s[1] == '~' && ll_s[2] == '~') ||
+                                (ll_s[0] == 'h' && ll_s[1] == 't' && ll_s[2] == 't' && ll_s[3] == 'p')
+                            )
+                        )
+                        {
+                            std::vector<BookWord> image_paragraph;
+                            BookWord image_bw;
+                            image_bw.word = link_line;
+                            image_bw.ancestors.clear();
+                            image_bw.first_ancestor_start_index = -1;
+                            image_bw.index_within_first_ancestor = -1;
+                            image_bw.referenced = true;
+                            image_paragraph.push_back(image_bw);
+                            crumbs.chapters.back().paragraphs.push_back(image_paragraph);
+                        }
+                        else
+                        {
+                            std::vector<BookWord> paragraph;
+                            std::deque<int> parents;
+                            add_to_paragraph(link_line, parents, -1, -1, true, embedded_words, paragraph);
+                            crumbs.chapters.back().paragraphs.push_back(paragraph);
+                        }
+                    }
+
+                    // add blank line after linked post
+                    crumbs.chapters.back().paragraphs.push_back({});
+
                     continue; // to next line
                 }
             }
 
-            std::deque<int> parents;
-            add_to_paragraph(term, parents, -1, -1, embedded_words, paragraph);
-            crumbs.chapters.back().paragraphs.push_back(paragraph);
+            bool is_link = s_len > 3;
+            is_link = is_link && s[0] == '>' && s[1] == '>';
+            for (int i = 2; is_link && i < s_len; ++i)
+                is_link = s[i] >= '0' && s[i] <= '9';
+
+            // check for lines that must be added as whole paragraphs
+            if (
+                s_len > 3 &&
+                ((s[0] == '~' && s[1] == '~' && s[2] == '~') ||
+                 is_link || (s[0] == 'h' && s[1] == 't' && s[2] == 't' && s[3] == 'p'))
+            )
+            {
+                std::vector<BookWord> image_paragraph;
+                BookWord image_bw;
+                image_bw.word = line_as_term;
+                image_bw.ancestors.clear();
+                image_bw.first_ancestor_start_index = -1;
+                image_bw.index_within_first_ancestor = -1;
+                image_bw.referenced = false;
+                image_paragraph.push_back(image_bw);
+                crumbs.chapters.back().paragraphs.push_back(image_paragraph);
+            }
+            else
+            {
+                std::vector<BookWord> paragraph;
+                std::deque<int> parents;
+                add_to_paragraph(line_as_term, parents, -1, -1, false, embedded_words, paragraph);
+                crumbs.chapters.back().paragraphs.push_back(paragraph);
+            }
         }
     }
     return true;
@@ -508,4 +592,78 @@ void tokenize(std::string const & str, char const delim, std::vector<std::string
         end = str.find(delim, start);
         out.push_back(str.substr(start, end - start));
     }
+}
+
+
+bool read_link(int link_as_term, std::vector<int> & lines)
+{
+    int link_as_str_len = 0;
+    char const * link_as_str = mm_at(link_as_term, &link_as_str_len);
+    if (link_as_str_len < 3)
+        return false;
+
+    ++link_as_str;
+    ++link_as_str;
+
+    std::string const & DATA_DIR = Stage1Data::nil.as_data_dir();
+
+    std::string fn = DATA_DIR;
+    fn += "/Crumbs/linked_text/";
+    fn += link_as_str;
+    fn += "/post";
+
+    FILE * link_file = fopen(fn.c_str(), "r");
+    if (link_file == 0)
+    {
+        perror(link_as_str);
+        return false;
+    }
+
+    lines.clear();
+    std::string line;
+    bool term_in_dictionary{false};
+    int line_as_term{-1};
+
+
+    while (read_link_line(link_file, line))
+    {
+        if (line.length() == 0)
+            continue;
+
+        // entire line should exist as a term
+        line_as_term = mm_lookup(line.c_str(), &term_in_dictionary);
+        if (!term_in_dictionary)
+        {
+            std::cout << "\nterm '" << line
+                        << "' not in the dictionary! link: " << link_as_str << std::endl;
+            return false;
+        }
+
+        lines.push_back(line_as_term);
+    }
+
+    fclose(link_file);
+
+    return true;
+}
+
+
+bool read_link_line(FILE * f, std::string & line)
+{
+    line.clear();
+
+    int ch;
+    while (true)
+    {
+        ch = fgetc(f);
+        if (ch == EOF)
+            return false;
+
+        if (ch == '\n')
+            break;
+
+        line += (char) ch;
+    }
+
+    return true;
 }

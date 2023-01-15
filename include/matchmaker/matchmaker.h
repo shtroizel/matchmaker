@@ -497,6 +497,8 @@ int mm_word_count(int book_index, int chapter_index, int paragraph_index);
  * @param[out] index_within_first_ancestor
  *     index within the first ancestor if there is one or -1 otherwise.
  *     cat be NULL if not needed.
+ * @param[out] referenced
+ *     indicates whether the word is not part of the main body of text (references, citations, etc).
  * @returns
  *     the alphabetic dictionary index for a word in the paragraph or -1 if provided an invalid index
  */
@@ -507,7 +509,8 @@ int mm_word(
     int word_index,
     int const * * ancestors,
     int * ancestor_count,
-    int * index_within_first_ancestor
+    int * index_within_first_ancestor,
+    bool * referenced
 );
 
 #ifdef __cplusplus

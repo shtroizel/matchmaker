@@ -77,7 +77,8 @@ int mm_aoeu_chapter_snth_word(
     int word_index,
     int const * * ancestors,
     int * ancestor_count,
-    int * index_within_first_ancestor
+    int * index_within_first_ancestor,
+    bool * referenced
 )
 {
     if (paragraph_index < 0 || paragraph_index >= (int) aoeu_chapter_snth_paragraphs.size() ||
@@ -93,6 +94,9 @@ int mm_aoeu_chapter_snth_word(
     if (nullptr != index_within_first_ancestor)
         *index_within_first_ancestor =
                 (int) aoeu_chapter_snth_paragraphs[paragraph_index][word_index].index_within_first_ancestor;
+
+    if (nullptr != referenced)
+        *referenced = aoeu_chapter_snth_paragraphs[paragraph_index][word_index].referenced;
 
     return (int) aoeu_chapter_snth_paragraphs[paragraph_index][word_index].word;
 }

@@ -18,6 +18,7 @@ struct BookWord
     std::deque<int> ancestors;
     int first_ancestor_start_index{-1};
     int index_within_first_ancestor{-1};
+    bool referenced{false};
 };
 
 struct Chapter
