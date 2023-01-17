@@ -71,7 +71,7 @@ in the second stage, the first stage is used to patch its code before recompilin
 the build_and_install.py script handles all of this including several layers of code generation<br>
 
 ### quick build option
-"quick" builds are faster but the resulting library will contain only about 1% of the words<br>
+"quick" builds are faster but the resulting library will contain limited vocabulary<br>
 "quick" builds may be installed to the same prefix as complete builds<br>
 "quick" builds use "_q" suffixes and install to lib/matchmaker_q and include/matchmaker_q<br>
 
