@@ -25,7 +25,7 @@ matchmaker is a C library of compiled english-language words, phrases and books<
 * terms are smart and know things like who their synonyms are<br>
 * terms that are compound words or phrases know who their embedded words are<br>
 * terms sometimes know their parts of speech<br>
-* terms always know every location within every book that they are used in<br>
+* most terms know every location within every book that they are used in<br>
 * all of this data including book locations is static and accessible in O(1) time<br>
 <br>
 * matchmaker avoids exposing any custom data types in its interface<br>
