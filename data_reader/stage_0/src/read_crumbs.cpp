@@ -255,19 +255,9 @@ bool read_crumbs(
         }
         else
         {
-            // ********** TODO REMOVE ME ********************
-            if (line.rfind("~~https", 0) == 0)
-            {
-                std::cout << "encountered error parsing '~~https' text: " << text << std::endl;
-                return false;
-            }
-            else if (line.rfind("~;~", 0) == 0)
-            {
-                std::cout << "encountered error parsing '~;~' in text: " << text << std::endl;
-                return false;
-            }
-            else
-            //************************************************
+            // work around missing chapter info within image references
+            if (line.rfind("~~~", 0) == 0)
+                line.insert(3, std::to_string(text) + "_");
 
             // each line is also just a "word"
             {
@@ -280,7 +270,7 @@ bool read_crumbs(
             if (line.rfind("~~~", 0) != 0 && line.rfind("]~~", 0) != 0)
             {
                 // check for linked post
-                bool is_link = line.size() > 4;
+                bool is_link = line.size() > 2;
                 is_link = is_link && line[0] == '>' && line[1] == '>';
                 for (size_t i = 2; is_link && i < line.size(); ++i)
                     is_link = line[i] >= '0' && line[i] <= '9';

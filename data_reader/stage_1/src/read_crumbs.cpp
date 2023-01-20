@@ -92,7 +92,7 @@ bool read_crumbs(int progress_steps)
     int files_processed{0};
     int printed_progress{0};
     int const file_count = (int) q_files.size();
-    int chapter = 0;
+    int post = 0;
     while (!q_files.empty())
     {
         ++files_processed;
@@ -109,7 +109,7 @@ bool read_crumbs(int progress_steps)
             exit(1);
         }
 
-        ok = read_chapter(embedded_words, q_file, book, chapter);
+        ok = read_chapter(embedded_words, q_file, book, post);
         fclose(q_file);
         if (!ok)
             return false;
@@ -125,10 +125,10 @@ bool read_chapter(
     IndexTable const & embedded_words,
     FILE * input_file,
     Book & crumbs,
-    int & chapter
+    int & post
 )
 {
-    std::string text_number = "INVALID";
+    std::string post_number = "INVALID";
     std::string line;
     bool term_exists{false};
     int line_as_term{-1};
@@ -140,23 +140,24 @@ bool read_chapter(
 
         if (line.rfind("~~:", 0) == 0)
         {
-            ++chapter;
+            ++post;
             crumbs.chapters.push_back(Chapter());
 
             // first read the text number (chapter title)
-            text_number = line.substr(3);
-            int index = mm_lookup(text_number.c_str(), &term_exists);
+            post_number = line.substr(3);
+            int index = mm_lookup(post_number.c_str(), &term_exists);
             if (!term_exists)
             {
-                std::cout << "FAILED!\nencountered '" << text_number << "' which is not in the dictionary!"
+                std::cout << "FAILED!\nencountered '" << post_number << "' which is not in the dictionary!"
                           << std::endl;
                 return false;
             }
-            if (std::to_string(chapter) != mm_at(index, nullptr))
+            if (std::to_string(post) != mm_at(index, nullptr))
             {
                 std::cout << "FAILED!\n"
-                          << "text_number: " << text_number
-                          << "\nencountered '" << mm_at(index, nullptr) << "' but " << chapter << " expected" << std::endl;
+                          << "post_number: " << post_number
+                          << "\nencountered '" << mm_at(index, nullptr)
+                          << "' but " << post << " expected" << std::endl;
                 return false;
             }
             crumbs.chapters.back().title.push_back(index);
@@ -164,12 +165,12 @@ bool read_chapter(
             // then read the text's header (chapter subtitle)
             if (!read_line(input_file, line))
             {
-                std::cout << "FAILED!\nunexpected end of file within text " << text_number << std::endl;
+                std::cout << "FAILED!\nunexpected end of file within text " << post_number << std::endl;
                 return false;
             }
             if (!read_header(line, crumbs.chapters.back()))
             {
-                std::cout << "failed to read header for text " << text_number << std::endl;
+                std::cout << "failed to read header for text " << post_number << std::endl;
                 return false;
             }
         }
@@ -191,12 +192,16 @@ bool read_chapter(
 
         else
         {
+            // work around missing chapter info within image references
+            if (line.rfind("~~~", 0) == 0)
+                line.insert(3, post_number + "_");
+
             // entire line should exist as a term
             line_as_term = mm_lookup(line.c_str(), &term_exists);
             if (!term_exists)
             {
                 std::cout << "FAILED!\nword '" << line
-                          << "' not in the dictionary! text: " << text_number << std::endl;
+                          << "' not in the dictionary! text: " << post_number << std::endl;
                 return false;
             }
 
@@ -273,7 +278,10 @@ bool read_chapter(
                     std::vector<int> link_lines;
 
                     if (!read_link(line_as_term, link_lines))
+                    {
+                        std::cout << "failed to read link for post: " << post_number << std::endl;
                         return false;
+                    }
 
                     for (int link_line : link_lines)
                     {
