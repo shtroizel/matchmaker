@@ -47,11 +47,10 @@ int main(int argc, char ** argv)
     Stage0Data::output_dir() = argv[3];
     Stage0Data::prefixes_filename() = argv[4];
 
-    q_usage::Type q_mode;
     if (argc == 6)
     {
-        q_mode = q_usage::from_string(argv[5]);
-        if (q_mode.is_nil())
+        Stage0Data::q_mode() = q_usage::from_string(argv[5]);
+        if (Stage0Data::q_mode().is_nil())
         {
             std::cout << "\"" << argv[5] << "\"is not a variant of q_usage. valid variants are:"
                       << std::endl;
@@ -66,37 +65,16 @@ int main(int argc, char ** argv)
         std::cout << "\"q_usage\" not specified, defaulting to \""
                   << q_usage::included::grab() << "\"" << std::endl;
     }
-    if (q_mode.is_nil())
-        q_mode = q_usage::included::grab();
+    if (Stage0Data::q_mode().is_nil())
+        Stage0Data::q_mode() = q_usage::included::grab();
 
 
     SerialTask::Flags tasks;
     for (auto const & task : SerialTask::variants_by_index())
         tasks.set(task);
 
-    q_mode.match({
-        {q_usage::only::grab(),
-            [&tasks]()
-            {
-                tasks.unset(SerialTask::reading_spc_3201_spc__parl_SINGLE_parr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__parl_COMPOUND_parr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__parl_COMMON_parr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__parl_NAMES_parr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__parl_NAMES_mns_F_parr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__parl_NAMES_mns_M_parr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__parl_PLACES_parr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__parl_CROSSWD_parr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__parl_CRSWD_spc_D_parr_::grab());
-                tasks.unset(SerialTask::reading_spc_3201_spc__parl_ACRONYMS_parr_::grab());
-                tasks.unset(SerialTask::reading_spc_3202::grab());
-                tasks.unset(SerialTask::reading_spc_3203::grab());
-            }},
-        {q_usage::omitted::grab(),
-            [&tasks]()
-            {
-                tasks.unset(SerialTask::reading_spc_Crumbs::grab());
-            }}
-    });
+    if (Stage0Data::q_mode() == q_usage::omitted::grab())
+        tasks.unset(SerialTask::reading_spc_Crumbs::grab());
 
     SerialTask::reset_progress();
     int const magic_number = 58;
@@ -112,13 +90,11 @@ int main(int argc, char ** argv)
             std::cout << "\nrun function is null!" << std::endl;
             abort();
         }
+
         task.as_run()(task);
-        int remaining_dots{0};
+
         for (int i = task.as_printed_progress(); i < task.as_progress_steps(); ++i)
-        {
-            ++remaining_dots;
             ++task.as_mutable_progress();
-        }
         SerialTask::check_progress(task);
         std::cout << std::endl;
     }

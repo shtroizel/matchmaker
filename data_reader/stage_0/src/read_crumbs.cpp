@@ -51,6 +51,7 @@ bool add_embedded(
     FILE * vocab_file,
     int text,
     int linked_text,
+    SerialTask::Type task,
     std::map<std::string, Stage0Data::Encountered::Type> & encounters,
     Stage0Data::word_attribute::Flags & attributes
 );
@@ -172,7 +173,7 @@ bool read_crumbs(
                 return false;
             }
 
-            Stage0Data::add_book_vocab(text_line, attributes, vocab_file, encounters);
+            Stage0Data::add_book_vocab(text_line, attributes, task, vocab_file, encounters);
 
             // read date/time line
             attributes = base_attributes;
@@ -251,7 +252,7 @@ bool read_crumbs(
             terms.insert(terms.end(), tokenized_date.begin(), tokenized_date.end());
             terms.insert(terms.end(), tokenized_time.begin(), tokenized_time.end());
             for (auto const & word : terms)
-                Stage0Data::add_book_vocab(word, attributes, vocab_file, encounters);
+                Stage0Data::add_book_vocab(word, attributes, task, vocab_file, encounters);
         }
         else
         {
@@ -263,7 +264,7 @@ bool read_crumbs(
             {
                 Stage0Data::word_attribute::Flags att = attributes;
                 att.set(Stage0Data::word_attribute::phrase::grab());
-                Stage0Data::add_book_vocab(line, att, vocab_file, encounters);
+                Stage0Data::add_book_vocab(line, att, task, vocab_file, encounters);
             }
 
             // only parse out lines for non-images and non-archives
@@ -314,7 +315,7 @@ bool read_crumbs(
                             {
                                 Stage0Data::word_attribute::Flags att = attributes;
                                 att.set(Stage0Data::word_attribute::phrase::grab());
-                                Stage0Data::add_book_vocab(link_line, att, vocab_file, encounters);
+                                Stage0Data::add_book_vocab(link_line, att, task, vocab_file, encounters);
                             }
 
                             if (
@@ -323,6 +324,7 @@ bool read_crumbs(
                                     vocab_file,
                                     text,
                                     std::stoi(link_name),
+                                    task,
                                     encounters,
                                     link_attributes
                                 )
@@ -333,7 +335,7 @@ bool read_crumbs(
                     }
                 }
 
-                add_embedded(line, vocab_file, text, -1, encounters, attributes);
+                add_embedded(line, vocab_file, text, -1, task, encounters, attributes);
             }
         }
 
@@ -530,6 +532,7 @@ bool add_embedded(
     FILE * vocab_file,
     int text,
     int linked_text,
+    SerialTask::Type task,
     std::map<std::string, Stage0Data::Encountered::Type> & encounters,
     Stage0Data::word_attribute::Flags & attributes
 )
@@ -623,24 +626,24 @@ bool add_embedded(
                     else if (!has_left_bracket && has_right_bracket)
                         strip_word(']', slash_token);
 
-                    Stage0Data::add_book_vocab(slash_token, attributes, vocab_file, encounters);
+                    Stage0Data::add_book_vocab(slash_token, attributes, task, vocab_file, encounters);
 
                     // split on '='
                     std::vector<std::string> tokenized_on_eq;
                     tokenize(slash_token, '=', tokenized_on_eq);
                     for (auto & eq_token : tokenized_on_eq)
-                        Stage0Data::add_book_vocab(eq_token, attributes, vocab_file, encounters);
+                        Stage0Data::add_book_vocab(eq_token, attributes, task, vocab_file, encounters);
 
                     // for words with brackets, add version of word without brackets
                     bool had_brackets = strip_word('[', slash_token);
                     had_brackets = strip_word(']', slash_token) || had_brackets;
                     if (had_brackets)
-                        Stage0Data::add_book_vocab(slash_token, attributes, vocab_file, encounters);
+                        Stage0Data::add_book_vocab(slash_token, attributes, task, vocab_file, encounters);
                 }
             }
             else
             {
-                Stage0Data::add_book_vocab(token, attributes, vocab_file, encounters);
+                Stage0Data::add_book_vocab(token, attributes, task, vocab_file, encounters);
             }
 //                         std::cout << "adding word: " << token << std::endl;
         }
@@ -662,7 +665,7 @@ bool add_embedded(
                 if (has_space)
                     att.set(Stage0Data::word_attribute::phrase::grab());
 
-                Stage0Data::add_book_vocab(phrase, att, vocab_file, encounters);
+                Stage0Data::add_book_vocab(phrase, att, task, vocab_file, encounters);
                 // std::cout << "adding phrase: " << phrase << std::endl;
             }
         };

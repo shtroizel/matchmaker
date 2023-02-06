@@ -51,7 +51,7 @@ void read_3201_default(
                 word.find('-') == std::string::npos && word.find(' ') == std::string::npos)
             attributes.unset(Stage0Data::word_attribute::compound::grab());
 
-        Stage0Data::add_word(word, attributes);
+        Stage0Data::add_word(word, attributes, task);
 
         SerialTask::check_progress(task);
     }

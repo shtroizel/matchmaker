@@ -9,9 +9,11 @@ matchable with by_index required for stage 0 reader
 
 #include <functional>
 
+#include <matchmaker/data_reader_common.h>
 #include <matchmaker/parts_of_speech.h>
 
 #include <Prefix.h>
+#include <SerialTask.h>
 
 
 
@@ -43,6 +45,8 @@ namespace Stage0Data
     std::string & output_dir();
     std::string & prefixes_filename();
 
+    q_usage::Type & q_mode();
+
     // All prefixes with a depth of 1 are symbols
     std::array<Prefix, 24> & symbols_1d_prefixes();
 
@@ -72,18 +76,21 @@ namespace Stage0Data
     void add_book_vocab(
         std::string const & word,
         word_attribute::Flags const & wsf,
+        SerialTask::Type task,
         FILE * vocab_file,
         std::map<std::string, Encountered::Type> & encounters
     );
 
     void add_word(
         std::string const & word,
-        word_attribute::Flags const & wsf
+        word_attribute::Flags const & wsf,
+        SerialTask::Type task
     );
 
     void add_word(
         std::string const & word,
         word_attribute::Flags const & wsf,
+        SerialTask::Type task,
         parts_of_speech::Flags const & pos_flags
     );
 

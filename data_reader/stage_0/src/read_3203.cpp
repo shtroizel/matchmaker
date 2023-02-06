@@ -50,7 +50,7 @@ void read_3203(SerialTask::Type task)
         if (word.size() == 0)
             continue;
 
-        Stage0Data::add_word(word, attributes, pos_flags);
+        Stage0Data::add_word(word, attributes, task, pos_flags);
         SerialTask::check_progress(task);
     }
 

@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <SerialTask.h>
+
 
 
 namespace Stage0Data
@@ -10,6 +12,8 @@ namespace Stage0Data
     std::string & book_vocab_dir() { static std::string s; return s; }
     std::string & output_dir() { static std::string s; return s; }
     std::string & prefixes_filename() { static std::string s; return s; }
+
+    q_usage::Type & q_mode() { static q_usage::Type mode; return mode; }
 
     std::array<Prefix, 24> & symbols_1d_prefixes()
     {
@@ -58,6 +62,7 @@ namespace Stage0Data
     void add_book_vocab(
         std::string const & word,
         word_attribute::Flags const & wsf,
+        SerialTask::Type task,
         FILE * vocab_file,
         std::map<std::string, Encountered::Type> & encounters
     )
@@ -72,7 +77,7 @@ namespace Stage0Data
                 abort();
             }
 
-            add_word(word, wsf);
+            add_word(word, wsf, task);
         }
     }
 
@@ -80,11 +85,12 @@ namespace Stage0Data
 
     void add_word(
         std::string const & word,
-        word_attribute::Flags const & wsf
+        word_attribute::Flags const & wsf,
+        SerialTask::Type task
     )
     {
         static parts_of_speech::Flags const empty_pos_flags;
-        add_word(word, wsf, empty_pos_flags);
+        add_word(word, wsf, task, empty_pos_flags);
     }
 
 
@@ -92,6 +98,7 @@ namespace Stage0Data
     void add_word(
         std::string const & word,
         word_attribute::Flags const & wsf,
+        SerialTask::Type task,
         parts_of_speech::Flags const & pos_flags
     )
     {
@@ -118,7 +125,7 @@ namespace Stage0Data
 
         std::string const matchable_name = "word_" + p->escaped_and_delimited('_');
 
-        // create new variant
+        // new variant
         std::string const escaped = "esc_" + matchable::escapable::escape_all(word);
 
         // verify matchable escaped correctly
@@ -131,35 +138,49 @@ namespace Stage0Data
             abort();
         }
 
-        mm.grab(matchable_name)->add_variant(escaped);
+        if (task == SerialTask::reading_spc_Crumbs::grab() || q_mode() != q_usage::only::grab())
+            mm.grab(matchable_name)->add_variant(escaped);
+
+        if (!mm.grab(matchable_name)->has_variant(escaped))
+            return;
 
         // property for parts of speech
         std::vector<std::string> property_values;
-        for (auto p : parts_of_speech::variants_by_string())
+        mm.grab(matchable_name)->get_propertyvect(escaped, "pos", property_values);
+        if (property_values.empty())
         {
-            if (pos_flags.is_set(p))
-                property_values.push_back("1");
-            else
-                property_values.push_back("0");
+            for (auto p : parts_of_speech::variants_by_string())
+            {
+                if (pos_flags.is_set(p))
+                    property_values.push_back("1");
+                else
+                    property_values.push_back("0");
+            }
+            mm.grab(matchable_name)->set_propertyvect(escaped, "pos", property_values);
         }
-        mm.grab(matchable_name)->set_propertyvect(escaped, "pos", property_values);
 
         // property for ordinal sum
         {
-            int ordinal_sum = 0;
-            int letter = 0;
-            for (int letter_index = 0; letter_index < (int) word.size(); ++letter_index)
+            std::string ordinal_sum_as_str;
+            mm.grab(matchable_name)->get_property(escaped, "ordinal_summation", ordinal_sum_as_str);
+            if (ordinal_sum_as_str.empty())
             {
-                letter = (int) word[letter_index];
-                if (letter > 96)
-                    letter -= 96;
-                else if (letter > 64)
-                    letter -= 64;
+                int ordinal_sum = 0;
+                int letter = 0;
+                for (int letter_index = 0; letter_index < (int) word.size(); ++letter_index)
+                {
+                    letter = (int) word[letter_index];
+                    if (letter > 96)
+                        letter -= 96;
+                    else if (letter > 64)
+                        letter -= 64;
 
-                if (letter >= 1 && letter <= 26)
-                    ordinal_sum += letter;
+                    if (letter >= 1 && letter <= 26)
+                        ordinal_sum += letter;
+                }
+                ordinal_sum_as_str = std::to_string(ordinal_sum);
+                mm.grab(matchable_name)->set_property(escaped, "ordinal_summation", ordinal_sum_as_str);
             }
-            mm.grab(matchable_name)->set_property(escaped, "ordinal_summation", std::to_string(ordinal_sum));
         }
 
         // properties from word attributes
@@ -167,11 +188,11 @@ namespace Stage0Data
             auto set_prop =
                 [&](word_attribute::Type att)
                 {
-                    if (wsf.is_set(att))
-                    {
-                        std::string const prop_name = std::string("is_") + att.as_string();
+                    std::string const prop_name = std::string("is_") + att.as_string();
+                    std::string prop_value;
+                    mm.grab(matchable_name)->get_property(escaped, prop_name, prop_value);
+                    if (prop_value.empty() && wsf.is_set(att))
                         mm.grab(matchable_name)->set_property(escaped, prop_name, "1");
-                    }
                 };
 
             set_prop(word_attribute::name::grab());

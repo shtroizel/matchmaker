@@ -43,7 +43,7 @@ void read_3202(SerialTask::Type task)
             word += (char) ch;
         }
 
-        Stage0Data::add_word(word, attributes, pos_flags);
+        Stage0Data::add_word(word, attributes, task, pos_flags);
 
         if (ch == EOF)
             break;

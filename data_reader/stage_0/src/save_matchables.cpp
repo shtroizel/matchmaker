@@ -21,7 +21,7 @@ void save_matchables(SerialTask::Type task)
         parts_of_speech::Flags pos{parts_of_speech::N::grab()};
 
         for (auto const & s : contributed_by_shtroizel)
-            Stage0Data::add_word(s, word_attributes, pos);
+            Stage0Data::add_word(s, word_attributes, task, pos);
     }
 
     task.set_progress(0);
