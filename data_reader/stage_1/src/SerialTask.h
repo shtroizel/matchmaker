@@ -5,18 +5,26 @@
 #endif
 
 #include <matchable/matchable.h>
+#include <matchable/matchable_fwd.h>
 
 #include <functional>
 
 
 
-using run_func = std::function<bool (int)>;
-PROPERTYx1_MATCHABLE(
+MATCHABLE_FWD(SerialTask)
+using run_func = std::function<void (SerialTask::Type)>;
+
+PROPERTYx5_MATCHABLE(
     run_func, run,
+    unsigned long, progress,
+    unsigned long, goal,
+    int, progress_steps,
+    int, printed_progress,
 
     SerialTask,
 
     discover_spc_book_spc_vocabulary,
+    reading_spc_Keys,
     reading_spc_51155,
     reading_spc_3202,
     fill_spc_reflections,
@@ -28,3 +36,10 @@ PROPERTYx1_MATCHABLE(
     recording_spc_word_spc_locations,
     patching_spc_matchables
 )
+
+
+namespace SerialTask
+{
+    void reset_progress();
+    void check_progress(SerialTask::Type task);
+}

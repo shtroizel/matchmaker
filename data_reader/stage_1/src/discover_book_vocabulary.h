@@ -4,7 +4,7 @@
 
 
 
-bool discover_book_vocabulary(int progress_steps);
+bool discover_book_vocabulary(SerialTask::Type);
 
 MATCHABLE_VARIANT_PROPERTY_VALUE(
     SerialTask,

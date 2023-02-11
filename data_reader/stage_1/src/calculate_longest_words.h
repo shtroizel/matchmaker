@@ -4,7 +4,7 @@
 
 
 
-bool calculate_longest_words(int progress_steps);
+bool calculate_longest_words(SerialTask::Type);
 
 MATCHABLE_VARIANT_PROPERTY_VALUE(
     SerialTask,

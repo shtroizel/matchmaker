@@ -9,23 +9,12 @@
 #include "Stage1Data.h"
 #include "SerialTask.h"
 
-// #include "discover_book_vocabulary.h"
-// #include "read_51155.h"
-// #include "read_3202.h"
-// #include "fill_reflections.h"
-// #include "calculate_longest_words.h"
-// #include "discover_embedded.h"
-// #include "calculate_ordinal_summations.h"
-// #include "read_crumbs.h"
-// #include "create_books.h"
-// #include "patch_headers.h"
 
 
 MATCHABLE(q_usage, included, omitted, only)
 
 
 void print_usage();
-bool run_task(SerialTask::Type task);
 
 
 
@@ -69,52 +58,33 @@ int main(int argc, char ** argv)
     for (auto const & task : SerialTask::variants_by_index())
         tasks.set(task);
 
-    q_mode.match({
-        {q_usage::only::grab(),
-            [&tasks]()
-            {
-                tasks.unset(SerialTask::reading_spc_51155::grab());
-                tasks.unset(SerialTask::reading_spc_3202::grab());
-                tasks.unset(SerialTask::fill_spc_reflections::grab());
-            }},
-        {q_usage::omitted::grab(),
-            [&tasks]()
-            {
-                tasks.unset(SerialTask::reading_spc_crumbs::grab());
-            }}
-    });
+    if (q_mode == q_usage::omitted::grab())
+        tasks.unset(SerialTask::reading_spc_crumbs::grab());
 
-    for (auto const & task : tasks.currently_set())
+    SerialTask::reset_progress();
+    int const magic_number = 58;
+    // std::cout << "         1         2         3         4         5         6         7         8\n"
+    //           << "12345678901234567890123456789012345678901234567890123456789012345678901234567890"
+    //           << std::endl;
+    for (SerialTask::Type task : tasks.currently_set())
     {
         std::cout << "       ------> " << task << std::flush;
-        bool ok = task.as_run()(36 - task.as_string().length());
-        if (ok)
+        task.set_progress_steps(magic_number - task.as_string().length());
+        if (nullptr == task.as_run())
         {
-            std::cout << ": SUCCESS" << std::endl;
+            std::cout << "\nrun function is null!" << std::endl;
+            abort();
         }
-        else
-        {
-            std::cout << ": FAILED" << std::endl;
-            return 1;
-        }
+
+        task.as_run()(task);
+
+        for (int i = task.as_printed_progress(); i < task.as_progress_steps(); ++i)
+            ++task.as_mutable_progress();
+        SerialTask::check_progress(task);
+        std::cout << std::endl;
     }
 
     return 0;
-}
-
-
-
-bool run_task(SerialTask::Type task)
-{
-    std::cout << "       ------> " << task << std::flush;
-    bool ok = task.as_run()(36 - task.as_string().length());
-    if (!ok)
-    {
-        std::cout << ": FAILED" << std::endl;
-        return false;
-    }
-    std::cout << ": SUCCESS" << std::endl;
-    return true;
 }
 
 

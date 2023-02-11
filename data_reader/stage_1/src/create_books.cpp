@@ -44,18 +44,21 @@ void replace(std::string & data, std::string search_pattern, std::string replace
 
 
 
-bool create_books(int progress_steps)
+bool create_books(SerialTask::Type task)
 {
     std::vector<Book> const & books = Stage1Data::nil.as_books();
 
-    int progress{0};
-    int goal{0};
-    for (int b = 0; b < (int) books.size(); ++b)
-        goal += (int) books[b].chapters.size();
+    {
+        int goal{0};
+        for (int b = 0; b < (int) books.size(); ++b)
+            goal += (int) books[b].chapters.size();
+
+        task.set_goal(goal);
+        task.set_progress(0);
+    }
 
     std::vector<std::string> book_identifiers;
     create_books_content_and_get_book_identifiers(book_identifiers);
-
 
     // create code for each book
     for (size_t b_i = 0; b_i < book_identifiers.size(); ++b_i)
@@ -105,9 +108,8 @@ bool create_books(int progress_steps)
             // create chapter content file
             create_chapter_content(b_i, book_identifier, ch_i);
 
-            ++progress;
-            if (progress % (goal / progress_steps) == 0)
-                std::cout << "." << std::flush;
+            ++task.as_mutable_progress();
+            SerialTask::check_progress(task);
         }
     }
 

@@ -62,8 +62,9 @@ using SynAntTable = std::map<std::string, SynAnt>;
 using IndexTable = std::vector<std::vector<int>>;
 using UsedInBookTable = std::vector<Buch::Flags>;
 using LongestOffsetsMap = std::map<int, std::pair<int, int>>;
+using KeyWords = std::vector<int>;
 
-PROPERTYx14_MATCHABLE(
+PROPERTYx15_MATCHABLE(
     std::string, workspace_dir,
     std::string, data_dir,
     std::string, template_dir,
@@ -78,6 +79,7 @@ PROPERTYx14_MATCHABLE(
     IndexTable, chapter_indexes,
     IndexTable, paragraph_indexes,
     IndexTable, word_indexes,
+    KeyWords, key_words,
 
     Stage1Data
 )

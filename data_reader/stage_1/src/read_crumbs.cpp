@@ -52,7 +52,7 @@ bool read_link_line(FILE * f, std::string & line);
 
 
 
-bool read_crumbs(int progress_steps)
+bool read_crumbs(SerialTask::Type task)
 {
     IndexTable const & embedded_words = Stage1Data::nil.as_embedded_words();
     std::string const & DATA_DIR = Stage1Data::nil.as_data_dir();
@@ -88,19 +88,15 @@ bool read_crumbs(int progress_steps)
         if (entry.is_regular_file())
             q_files.push({entry});
 
+    task.set_goal(q_files.size());
+    task.set_progress(0);
+
     FILE * q_file{nullptr};
-    int files_processed{0};
-    int printed_progress{0};
-    int const file_count = (int) q_files.size();
     int post = 0;
     while (!q_files.empty())
     {
-        ++files_processed;
-        if (files_processed % (file_count / progress_steps) == 0 && printed_progress < progress_steps)
-        {
-            ++printed_progress;
-            std::cout << "." << std::flush;
-        }
+        ++task.as_mutable_progress();
+        SerialTask::check_progress(task);
 
         q_file = fopen(q_files.top().entry.path().c_str(), "r");
         if (q_file == 0)

@@ -16,9 +16,10 @@
 int const MAX_ORD_SUM{21777};
 
 
-bool generate_ordinal_summation_header(int progress_steps)
+bool generate_ordinal_summation_header(SerialTask::Type task)
 {
-    int progress{0};
+    task.set_progress(0);
+    task.set_goal(MAX_ORD_SUM);
 
     std::array<std::vector<int>, MAX_ORD_SUM> all_ord_sums;
     {
@@ -59,9 +60,8 @@ bool generate_ordinal_summation_header(int progress_steps)
 
     for (auto const & words : all_ord_sums)
     {
-        ++progress;
-        if (progress % (MAX_ORD_SUM / progress_steps) == 0)
-            std::cout << "." << std::flush;
+        ++task.as_mutable_progress();
+        SerialTask::check_progress(task);
 
         if (fputs("    { ", f) == EOF)
             goto ord_sum_err;

@@ -4,7 +4,7 @@
 
 
 
-bool generate_ordinal_summation_header(int progress_steps);
+bool generate_ordinal_summation_header(SerialTask::Type);
 
 MATCHABLE_VARIANT_PROPERTY_VALUE(
     SerialTask,

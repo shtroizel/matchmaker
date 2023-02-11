@@ -181,7 +181,7 @@ void mm_from_ordinal_summation(int summation, int const * * terms, int * count);
 
 /**
  * retrieve the parts of speech for a given term (word).
- * note that many words, phrases and other expressions do not have parts of speech data.
+ * parts of speech are available for some terms.
  * the complexity for this function is O(1).
  * @param[in] index
  *     alphabetic index of a term in the dictionary

@@ -49,12 +49,10 @@ inline bool operator<(HeaderEntry const & l, HeaderEntry const & r)
 
 
 
-bool calculate_longest_words(int progress_steps)
+bool calculate_longest_words(SerialTask::Type task)
 {
-    int progress{0};
-    int const progress_steps1{progress_steps / 3};
-    int const progress_steps2{progress_steps / 3};
-    int const progress_steps3{progress_steps - progress_steps1 - progress_steps2};
+    task.set_progress(0);
+    task.set_goal(mm_count() * 3);
 
     std::string const LONGEST_WORDS_HEADER{
         Stage1Data::nil.as_workspace_dir() + "/generated_include/matchmaker/longest_words.h"
@@ -78,11 +76,9 @@ bool calculate_longest_words(int progress_steps)
         cur.index = i;
         q.push(cur);
 
-        ++progress;
-        if (progress % (mm_count() / progress_steps1) == 0)
-            std::cout << "." << std::flush;
+        ++task.as_mutable_progress();
+        SerialTask::check_progress(task);
     }
-    progress = 0;
 
     // use calculation to create and write header file content
     std::string index_to_print;
@@ -116,15 +112,13 @@ bool calculate_longest_words(int progress_steps)
         by_longest.push_back(q.top().index);
         q.pop();
 
-        ++progress;
-        if (progress % (mm_count() / progress_steps2) == 0)
-            std::cout << "." << std::flush;
+        ++task.as_mutable_progress();
+        SerialTask::check_progress(task);
     }
     if (fputs("};\n\n", f) == EOF)
         goto lw_err;
 
     // calculate offsets (requires by_longest)
-    progress = 0;
     {
         int cur_end{(int) by_longest.size() - 1};
         int cur_start{cur_end};
@@ -147,9 +141,8 @@ bool calculate_longest_words(int progress_steps)
                 offsets[cur_length] = std::make_pair(cur_start, cur_end);
                 cur_start = cur_end = i;
             }
-            ++progress;
-            if (progress % (by_longest.size() / progress_steps3) == 0)
-                std::cout << "." << std::flush;
+            ++task.as_mutable_progress();
+            SerialTask::check_progress(task);
         }
     }
 

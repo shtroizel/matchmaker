@@ -24,6 +24,7 @@ PROPERTYx5_MATCHABLE(
 
     preparing_spc_prefixes,
     reading_spc_Crumbs,
+    reading_spc_Keys,
     reading_spc_3201_spc__parl_SINGLE_parr_,
     reading_spc_3201_spc__parl_COMPOUND_parr_,
     reading_spc_3201_spc__parl_COMMON_parr_,

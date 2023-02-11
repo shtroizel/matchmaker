@@ -110,6 +110,8 @@ set(
     src/read_3203.h
     src/read_crumbs.cpp
     src/read_crumbs.h
+    src/read_keys.cpp
+    src/read_keys.h
     src/save_matchables.cpp
     src/save_matchables.h
 )

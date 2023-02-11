@@ -70,6 +70,7 @@ set(
     src/discover_book_vocabulary.cpp
     src/read_51155.cpp
     src/read_3202.cpp
+    src/read_keys.cpp
     src/fill_reflections.cpp
     src/calculate_longest_words.cpp
     src/discover_embedded_words.cpp
@@ -78,6 +79,7 @@ set(
     src/create_books.cpp
     src/record_word_locations.cpp
     src/patch_matchables.cpp
+    src/SerialTask.cpp
 )
 
 add_executable(${CMAKE_PROJECT_NAME} ${srcs})

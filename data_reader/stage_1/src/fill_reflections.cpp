@@ -12,11 +12,11 @@
 
 
 
-bool fill_reflections(int progress_steps)
+bool fill_reflections(SerialTask::Type task)
 {
-    int printed_progress{0};
-    int progress{0};
-    int goal{0};
+    task.set_goal(Stage1Data::nil.as_mutable_syn_ant_table().size());
+    task.set_progress(0);
+    task.set_printed_progress(0);
 
 
     // if you belong to me then I belong to you...
@@ -36,13 +36,9 @@ bool fill_reflections(int progress_steps)
                 other_ant.push_back(w);
         }
 
-        goal = (int) Stage1Data::nil.as_mutable_syn_ant_table().size();
-        ++progress;
-        if (progress % (goal / progress_steps) == 0 && printed_progress < progress_steps)
-        {
-            ++printed_progress;
-            std::cout << "." << std::flush;
-        }
+        // task.set_goal(Stage1Data::nil.as_mutable_syn_ant_table().size());
+        ++task.as_mutable_progress();
+        SerialTask::check_progress(task);
     }
 
     return true;

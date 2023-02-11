@@ -4,11 +4,17 @@
 #include <iostream>
 #include <string>
 
+#ifdef Q_ONLY
+    #include <matchmaker_q/matchmaker.h>
+#else
+    #include <matchmaker/matchmaker.h>
+#endif
+
 #include "Stage1Data.h"
 
 
 
-bool read_3202(int progress_steps)
+bool read_3202(SerialTask::Type task)
 {
     std::string const FN_3202{Stage1Data::nil.as_data_dir() + "/3202/files/mthesaur.txt"};
     FILE * f = fopen(FN_3202.c_str(), "r");
@@ -19,13 +25,13 @@ bool read_3202(int progress_steps)
     }
 
     std::filesystem::path p{FN_3202.c_str()};
-    unsigned long goal{std::filesystem::file_size(p)};
-    int progress{0};
-    int mod_progress{0};
-    int prev_mod_progress{0};
+    task.set_goal(std::filesystem::file_size(p));
+    task.set_progress(0);
 
     std::string syn;
     std::string key;
+    bool found = false;
+    int term = -1;
 
     int ch = 0;
     while (true)
@@ -35,7 +41,7 @@ bool read_3202(int progress_steps)
         while (true)
         {
             ch = fgetc(f);
-            ++progress;
+            ++task.as_mutable_progress();
             if (ch == EOF)
                 goto end;
 
@@ -45,54 +51,62 @@ bool read_3202(int progress_steps)
             key += (char) ch;
         }
 
-        // read each comma separated synonym
-        do
+        term = mm_lookup(key.c_str(), &found);
+        if (found && !std::binary_search(Stage1Data::nil.as_mutable_key_words().begin(),
+                                         Stage1Data::nil.as_mutable_key_words().end(),
+                                         term))
         {
-            // read next synonym
-            syn.clear();
-            while (true)
+            // read each comma separated synonym
+            do
             {
-                ch = fgetc(f);
-                ++progress;
-                if (ch == EOF)
-                    goto end;
+                // read next synonym
+                syn.clear();
+                while (true)
+                {
+                    ch = fgetc(f);
+                    ++task.as_mutable_progress();
+                    if (ch == EOF)
+                        goto end;
 
-                if (ch == ',' || ch == 10 || ch == 13)
-                    break;
+                    if (ch == ',' || ch == 10 || ch == 13)
+                        break;
 
-                syn += (char) ch;
+                    syn += (char) ch;
+                }
+
+                term = mm_lookup(syn.c_str(), &found);
+                if (
+                    found &&
+                    !std::binary_search(Stage1Data::nil.as_mutable_key_words().begin(),
+                                        Stage1Data::nil.as_mutable_key_words().end(),
+                                        term) &&
+                    std::find(
+                        Stage1Data::nil.as_mutable_syn_ant_table()[key].syn.begin(),
+                        Stage1Data::nil.as_mutable_syn_ant_table()[key].syn.end(),
+                        syn
+                    ) == Stage1Data::nil.as_mutable_syn_ant_table()[key].syn.end()
+                )
+                    Stage1Data::nil.as_mutable_syn_ant_table()[key].syn.push_back(syn);
             }
-            if (
-                std::find(
-                    Stage1Data::nil.as_mutable_syn_ant_table()[key].syn.begin(),
-                    Stage1Data::nil.as_mutable_syn_ant_table()[key].syn.end(),
-                    syn
-                ) == Stage1Data::nil.as_mutable_syn_ant_table()[key].syn.end()
-            )
-            Stage1Data::nil.as_mutable_syn_ant_table()[key].syn.push_back(syn);
+            while (ch == ',');
         }
-        while (ch == ',');
 
         // skip to beginning of next line
         do
         {
             ch = fgetc(f);
-            ++progress;
+            ++task.as_mutable_progress();
             if (ch == EOF)
                 goto end;
         }
         while (ch == 10 || ch == 13);
         ungetc(ch, f);
-        --progress;
+        --task.as_mutable_progress();
 
-        mod_progress = progress % (goal / progress_steps);
-        if (mod_progress < prev_mod_progress)
-            std::cout << "." << std::flush;
-        prev_mod_progress = mod_progress;
+        SerialTask::check_progress(task);
     }
 
 end:
-    std::cout << "." << std::flush;
     fclose(f);
     return true;
 }

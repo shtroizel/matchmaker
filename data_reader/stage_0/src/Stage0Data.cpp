@@ -138,7 +138,10 @@ namespace Stage0Data
             abort();
         }
 
-        if (task == SerialTask::reading_spc_Crumbs::grab() || q_mode() != q_usage::only::grab())
+        if (
+            MATCHABLE_INSTANCE_IN(SerialTask, task, reading_spc_Crumbs, reading_spc_Keys)
+            || q_mode() != q_usage::only::grab()
+        )
             mm.grab(matchable_name)->add_variant(escaped);
 
         if (!mm.grab(matchable_name)->has_variant(escaped))

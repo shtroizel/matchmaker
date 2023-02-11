@@ -33,19 +33,17 @@ inline bool operator<(HeaderEntry const & l, HeaderEntry const & r)
 }
 
 
-bool patch_matchable_header(std::vector<HeaderEntry> const & matchable_headers);
+bool patch_matchable_header(
+    SerialTask::Type task,
+    std::vector<HeaderEntry> const & matchable_headers
+);
 
 
 std::mutex patch_matchable_header_mutex;
-int processed_headers{0};
-int header_count{0};
-int patch_matchables_progress_steps{0};
 
 
-bool patch_matchables(int progress_steps)
+bool patch_matchables(SerialTask::Type task)
 {
-    patch_matchables_progress_steps = progress_steps;
-
     std::string const STAGE_1_MATCHABLES_DIR{
         Stage1Data::nil.as_workspace_dir() + "/generated_include/matchmaker/generated_matchables"
     };
@@ -61,7 +59,8 @@ bool patch_matchables(int progress_steps)
         if (entry.is_regular_file())
             header_entries.push({entry});
 
-    header_count = (int) header_entries.size();
+    task.set_goal(header_entries.size());
+    task.set_progress(0);
 
     // create vector of header entries for each thread
     int const CPU_COUNT = std::thread::hardware_concurrency();
@@ -89,7 +88,7 @@ bool patch_matchables(int progress_steps)
             std::thread(
                 [&]()
                 {
-                    if (all_ok && !patch_matchable_header(deal))
+                    if (all_ok && !patch_matchable_header(task, deal))
                         all_ok = false;
                 }
             )
@@ -102,7 +101,10 @@ bool patch_matchables(int progress_steps)
 
 
 
-bool patch_matchable_header(std::vector<HeaderEntry> const & matchable_headers)
+bool patch_matchable_header(
+    SerialTask::Type task,
+    std::vector<HeaderEntry> const & matchable_headers
+)
 {
     // aliases
     SynAntTable const & contents_SynAnt = Stage1Data::nil.as_syn_ant_table();
@@ -279,10 +281,8 @@ bool patch_matchable_header(std::vector<HeaderEntry> const & matchable_headers)
             matchable::save__grow_mode::wrap::grab()
         );
 
-        ++processed_headers;
-
-        if (processed_headers % (header_count / patch_matchables_progress_steps) == 0)
-            std::cout << "." << std::flush;
+        ++task.as_mutable_progress();
+        SerialTask::check_progress(task);
 
         if (sa_status != matchable::save__status::success::grab())
             return false;

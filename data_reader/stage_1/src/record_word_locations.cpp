@@ -16,7 +16,7 @@
 
 
 
-bool record_word_locations(int progress_steps)
+bool record_word_locations(SerialTask::Type task)
 {
     std::vector<Book> const & books = Stage1Data::nil.as_books();
     IndexTable & book_indexes = Stage1Data::nil.as_mutable_book_indexes();
@@ -24,13 +24,16 @@ bool record_word_locations(int progress_steps)
     IndexTable & paragraph_indexes = Stage1Data::nil.as_mutable_paragraph_indexes();
     IndexTable & word_indexes = Stage1Data::nil.as_mutable_word_indexes();
 
-    int location_count{0};
-    for (int b = 0; b < (int) books.size(); ++b)
-        for (int ch = 0; ch < (int) books[b].chapters.size(); ++ch)
-            for (int p = 0; p < (int) books[b].chapters[ch].paragraphs.size(); ++p)
-                location_count += (int) books[b].chapters[ch].paragraphs[p].size();
+    {
+        int location_count{0};
+        for (int b = 0; b < (int) books.size(); ++b)
+            for (int ch = 0; ch < (int) books[b].chapters.size(); ++ch)
+                for (int p = 0; p < (int) books[b].chapters[ch].paragraphs.size(); ++p)
+                    location_count += (int) books[b].chapters[ch].paragraphs[p].size();
 
-    int locations_processed{0};
+        task.set_goal(location_count);
+        task.set_progress(0);
+    }
 
     char const * s = nullptr;
     int len{0};
@@ -54,48 +57,6 @@ bool record_word_locations(int progress_steps)
                         paragraph_indexes[bw.word].push_back(p);
                         word_indexes[bw.word].push_back(w);
                     }
-
-                    // record links
-                    if (w == 0 && len > 5 && s[0] == '>' && s[1] == '>')
-                    {
-                        bool all_numbers = true;
-                        for (int i = 2; all_numbers && i < len; ++i)
-                            all_numbers = s[i] >= '0' && s[i] <= '9';
-
-                        if (all_numbers)
-                        {
-                            std::function<void (int)> add_term =
-                                [&](int term)
-                                {
-                                    // add term
-                                    if ((len != 1 || s[0] == 'Q' || s[0] == 'q') &&
-                                            strcmp(s, "the") != 0 && strcmp(s, "The") != 0 &&
-                                            strcmp(s, "an") != 0 && strcmp(s, "An") != 0)
-                                    {
-                                        book_indexes[term].push_back(b);
-                                        chapter_indexes[term].push_back(ch);
-                                        paragraph_indexes[term].push_back(p);
-                                        word_indexes[term].push_back(w);
-
-                                        int s_len = 0;
-                                        char const * s = mm_at(term, &s_len);
-                                        if (s_len > 2 && s[0] == '>' && s[1] == '>')
-                                            return;
-
-                                        // add embedded
-                                        std::vector<int> embedded =
-                                                Stage1Data::nil.as_embedded_words()[term];
-                                        for (int e : embedded)
-                                            add_term(e);
-                                    }
-                                };
-
-                            IndexTable const & defs = Stage1Data::nil.as_definitions();
-                            for (auto d : defs[bw.word])
-                                add_term(d);
-                        }
-                    }
-
 
                     // record parents
 
@@ -129,9 +90,8 @@ bool record_word_locations(int progress_steps)
                         }
                     }
 
-                    ++locations_processed;
-                    if (locations_processed % (location_count / progress_steps) == 0)
-                        std::cout << "." << std::flush;
+                    ++task.as_mutable_progress();
+                    SerialTask::check_progress(task);
                 }
             }
         }

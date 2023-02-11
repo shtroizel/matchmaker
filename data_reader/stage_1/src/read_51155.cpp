@@ -4,6 +4,12 @@
 #include <iostream>
 #include <string>
 
+#ifdef Q_ONLY
+    #include <matchmaker_q/matchmaker.h>
+#else
+    #include <matchmaker/matchmaker.h>
+#endif
+
 #include "Stage1Data.h"
 
 
@@ -28,7 +34,7 @@ void update_word_status(word_status::Flags & flags, int & ch)
 
 
 
-bool read_51155(int progress_steps)
+bool read_51155(SerialTask::Type task)
 {
     std::string const FN_51155{Stage1Data::nil.as_data_dir() + "/51155/51155-0.txt"};
     FILE * f = fopen(FN_51155.c_str(), "r");
@@ -39,12 +45,12 @@ bool read_51155(int progress_steps)
     }
 
     std::filesystem::path p{FN_51155.c_str()};
-    unsigned long goal{std::filesystem::file_size(p)};
-    int progress{0};
-    int mod_progress{0};
-    int prev_mod_progress{0};
+    task.set_goal(std::filesystem::file_size(p));
+    task.set_progress(0);
 
-    std::string word;
+    std::string term;
+    int term_as_index = -1;
+    bool found = false;
     std::string cur_key{"-1"};
     word_status::Flags status;
     bool key{false};
@@ -59,23 +65,23 @@ bool read_51155(int progress_steps)
         ant = false;
 
         ch = fgetc(f);
-        ++progress;
+        ++task.as_mutable_progress();
         if (ch == 'K')
         {
             ch = fgetc(f);
-            ++progress;
+            ++task.as_mutable_progress();
             if (ch == 'E')
             {
                 ch = fgetc(f);
-                ++progress;
+                ++task.as_mutable_progress();
                 if (ch == 'Y')
                 {
                     ch = fgetc(f);
-                    ++progress;
+                    ++task.as_mutable_progress();
                     if (ch == ':')
                     {
                         ch = fgetc(f);
-                        ++progress;
+                        ++task.as_mutable_progress();
                         if (ch == ' ')
                             key = true;
                     }
@@ -85,19 +91,19 @@ bool read_51155(int progress_steps)
         else if (cur_key != "-1" && ch == 'S')
         {
             ch = fgetc(f);
-            ++progress;
+            ++task.as_mutable_progress();
             if (ch == 'Y')
             {
                 ch = fgetc(f);
-                ++progress;
+                ++task.as_mutable_progress();
                 if (ch == 'N')
                 {
                     ch = fgetc(f);
-                    ++progress;
+                    ++task.as_mutable_progress();
                     if (ch == ':')
                     {
                         ch = fgetc(f);
-                        ++progress;
+                        ++task.as_mutable_progress();
                         if (ch == ' ')
                             syn = true;
                     }
@@ -107,19 +113,19 @@ bool read_51155(int progress_steps)
         else if (cur_key != "-1" && ch == 'A')
         {
             ch = fgetc(f);
-            ++progress;
+            ++task.as_mutable_progress();
             if (ch == 'N')
             {
                 ch = fgetc(f);
-                ++progress;
+                ++task.as_mutable_progress();
                 if (ch == 'T')
                 {
                     ch = fgetc(f);
-                    ++progress;
+                    ++task.as_mutable_progress();
                     if (ch == ':')
                     {
                         ch = fgetc(f);
-                        ++progress;
+                        ++task.as_mutable_progress();
                         if (ch == ' ')
                             ant = true;
                     }
@@ -129,12 +135,12 @@ bool read_51155(int progress_steps)
 
         if (key)
         {
-            word.clear();
+            term.clear();
             status.clear();
             while (true)
             {
                 ch = fgetc(f);
-                ++progress;
+                ++task.as_mutable_progress();
 
                 if (ch == EOF)
                     goto err;
@@ -146,25 +152,29 @@ bool read_51155(int progress_steps)
                     ch += 32;
 
                 update_word_status(status, ch);
-                word += (char) ch;
+                term += (char) ch;
             }
-            if (word.size() > 0 && !status.is_set(word_status::has_other_symbols::grab()))
-                cur_key = word;
-            else
+
+            term_as_index = mm_lookup(term.c_str(), &found);
+            if (term.empty() || status.is_set(word_status::has_other_symbols::grab()) || !found)
                 cur_key = "-1";
+            else if (!std::binary_search(Stage1Data::nil.as_mutable_key_words().begin(),
+                                         Stage1Data::nil.as_mutable_key_words().end(),
+                                         term_as_index))
+                cur_key = term;
         }
         else if (syn || ant)
         {
             while (ch != '.')
             {
-                word.clear();
+                term.clear();
                 status.clear();
 
                 // read word
                 while (true)
                 {
                     ch = fgetc(f);
-                    ++progress;
+                    ++task.as_mutable_progress();
 
                     if (ch == EOF)
                         goto err;
@@ -176,11 +186,19 @@ bool read_51155(int progress_steps)
                         ch += 32;
 
                     update_word_status(status, ch);
-                    word += (char) ch;
+                    term += (char) ch;
                 }
 
+                term_as_index = mm_lookup(term.c_str(), &found);
+
                 // maybe add word
-                if (word.size() > 0)
+                if (
+                    term.size() > 0 &&
+                    found &&
+                    !std::binary_search(Stage1Data::nil.as_mutable_key_words().begin(),
+                                        Stage1Data::nil.as_mutable_key_words().end(),
+                                        term_as_index)
+                )
                 {
                     if (status.is_set(word_status::not_printable_ascii::grab()))
                         continue;
@@ -193,20 +211,20 @@ bool read_51155(int progress_steps)
                         std::find(
                             Stage1Data::nil.as_mutable_syn_ant_table()[cur_key].syn.begin(),
                             Stage1Data::nil.as_mutable_syn_ant_table()[cur_key].syn.end(),
-                            word
+                            term
                         ) == Stage1Data::nil.as_mutable_syn_ant_table()[cur_key].syn.end()
                     )
-                        Stage1Data::nil.as_mutable_syn_ant_table()[cur_key].syn.push_back(word);
+                        Stage1Data::nil.as_mutable_syn_ant_table()[cur_key].syn.push_back(term);
 
                     if (
                         ant &&
                         std::find(
                             Stage1Data::nil.as_mutable_syn_ant_table()[cur_key].ant.begin(),
                             Stage1Data::nil.as_mutable_syn_ant_table()[cur_key].ant.end(),
-                            word
+                            term
                         ) == Stage1Data::nil.as_mutable_syn_ant_table()[cur_key].ant.end()
                     )
-                        Stage1Data::nil.as_mutable_syn_ant_table()[cur_key].ant.push_back(word);
+                        Stage1Data::nil.as_mutable_syn_ant_table()[cur_key].ant.push_back(term);
                 }
             }
         }
@@ -215,7 +233,7 @@ bool read_51155(int progress_steps)
         while (ch != 10 && ch != 13)
         {
             ch = fgetc(f);
-            ++progress;
+            ++task.as_mutable_progress();
             if (ch == EOF)
                 goto end;
         }
@@ -224,23 +242,19 @@ bool read_51155(int progress_steps)
         do
         {
             ch = fgetc(f);
-            ++progress;
+            ++task.as_mutable_progress();
             if (ch == EOF)
                 goto end;
         }
         while (ch == 10 || ch == 13);
         ungetc(ch, f);
-        --progress;
+        --task.as_mutable_progress();
 
-        mod_progress = progress % (goal / progress_steps);
-        if (mod_progress < prev_mod_progress)
-            std::cout << "." << std::flush;
-        prev_mod_progress = mod_progress;
+        SerialTask::check_progress(task);
     }
 
 
 end:
-    std::cout << "." << std::flush;
     fclose(f);
     return true;
 
