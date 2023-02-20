@@ -8,7 +8,7 @@ import sys
 
 from string import ascii_lowercase
 from string import ascii_uppercase
-
+from pathlib import Path
 
 
 
@@ -24,24 +24,24 @@ def usage():
 
 def prepare_letters(workspace_root, q, parents_only):
 
-    generated_include = workspace_root + '/generated_include/'
-    generated_src = workspace_root + '/generated_src/'
+    generated_include = workspace_root / 'generated_include'
+    generated_src = workspace_root / 'generated_src'
 
     if not parents_only:
         # reset header location
-        shutil.rmtree(generated_include + '/matchmaker/generated_symbols', ignore_errors=True)
-        os.makedirs(generated_include + '/matchmaker/generated_symbols')
+        shutil.rmtree(generated_include / 'matchmaker' / 'generated_symbols', ignore_errors=True)
+        os.makedirs(generated_include / 'matchmaker' / 'generated_symbols')
 
         # reset impl location
         shutil.rmtree(generated_src, ignore_errors=True)
         os.makedirs(generated_src)
 
-    matchmaker_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
+    matchmaker_root = Path(os.path.dirname(os.path.realpath(__file__))).parent
 
-    leaf_h = matchmaker_root + 'templates/internal_interface.h'
-    leaf_cpp = matchmaker_root + 'templates/leaf.cpp'
-    parent_h = matchmaker_root + 'templates/internal_interface.h'
-    parent_cpp = matchmaker_root + 'templates/parent.cpp'
+    leaf_h = matchmaker_root / 'templates' / 'internal_interface.h'
+    leaf_cpp = matchmaker_root / 'templates' / 'leaf.cpp'
+    parent_h = matchmaker_root / 'templates' / 'internal_interface.h'
+    parent_cpp = matchmaker_root / 'templates' / 'parent.cpp'
 
 
     print('|                  generating source                  |');
@@ -54,10 +54,10 @@ def prepare_letters(workspace_root, q, parents_only):
         sys.stdout.flush()
 
         if not parents_only:
-            os.makedirs(generated_include + '/matchmaker/generated_symbols/' + l0)
+            os.makedirs(generated_include / 'matchmaker' / 'generated_symbols' / l0)
 
-        letter_x1_h = generated_include + '/matchmaker/generated_symbols/' + l0 + '/' + l0 + '.h'
-        letter_x1_cpp = generated_src + l0 + '.cpp'
+        letter_x1_h = generated_include / 'matchmaker' / 'generated_symbols' / l0 / (l0 + '.h')
+        letter_x1_cpp = generated_src / (l0 + '.cpp')
 
         # single letter parent
         shutil.copy(parent_h, letter_x1_h)
@@ -71,12 +71,12 @@ def prepare_letters(workspace_root, q, parents_only):
 
         for l1 in ascii_uppercase + ascii_lowercase:
             if not parents_only:
-                os.makedirs(generated_include + '/matchmaker/generated_symbols/' + l0 + '/' + l1)
+                os.makedirs(generated_include / 'matchmaker' / 'generated_symbols' / l0 / l1)
 
-            letter_x2_h = generated_include + '/matchmaker/generated_symbols/'                             \
-                    + l0 + '/' + l1 + '/' + l0 + '_' + l1 + '.h'
+            letter_x2_h = generated_include / 'matchmaker' / 'generated_symbols' / l0 / l1 /               \
+                    (l0 + '_' + l1 + '.h')
 
-            letter_x2_cpp = generated_src + l0 + '_' + l1 + '.cpp'
+            letter_x2_cpp = generated_src / (l0 + '_' + l1 + '.cpp')
 
             if (l0 == 'q' and l1 == 'u') or                                                                \
                     (l0 == 'p' and l1 == 'r') or                                                           \
@@ -256,13 +256,13 @@ def prepare_letters(workspace_root, q, parents_only):
 
                 for l2 in ascii_uppercase + ascii_lowercase:
                     if not parents_only:
-                        os.makedirs(generated_include + '/matchmaker/generated_symbols/'                   \
-                                + l0 + '/' + l1 + '/' + l2)
+                        os.makedirs(generated_include / 'matchmaker' / 'generated_symbols'                 \
+                                / l0 / l1 / l2)
 
-                    letter_x3_h = generated_include + '/matchmaker/generated_symbols/'                     \
-                            + l0 + '/' + l1 + '/' + l2 + '/' + l0 + '_' + l1 + '_' + l2 + '.h'
+                    letter_x3_h = generated_include / 'matchmaker' / 'generated_symbols'                   \
+                            / l0 / l1 / l2 / (l0 + '_' + l1 + '_' + l2 + '.h')
 
-                    letter_x3_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '.cpp'
+                    letter_x3_cpp = generated_src / (l0 + '_' + l1 + '_' + l2 + '.cpp')
 
                     if (l0 == 'p' and l1 == 'r' and l2 == 'e') or                                          \
                             (l0 == 'q' and l1 == 'u' and l2 == 'a') or                                     \
@@ -391,14 +391,13 @@ def prepare_letters(workspace_root, q, parents_only):
 
                         for l3 in ascii_uppercase + ascii_lowercase:
                             if not parents_only:
-                                os.makedirs(generated_include + '/matchmaker/generated_symbols/'           \
-                                        + l0 + '/' + l1 + '/' + l2 + '/' + l3)
+                                os.makedirs(generated_include / 'matchmaker' / 'generated_symbols'         \
+                                        / l0 / l1 / l2 / l3)
 
-                            letter_x4_h = generated_include + '/matchmaker/generated_symbols/'             \
-                                    + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/'                            \
-                                    + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '.h'
+                            letter_x4_h = generated_include / 'matchmaker' / 'generated_symbols'           \
+                                    / l0 / l1 / l2 / l3 / (l0 + '_' + l1 + '_' + l2 + '_' + l3 + '.h')
 
-                            letter_x4_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '.cpp'
+                            letter_x4_cpp = generated_src / (l0 + '_' + l1 + '_' + l2 + '_' + l3 + '.cpp')
 
                             if (l0 == 'o' and l1 == 'v' and l2 == 'e' and l3 == 'r') or                    \
                                     (l0 == 'i' and l1 == 'n' and l2 == 't' and l3 == 'e') or               \
@@ -434,15 +433,15 @@ def prepare_letters(workspace_root, q, parents_only):
 
                                 for l4 in ascii_uppercase + ascii_lowercase:
                                     if not parents_only:
-                                        os.makedirs(generated_include + '/matchmaker/generated_symbols/'   \
-                                                + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4)
+                                        os.makedirs(generated_include / 'matchmaker' / 'generated_symbols' \
+                                                / l0 / l1 / l2 / l3 / l4)
 
-                                    letter_x5_h = generated_include + '/matchmaker/generated_symbols/'     \
-                                            + l0 + '/' + l1 + '/' + l2 + '/' + l3 + '/' + l4 + '/'         \
-                                            + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '_' + l4 + '.h'
+                                    letter_x5_h = generated_include / 'matchmaker' / 'generated_symbols'   \
+                                            / l0 / l1 / l2 / l3 / l4 /                                     \
+                                            (l0 + '_' + l1 + '_' + l2 + '_' + l3 + '_' + l4 + '.h')
 
-                                    letter_x5_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' + l3    \
-                                            + '_' + l4 + '.cpp'
+                                    letter_x5_cpp = generated_src / (l0 + '_' + l1 + '_' + l2 + '_' + l3   \
+                                            + '_' + l4 + '.cpp')
 
                                     if (l0 == 'i' and l1 == 'n' and l2 == 't' and l3 == 'e' and            \
                                                     l4 == 'r') or                                          \
@@ -480,18 +479,16 @@ def prepare_letters(workspace_root, q, parents_only):
                                             continue
 
                                         for l5 in ascii_uppercase + ascii_lowercase:
-                                            os.makedirs(generated_include                                  \
-                                                    + '/matchmaker/generated_symbols/' + l0 + '/' + l1     \
-                                                    + '/' + l2 + '/' + l3 + '/' + l4 + '/' + l5)
+                                            os.makedirs(generated_include / 'matchmaker' /                 \
+                                                    'generated_symbols' / l0 / l1 / l2 / l3 / l4 / l5)
 
-                                            letter_x6_h = generated_include                                \
-                                                    + '/matchmaker/generated_symbols/' + l0 + '/' + l1     \
-                                                    + '/' + l2 + '/' + l3 + '/' + l4 + '/' + l5 + '/'      \
-                                                    + l0 + '_' + l1 + '_' + l2 + '_' + l3 + '_' + l4 + '_' \
-                                                    + l5 + '.h'
+                                            letter_x6_h = generated_include / 'matchmaker' /               \
+                                                    'generated_symbols' / l0 / l1 / l2 / l3 / l4 / l5 /    \
+                                                    (l0 + '_' + l1 + '_' + l2 + '_' + l3 + '_' + l4 + '_'  \
+                                                    + l5 + '.h')
 
-                                            letter_x6_cpp = generated_src + l0 + '_' + l1 + '_' + l2 + '_' \
-                                                    + l3 + '_' + l4 + '_' + l5 + '.cpp'
+                                            letter_x6_cpp = generated_src / (l0 + '_' + l1 + '_' + l2      \
+                                                    + '_' + l3 + '_' + l4 + '_' + l5 + '.cpp')
 
 
 
@@ -589,9 +586,9 @@ def prepare_letters(workspace_root, q, parents_only):
                     '_sbr_',
                     '_',
                     '_tld_']:
-            os.makedirs(generated_include + '/matchmaker/generated_symbols/' + sym)
-            sym_h = generated_include + 'matchmaker/generated_symbols/' + sym + '/' + sym + '.h'
-            sym_cpp = generated_src + sym + '.cpp'
+            os.makedirs(generated_include / 'matchmaker' / 'generated_symbols' / sym)
+            sym_h = generated_include / 'matchmaker' / 'generated_symbols' / sym / (sym + '.h')
+            sym_cpp = generated_src / (sym + '.cpp')
             shutil.copy(leaf_h, sym_h)
             shutil.copy(leaf_cpp, sym_cpp)
             for filename in [sym_h, sym_cpp]:
@@ -629,6 +626,8 @@ def main():
     if workspace_root == '':
         print("workspace_root unset, use -w to set a workspace directory")
         usage()
+
+    workspace_root = Path(workspace_root)
 
     prepare_letters(workspace_root, q, parents_only)
     exit(0)

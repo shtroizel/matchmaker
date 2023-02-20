@@ -70,7 +70,6 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
     if atomic_libs:
         suffix = suffix + '_atomic'
 
-    # vars for build and install directories
     if build_dir == '':
         build_dir = matchmaker_root + 'build'
     if build_dir[0] != '/':
@@ -136,7 +135,10 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
                         stage_0_workspace_dir + 'config.cmake.in')
 
         print('preparing matchmaker code...\n')
-        prepare_letters_cmd = ['scripts/prepare_letters.py', '-w', stage_0_workspace_dir]
+        if os.name == 'nt':
+            prepare_letters_cmd = ['python', 'scripts\\prepare_letters.py', '-w', stage_0_workspace_dir]
+        else:
+            prepare_letters_cmd = ['scripts/prepare_letters.py', '-w', stage_0_workspace_dir]
         if retain_leaves:
             prepare_letters_cmd.append('-p')
         if subprocess.run(prepare_letters_cmd).returncode != 0:
@@ -237,6 +239,9 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + stage_0_install_prefix]
 
+    if os.name == 'nt':
+        cmake_cmd.append('-G Ninja')
+
     if debug:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
     else:
@@ -302,17 +307,16 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             shutil.copy(matchmaker_root + 'workspace_common/config.cmake.in',
                         stage_1_workspace_dir + 'config.cmake.in')
 
-            # os.symlink(stage_0_workspace_dir + 'generated_src', stage_1_workspace_dir + 'generated_src')
             shutil.copytree(stage_0_workspace_dir + 'generated_src', stage_1_workspace_dir + 'generated_src')
             if not os.path.exists(stage_1_workspace_dir + 'generated_src/books'):
                 os.makedirs(stage_1_workspace_dir + 'generated_src/books')
             shutil.copy(matchmaker_root + 'workspace_common/BookWord.h',
                         stage_1_workspace_dir + 'generated_src/books/BookWord.h')
-            os.symlink(stage_0_workspace_dir + 'book_vocabulary', stage_1_workspace_dir + 'book_vocabulary')
+            shutil.copytree(stage_0_workspace_dir + 'book_vocabulary', stage_1_workspace_dir + 'book_vocabulary')
             os.makedirs(stage_1_workspace_dir + 'generated_include/matchmaker')
             os.makedirs(stage_1_workspace_dir + 'generated_include/matchmaker/books')
-            os.symlink(stage_0_workspace_dir + 'generated_include/matchmaker/generated_symbols',
-                       stage_1_workspace_dir + 'generated_include/matchmaker/generated_symbols')
+            shutil.copytree(stage_0_workspace_dir + 'generated_include/matchmaker/generated_symbols',
+                            stage_1_workspace_dir + 'generated_include/matchmaker/generated_symbols')
 
         if (not retain_matchables and not retain_leaves) or not os.path.exists(
                 stage_1_workspace_dir + 'generated_include/matchmaker/generated_matchables'):
@@ -374,6 +378,9 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
     os.chdir(build_dir)
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + install_dir]
+
+    if os.name == 'nt':
+        cmake_cmd.append('-G Ninja')
 
     if debug:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
