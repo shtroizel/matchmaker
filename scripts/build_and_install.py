@@ -85,6 +85,9 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
     while install_dir[-1] == '/':
         install_dir = install_dir[:-1]
     install_dir = install_dir + '/'
+    abs_install_dir = install_dir
+    if abs_install_dir[0] != '/':
+        abs_install_dir = build_dir + install_dir
     stage_0_install_prefix = stage_0_build_dir + 'install/'
 
     try:
@@ -175,7 +178,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             build_matchable_cmd.append('-b')
             build_matchable_cmd.append('build_mm' + suffix)
             build_matchable_cmd.append('-i')
-            build_matchable_cmd.append(install_dir)
+            build_matchable_cmd.append(abs_install_dir)
             if subprocess.run(build_matchable_cmd).returncode != 0:
                 print('matchable failed to build for stage 1')
                 exit(1)
@@ -190,7 +193,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             build_data_reader_cmd.append('-i')
             build_data_reader_cmd.append('../install_mm' + suffix)
             build_data_reader_cmd.append('-m')
-            build_data_reader_cmd.append(install_dir + '/lib/matchable/cmake')
+            build_data_reader_cmd.append(stage_0_install_prefix + '/lib/matchable/cmake')
             if use_clang:
                 build_data_reader_cmd.append('-c')
             if debug:
@@ -265,7 +268,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
         cmake_cmd.append('-DCMAKE_C_COMPILER=' + clang_c)
         cmake_cmd.append('-DCMAKE_CXX_COMPILER=' + clang_cxx)
 
-    cmake_cmd.append('-Dmatchable_DIR=' + install_dir + '/lib/matchable/cmake')
+    cmake_cmd.append('-Dmatchable_DIR=' + stage_0_install_prefix + '/lib/matchable/cmake')
     cmake_cmd.append(stage_0_workspace_dir)
 
     if subprocess.run(cmake_cmd).returncode != 0:
@@ -335,7 +338,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             build_data_reader_cmd.append('../install_mm' + suffix)
             build_data_reader_cmd.append('-m')
             # build_data_reader_cmd.append('../../matchable/install_mm' + suffix + '/lib/matchable/cmake')
-            build_data_reader_cmd.append(install_dir + '/lib/matchable/cmake')
+            build_data_reader_cmd.append(abs_install_dir + '/lib/matchable/cmake')
             build_data_reader_cmd.append('-s')
             build_data_reader_cmd.append(stage_0_install_prefix + '/lib/matchmaker' + suffix + '/cmake')
             if use_clang:
@@ -404,7 +407,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
         cmake_cmd.append('-DCMAKE_C_COMPILER=' + clang_c)
         cmake_cmd.append('-DCMAKE_CXX_COMPILER=' + clang_cxx)
 
-    cmake_cmd.append('-Dmatchable_DIR=' + install_dir + '/lib/matchable/cmake')
+    cmake_cmd.append('-Dmatchable_DIR=' + abs_install_dir + '/lib/matchable/cmake')
     cmake_cmd.append(stage_1_workspace_dir)
 
     if subprocess.run(cmake_cmd).returncode != 0:
