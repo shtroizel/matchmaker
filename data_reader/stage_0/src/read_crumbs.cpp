@@ -92,11 +92,8 @@ void read_crumbs(SerialTask::Type task)
         }
     }
 
-    int files_processed = 0;
     while (!q_files.empty())
     {
-        ++files_processed;
-
         // std::cout << "processing file: " << q_files.top().entry.path() << std::endl;
         q_file = fopen(q_files.top().entry.path().c_str(), "r");
         if (q_file == 0)
