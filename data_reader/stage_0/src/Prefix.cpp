@@ -148,9 +148,13 @@ std::string Prefix::escaped_and_delimited(char delim) const
         if (i > 0)
             ret += delim;
 
-        // manually explicitly escape numbers since matchable escapes numbers to themselves.
-        if (str[i] >= '0' && str[i] <= '9')
+        // manually explicitly escape numbers and upper case letters
+        if (
+            (str[i] >= '0' && str[i] <= '9') ||
+            (str[i] >= 'A' && str[i] <= 'Z')
+        )
             ret += "esc_";
+
         ret += escaped;
     }
 

@@ -70,6 +70,7 @@ set(A_z_letters)
 set(l0_A_z_letters)
 foreach(A_Z_number RANGE 65 90)
     string(ASCII ${A_Z_number} A_Z_letter)
+    string(PREPEND A_Z_letter "esc_")
     list(APPEND A_z_letters ${A_Z_letter})
     list(APPEND l0_A_z_letters ${A_Z_letter})
 endforeach()
@@ -199,60 +200,60 @@ foreach(l0 ${l0_A_z_letters})
             (l0 STREQUAL "f" AND l1 STREQUAL "u") OR
             (l0 STREQUAL "g" AND l1 STREQUAL "u") OR
             (l0 STREQUAL "w" AND l1 STREQUAL "o") OR
-            (l0 STREQUAL "C" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "esc_C" AND l1 STREQUAL "a") OR
             (l0 STREQUAL "h" AND l1 STREQUAL "i") OR
-            (l0 STREQUAL "C" AND l1 STREQUAL "h") OR
-            (l0 STREQUAL "C" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "esc_C" AND l1 STREQUAL "h") OR
+            (l0 STREQUAL "esc_C" AND l1 STREQUAL "o") OR
             (l0 STREQUAL "s" AND l1 STREQUAL "w") OR
             (l0 STREQUAL "t" AND l1 STREQUAL "w") OR
             (l0 STREQUAL "r" AND l1 STREQUAL "u") OR
             (l0 STREQUAL "g" AND l1 STREQUAL "i") OR
-            (l0 STREQUAL "S" AND l1 STREQUAL "a") OR
-            (l0 STREQUAL "B" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "esc_S" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "esc_B" AND l1 STREQUAL "a") OR
             (l0 STREQUAL "a" AND l1 STREQUAL "t") OR
-            (l0 STREQUAL "P" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "esc_P" AND l1 STREQUAL "a") OR
             (l0 STREQUAL "d" AND l1 STREQUAL "u") OR
-            (l0 STREQUAL "L" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "esc_L" AND l1 STREQUAL "a") OR
             (l0 STREQUAL "n" AND l1 STREQUAL "i") OR
-            (l0 STREQUAL "A" AND l1 STREQUAL "n") OR
+            (l0 STREQUAL "esc_A" AND l1 STREQUAL "n") OR
             (l0 STREQUAL "s" AND l1 STREQUAL "n") OR
-            (l0 STREQUAL "B" AND l1 STREQUAL "e") OR
-            (l0 STREQUAL "H" AND l1 STREQUAL "a") OR
+            (l0 STREQUAL "esc_B" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "esc_H" AND l1 STREQUAL "a") OR
             (l0 STREQUAL "c" AND l1 STREQUAL "y") OR
             (l0 STREQUAL "s" AND l1 STREQUAL "m") OR
             (l0 STREQUAL "j" AND l1 STREQUAL "u") OR
             (l0 STREQUAL "l" AND l1 STREQUAL "u") OR
-            (l0 STREQUAL "R" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "esc_R" AND l1 STREQUAL "o") OR
             (l0 STREQUAL "o" AND l1 STREQUAL "p") OR
             (l0 STREQUAL "a" AND l1 STREQUAL "g") OR
             (l0 STREQUAL "k" AND l1 STREQUAL "i") OR
-            (l0 STREQUAL "M" AND l1 STREQUAL "i") OR
-            (l0 STREQUAL "P" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "esc_M" AND l1 STREQUAL "i") OR
+            (l0 STREQUAL "esc_P" AND l1 STREQUAL "e") OR
             (l0 STREQUAL "w" AND l1 STREQUAL "e") OR
-            (l0 STREQUAL "M" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "esc_M" AND l1 STREQUAL "o") OR
             (l0 STREQUAL "h" AND l1 STREQUAL "u") OR
             (l0 STREQUAL "o" AND l1 STREQUAL "n") OR
-            (l0 STREQUAL "B" AND l1 STREQUAL "r") OR
-            (l0 STREQUAL "A" AND l1 STREQUAL "r") OR
-            (l0 STREQUAL "G" AND l1 STREQUAL "r") OR
-            (l0 STREQUAL "P" AND l1 STREQUAL "r") OR
-            (l0 STREQUAL "A" AND l1 STREQUAL "l") OR
+            (l0 STREQUAL "esc_B" AND l1 STREQUAL "r") OR
+            (l0 STREQUAL "esc_A" AND l1 STREQUAL "r") OR
+            (l0 STREQUAL "esc_G" AND l1 STREQUAL "r") OR
+            (l0 STREQUAL "esc_P" AND l1 STREQUAL "r") OR
+            (l0 STREQUAL "esc_A" AND l1 STREQUAL "l") OR
             (l0 STREQUAL "s" AND l1 STREQUAL "k") OR
-            (l0 STREQUAL "H" AND l1 STREQUAL "e") OR
-            (l0 STREQUAL "S" AND l1 STREQUAL "t") OR
-            (l0 STREQUAL "L" AND l1 STREQUAL "e") OR
-            (l0 STREQUAL "D" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "esc_H" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "esc_S" AND l1 STREQUAL "t") OR
+            (l0 STREQUAL "esc_L" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "esc_D" AND l1 STREQUAL "e") OR
             (l0 STREQUAL "i" AND l1 STREQUAL "s") OR
             (l0 STREQUAL "v" AND l1 STREQUAL "o") OR
             (l0 STREQUAL "k" AND l1 STREQUAL "e") OR
-            (l0 STREQUAL "M" AND l1 STREQUAL "e") OR
+            (l0 STREQUAL "esc_M" AND l1 STREQUAL "e") OR
             (l0 STREQUAL "j" AND l1 STREQUAL "a") OR
             (l0 STREQUAL "u" AND l1 STREQUAL "p") OR
-            (l0 STREQUAL "B" AND l1 STREQUAL "o") OR
+            (l0 STREQUAL "esc_B" AND l1 STREQUAL "o") OR
             (l0 STREQUAL "o" AND l1 STREQUAL "b") OR
             (l0 STREQUAL "m" AND l1 STREQUAL "y") OR
-            (l0 STREQUAL "T" AND l1 STREQUAL "h") OR
-            (l0 STREQUAL "W" AND l1 STREQUAL "h") OR
+            (l0 STREQUAL "esc_T" AND l1 STREQUAL "h") OR
+            (l0 STREQUAL "esc_W" AND l1 STREQUAL "h") OR
             (l0 STREQUAL "h" AND l1 STREQUAL "t") OR
             (l0 STREQUAL "r" AND l1 STREQUAL "i")
         )
@@ -356,7 +357,7 @@ foreach(l0 ${l0_A_z_letters})
                     (l0 STREQUAL "n" AND l1 STREQUAL "o" AND l2 STREQUAL "t") OR
                     (l0 STREQUAL "t" AND l1 STREQUAL "h" AND l2 STREQUAL "i") OR
                     (l0 STREQUAL "h" AND l1 STREQUAL "a" AND l2 STREQUAL "r") OR
-                    (l0 STREQUAL "D" AND l1 STREQUAL "e" AND l2 STREQUAL "c") OR
+                    (l0 STREQUAL "esc_D" AND l1 STREQUAL "e" AND l2 STREQUAL "c") OR
                     (l0 STREQUAL "b" AND l1 STREQUAL "e" AND l2 STREQUAL "a") OR
                     (l0 STREQUAL "p" AND l1 STREQUAL "a" AND l2 STREQUAL "n") OR
                     (l0 STREQUAL "c" AND l1 STREQUAL "h" AND l2 STREQUAL "i") OR

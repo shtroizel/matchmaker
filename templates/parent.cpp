@@ -45,32 +45,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <matchable/matchable.h>
 
-#include <matchmaker/generated_symbols/aoeu/A/snth_A.h>
-#include <matchmaker/generated_symbols/aoeu/B/snth_B.h>
-#include <matchmaker/generated_symbols/aoeu/C/snth_C.h>
-#include <matchmaker/generated_symbols/aoeu/D/snth_D.h>
-#include <matchmaker/generated_symbols/aoeu/E/snth_E.h>
-#include <matchmaker/generated_symbols/aoeu/F/snth_F.h>
-#include <matchmaker/generated_symbols/aoeu/G/snth_G.h>
-#include <matchmaker/generated_symbols/aoeu/H/snth_H.h>
-#include <matchmaker/generated_symbols/aoeu/I/snth_I.h>
-#include <matchmaker/generated_symbols/aoeu/J/snth_J.h>
-#include <matchmaker/generated_symbols/aoeu/K/snth_K.h>
-#include <matchmaker/generated_symbols/aoeu/L/snth_L.h>
-#include <matchmaker/generated_symbols/aoeu/M/snth_M.h>
-#include <matchmaker/generated_symbols/aoeu/N/snth_N.h>
-#include <matchmaker/generated_symbols/aoeu/O/snth_O.h>
-#include <matchmaker/generated_symbols/aoeu/P/snth_P.h>
-#include <matchmaker/generated_symbols/aoeu/Q/snth_Q.h>
-#include <matchmaker/generated_symbols/aoeu/R/snth_R.h>
-#include <matchmaker/generated_symbols/aoeu/S/snth_S.h>
-#include <matchmaker/generated_symbols/aoeu/T/snth_T.h>
-#include <matchmaker/generated_symbols/aoeu/U/snth_U.h>
-#include <matchmaker/generated_symbols/aoeu/V/snth_V.h>
-#include <matchmaker/generated_symbols/aoeu/W/snth_W.h>
-#include <matchmaker/generated_symbols/aoeu/X/snth_X.h>
-#include <matchmaker/generated_symbols/aoeu/Y/snth_Y.h>
-#include <matchmaker/generated_symbols/aoeu/Z/snth_Z.h>
+#include <matchmaker/generated_symbols/aoeu/esc_A/snth_esc_A.h>
+#include <matchmaker/generated_symbols/aoeu/esc_B/snth_esc_B.h>
+#include <matchmaker/generated_symbols/aoeu/esc_C/snth_esc_C.h>
+#include <matchmaker/generated_symbols/aoeu/esc_D/snth_esc_D.h>
+#include <matchmaker/generated_symbols/aoeu/esc_E/snth_esc_E.h>
+#include <matchmaker/generated_symbols/aoeu/esc_F/snth_esc_F.h>
+#include <matchmaker/generated_symbols/aoeu/esc_G/snth_esc_G.h>
+#include <matchmaker/generated_symbols/aoeu/esc_H/snth_esc_H.h>
+#include <matchmaker/generated_symbols/aoeu/esc_I/snth_esc_I.h>
+#include <matchmaker/generated_symbols/aoeu/esc_J/snth_esc_J.h>
+#include <matchmaker/generated_symbols/aoeu/esc_K/snth_esc_K.h>
+#include <matchmaker/generated_symbols/aoeu/esc_L/snth_esc_L.h>
+#include <matchmaker/generated_symbols/aoeu/esc_M/snth_esc_M.h>
+#include <matchmaker/generated_symbols/aoeu/esc_N/snth_esc_N.h>
+#include <matchmaker/generated_symbols/aoeu/esc_O/snth_esc_O.h>
+#include <matchmaker/generated_symbols/aoeu/esc_P/snth_esc_P.h>
+#include <matchmaker/generated_symbols/aoeu/esc_Q/snth_esc_Q.h>
+#include <matchmaker/generated_symbols/aoeu/esc_R/snth_esc_R.h>
+#include <matchmaker/generated_symbols/aoeu/esc_S/snth_esc_S.h>
+#include <matchmaker/generated_symbols/aoeu/esc_T/snth_esc_T.h>
+#include <matchmaker/generated_symbols/aoeu/esc_U/snth_esc_U.h>
+#include <matchmaker/generated_symbols/aoeu/esc_V/snth_esc_V.h>
+#include <matchmaker/generated_symbols/aoeu/esc_W/snth_esc_W.h>
+#include <matchmaker/generated_symbols/aoeu/esc_X/snth_esc_X.h>
+#include <matchmaker/generated_symbols/aoeu/esc_Y/snth_esc_Y.h>
+#include <matchmaker/generated_symbols/aoeu/esc_Z/snth_esc_Z.h>
 #include <matchmaker/generated_symbols/aoeu/a/snth_a.h>
 #include <matchmaker/generated_symbols/aoeu/b/snth_b.h>
 #include <matchmaker/generated_symbols/aoeu/c/snth_c.h>
@@ -166,7 +166,8 @@ PROPERTYx19_MATCHABLE(
     is_used_in_book,
 
     letter_snth,
-    A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
+    esc_A, esc_B, esc_C, esc_D, esc_E, esc_F, esc_G, esc_H, esc_I, esc_J, esc_K, esc_L, esc_M,
+    esc_N, esc_O, esc_P, esc_Q, esc_R, esc_S, esc_T, esc_U, esc_V, esc_W, esc_X, esc_Y, esc_Z,
     a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
 )
 
@@ -194,32 +195,32 @@ MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_acronym, &mm_is_acrony
 MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_phrase, &mm_is_phrase_snth_##_letter)            \
 MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_used_in_book, &mm_is_used_in_book_snth_##_letter)
 
-_set_properties(A)
-_set_properties(B)
-_set_properties(C)
-_set_properties(D)
-_set_properties(E)
-_set_properties(F)
-_set_properties(G)
-_set_properties(H)
-_set_properties(I)
-_set_properties(J)
-_set_properties(K)
-_set_properties(L)
-_set_properties(M)
-_set_properties(N)
-_set_properties(O)
-_set_properties(P)
-_set_properties(Q)
-_set_properties(R)
-_set_properties(S)
-_set_properties(T)
-_set_properties(U)
-_set_properties(V)
-_set_properties(W)
-_set_properties(X)
-_set_properties(Y)
-_set_properties(Z)
+_set_properties(esc_A)
+_set_properties(esc_B)
+_set_properties(esc_C)
+_set_properties(esc_D)
+_set_properties(esc_E)
+_set_properties(esc_F)
+_set_properties(esc_G)
+_set_properties(esc_H)
+_set_properties(esc_I)
+_set_properties(esc_J)
+_set_properties(esc_K)
+_set_properties(esc_L)
+_set_properties(esc_M)
+_set_properties(esc_N)
+_set_properties(esc_O)
+_set_properties(esc_P)
+_set_properties(esc_Q)
+_set_properties(esc_R)
+_set_properties(esc_S)
+_set_properties(esc_T)
+_set_properties(esc_U)
+_set_properties(esc_V)
+_set_properties(esc_W)
+_set_properties(esc_X)
+_set_properties(esc_Y)
+_set_properties(esc_Z)
 _set_properties(a)
 _set_properties(b)
 _set_properties(c)
@@ -254,32 +255,32 @@ int mm_count_snth()
     static int const ret =
         [&](){
             int r{0};
-            r += mm_count_snth_A();
-            r += mm_count_snth_B();
-            r += mm_count_snth_C();
-            r += mm_count_snth_D();
-            r += mm_count_snth_E();
-            r += mm_count_snth_F();
-            r += mm_count_snth_G();
-            r += mm_count_snth_H();
-            r += mm_count_snth_I();
-            r += mm_count_snth_J();
-            r += mm_count_snth_K();
-            r += mm_count_snth_L();
-            r += mm_count_snth_M();
-            r += mm_count_snth_N();
-            r += mm_count_snth_O();
-            r += mm_count_snth_P();
-            r += mm_count_snth_Q();
-            r += mm_count_snth_R();
-            r += mm_count_snth_S();
-            r += mm_count_snth_T();
-            r += mm_count_snth_U();
-            r += mm_count_snth_V();
-            r += mm_count_snth_W();
-            r += mm_count_snth_X();
-            r += mm_count_snth_Y();
-            r += mm_count_snth_Z();
+            r += mm_count_snth_esc_A();
+            r += mm_count_snth_esc_B();
+            r += mm_count_snth_esc_C();
+            r += mm_count_snth_esc_D();
+            r += mm_count_snth_esc_E();
+            r += mm_count_snth_esc_F();
+            r += mm_count_snth_esc_G();
+            r += mm_count_snth_esc_H();
+            r += mm_count_snth_esc_I();
+            r += mm_count_snth_esc_J();
+            r += mm_count_snth_esc_K();
+            r += mm_count_snth_esc_L();
+            r += mm_count_snth_esc_M();
+            r += mm_count_snth_esc_N();
+            r += mm_count_snth_esc_O();
+            r += mm_count_snth_esc_P();
+            r += mm_count_snth_esc_Q();
+            r += mm_count_snth_esc_R();
+            r += mm_count_snth_esc_S();
+            r += mm_count_snth_esc_T();
+            r += mm_count_snth_esc_U();
+            r += mm_count_snth_esc_V();
+            r += mm_count_snth_esc_W();
+            r += mm_count_snth_esc_X();
+            r += mm_count_snth_esc_Y();
+            r += mm_count_snth_esc_Z();
             r += mm_count_snth_a();
             r += mm_count_snth_b();
             r += mm_count_snth_c();
@@ -379,32 +380,32 @@ std::string const & mm_at_snth(int index)
 int mm_lookup_snth(std::string const & word, bool * found)
 {
     static std::array<std::pair<letter_snth::Type, int>, 52> const io_snth {
-        std::make_pair(letter_snth::A::grab(), letter_boundries[0].first),
-        std::make_pair(letter_snth::B::grab(), letter_boundries[1].first),
-        std::make_pair(letter_snth::C::grab(), letter_boundries[2].first),
-        std::make_pair(letter_snth::D::grab(), letter_boundries[3].first),
-        std::make_pair(letter_snth::E::grab(), letter_boundries[4].first),
-        std::make_pair(letter_snth::F::grab(), letter_boundries[5].first),
-        std::make_pair(letter_snth::G::grab(), letter_boundries[6].first),
-        std::make_pair(letter_snth::H::grab(), letter_boundries[7].first),
-        std::make_pair(letter_snth::I::grab(), letter_boundries[8].first),
-        std::make_pair(letter_snth::J::grab(), letter_boundries[9].first),
-        std::make_pair(letter_snth::K::grab(), letter_boundries[10].first),
-        std::make_pair(letter_snth::L::grab(), letter_boundries[11].first),
-        std::make_pair(letter_snth::M::grab(), letter_boundries[12].first),
-        std::make_pair(letter_snth::N::grab(), letter_boundries[13].first),
-        std::make_pair(letter_snth::O::grab(), letter_boundries[14].first),
-        std::make_pair(letter_snth::P::grab(), letter_boundries[15].first),
-        std::make_pair(letter_snth::Q::grab(), letter_boundries[16].first),
-        std::make_pair(letter_snth::R::grab(), letter_boundries[17].first),
-        std::make_pair(letter_snth::S::grab(), letter_boundries[18].first),
-        std::make_pair(letter_snth::T::grab(), letter_boundries[19].first),
-        std::make_pair(letter_snth::U::grab(), letter_boundries[20].first),
-        std::make_pair(letter_snth::V::grab(), letter_boundries[21].first),
-        std::make_pair(letter_snth::W::grab(), letter_boundries[22].first),
-        std::make_pair(letter_snth::X::grab(), letter_boundries[23].first),
-        std::make_pair(letter_snth::Y::grab(), letter_boundries[24].first),
-        std::make_pair(letter_snth::Z::grab(), letter_boundries[25].first),
+        std::make_pair(letter_snth::esc_A::grab(), letter_boundries[0].first),
+        std::make_pair(letter_snth::esc_B::grab(), letter_boundries[1].first),
+        std::make_pair(letter_snth::esc_C::grab(), letter_boundries[2].first),
+        std::make_pair(letter_snth::esc_D::grab(), letter_boundries[3].first),
+        std::make_pair(letter_snth::esc_E::grab(), letter_boundries[4].first),
+        std::make_pair(letter_snth::esc_F::grab(), letter_boundries[5].first),
+        std::make_pair(letter_snth::esc_G::grab(), letter_boundries[6].first),
+        std::make_pair(letter_snth::esc_H::grab(), letter_boundries[7].first),
+        std::make_pair(letter_snth::esc_I::grab(), letter_boundries[8].first),
+        std::make_pair(letter_snth::esc_J::grab(), letter_boundries[9].first),
+        std::make_pair(letter_snth::esc_K::grab(), letter_boundries[10].first),
+        std::make_pair(letter_snth::esc_L::grab(), letter_boundries[11].first),
+        std::make_pair(letter_snth::esc_M::grab(), letter_boundries[12].first),
+        std::make_pair(letter_snth::esc_N::grab(), letter_boundries[13].first),
+        std::make_pair(letter_snth::esc_O::grab(), letter_boundries[14].first),
+        std::make_pair(letter_snth::esc_P::grab(), letter_boundries[15].first),
+        std::make_pair(letter_snth::esc_Q::grab(), letter_boundries[16].first),
+        std::make_pair(letter_snth::esc_R::grab(), letter_boundries[17].first),
+        std::make_pair(letter_snth::esc_S::grab(), letter_boundries[18].first),
+        std::make_pair(letter_snth::esc_T::grab(), letter_boundries[19].first),
+        std::make_pair(letter_snth::esc_U::grab(), letter_boundries[20].first),
+        std::make_pair(letter_snth::esc_V::grab(), letter_boundries[21].first),
+        std::make_pair(letter_snth::esc_W::grab(), letter_boundries[22].first),
+        std::make_pair(letter_snth::esc_X::grab(), letter_boundries[23].first),
+        std::make_pair(letter_snth::esc_Y::grab(), letter_boundries[24].first),
+        std::make_pair(letter_snth::esc_Z::grab(), letter_boundries[25].first),
         std::make_pair(letter_snth::a::grab(), letter_boundries[26].first),
         std::make_pair(letter_snth::b::grab(), letter_boundries[27].first),
         std::make_pair(letter_snth::c::grab(), letter_boundries[28].first),
@@ -440,14 +441,14 @@ int mm_lookup_snth(std::string const & word, bool * found)
         goto lookup_failed;
 
     if ((int) word.size() <= depth)
-        return mm_lookup_snth_A(word, found);
+        return mm_lookup_snth_esc_A(word, found);
 
     if (word[depth] < 32 || word[depth] > 126)
         goto lookup_failed;
 
     for (int i = 0; i <= depth; ++i)
         if (word[i] < 'A' || (word[i] > 'Z' && word[i] < 'a') || word[i] > 'z')
-            return mm_lookup_snth_A(word, found);
+            return mm_lookup_snth_esc_A(word, found);
 
     {
         int i = word[depth];

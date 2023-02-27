@@ -55,6 +55,10 @@ void prepare_prefixes(SerialTask::Type task)
                 std::cout << "read_prefixes() --> invalid prefix: " << prefix << std::endl;
                 abort();
             }
+
+            if (p[i].rfind("esc_", 0) == 0)
+                p[i] = p[i].substr(4);
+
             p_as_str += p[i];
         }
 

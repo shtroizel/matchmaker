@@ -33,32 +33,32 @@
 #include <matchmaker/generated_symbols/_sbr_/_sbr_.h>
 #include <matchmaker/generated_symbols/_/_.h>
 #include <matchmaker/generated_symbols/_tld_/_tld_.h>
-#include <matchmaker/generated_symbols/A/A.h>
-#include <matchmaker/generated_symbols/B/B.h>
-#include <matchmaker/generated_symbols/C/C.h>
-#include <matchmaker/generated_symbols/D/D.h>
-#include <matchmaker/generated_symbols/E/E.h>
-#include <matchmaker/generated_symbols/F/F.h>
-#include <matchmaker/generated_symbols/G/G.h>
-#include <matchmaker/generated_symbols/H/H.h>
-#include <matchmaker/generated_symbols/I/I.h>
-#include <matchmaker/generated_symbols/J/J.h>
-#include <matchmaker/generated_symbols/K/K.h>
-#include <matchmaker/generated_symbols/L/L.h>
-#include <matchmaker/generated_symbols/M/M.h>
-#include <matchmaker/generated_symbols/N/N.h>
-#include <matchmaker/generated_symbols/O/O.h>
-#include <matchmaker/generated_symbols/P/P.h>
-#include <matchmaker/generated_symbols/Q/Q.h>
-#include <matchmaker/generated_symbols/R/R.h>
-#include <matchmaker/generated_symbols/S/S.h>
-#include <matchmaker/generated_symbols/T/T.h>
-#include <matchmaker/generated_symbols/U/U.h>
-#include <matchmaker/generated_symbols/V/V.h>
-#include <matchmaker/generated_symbols/W/W.h>
-#include <matchmaker/generated_symbols/X/X.h>
-#include <matchmaker/generated_symbols/Y/Y.h>
-#include <matchmaker/generated_symbols/Z/Z.h>
+#include <matchmaker/generated_symbols/esc_A/esc_A.h>
+#include <matchmaker/generated_symbols/esc_B/esc_B.h>
+#include <matchmaker/generated_symbols/esc_C/esc_C.h>
+#include <matchmaker/generated_symbols/esc_D/esc_D.h>
+#include <matchmaker/generated_symbols/esc_E/esc_E.h>
+#include <matchmaker/generated_symbols/esc_F/esc_F.h>
+#include <matchmaker/generated_symbols/esc_G/esc_G.h>
+#include <matchmaker/generated_symbols/esc_H/esc_H.h>
+#include <matchmaker/generated_symbols/esc_I/esc_I.h>
+#include <matchmaker/generated_symbols/esc_J/esc_J.h>
+#include <matchmaker/generated_symbols/esc_K/esc_K.h>
+#include <matchmaker/generated_symbols/esc_L/esc_L.h>
+#include <matchmaker/generated_symbols/esc_M/esc_M.h>
+#include <matchmaker/generated_symbols/esc_N/esc_N.h>
+#include <matchmaker/generated_symbols/esc_O/esc_O.h>
+#include <matchmaker/generated_symbols/esc_P/esc_P.h>
+#include <matchmaker/generated_symbols/esc_Q/esc_Q.h>
+#include <matchmaker/generated_symbols/esc_R/esc_R.h>
+#include <matchmaker/generated_symbols/esc_S/esc_S.h>
+#include <matchmaker/generated_symbols/esc_T/esc_T.h>
+#include <matchmaker/generated_symbols/esc_U/esc_U.h>
+#include <matchmaker/generated_symbols/esc_V/esc_V.h>
+#include <matchmaker/generated_symbols/esc_W/esc_W.h>
+#include <matchmaker/generated_symbols/esc_X/esc_X.h>
+#include <matchmaker/generated_symbols/esc_Y/esc_Y.h>
+#include <matchmaker/generated_symbols/esc_Z/esc_Z.h>
 #include <matchmaker/generated_symbols/a/a.h>
 #include <matchmaker/generated_symbols/b/b.h>
 #include <matchmaker/generated_symbols/c/c.h>
@@ -170,7 +170,8 @@ PROPERTYx19_MATCHABLE(
     _quot_, _hsh_, _dol_, _sqt_, _parl_, _plus_, _mns_, _dot_, _slsh_,
     esc_0, esc_1, esc_2, esc_3, esc_4, esc_5, esc_6, esc_7, esc_8, esc_9,
     _cln_, _gt_, _sbr_, _, _tld_,
-    A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
+    esc_A, esc_B, esc_C, esc_D, esc_E, esc_F, esc_G, esc_H, esc_I, esc_J, esc_K, esc_L, esc_M,
+    esc_N, esc_O, esc_P, esc_Q, esc_R, esc_S, esc_T, esc_U, esc_V, esc_W, esc_X, esc_Y, esc_Z,
     a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
 )
 
@@ -220,32 +221,32 @@ _set_properties(_gt_)
 _set_properties(_sbr_)
 _set_properties(_)
 _set_properties(_tld_)
-_set_properties(A)
-_set_properties(B)
-_set_properties(C)
-_set_properties(D)
-_set_properties(E)
-_set_properties(F)
-_set_properties(G)
-_set_properties(H)
-_set_properties(I)
-_set_properties(J)
-_set_properties(K)
-_set_properties(L)
-_set_properties(M)
-_set_properties(N)
-_set_properties(O)
-_set_properties(P)
-_set_properties(Q)
-_set_properties(R)
-_set_properties(S)
-_set_properties(T)
-_set_properties(U)
-_set_properties(V)
-_set_properties(W)
-_set_properties(X)
-_set_properties(Y)
-_set_properties(Z)
+_set_properties(esc_A)
+_set_properties(esc_B)
+_set_properties(esc_C)
+_set_properties(esc_D)
+_set_properties(esc_E)
+_set_properties(esc_F)
+_set_properties(esc_G)
+_set_properties(esc_H)
+_set_properties(esc_I)
+_set_properties(esc_J)
+_set_properties(esc_K)
+_set_properties(esc_L)
+_set_properties(esc_M)
+_set_properties(esc_N)
+_set_properties(esc_O)
+_set_properties(esc_P)
+_set_properties(esc_Q)
+_set_properties(esc_R)
+_set_properties(esc_S)
+_set_properties(esc_T)
+_set_properties(esc_U)
+_set_properties(esc_V)
+_set_properties(esc_W)
+_set_properties(esc_X)
+_set_properties(esc_Y)
+_set_properties(esc_Z)
 _set_properties(a)
 _set_properties(b)
 _set_properties(c)
@@ -388,83 +389,83 @@ static std::vector<std::pair<int, symbol::Type>> const boundries_by_index =
         boundries.push_back(std::make_pair(b, symbol::_tld_::grab()));
         b += symbol::_tld_::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::A::grab()));
-        b += symbol::A::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_A::grab()));
+        b += symbol::esc_A::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::B::grab()));
-        b += symbol::B::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_B::grab()));
+        b += symbol::esc_B::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::C::grab()));
-        b += symbol::C::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_C::grab()));
+        b += symbol::esc_C::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::D::grab()));
-        b += symbol::D::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_D::grab()));
+        b += symbol::esc_D::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::E::grab()));
-        b += symbol::E::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_E::grab()));
+        b += symbol::esc_E::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::F::grab()));
-        b += symbol::F::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_F::grab()));
+        b += symbol::esc_F::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::G::grab()));
-        b += symbol::G::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_G::grab()));
+        b += symbol::esc_G::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::H::grab()));
-        b += symbol::H::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_H::grab()));
+        b += symbol::esc_H::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::I::grab()));
-        b += symbol::I::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_I::grab()));
+        b += symbol::esc_I::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::J::grab()));
-        b += symbol::J::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_J::grab()));
+        b += symbol::esc_J::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::K::grab()));
-        b += symbol::K::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_K::grab()));
+        b += symbol::esc_K::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::L::grab()));
-        b += symbol::L::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_L::grab()));
+        b += symbol::esc_L::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::M::grab()));
-        b += symbol::M::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_M::grab()));
+        b += symbol::esc_M::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::N::grab()));
-        b += symbol::N::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_N::grab()));
+        b += symbol::esc_N::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::O::grab()));
-        b += symbol::O::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_O::grab()));
+        b += symbol::esc_O::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::P::grab()));
-        b += symbol::P::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_P::grab()));
+        b += symbol::esc_P::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::Q::grab()));
-        b += symbol::Q::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_Q::grab()));
+        b += symbol::esc_Q::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::R::grab()));
-        b += symbol::R::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_R::grab()));
+        b += symbol::esc_R::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::S::grab()));
-        b += symbol::S::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_S::grab()));
+        b += symbol::esc_S::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::T::grab()));
-        b += symbol::T::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_T::grab()));
+        b += symbol::esc_T::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::U::grab()));
-        b += symbol::U::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_U::grab()));
+        b += symbol::esc_U::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::V::grab()));
-        b += symbol::V::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_V::grab()));
+        b += symbol::esc_V::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::W::grab()));
-        b += symbol::W::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_W::grab()));
+        b += symbol::esc_W::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::X::grab()));
-        b += symbol::X::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_X::grab()));
+        b += symbol::esc_X::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::Y::grab()));
-        b += symbol::Y::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_Y::grab()));
+        b += symbol::esc_Y::grab().as_count()();
 
-        boundries.push_back(std::make_pair(b, symbol::Z::grab()));
-        b += symbol::Z::grab().as_count()();
+        boundries.push_back(std::make_pair(b, symbol::esc_Z::grab()));
+        b += symbol::esc_Z::grab().as_count()();
 
         boundries.push_back(std::make_pair(b, symbol::a::grab()));
         b += symbol::a::grab().as_count()();
@@ -617,32 +618,32 @@ int mm_lookup(char const * word, bool * found)
         std::make_pair(symbol::_sbr_::grab(), boundries_by_index[21].first),
         std::make_pair(symbol::_::grab(), boundries_by_index[22].first),
         std::make_pair(symbol::_tld_::grab(), boundries_by_index[23].first),
-        std::make_pair(symbol::A::grab(), boundries_by_index[24].first),
-        std::make_pair(symbol::B::grab(), boundries_by_index[25].first),
-        std::make_pair(symbol::C::grab(), boundries_by_index[26].first),
-        std::make_pair(symbol::D::grab(), boundries_by_index[27].first),
-        std::make_pair(symbol::E::grab(), boundries_by_index[28].first),
-        std::make_pair(symbol::F::grab(), boundries_by_index[29].first),
-        std::make_pair(symbol::G::grab(), boundries_by_index[30].first),
-        std::make_pair(symbol::H::grab(), boundries_by_index[31].first),
-        std::make_pair(symbol::I::grab(), boundries_by_index[32].first),
-        std::make_pair(symbol::J::grab(), boundries_by_index[33].first),
-        std::make_pair(symbol::K::grab(), boundries_by_index[34].first),
-        std::make_pair(symbol::L::grab(), boundries_by_index[35].first),
-        std::make_pair(symbol::M::grab(), boundries_by_index[36].first),
-        std::make_pair(symbol::N::grab(), boundries_by_index[37].first),
-        std::make_pair(symbol::O::grab(), boundries_by_index[38].first),
-        std::make_pair(symbol::P::grab(), boundries_by_index[39].first),
-        std::make_pair(symbol::Q::grab(), boundries_by_index[40].first),
-        std::make_pair(symbol::R::grab(), boundries_by_index[41].first),
-        std::make_pair(symbol::S::grab(), boundries_by_index[42].first),
-        std::make_pair(symbol::T::grab(), boundries_by_index[43].first),
-        std::make_pair(symbol::U::grab(), boundries_by_index[44].first),
-        std::make_pair(symbol::V::grab(), boundries_by_index[45].first),
-        std::make_pair(symbol::W::grab(), boundries_by_index[46].first),
-        std::make_pair(symbol::X::grab(), boundries_by_index[47].first),
-        std::make_pair(symbol::Y::grab(), boundries_by_index[48].first),
-        std::make_pair(symbol::Z::grab(), boundries_by_index[49].first),
+        std::make_pair(symbol::esc_A::grab(), boundries_by_index[24].first),
+        std::make_pair(symbol::esc_B::grab(), boundries_by_index[25].first),
+        std::make_pair(symbol::esc_C::grab(), boundries_by_index[26].first),
+        std::make_pair(symbol::esc_D::grab(), boundries_by_index[27].first),
+        std::make_pair(symbol::esc_E::grab(), boundries_by_index[28].first),
+        std::make_pair(symbol::esc_F::grab(), boundries_by_index[29].first),
+        std::make_pair(symbol::esc_G::grab(), boundries_by_index[30].first),
+        std::make_pair(symbol::esc_H::grab(), boundries_by_index[31].first),
+        std::make_pair(symbol::esc_I::grab(), boundries_by_index[32].first),
+        std::make_pair(symbol::esc_J::grab(), boundries_by_index[33].first),
+        std::make_pair(symbol::esc_K::grab(), boundries_by_index[34].first),
+        std::make_pair(symbol::esc_L::grab(), boundries_by_index[35].first),
+        std::make_pair(symbol::esc_M::grab(), boundries_by_index[36].first),
+        std::make_pair(symbol::esc_N::grab(), boundries_by_index[37].first),
+        std::make_pair(symbol::esc_O::grab(), boundries_by_index[38].first),
+        std::make_pair(symbol::esc_P::grab(), boundries_by_index[39].first),
+        std::make_pair(symbol::esc_Q::grab(), boundries_by_index[40].first),
+        std::make_pair(symbol::esc_R::grab(), boundries_by_index[41].first),
+        std::make_pair(symbol::esc_S::grab(), boundries_by_index[42].first),
+        std::make_pair(symbol::esc_T::grab(), boundries_by_index[43].first),
+        std::make_pair(symbol::esc_U::grab(), boundries_by_index[44].first),
+        std::make_pair(symbol::esc_V::grab(), boundries_by_index[45].first),
+        std::make_pair(symbol::esc_W::grab(), boundries_by_index[46].first),
+        std::make_pair(symbol::esc_X::grab(), boundries_by_index[47].first),
+        std::make_pair(symbol::esc_Y::grab(), boundries_by_index[48].first),
+        std::make_pair(symbol::esc_Z::grab(), boundries_by_index[49].first),
         std::make_pair(symbol::a::grab(), boundries_by_index[50].first),
         std::make_pair(symbol::b::grab(), boundries_by_index[51].first),
         std::make_pair(symbol::c::grab(), boundries_by_index[52].first),

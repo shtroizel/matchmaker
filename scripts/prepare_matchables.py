@@ -77,180 +77,185 @@ def prepare_matchables(workspace_dir, reader_loc, q):
         prefix_file.write(sym[0] + " nil nil nil nil nil\n")
         os.makedirs(out_dir + sym[1])
 
+    prefixes = []
+    for ch in ascii_uppercase:
+        prefixes.append('esc_' + ch)
+    for ch in ascii_lowercase:
+        prefixes.append(ch)
 
-    for l0 in ascii_uppercase + ascii_lowercase:
+    for l0 in prefixes:
         os.makedirs(out_dir + l0)
 
-        for l1 in ascii_uppercase + ascii_lowercase:
+        for l1 in prefixes:
             os.makedirs(out_dir + l0 + "/" + l1)
 
-            if (l0 == "q" and l1 == "u") or                                                                \
-                    (l0 == "p" and l1 == "r") or                                                           \
-                    (l0 == "n" and l1 == "o") or                                                           \
-                    (l0 == "u" and l1 == "n") or                                                           \
-                    (l0 == "c" and l1 == "o") or                                                           \
-                    (l0 == "i" and l1 == "n") or                                                           \
-                    (l0 == "c" and l1 == "a") or                                                           \
-                    (l0 == "s" and l1 == "u") or                                                           \
-                    (l0 == "d" and l1 == "i") or                                                           \
-                    (l0 == "d" and l1 == "e") or                                                           \
-                    (l0 == "p" and l1 == "a") or                                                           \
-                    (l0 == "s" and l1 == "t") or                                                           \
-                    (l0 == "t" and l1 == "r") or                                                           \
-                    (l0 == "r" and l1 == "e") or                                                           \
-                    (l0 == "a" and l1 == "n") or                                                           \
-                    (l0 == "c" and l1 == "h") or                                                           \
-                    (l0 == "m" and l1 == "a") or                                                           \
-                    (l0 == "s" and l1 == "e") or                                                           \
-                    (l0 == "o" and l1 == "v") or                                                           \
-                    (l0 == "m" and l1 == "i") or                                                           \
-                    (l0 == "p" and l1 == "e") or                                                           \
-                    (l0 == "p" and l1 == "o") or                                                           \
-                    (l0 == "m" and l1 == "e") or                                                           \
-                    (l0 == "b" and l1 == "a") or                                                           \
-                    (l0 == "b" and l1 == "e") or                                                           \
-                    (l0 == "h" and l1 == "e") or                                                           \
-                    (l0 == "h" and l1 == "a") or                                                           \
-                    (l0 == "p" and l1 == "h") or                                                           \
-                    (l0 == "m" and l1 == "o") or                                                           \
-                    (l0 == "t" and l1 == "h") or                                                           \
-                    (l0 == "l" and l1 == "a") or                                                           \
-                    (l0 == "e" and l1 == "x") or                                                           \
-                    (l0 == "s" and l1 == "p") or                                                           \
-                    (l0 == "c" and l1 == "r") or                                                           \
-                    (l0 == "h" and l1 == "o") or                                                           \
-                    (l0 == "f" and l1 == "o") or                                                           \
-                    (l0 == "s" and l1 == "c") or                                                           \
-                    (l0 == "b" and l1 == "r") or                                                           \
-                    (l0 == "e" and l1 == "n") or                                                           \
-                    (l0 == "t" and l1 == "e") or                                                           \
-                    (l0 == "t" and l1 == "a") or                                                           \
-                    (l0 == "s" and l1 == "a") or                                                           \
-                    (l0 == "h" and l1 == "y") or                                                           \
-                    (l0 == "c" and l1 == "l") or                                                           \
-                    (l0 == "a" and l1 == "r") or                                                           \
-                    (l0 == "a" and l1 == "l") or                                                           \
-                    (l0 == "l" and l1 == "i") or                                                           \
-                    (l0 == "g" and l1 == "a") or                                                           \
-                    (l0 == "s" and l1 == "o") or                                                           \
-                    (l0 == "r" and l1 == "a") or                                                           \
-                    (l0 == "g" and l1 == "r") or                                                           \
-                    (l0 == "b" and l1 == "i") or                                                           \
-                    (l0 == "p" and l1 == "l") or                                                           \
-                    (l0 == "a" and l1 == "c") or                                                           \
-                    (l0 == "t" and l1 == "o") or                                                           \
-                    (l0 == "p" and l1 == "i") or                                                           \
-                    (l0 == "o" and l1 == "u") or                                                           \
-                    (l0 == "f" and l1 == "l") or                                                           \
-                    (l0 == "s" and l1 == "i") or                                                           \
-                    (l0 == "b" and l1 == "u") or                                                           \
-                    (l0 == "m" and l1 == "u") or                                                           \
-                    (l0 == "s" and l1 == "h") or                                                           \
-                    (l0 == "d" and l1 == "o") or                                                           \
-                    (l0 == "b" and l1 == "o") or                                                           \
-                    (l0 == "n" and l1 == "e") or                                                           \
-                    (l0 == "i" and l1 == "m") or                                                           \
-                    (l0 == "l" and l1 == "e") or                                                           \
-                    (l0 == "f" and l1 == "a") or                                                           \
-                    (l0 == "f" and l1 == "i") or                                                           \
-                    (l0 == "w" and l1 == "a") or                                                           \
-                    (l0 == "a" and l1 == "m") or                                                           \
-                    (l0 == "v" and l1 == "i") or                                                           \
-                    (l0 == "v" and l1 == "e") or                                                           \
-                    (l0 == "l" and l1 == "o") or                                                           \
-                    (l0 == "f" and l1 == "r") or                                                           \
-                    (l0 == "r" and l1 == "o") or                                                           \
-                    (l0 == "b" and l1 == "l") or                                                           \
-                    (l0 == "p" and l1 == "u") or                                                           \
-                    (l0 == "a" and l1 == "p") or                                                           \
-                    (l0 == "c" and l1 == "u") or                                                           \
-                    (l0 == "a" and l1 == "s") or                                                           \
-                    (l0 == "c" and l1 == "e") or                                                           \
-                    (l0 == "p" and l1 == "s") or                                                           \
-                    (l0 == "g" and l1 == "e") or                                                           \
-                    (l0 == "f" and l1 == "e") or                                                           \
-                    (l0 == "M" and l1 == "a") or                                                           \
-                    (l0 == "a" and l1 == "u") or                                                           \
-                    (l0 == "a" and l1 == "d") or                                                           \
-                    (l0 == "d" and l1 == "a") or                                                           \
-                    (l0 == "w" and l1 == "i") or                                                           \
-                    (l0 == "s" and l1 == "y") or                                                           \
-                    (l0 == "g" and l1 == "l") or                                                           \
-                    (l0 == "o" and l1 == "r") or                                                           \
-                    (l0 == "v" and l1 == "a") or                                                           \
-                    (l0 == "g" and l1 == "o") or                                                           \
-                    (l0 == "t" and l1 == "i") or                                                           \
-                    (l0 == "t" and l1 == "u") or                                                           \
-                    (l0 == "e" and l1 == "l") or                                                           \
-                    (l0 == "d" and l1 == "r") or                                                           \
-                    (l0 == "a" and l1 == "b") or                                                           \
-                    (l0 == "e" and l1 == "p") or                                                           \
-                    (l0 == "s" and l1 == "l") or                                                           \
-                    (l0 == "c" and l1 == "i") or                                                           \
-                    (l0 == "e" and l1 == "m") or                                                           \
-                    (l0 == "w" and l1 == "h") or                                                           \
-                    (l0 == "n" and l1 == "a") or                                                           \
-                    (l0 == "f" and l1 == "u") or                                                           \
-                    (l0 == "g" and l1 == "u") or                                                           \
-                    (l0 == "w" and l1 == "o") or                                                           \
-                    (l0 == "C" and l1 == "a") or                                                           \
-                    (l0 == "h" and l1 == "i") or                                                           \
-                    (l0 == "C" and l1 == "h") or                                                           \
-                    (l0 == "C" and l1 == "o") or                                                           \
-                    (l0 == "s" and l1 == "w") or                                                           \
-                    (l0 == "t" and l1 == "w") or                                                           \
-                    (l0 == "r" and l1 == "u") or                                                           \
-                    (l0 == "g" and l1 == "i") or                                                           \
-                    (l0 == "S" and l1 == "a") or                                                           \
-                    (l0 == "B" and l1 == "a") or                                                           \
-                    (l0 == "a" and l1 == "t") or                                                           \
-                    (l0 == "P" and l1 == "a") or                                                           \
-                    (l0 == "d" and l1 == "u") or                                                           \
-                    (l0 == "L" and l1 == "a") or                                                           \
-                    (l0 == "n" and l1 == "i") or                                                           \
-                    (l0 == "A" and l1 == "n") or                                                           \
-                    (l0 == "s" and l1 == "n") or                                                           \
-                    (l0 == "B" and l1 == "e") or                                                           \
-                    (l0 == "H" and l1 == "a") or                                                           \
-                    (l0 == "c" and l1 == "y") or                                                           \
-                    (l0 == "s" and l1 == "m") or                                                           \
-                    (l0 == "j" and l1 == "u") or                                                           \
-                    (l0 == "l" and l1 == "u") or                                                           \
-                    (l0 == "R" and l1 == "o") or                                                           \
-                    (l0 == "o" and l1 == "p") or                                                           \
-                    (l0 == "a" and l1 == "g") or                                                           \
-                    (l0 == "k" and l1 == "i") or                                                           \
-                    (l0 == "M" and l1 == "i") or                                                           \
-                    (l0 == "P" and l1 == "e") or                                                           \
-                    (l0 == "w" and l1 == "e") or                                                           \
-                    (l0 == "M" and l1 == "o") or                                                           \
-                    (l0 == "h" and l1 == "u") or                                                           \
-                    (l0 == "o" and l1 == "n") or                                                           \
-                    (l0 == "B" and l1 == "r") or                                                           \
-                    (l0 == "A" and l1 == "r") or                                                           \
-                    (l0 == "G" and l1 == "r") or                                                           \
-                    (l0 == "P" and l1 == "r") or                                                           \
-                    (l0 == "A" and l1 == "l") or                                                           \
-                    (l0 == "s" and l1 == "k") or                                                           \
-                    (l0 == "H" and l1 == "e") or                                                           \
-                    (l0 == "S" and l1 == "t") or                                                           \
-                    (l0 == "L" and l1 == "e") or                                                           \
-                    (l0 == "D" and l1 == "e") or                                                           \
-                    (l0 == "i" and l1 == "s") or                                                           \
-                    (l0 == "v" and l1 == "o") or                                                           \
-                    (l0 == "k" and l1 == "e") or                                                           \
-                    (l0 == "M" and l1 == "e") or                                                           \
-                    (l0 == "j" and l1 == "a") or                                                           \
-                    (l0 == "u" and l1 == "p") or                                                           \
-                    (l0 == "B" and l1 == "o") or                                                           \
-                    (l0 == "o" and l1 == "b") or                                                           \
-                    (l0 == "m" and l1 == "y") or                                                           \
-                    (l0 == "T" and l1 == "h") or                                                           \
-                    (l0 == "W" and l1 == "h") or                                                           \
-                    (l0 == "h" and l1 == "t") or                                                           \
-                    (l0 == "r" and l1 == "i"):
+            if (l0 == 'q' and l1 == 'u') or                                                                \
+                    (l0 == 'p' and l1 == 'r') or                                                           \
+                    (l0 == 'n' and l1 == 'o') or                                                           \
+                    (l0 == 'u' and l1 == 'n') or                                                           \
+                    (l0 == 'c' and l1 == 'o') or                                                           \
+                    (l0 == 'i' and l1 == 'n') or                                                           \
+                    (l0 == 'c' and l1 == 'a') or                                                           \
+                    (l0 == 's' and l1 == 'u') or                                                           \
+                    (l0 == 'd' and l1 == 'i') or                                                           \
+                    (l0 == 'd' and l1 == 'e') or                                                           \
+                    (l0 == 'p' and l1 == 'a') or                                                           \
+                    (l0 == 's' and l1 == 't') or                                                           \
+                    (l0 == 't' and l1 == 'r') or                                                           \
+                    (l0 == 'r' and l1 == 'e') or                                                           \
+                    (l0 == 'a' and l1 == 'n') or                                                           \
+                    (l0 == 'c' and l1 == 'h') or                                                           \
+                    (l0 == 'm' and l1 == 'a') or                                                           \
+                    (l0 == 's' and l1 == 'e') or                                                           \
+                    (l0 == 'o' and l1 == 'v') or                                                           \
+                    (l0 == 'm' and l1 == 'i') or                                                           \
+                    (l0 == 'p' and l1 == 'e') or                                                           \
+                    (l0 == 'p' and l1 == 'o') or                                                           \
+                    (l0 == 'm' and l1 == 'e') or                                                           \
+                    (l0 == 'b' and l1 == 'a') or                                                           \
+                    (l0 == 'b' and l1 == 'e') or                                                           \
+                    (l0 == 'h' and l1 == 'e') or                                                           \
+                    (l0 == 'h' and l1 == 'a') or                                                           \
+                    (l0 == 'p' and l1 == 'h') or                                                           \
+                    (l0 == 'm' and l1 == 'o') or                                                           \
+                    (l0 == 't' and l1 == 'h') or                                                           \
+                    (l0 == 'l' and l1 == 'a') or                                                           \
+                    (l0 == 'e' and l1 == 'x') or                                                           \
+                    (l0 == 's' and l1 == 'p') or                                                           \
+                    (l0 == 'c' and l1 == 'r') or                                                           \
+                    (l0 == 'h' and l1 == 'o') or                                                           \
+                    (l0 == 'f' and l1 == 'o') or                                                           \
+                    (l0 == 's' and l1 == 'c') or                                                           \
+                    (l0 == 'b' and l1 == 'r') or                                                           \
+                    (l0 == 'e' and l1 == 'n') or                                                           \
+                    (l0 == 't' and l1 == 'e') or                                                           \
+                    (l0 == 't' and l1 == 'a') or                                                           \
+                    (l0 == 's' and l1 == 'a') or                                                           \
+                    (l0 == 'h' and l1 == 'y') or                                                           \
+                    (l0 == 'c' and l1 == 'l') or                                                           \
+                    (l0 == 'a' and l1 == 'r') or                                                           \
+                    (l0 == 'a' and l1 == 'l') or                                                           \
+                    (l0 == 'l' and l1 == 'i') or                                                           \
+                    (l0 == 'g' and l1 == 'a') or                                                           \
+                    (l0 == 's' and l1 == 'o') or                                                           \
+                    (l0 == 'r' and l1 == 'a') or                                                           \
+                    (l0 == 'g' and l1 == 'r') or                                                           \
+                    (l0 == 'b' and l1 == 'i') or                                                           \
+                    (l0 == 'p' and l1 == 'l') or                                                           \
+                    (l0 == 'a' and l1 == 'c') or                                                           \
+                    (l0 == 't' and l1 == 'o') or                                                           \
+                    (l0 == 'p' and l1 == 'i') or                                                           \
+                    (l0 == 'o' and l1 == 'u') or                                                           \
+                    (l0 == 'f' and l1 == 'l') or                                                           \
+                    (l0 == 's' and l1 == 'i') or                                                           \
+                    (l0 == 'b' and l1 == 'u') or                                                           \
+                    (l0 == 'm' and l1 == 'u') or                                                           \
+                    (l0 == 's' and l1 == 'h') or                                                           \
+                    (l0 == 'd' and l1 == 'o') or                                                           \
+                    (l0 == 'b' and l1 == 'o') or                                                           \
+                    (l0 == 'n' and l1 == 'e') or                                                           \
+                    (l0 == 'i' and l1 == 'm') or                                                           \
+                    (l0 == 'l' and l1 == 'e') or                                                           \
+                    (l0 == 'f' and l1 == 'a') or                                                           \
+                    (l0 == 'f' and l1 == 'i') or                                                           \
+                    (l0 == 'w' and l1 == 'a') or                                                           \
+                    (l0 == 'a' and l1 == 'm') or                                                           \
+                    (l0 == 'v' and l1 == 'i') or                                                           \
+                    (l0 == 'v' and l1 == 'e') or                                                           \
+                    (l0 == 'l' and l1 == 'o') or                                                           \
+                    (l0 == 'f' and l1 == 'r') or                                                           \
+                    (l0 == 'r' and l1 == 'o') or                                                           \
+                    (l0 == 'b' and l1 == 'l') or                                                           \
+                    (l0 == 'p' and l1 == 'u') or                                                           \
+                    (l0 == 'a' and l1 == 'p') or                                                           \
+                    (l0 == 'c' and l1 == 'u') or                                                           \
+                    (l0 == 'a' and l1 == 's') or                                                           \
+                    (l0 == 'c' and l1 == 'e') or                                                           \
+                    (l0 == 'p' and l1 == 's') or                                                           \
+                    (l0 == 'g' and l1 == 'e') or                                                           \
+                    (l0 == 'f' and l1 == 'e') or                                                           \
+                    (l0 == 'M' and l1 == 'a') or                                                           \
+                    (l0 == 'a' and l1 == 'u') or                                                           \
+                    (l0 == 'a' and l1 == 'd') or                                                           \
+                    (l0 == 'd' and l1 == 'a') or                                                           \
+                    (l0 == 'w' and l1 == 'i') or                                                           \
+                    (l0 == 's' and l1 == 'y') or                                                           \
+                    (l0 == 'g' and l1 == 'l') or                                                           \
+                    (l0 == 'o' and l1 == 'r') or                                                           \
+                    (l0 == 'v' and l1 == 'a') or                                                           \
+                    (l0 == 'g' and l1 == 'o') or                                                           \
+                    (l0 == 't' and l1 == 'i') or                                                           \
+                    (l0 == 't' and l1 == 'u') or                                                           \
+                    (l0 == 'e' and l1 == 'l') or                                                           \
+                    (l0 == 'd' and l1 == 'r') or                                                           \
+                    (l0 == 'a' and l1 == 'b') or                                                           \
+                    (l0 == 'e' and l1 == 'p') or                                                           \
+                    (l0 == 's' and l1 == 'l') or                                                           \
+                    (l0 == 'c' and l1 == 'i') or                                                           \
+                    (l0 == 'e' and l1 == 'm') or                                                           \
+                    (l0 == 'w' and l1 == 'h') or                                                           \
+                    (l0 == 'n' and l1 == 'a') or                                                           \
+                    (l0 == 'f' and l1 == 'u') or                                                           \
+                    (l0 == 'g' and l1 == 'u') or                                                           \
+                    (l0 == 'w' and l1 == 'o') or                                                           \
+                    (l0 == 'esc_C' and l1 == 'a') or                                                       \
+                    (l0 == 'h' and l1 == 'i') or                                                           \
+                    (l0 == 'esc_C' and l1 == 'h') or                                                       \
+                    (l0 == 'esc_C' and l1 == 'o') or                                                       \
+                    (l0 == 's' and l1 == 'w') or                                                           \
+                    (l0 == 't' and l1 == 'w') or                                                           \
+                    (l0 == 'r' and l1 == 'u') or                                                           \
+                    (l0 == 'g' and l1 == 'i') or                                                           \
+                    (l0 == 'esc_S' and l1 == 'a') or                                                       \
+                    (l0 == 'esc_B' and l1 == 'a') or                                                       \
+                    (l0 == 'a' and l1 == 't') or                                                           \
+                    (l0 == 'esc_P' and l1 == 'a') or                                                       \
+                    (l0 == 'd' and l1 == 'u') or                                                           \
+                    (l0 == 'esc_L' and l1 == 'a') or                                                       \
+                    (l0 == 'n' and l1 == 'i') or                                                           \
+                    (l0 == 'esc_A' and l1 == 'n') or                                                       \
+                    (l0 == 's' and l1 == 'n') or                                                           \
+                    (l0 == 'esc_B' and l1 == 'e') or                                                       \
+                    (l0 == 'esc_H' and l1 == 'a') or                                                       \
+                    (l0 == 'c' and l1 == 'y') or                                                           \
+                    (l0 == 's' and l1 == 'm') or                                                           \
+                    (l0 == 'j' and l1 == 'u') or                                                           \
+                    (l0 == 'l' and l1 == 'u') or                                                           \
+                    (l0 == 'esc_R' and l1 == 'o') or                                                       \
+                    (l0 == 'o' and l1 == 'p') or                                                           \
+                    (l0 == 'a' and l1 == 'g') or                                                           \
+                    (l0 == 'k' and l1 == 'i') or                                                           \
+                    (l0 == 'esc_M' and l1 == 'i') or                                                       \
+                    (l0 == 'esc_P' and l1 == 'e') or                                                       \
+                    (l0 == 'w' and l1 == 'e') or                                                           \
+                    (l0 == 'esc_M' and l1 == 'o') or                                                       \
+                    (l0 == 'h' and l1 == 'u') or                                                           \
+                    (l0 == 'o' and l1 == 'n') or                                                           \
+                    (l0 == 'esc_B' and l1 == 'r') or                                                       \
+                    (l0 == 'esc_A' and l1 == 'r') or                                                       \
+                    (l0 == 'esc_G' and l1 == 'r') or                                                       \
+                    (l0 == 'esc_P' and l1 == 'r') or                                                       \
+                    (l0 == 'esc_A' and l1 == 'l') or                                                       \
+                    (l0 == 's' and l1 == 'k') or                                                           \
+                    (l0 == 'esc_H' and l1 == 'e') or                                                       \
+                    (l0 == 'esc_S' and l1 == 't') or                                                       \
+                    (l0 == 'esc_L' and l1 == 'e') or                                                       \
+                    (l0 == 'esc_D' and l1 == 'e') or                                                       \
+                    (l0 == 'i' and l1 == 's') or                                                           \
+                    (l0 == 'v' and l1 == 'o') or                                                           \
+                    (l0 == 'k' and l1 == 'e') or                                                           \
+                    (l0 == 'esc_M' and l1 == 'e') or                                                       \
+                    (l0 == 'j' and l1 == 'a') or                                                           \
+                    (l0 == 'u' and l1 == 'p') or                                                           \
+                    (l0 == 'esc_B' and l1 == 'o') or                                                       \
+                    (l0 == 'o' and l1 == 'b') or                                                           \
+                    (l0 == 'm' and l1 == 'y') or                                                           \
+                    (l0 == 'esc_T' and l1 == 'h') or                                                       \
+                    (l0 == 'esc_W' and l1 == 'h') or                                                       \
+                    (l0 == 'h' and l1 == 't') or                                                           \
+                    (l0 == 'r' and l1 == 'i'):
 
-                for l2 in ascii_uppercase + ascii_lowercase:
+                for l2 in prefixes:
                     os.makedirs(out_dir + l0 + "/" + l1 + "/" + l2)
 
                     if (l0 == "p" and l1 == "r" and l2 == "e") or                                          \
@@ -348,7 +353,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                             (l0 == "n" and l1 == "o" and l2 == "t") or                                     \
                             (l0 == "t" and l1 == "h" and l2 == "i") or                                     \
                             (l0 == "h" and l1 == "a" and l2 == "r") or                                     \
-                            (l0 == "D" and l1 == "e" and l2 == "c") or                                     \
+                            (l0 == "esc_D" and l1 == "e" and l2 == "c") or                                 \
                             (l0 == "b" and l1 == "e" and l2 == "a") or                                     \
                             (l0 == "p" and l1 == "a" and l2 == "n") or                                     \
                             (l0 == "c" and l1 == "h" and l2 == "i") or                                     \
@@ -367,7 +372,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                             (l0 == "h" and l1 == "t" and l2 == "t") or                                     \
                             (l0 == "c" and l1 == "o" and l2 == "u"):
 
-                        for l3 in ascii_uppercase + ascii_lowercase:
+                        for l3 in prefixes:
                             os.makedirs(out_dir + l0 + "/" + l1 + "/" + l2 + "/" + l3)
 
                             if (l0 == "o" and l1 == "v" and l2 == "e" and l3 == "r") or                    \
@@ -392,7 +397,7 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                                     (l0 == "h" and l1 == "t" and l2 == "t" and l3 == "p") or               \
                                     (l0 == "n" and l1 == "o" and l2 == "n" and l3 == "c"):
 
-                                for l4 in ascii_uppercase + ascii_lowercase:
+                                for l4 in prefixes:
                                     os.makedirs(out_dir + l0 + "/" + l1 + "/" + l2 + "/" + l3 + "/" + l4)
 
                                     if (l0 == "i" and l1 == "n" and l2 == "t" and l3 == "e" and            \
@@ -416,179 +421,38 @@ def prepare_matchables(workspace_dir, reader_loc, q):
                                             (l0 == "u" and l1 == "n" and l2 == "d" and l3 == "e" and       \
                                                     l4 == "r"):
 
-                                        for l5 in ascii_uppercase + ascii_lowercase:
+                                        for l5 in prefixes:
                                             os.makedirs(out_dir + l0 + "/" + l1 + "/" + l2 + "/" + l3      \
                                                     + "/" + l4 + "/" + l5)
 
                                             # six letter prefix
-
                                             prefix_file.write(l0 + " " + l1 + " " + l2 + " " +
                                                               l3 + " " + l4 + " " + l5 + "\n")
-
-
-                                            #cmds.append([
-                                                #data_reader_stage_0,
-                                                #data_reader_stage_0_data,
-                                                #book_vocabulary_dir,
-                                                #out_dir + l0 + "/" + l1 + "/" + l2 + "/" + l3 + "/" + l4   \
-                                                        #+ "/" + l5,
-                                                #l0,
-                                                #l1,
-                                                #l2,
-                                                #l3,
-                                                #l4,
-                                                #l5,
-                                                #q_mode
-                                            #])
                                     else:
-
                                         # five letter prefix
-
                                         prefix_file.write(l0 + " " + l1 + " " + l2 + " " +
                                                           l3 + " " + l4 + " nil\n")
-
-                                        #cmds.append([
-                                            #data_reader_stage_0,
-                                            #data_reader_stage_0_data,
-                                            #book_vocabulary_dir,
-                                            #out_dir + l0 + "/" + l1 + "/" + l2 + "/" + l3 + "/" + l4,
-                                            #l0,
-                                            #l1,
-                                            #l2,
-                                            #l3,
-                                            #l4,
-                                            #"nil",
-                                            #q_mode
-                                        #])
                             else:
-
                                 # four letter prefix
-
                                 prefix_file.write(l0 + " " + l1 + " " + l2 + " " + l3 + " nil nil\n")
-
-                                #cmds.append([
-                                    #data_reader_stage_0,
-                                    #data_reader_stage_0_data,
-                                    #book_vocabulary_dir,
-                                    #out_dir + l0 + "/" + l1 + "/" + l2 + "/" + l3,
-                                    #l0,
-                                    #l1,
-                                    #l2,
-                                    #l3,
-                                    #"nil",
-                                    #"nil",
-                                    #q_mode
-                                #])
                     else:
-
                         # three letter prefix
-
                         prefix_file.write(l0 + " " + l1 + " " + l2 + " nil nil nil\n")
-
-                        #cmds.append([
-                            #data_reader_stage_0,
-                            #data_reader_stage_0_data,
-                            #book_vocabulary_dir,
-                            #out_dir + l0 + "/" + l1 + "/" + l2,
-                            #l0,
-                            #l1,
-                            #l2,
-                            #"nil",
-                            #"nil",
-                            #"nil",
-                            #q_mode
-                        #])
-
             else:
-
                 # two letter prefix
-
                 prefix_file.write(l0 + " " + l1 + " nil nil nil nil\n")
 
-                #cmds.append([
-                    #data_reader_stage_0,
-                    #data_reader_stage_0_data,
-                    #book_vocabulary_dir,
-                    #out_dir + l0 + "/" + l1,
-                    #l0,
-                    #l1,
-                    #"nil",
-                    #"nil",
-                    #"nil",
-                    #"nil",
-                    #q_mode
-                #])
-
-
-    #for sym in [("0", "zero"),
-                #("1", "one"),
-                #("2", "two"),
-                #("3", "three"),
-                #("4", "four"),
-                #("5", "five"),
-                #("6", "six"),
-                #("7", "seven"),
-                #("8", "eight"),
-                #("9", "nine"),
-                #("-", "mns"),
-                #(".", "dot"),
-                #("/", "slsh"),
-                #(":", "cln"),
-                #(""", "quot"),
-                #("#", "hsh"),
-                #("$", "dol"),
-                #("\"", "sqt"),
-                #("(", "pl"),
-                #("+", "pls"),
-                #(">", "gt"),
-                #("_", "uscr"),
-                #("~", "tld")]:
-        ##os.makedirs(out_dir + sym[1])
-
-        #prefix_file.write(sym[1] + " nil nil nil nil nil\n")
-
-        ##cmds.append([
-            ##data_reader_stage_0,
-            ##data_reader_stage_0_data,
-            ##book_vocabulary_dir,
-            ##out_dir + sym[1],
-            ##sym[0],
-            ##"nil",
-            ##"nil",
-            ##"nil",
-            ##"nil",
-            ##"nil",
-            ##q_mode
-        ##])
-
     prefix_file.close()
-
-    error_filename = "/tmp/prepare_matchables_failed"
-    def prepare(cmd):
-        if subprocess.run(cmd).returncode != 0:
-            print("command failed!")
-            print(cmd)
-            with open(error_filename, "w") as f:
-                pass
-
-    if os.path.exists(error_filename):
-        os.remove(error_filename)
-
-    #with ThreadPoolExecutor(multiprocessing.cpu_count()) as executor:
-        #executor.map(prepare, cmds)
 
     cmd = [data_reader_stage_0, data_reader_stage_0_data, book_vocabulary_dir, out_dir,
            prefix_filename, q_mode]
 
-    #print("cmd:")
-    #print(cmd)
-    prepare(cmd)
+    if subprocess.run(cmd).returncode != 0:
+        print("command failed!")
+        print(cmd)
+        exit(1)
 
     os.chdir(start_dir)
-
-    if os.path.exists(error_filename):
-        os.remove(error_filename)
-        exit(1)
 
 
 

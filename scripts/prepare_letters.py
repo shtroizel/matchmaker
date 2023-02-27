@@ -47,7 +47,13 @@ def prepare_letters(workspace_root, q, parents_only):
     print('|                  generating source                  |');
     print('[', end='');
 
-    for l0 in ascii_uppercase + ascii_lowercase:
+    prefixes = []
+    for ch in ascii_uppercase:
+        prefixes.append('esc_' + ch)
+    for ch in ascii_lowercase:
+        prefixes.append(ch)
+
+    for l0 in prefixes:
 
         # update progress
         print('-', end='')
@@ -69,7 +75,7 @@ def prepare_letters(workspace_root, q, parents_only):
                 print(replaced, end='')
 
 
-        for l1 in ascii_uppercase + ascii_lowercase:
+        for l1 in prefixes:
             if not parents_only:
                 os.makedirs(generated_include / 'matchmaker' / 'generated_symbols' / l0 / l1)
 
@@ -187,60 +193,60 @@ def prepare_letters(workspace_root, q, parents_only):
                     (l0 == 'f' and l1 == 'u') or                                                           \
                     (l0 == 'g' and l1 == 'u') or                                                           \
                     (l0 == 'w' and l1 == 'o') or                                                           \
-                    (l0 == 'C' and l1 == 'a') or                                                           \
+                    (l0 == 'esc_C' and l1 == 'a') or                                                       \
                     (l0 == 'h' and l1 == 'i') or                                                           \
-                    (l0 == 'C' and l1 == 'h') or                                                           \
-                    (l0 == 'C' and l1 == 'o') or                                                           \
+                    (l0 == 'esc_C' and l1 == 'h') or                                                       \
+                    (l0 == 'esc_C' and l1 == 'o') or                                                       \
                     (l0 == 's' and l1 == 'w') or                                                           \
                     (l0 == 't' and l1 == 'w') or                                                           \
                     (l0 == 'r' and l1 == 'u') or                                                           \
                     (l0 == 'g' and l1 == 'i') or                                                           \
-                    (l0 == 'S' and l1 == 'a') or                                                           \
-                    (l0 == 'B' and l1 == 'a') or                                                           \
+                    (l0 == 'esc_S' and l1 == 'a') or                                                       \
+                    (l0 == 'esc_B' and l1 == 'a') or                                                       \
                     (l0 == 'a' and l1 == 't') or                                                           \
-                    (l0 == 'P' and l1 == 'a') or                                                           \
+                    (l0 == 'esc_P' and l1 == 'a') or                                                       \
                     (l0 == 'd' and l1 == 'u') or                                                           \
-                    (l0 == 'L' and l1 == 'a') or                                                           \
+                    (l0 == 'esc_L' and l1 == 'a') or                                                       \
                     (l0 == 'n' and l1 == 'i') or                                                           \
-                    (l0 == 'A' and l1 == 'n') or                                                           \
+                    (l0 == 'esc_A' and l1 == 'n') or                                                       \
                     (l0 == 's' and l1 == 'n') or                                                           \
-                    (l0 == 'B' and l1 == 'e') or                                                           \
-                    (l0 == 'H' and l1 == 'a') or                                                           \
+                    (l0 == 'esc_B' and l1 == 'e') or                                                       \
+                    (l0 == 'esc_H' and l1 == 'a') or                                                       \
                     (l0 == 'c' and l1 == 'y') or                                                           \
                     (l0 == 's' and l1 == 'm') or                                                           \
                     (l0 == 'j' and l1 == 'u') or                                                           \
                     (l0 == 'l' and l1 == 'u') or                                                           \
-                    (l0 == 'R' and l1 == 'o') or                                                           \
+                    (l0 == 'esc_R' and l1 == 'o') or                                                       \
                     (l0 == 'o' and l1 == 'p') or                                                           \
                     (l0 == 'a' and l1 == 'g') or                                                           \
                     (l0 == 'k' and l1 == 'i') or                                                           \
-                    (l0 == 'M' and l1 == 'i') or                                                           \
-                    (l0 == 'P' and l1 == 'e') or                                                           \
+                    (l0 == 'esc_M' and l1 == 'i') or                                                       \
+                    (l0 == 'esc_P' and l1 == 'e') or                                                       \
                     (l0 == 'w' and l1 == 'e') or                                                           \
-                    (l0 == 'M' and l1 == 'o') or                                                           \
+                    (l0 == 'esc_M' and l1 == 'o') or                                                       \
                     (l0 == 'h' and l1 == 'u') or                                                           \
                     (l0 == 'o' and l1 == 'n') or                                                           \
-                    (l0 == 'B' and l1 == 'r') or                                                           \
-                    (l0 == 'A' and l1 == 'r') or                                                           \
-                    (l0 == 'G' and l1 == 'r') or                                                           \
-                    (l0 == 'P' and l1 == 'r') or                                                           \
-                    (l0 == 'A' and l1 == 'l') or                                                           \
+                    (l0 == 'esc_B' and l1 == 'r') or                                                       \
+                    (l0 == 'esc_A' and l1 == 'r') or                                                       \
+                    (l0 == 'esc_G' and l1 == 'r') or                                                       \
+                    (l0 == 'esc_P' and l1 == 'r') or                                                       \
+                    (l0 == 'esc_A' and l1 == 'l') or                                                       \
                     (l0 == 's' and l1 == 'k') or                                                           \
-                    (l0 == 'H' and l1 == 'e') or                                                           \
-                    (l0 == 'S' and l1 == 't') or                                                           \
-                    (l0 == 'L' and l1 == 'e') or                                                           \
-                    (l0 == 'D' and l1 == 'e') or                                                           \
+                    (l0 == 'esc_H' and l1 == 'e') or                                                       \
+                    (l0 == 'esc_S' and l1 == 't') or                                                       \
+                    (l0 == 'esc_L' and l1 == 'e') or                                                       \
+                    (l0 == 'esc_D' and l1 == 'e') or                                                       \
                     (l0 == 'i' and l1 == 's') or                                                           \
                     (l0 == 'v' and l1 == 'o') or                                                           \
                     (l0 == 'k' and l1 == 'e') or                                                           \
-                    (l0 == 'M' and l1 == 'e') or                                                           \
+                    (l0 == 'esc_M' and l1 == 'e') or                                                       \
                     (l0 == 'j' and l1 == 'a') or                                                           \
                     (l0 == 'u' and l1 == 'p') or                                                           \
-                    (l0 == 'B' and l1 == 'o') or                                                           \
+                    (l0 == 'esc_B' and l1 == 'o') or                                                       \
                     (l0 == 'o' and l1 == 'b') or                                                           \
                     (l0 == 'm' and l1 == 'y') or                                                           \
-                    (l0 == 'T' and l1 == 'h') or                                                           \
-                    (l0 == 'W' and l1 == 'h') or                                                           \
+                    (l0 == 'esc_T' and l1 == 'h') or                                                       \
+                    (l0 == 'esc_W' and l1 == 'h') or                                                       \
                     (l0 == 'h' and l1 == 't') or                                                           \
                     (l0 == 'r' and l1 == 'i'):
 
@@ -254,7 +260,7 @@ def prepare_letters(workspace_root, q, parents_only):
                         print(replaced, end='')
 
 
-                for l2 in ascii_uppercase + ascii_lowercase:
+                for l2 in prefixes:
                     if not parents_only:
                         os.makedirs(generated_include / 'matchmaker' / 'generated_symbols'                 \
                                 / l0 / l1 / l2)
@@ -360,7 +366,7 @@ def prepare_letters(workspace_root, q, parents_only):
                             (l0 == 'n' and l1 == 'o' and l2 == 't') or                                     \
                             (l0 == 't' and l1 == 'h' and l2 == 'i') or                                     \
                             (l0 == 'h' and l1 == 'a' and l2 == 'r') or                                     \
-                            (l0 == 'D' and l1 == 'e' and l2 == 'c') or                                     \
+                            (l0 == 'esc_D' and l1 == 'e' and l2 == 'c') or                                 \
                             (l0 == 'b' and l1 == 'e' and l2 == 'a') or                                     \
                             (l0 == 'p' and l1 == 'a' and l2 == 'n') or                                     \
                             (l0 == 'c' and l1 == 'h' and l2 == 'i') or                                     \
@@ -389,7 +395,7 @@ def prepare_letters(workspace_root, q, parents_only):
                                 print(replaced, end='')
 
 
-                        for l3 in ascii_uppercase + ascii_lowercase:
+                        for l3 in prefixes:
                             if not parents_only:
                                 os.makedirs(generated_include / 'matchmaker' / 'generated_symbols'         \
                                         / l0 / l1 / l2 / l3)
@@ -431,7 +437,7 @@ def prepare_letters(workspace_root, q, parents_only):
                                                 + l3)
                                         print(replaced, end='')
 
-                                for l4 in ascii_uppercase + ascii_lowercase:
+                                for l4 in prefixes:
                                     if not parents_only:
                                         os.makedirs(generated_include / 'matchmaker' / 'generated_symbols' \
                                                 / l0 / l1 / l2 / l3 / l4)
@@ -478,7 +484,7 @@ def prepare_letters(workspace_root, q, parents_only):
                                         if parents_only:
                                             continue
 
-                                        for l5 in ascii_uppercase + ascii_lowercase:
+                                        for l5 in prefixes:
                                             os.makedirs(generated_include / 'matchmaker' /                 \
                                                     'generated_symbols' / l0 / l1 / l2 / l3 / l4 / l5)
 
