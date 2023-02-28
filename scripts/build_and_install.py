@@ -20,17 +20,15 @@ def usage():
     print('    -i  --install_dir             install directory')
     print('                                    * default is <matchmaker root>/install')
     print('                                    * relative paths are relative to <build_dir>\n')
-    print('    -c  --clang                   force use of clang compiler')
+    print('    -c  --clang                   force use of clang compiler (clang build currently broken!)')
     print('                                    * use system compiler by default\n')
     print('    -r  --retain                  retain previous build')
     print('                                    * continuation/incremental building')
     print('                                    * implies \'-l\'\n')
     print('    -l  --retain_leaves           retain most of previous build')
-    print('                                    * implies \'-m\'')
     print('                                    * parents are rebuilt')
     print('                                    * matchmaker interface is rebuilt')
-    print('                                    * leaves are left alone\n')
-    print('    -m  --retain_matchables       retain generated matchables')
+    print('                                    * leaves are left alone')
     print('                                    * skips building of matchable')
     print('                                    * skips building and running of data readers\n')
     print('    -f  --force_stage_1           force stage 1 complete rebuild even when incremental')
@@ -52,10 +50,8 @@ def usage():
 
 
 
-def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force_stage_1, jobs,
+def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
                       build_dir, install_dir, atomic_libs, q, debug):
-    print('\n\n************** matchmaker **************\n\n')
-    print('starting stage 0 ...\n\n')
 
     start_dir = os.getcwd()
 
@@ -137,19 +133,17 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             shutil.copy(matchmaker_root + 'workspace_common/config.cmake.in',
                         stage_0_workspace_dir + 'config.cmake.in')
 
-        print('preparing matchmaker code...\n')
         if os.name == 'nt':
-            prepare_letters_cmd = ['python', 'scripts\\prepare_letters.py', '-w', stage_0_workspace_dir]
+            generate_code_cmd = ['python', 'scripts\\generate_code.py', '-w', stage_0_workspace_dir]
         else:
-            prepare_letters_cmd = ['scripts/prepare_letters.py', '-w', stage_0_workspace_dir]
+            generate_code_cmd = ['scripts/generate_code.py', '-w', stage_0_workspace_dir]
         if retain_leaves:
-            prepare_letters_cmd.append('-p')
-        if subprocess.run(prepare_letters_cmd).returncode != 0:
-            print('prepare_letters.py failed')
+            generate_code_cmd.append('-p')
+        if subprocess.run(generate_code_cmd).returncode != 0:
+            print('generate_code.py failed')
             exit(1)
-        print('\n\nmatchmaker code ready!')
 
-        if not retain_matchables and not retain_leaves:
+        if not retain_leaves:
 
             # first build and install matchable for each stage
             # matchable is included (installed with) all stages
@@ -170,9 +164,12 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
                 print('matchable failed to build for stage 0')
                 exit(1)
 
+        if not retain_leaves or force_stage_1:
+
             # build matchable for stage 1
             build_matchable_cmd = ['matchable/scripts/build_and_install.py']
             build_matchable_cmd.append('-j' + jobs)
+            build_matchable_cmd.append('-l')
             if use_clang:
                 build_matchable_cmd.append('-c')
             build_matchable_cmd.append('-b')
@@ -183,10 +180,9 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
                 print('matchable failed to build for stage 1')
                 exit(1)
 
-            print('\n\nmatchable ready!')
+        if not retain_leaves:
 
             # then build and install data reader for stage 0
-            print('\n\nbuild and install data reader for stage 0:\n\n')
             build_data_reader_cmd = ['data_reader/stage_0/scripts/build_and_install.py']
             build_data_reader_cmd.append('-b')
             build_data_reader_cmd.append('build_mm' + suffix)
@@ -206,19 +202,37 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
                     cmd_as_str += c
                 print('command was: ' + cmd_as_str)
                 exit(1)
-            print('\n\nstage 0 data reader ready!')
 
-            # prepare_matchables for stage 0
+            # run data reader for stage 0
             print('\n\ncreating stage 0 matchables...')
-            prepare_matchables_cmd = ['scripts/prepare_matchables.py', '-w', stage_0_workspace_dir]
-            prepare_matchables_cmd.append('-d')
-            prepare_matchables_cmd.append('data_reader/stage_0/install_mm' + suffix)
-            if q:
-                prepare_matchables_cmd.append('-q')
-            if subprocess.run(prepare_matchables_cmd).returncode != 0:
-                print('failed to prepare matchables for stage 0!')
+
+            book_vocabulary_dir = stage_0_workspace_dir + "/book_vocabulary/"
+            shutil.rmtree(book_vocabulary_dir, ignore_errors=True)
+            os.makedirs(book_vocabulary_dir)
+
+            reader_loc = matchmaker_root + 'data_reader/stage_0/install_mm' + suffix
+            data_reader_stage_0 = reader_loc + "/bin/data_reader_stage_0"
+            data_reader_stage_0_data = reader_loc + "/share/matchmaker/data_reader_stage_0/data"
+            out_dir = stage_0_workspace_dir + "/generated_include/matchmaker/generated_matchables/"
+            prefix_filename = stage_0_workspace_dir + "/prefix_list"
+
+            run_data_reader_cmd = [data_reader_stage_0, data_reader_stage_0_data, book_vocabulary_dir,
+                                   out_dir, prefix_filename, q_mode]
+            if subprocess.run(run_data_reader_cmd).returncode != 0:
+                print('\ndata_reader_stage_0 failed')
+                build_cmd_as_str = ''
+                for c in build_data_reader_cmd:
+                    build_cmd_as_str += ' '
+                    build_cmd_as_str += c
+                print('\nbuild command was:' + build_cmd_as_str)
+                cmd_as_str = ''
+                for c in run_data_reader_cmd:
+                    cmd_as_str += ' '
+                    cmd_as_str += c
+                print('  run command was:' + cmd_as_str)
                 exit(1)
-            print('\n\nstage 0 matchables ready!')
+
+        print('\n\nmatchables are ready!')
 
 
         # create longest_words.h for stage 0
@@ -238,7 +252,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
 
     os.chdir(stage_0_build_dir)
 
-    print('\n\nMATCHMAKER!\n\n')
+    print('\n\nbegin first stage matchmaker build - this will take a while...\n\n')
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + stage_0_install_prefix]
 
@@ -321,7 +335,7 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             shutil.copytree(stage_0_workspace_dir + 'generated_include/matchmaker/generated_symbols',
                             stage_1_workspace_dir + 'generated_include/matchmaker/generated_symbols')
 
-        if (not retain_matchables and not retain_leaves) or not os.path.exists(
+        if not retain_leaves or not os.path.exists(
                 stage_1_workspace_dir + 'generated_include/matchmaker/generated_matchables'):
             shutil.rmtree(stage_1_workspace_dir + 'generated_include/matchmaker/generated_matchables',
                           ignore_errors=True)
@@ -337,7 +351,6 @@ def build_and_install(use_clang, retain, retain_leaves, retain_matchables, force
             build_data_reader_cmd.append('-i')
             build_data_reader_cmd.append('../install_mm' + suffix)
             build_data_reader_cmd.append('-m')
-            # build_data_reader_cmd.append('../../matchable/install_mm' + suffix + '/lib/matchable/cmake')
             build_data_reader_cmd.append(abs_install_dir + '/lib/matchable/cmake')
             build_data_reader_cmd.append('-s')
             build_data_reader_cmd.append(stage_0_install_prefix + '/lib/matchmaker' + suffix + '/cmake')
@@ -435,7 +448,7 @@ def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crlmfj:aql:d',
                 ['help', 'build_dir', 'install_dir', 'clang', 'retain', 'retain_leaves',
-                 'retain_matchables', 'force_stage_1', 'jobs', 'atomic_libs', 'q', 'memory_usage_limit',
+                 'force_stage_1', 'jobs', 'atomic_libs', 'q', 'memory_usage_limit',
                  'debug'])
     except getopt.GetoptError as err:
         print(err)
@@ -445,7 +458,6 @@ def main():
     use_clang = False
     retain = False
     retain_leaves = False
-    retain_matchables = False
     force_stage_1 = False
     jobs = str(multiprocessing.cpu_count())
     build_dir = ''
@@ -464,8 +476,6 @@ def main():
             retain = True
         elif o in ('-l', '--retain_leaves'):
             retain_leaves = True
-        elif o in ('-m', '--retain_matchables'):
-            retain_matchables = True
         elif o in ('-f', '--force_stage_1'):
             force_stage_1 = True
         elif o in ('-j', '--jobs'):
@@ -483,7 +493,7 @@ def main():
         else:
             assert False, "unhandled option"
 
-    build_and_install(use_clang, retain, retain_leaves, retain_matchables, force_stage_1, jobs, build_dir,
+    build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs, build_dir,
                       install_dir, atomic_libs, q, debug)
 
     exit(0)
