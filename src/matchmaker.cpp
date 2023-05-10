@@ -297,10 +297,6 @@ static std::vector<std::pair<int, symbol::Type>> const boundries_by_index =
 //     //
 //     //     2) unroll the super-cool matchable variant iteration which is tedious and typo prone but
 //     //        if correct will preserve stability, simplicity and performance
-//     //
-//     //     3) implement "by_index" iterators in matchable instead of using a second vector. this could
-//     //        be cool but violates kiss, destablizes matchable and for what? this? if the terms need it
-//     //        then maybe someday...
 //     [](){
 //         int b{0};
 //         std::vector<std::pair<int, symbol::Type>> boundries;
