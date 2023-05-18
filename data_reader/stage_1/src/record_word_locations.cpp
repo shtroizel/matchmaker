@@ -48,9 +48,18 @@ bool record_word_locations(SerialTask::Type task)
                     BookWord const & bw = books[b].chapters[ch].paragraphs[p][w];
 
                     s = mm_at(bw.word, &len);
-                    if ((len != 1 || s[0] == 'Q' || s[0] == 'q') &&
-                            strcmp(s, "the") != 0 && strcmp(s, "The") != 0 &&
-                            strcmp(s, "an") != 0 && strcmp(s, "An") != 0)
+                    if (
+                        (len != 1 || s[0] == 'Q' || s[0] == 'q') &&
+                        strcmp(s, "the") != 0 &&
+                        strcmp(s, "The") != 0 &&
+                        strcmp(s, "an") != 0 &&
+                        strcmp(s, "An") != 0 &&
+                        strcmp(s, "http") != 0 &&
+                        strcmp(s, ">>") != 0 &&
+                        strcmp(s, "~~~") != 0 &&
+                        strcmp(s, "~~:") != 0 &&
+                        strcmp(s, "]~~") != 0
+                    )
                     {
                         book_indexes[bw.word].push_back(b);
                         chapter_indexes[bw.word].push_back(ch);

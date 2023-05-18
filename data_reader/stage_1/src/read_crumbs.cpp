@@ -26,14 +26,121 @@
 
 
 
+MATCHABLE(
+    ParseStatus,
+    Failed,
+    Success,
+    Finished
+)
+
+ParseStatus::Type parse_post_start(
+    std::string const & line,
+    bool within_linked_post,
+    int & post,
+    FILE * input_file,
+    Book & crumbs
+);
+
+ParseStatus::Type parse_linked_post(
+    std::string const & line,
+    bool within_linked_post,
+    int & post,
+    FILE * input_file,
+    Book & crumbs
+);
+
+ParseStatus::Type parse_image(
+    std::string const & line,
+    bool within_linked_post,
+    int & post,
+    FILE * input_file,
+    Book & crumbs
+);
+
+ParseStatus::Type parse_archived_link(
+    std::string const & line,
+    bool within_linked_post,
+    int & post,
+    FILE * input_file,
+    Book & crumbs
+);
+
+ParseStatus::Type parse_hyperlink(
+    std::string const & line,
+    bool within_linked_post,
+    int & post,
+    FILE * input_file,
+    Book & crumbs
+);
+
+ParseStatus::Type parse_body_line(
+    std::string const & line,
+    bool within_linked_post,
+    int & post,
+    FILE * input_file,
+    Book & crumbs
+);
+
+
+using ParseFunc = std::function<ParseStatus::Type (std::string const & line,
+                                                   bool within_linked_post,
+                                                   int & post,
+                                                   FILE * input_file,
+                                                   Book & crumbs)>;
+
+PROPERTYx1_MATCHABLE(
+    ParseFunc, parse_func,
+
+    LineStart,
+
+    Post,
+    LinkedPost,
+    Image,
+    ArchivedLink,
+    Hyperlink
+)
+MATCHABLE_VARIANT_PROPERTY_VALUE(LineStart, Post, parse_func, &parse_post_start)
+MATCHABLE_VARIANT_PROPERTY_VALUE(LineStart, LinkedPost, parse_func, &parse_linked_post)
+MATCHABLE_VARIANT_PROPERTY_VALUE(LineStart, Image, parse_func, &parse_image)
+MATCHABLE_VARIANT_PROPERTY_VALUE(LineStart, ArchivedLink, parse_func, &parse_archived_link)
+MATCHABLE_VARIANT_PROPERTY_VALUE(LineStart, Hyperlink, parse_func, &parse_hyperlink)
+MATCHABLE_NIL_PROPERTY_VALUE(LineStart, parse_func, &parse_body_line)
+
+
+
+MATCHABLE(
+    LineStartCode,
+    esc__tld__tld__cln_,
+    esc__gt__gt_,
+    esc__tld__tld__tld_,
+    esc__sbr__tld__tld_,
+    http
+)
+
+
+// lookup tables for converting between LineStart and LineStartCode
+matchable::MatchBox<LineStart::Type, LineStartCode::Type> const LineStart_as_code {
+    { LineStart::Post::grab(), LineStartCode::esc__tld__tld__cln_::grab() },
+    { LineStart::LinkedPost::grab(), LineStartCode::esc__gt__gt_::grab() },
+    { LineStart::Image::grab(), LineStartCode::esc__tld__tld__tld_::grab() },
+    { LineStart::ArchivedLink::grab(), LineStartCode::esc__sbr__tld__tld_::grab() },
+    { LineStart::Hyperlink::grab(), LineStartCode::http::grab() },
+};
+matchable::MatchBox<LineStartCode::Type, LineStart::Type> const code_as_LineStart {
+    { LineStartCode::esc__tld__tld__cln_::grab(), LineStart::Post::grab() },
+    { LineStartCode::esc__gt__gt_::grab(), LineStart::LinkedPost::grab() },
+    { LineStartCode::esc__tld__tld__tld_::grab(), LineStart::Image::grab() },
+    { LineStartCode::esc__sbr__tld__tld_::grab(), LineStart::ArchivedLink::grab() },
+    { LineStartCode::http::grab(), LineStart::Hyperlink::grab() },
+};
+
+
 bool read_crumbs(
     std::string const & DATA_DIR,
-    IndexTable const & embedded_words,
     Book & book
 );
 
 bool read_chapter(
-    IndexTable const & embedded_words,
     FILE * input_file,
     Book & crumbs,
     int & chapter
@@ -45,16 +152,379 @@ bool read_header(std::string const & header, Chapter & chapter);
 
 void tokenize(std::string const & str, char const delim, std::vector<std::string> & out);
 
-
-bool read_link(int link_as_term, std::vector<int> & lines);
+bool read_link(std::string const & link_number_as_string, std::vector<std::string> & lines);
 
 bool read_link_line(FILE * f, std::string & line);
 
+void add_to_paragraph(
+    int word,
+    std::deque<int> parents,
+    int parent_start,
+    int index_within_parent,
+    bool referenced,
+    std::vector<BookWord> & paragraph
+);
+
+
+
+ParseStatus::Type parse_post_start(
+    std::string const & line,
+    bool within_linked_post,
+    int & post,
+    FILE * input_file,
+    Book & crumbs
+)
+{
+    if (within_linked_post)
+    {
+        std::cout << "FAILED!\nparse_post_start() called within linked post, post: " << post << std::endl;
+        return ParseStatus::Failed::grab();
+    }
+
+    ++post;
+    crumbs.chapters.push_back(Chapter());
+
+    // first read the post number (chapter title)
+    std::string post_number = line.substr(3);
+    bool term_exists{false};
+    int index = mm_lookup(post_number.c_str(), &term_exists);
+    if (!term_exists)
+    {
+        std::cout << "FAILED!\nencountered '" << post_number << "' which is not in the dictionary!"
+                    << std::endl;
+        return ParseStatus::Failed::grab();
+    }
+    if (std::to_string(post) != mm_at(index, nullptr))
+    {
+        std::cout << "FAILED!\n"
+                    << "post_number: " << post_number
+                    << "\nencountered '" << mm_at(index, nullptr)
+                    << "' but " << post << " expected" << std::endl;
+        return ParseStatus::Failed::grab();
+    }
+    crumbs.chapters.back().title.push_back(index);
+
+    // then read the post's header (chapter subtitle)
+    std::string subtitle_line;
+    if (!read_line(input_file, subtitle_line))
+    {
+        std::cout << "FAILED!\nunexpected end of file within post " << post_number << std::endl;
+        return ParseStatus::Failed::grab();
+    }
+    if (!read_header(subtitle_line, crumbs.chapters.back()))
+    {
+        std::cout << "failed to read header for post " << post_number << std::endl;
+        return ParseStatus::Failed::grab();
+    }
+
+    return ParseStatus::Success::grab();
+}
+
+
+ParseStatus::Type parse_linked_post(
+    std::string const & line,
+    bool within_linked_post,
+    int & post,
+    FILE * input_file,
+    Book & crumbs
+)
+{
+    std::vector<BookWord> link_paragraph;
+
+    // split up link line into start code, number, and any extra chars (if any)
+    LineStartCode::Type start_code = LineStart_as_code.at(LineStart::LinkedPost::grab());
+    if (line.size() <= start_code.as_string().size())
+    {
+        std::cout << "FAILED\nLinked post start code but missing number! post: " << post << std::endl;
+        return ParseStatus::Failed::grab();
+    }
+    std::string line_without_start_code = line.substr(start_code.as_string().size());
+    std::string link_number_as_string;
+    bool is_link{true};
+    size_t i = 0;
+    for (; is_link && i < line_without_start_code.size(); ++i)
+    {
+        is_link = line_without_start_code[i] >= '0' && line_without_start_code[i] <= '9';
+        if (is_link)
+            link_number_as_string += line_without_start_code[i];
+        else
+            --i;
+    }
+    std::string extra_chars;
+    for (; i < line_without_start_code.size(); ++i)
+        extra_chars += line_without_start_code[i];
+
+    // line starts with link's start code but is not a link! (parse entire line as normal body line)
+    if (link_number_as_string.empty() || (extra_chars.size() > 0 && line_without_start_code[i] != ' '))
+        return parse_body_line(line, within_linked_post, post, input_file, crumbs);
+
+    // first create a word for the start code
+    bool term_exists{false};
+    int code_as_term = mm_lookup(start_code.as_string().c_str(), &term_exists);
+    if (!term_exists)
+    {
+        std::cout << "FAILED!\nstart code '" << start_code
+                    << "' not in the dictionary! post: " << post << std::endl;
+        return ParseStatus::Failed::grab();
+    }
+    BookWord code_bw;
+    code_bw.word = code_as_term;
+    code_bw.ancestors.clear();
+    code_bw.first_ancestor_start_index = -1;
+    code_bw.index_within_first_ancestor = -1;
+    code_bw.referenced = within_linked_post;
+    link_paragraph.push_back(code_bw);
+
+    // then create term for the number part of the link
+    int number_as_term = mm_lookup(link_number_as_string.c_str(), &term_exists);
+    if (!term_exists)
+    {
+        std::cout << "FAILED!\nlink number: '" << link_number_as_string
+                    << "' not in the dictionary! post: " << post << std::endl;
+        return ParseStatus::Failed::grab();
+    }
+    BookWord number_bw;
+    number_bw.word = number_as_term;
+    number_bw.ancestors.clear();
+    number_bw.first_ancestor_start_index = -1;
+    number_bw.index_within_first_ancestor = -1;
+    number_bw.referenced = within_linked_post;
+    link_paragraph.push_back(number_bw);
+
+    // then create terms for each extra char (if any)
+    for (char ch : extra_chars)
+    {
+        int ch_as_term = mm_lookup(std::string(1, ch).c_str(), &term_exists);
+        if (!term_exists)
+        {
+            std::cout << "FAILED!\nchar '" << ch << "' not in the dictionary! post: " << post << std::endl;
+            return ParseStatus::Failed::grab();
+        }
+        BookWord ch_bw;
+        ch_bw.word = ch_as_term;
+        ch_bw.ancestors.clear();
+        ch_bw.first_ancestor_start_index = -1;
+        ch_bw.index_within_first_ancestor = -1;
+        ch_bw.referenced = within_linked_post;
+        link_paragraph.push_back(ch_bw);
+    }
+
+    // add the link line paragraph to the last chapter
+    crumbs.chapters.back().paragraphs.push_back(link_paragraph);
+
+    // no recursively linked content!
+    // links within linked text exist but as single lines only (without content)
+    // links with anything other than numbers following the start code are considered invalid (no content)
+    if (!within_linked_post && extra_chars.empty())
+    {
+        std::vector<std::string> content_lines;
+        if (!read_link(link_number_as_string, content_lines))
+        {
+            std::cout << "failed to read link content for link '" << link_number_as_string
+                      << "' within post: " << post << std::endl;
+            ParseStatus::Failed::grab();
+        }
+
+        for (std::string const & content_line : content_lines)
+        {
+            // get content line's start code
+            LineStart::Type content_line_start;
+            for (auto code : LineStartCode::variants())
+            {
+                if (content_line.rfind(code.as_string(), 0) == 0)
+                {
+                    content_line_start = code_as_LineStart.at(code);
+                    break;
+                }
+            }
+
+            ParseStatus::Type ret = content_line_start.as_parse_func()(
+                                        content_line,
+                                        true, // within_linked_post!
+                                        post,
+                                        input_file,
+                                        crumbs
+                                    );
+
+            if (ret == ParseStatus::Failed::grab())
+            {
+                std::cout << "read_chapter() --> failed to content for link '"
+                        << link_number_as_string << "' within post: " << post << std::endl;
+                return ret;
+            }
+        }
+    }
+
+    // add blank line after linked content
+    crumbs.chapters.back().paragraphs.push_back({});
+
+    return ParseStatus::Success::grab();
+}
+
+
+ParseStatus::Type parse_image(
+    std::string const & line,
+    bool within_linked_post,
+    int & post,
+    FILE * input_file,
+    Book & crumbs
+)
+{
+    (void) input_file;
+
+    std::string image_line = line;
+    std::string post_as_string = std::to_string(post);
+
+    LineStartCode::Type start_code = LineStart_as_code.at(LineStart::Image::grab());
+    if (image_line.size() <= start_code.as_string().size())
+    {
+        std::cout << "FAILED\nimage line is empty! post: " << post << std::endl;
+        return ParseStatus::Failed::grab();
+    }
+
+    if (!within_linked_post)
+        image_line.insert(start_code.as_string().size(), post_as_string + "_");
+
+    // entire line should exist as a term
+    bool term_exists{false};
+    int line_as_term = mm_lookup(image_line.c_str(), &term_exists);
+    if (!term_exists)
+    {
+        std::cout << "FAILED!\nimage '" << image_line
+                  << "' not in the dictionary! post: " << post_as_string << std::endl;
+        return ParseStatus::Failed::grab();
+    }
+
+    std::vector<BookWord> image_paragraph;
+    BookWord image_bw;
+    image_bw.word = line_as_term;
+    image_bw.ancestors.clear();
+    image_bw.first_ancestor_start_index = -1;
+    image_bw.index_within_first_ancestor = -1;
+    image_bw.referenced = within_linked_post;
+    image_paragraph.push_back(image_bw);
+    crumbs.chapters.back().paragraphs.push_back(image_paragraph);
+
+    return ParseStatus::Success::grab();
+}
+
+
+ParseStatus::Type parse_archived_link(
+    std::string const & line,
+    bool within_linked_post,
+    int & post,
+    FILE * input_file,
+    Book & crumbs
+)
+{
+    (void) input_file;
+
+    LineStartCode::Type start_code = LineStart_as_code.at(LineStart::ArchivedLink::grab());
+    if (line.size() <= start_code.as_string().size())
+    {
+        std::cout << "FAILED\narchived link is empty! post: " << post << std::endl;
+        return ParseStatus::Failed::grab();
+    }
+
+    std::string link_line = line.substr(start_code.as_string().size());
+    return parse_hyperlink(link_line, within_linked_post, post, input_file, crumbs);
+}
+
+
+ParseStatus::Type parse_hyperlink(
+    std::string const & line,
+    bool within_linked_post,
+    int & post,
+    FILE * input_file,
+    Book & crumbs
+)
+{
+    (void) input_file;
+
+    std::vector<BookWord> paragraph;
+    bool term_exists{false};
+    LineStartCode::Type start_code = LineStart_as_code.at(LineStart::Hyperlink::grab());
+    if (line.size() <= start_code.as_string().size())
+    {
+        std::cout << "FAILED\nlink is empty! post: " << post << std::endl;
+        return ParseStatus::Failed::grab();
+    }
+
+    // first create a word for the start code
+    {
+        int code_as_term = mm_lookup(start_code.as_string().c_str(), &term_exists);
+        if (!term_exists)
+        {
+            std::cout << "FAILED!\nstart code '" << start_code
+                        << "' not in the dictionary! post: " << post << std::endl;
+            return ParseStatus::Failed::grab();
+        }
+        BookWord code_bw;
+        code_bw.word = code_as_term;
+        code_bw.ancestors.clear();
+        code_bw.first_ancestor_start_index = -1;
+        code_bw.index_within_first_ancestor = -1;
+        code_bw.referenced = within_linked_post;
+        paragraph.push_back(code_bw);
+    }
+
+    // then create words for each character in the link (links no longer exist as whole words!)
+    for (auto ch : line.substr(start_code.as_string().size()))
+    {
+        int ch_as_term = mm_lookup(std::string(1, ch).c_str(), &term_exists);
+        if (!term_exists)
+        {
+            std::cout << "FAILED!\ncharacter '" << ch
+                      << "' not in the dictionary! post: " << post << std::endl;
+            return ParseStatus::Failed::grab();
+        }
+        BookWord ch_bw;
+        ch_bw.word = ch_as_term;
+        ch_bw.ancestors.clear();
+        ch_bw.first_ancestor_start_index = -1;
+        ch_bw.index_within_first_ancestor = -1;
+        ch_bw.referenced = within_linked_post;
+        paragraph.push_back(ch_bw);
+    }
+
+    // finally add the paragraph to the last chapter
+    crumbs.chapters.back().paragraphs.push_back(paragraph);
+
+    return ParseStatus::Success::grab();
+}
+
+
+ParseStatus::Type parse_body_line(
+    std::string const & line,
+    bool within_linked_post,
+    int & post,
+    FILE * input_file,
+    Book & crumbs
+)
+{
+    (void) input_file;
+
+    // entire line should exist as a term
+    bool term_exists{false};
+    int line_as_term = mm_lookup(line.c_str(), &term_exists);
+    if (!term_exists)
+    {
+        std::cout << "FAILED!\nword '" << line
+                    << "' not in the dictionary! post: " << post << std::endl;
+        return ParseStatus::Failed::grab();
+    }
+
+    std::vector<BookWord> paragraph;
+    std::deque<int> parents;
+    add_to_paragraph(line_as_term, parents, -1, -1, within_linked_post, paragraph);
+    crumbs.chapters.back().paragraphs.push_back(paragraph);
+
+    return ParseStatus::Success::grab();
+}
 
 
 bool read_crumbs(SerialTask::Type task)
 {
-    IndexTable const & embedded_words = Stage1Data::nil.as_embedded_words();
     std::string const & DATA_DIR = Stage1Data::nil.as_data_dir();
 
     Stage1Data::nil.as_mutable_books().push_back(Book());
@@ -105,7 +575,7 @@ bool read_crumbs(SerialTask::Type task)
             exit(1);
         }
 
-        ok = read_chapter(embedded_words, q_file, book, post);
+        ok = read_chapter(q_file, book, post);
         fclose(q_file);
         if (!ok)
             return false;
@@ -118,242 +588,39 @@ bool read_crumbs(SerialTask::Type task)
 
 
 bool read_chapter(
-    IndexTable const & embedded_words,
     FILE * input_file,
     Book & crumbs,
     int & post
 )
 {
-    std::string post_number = "INVALID";
     std::string line;
-    bool term_exists{false};
-    int line_as_term{-1};
-
     while (read_line(input_file, line))
     {
         if (line.length() == 0)
             continue;
 
-        if (line.rfind("~~:", 0) == 0)
+        // get line start code
+        LineStart::Type line_start;
+        for (auto code : LineStartCode::variants())
         {
-            ++post;
-            crumbs.chapters.push_back(Chapter());
-
-            // first read the text number (chapter title)
-            post_number = line.substr(3);
-            int index = mm_lookup(post_number.c_str(), &term_exists);
-            if (!term_exists)
+            if (line.rfind(code.as_string(), 0) == 0)
             {
-                std::cout << "FAILED!\nencountered '" << post_number << "' which is not in the dictionary!"
-                          << std::endl;
-                return false;
-            }
-            if (std::to_string(post) != mm_at(index, nullptr))
-            {
-                std::cout << "FAILED!\n"
-                          << "post_number: " << post_number
-                          << "\nencountered '" << mm_at(index, nullptr)
-                          << "' but " << post << " expected" << std::endl;
-                return false;
-            }
-            crumbs.chapters.back().title.push_back(index);
-
-            // then read the text's header (chapter subtitle)
-            if (!read_line(input_file, line))
-            {
-                std::cout << "FAILED!\nunexpected end of file within text " << post_number << std::endl;
-                return false;
-            }
-            if (!read_header(line, crumbs.chapters.back()))
-            {
-                std::cout << "failed to read header for text " << post_number << std::endl;
-                return false;
+                line_start = code_as_LineStart.at(code);
+                break;
             }
         }
+        ParseStatus::Type ret = line_start.as_parse_func()(
+                                    line,
+                                    false,
+                                    post,
+                                    input_file,
+                                    crumbs
+                                );
 
-
-
-        // TODO stop ignoring hyperlinks without blowing up the dictionary (9 deep prefixes!?!?!)
-        //
-        // note this would be 12 deep if we have the entire line including the ]~~ !!!
-        //
-        // when the time comes for 9 deep, instead of assuming entire line exists check for two words
-        // instead --> ]~~ and line.substr(3)
-        else if (line.rfind("]~~", 0) == 0)
+        if (ret == ParseStatus::Failed::grab())
         {
-            continue;
-        }
-
-
-
-        else
-        {
-            // work around missing chapter info within image references
-            if (line.rfind("~~~", 0) == 0)
-                line.insert(3, post_number + "_");
-
-            // entire line should exist as a term
-            line_as_term = mm_lookup(line.c_str(), &term_exists);
-            if (!term_exists)
-            {
-                std::cout << "FAILED!\nword '" << line
-                          << "' not in the dictionary! text: " << post_number << std::endl;
-                return false;
-            }
-
-            std::function<void (int,
-                                std::deque<int>,
-                                int,
-                                int,
-                                bool,
-                                IndexTable const &,
-                                std::vector<BookWord> &)> add_to_paragraph =
-                [&add_to_paragraph]
-                (
-                    int word,
-                    std::deque<int> parents,
-                    int parent_start,
-                    int index_within_parent,
-                    bool referenced,
-                    IndexTable const & embedded_words,
-                    std::vector<BookWord> & paragraph
-                )
-                {
-                    if (embedded_words[word].size() == 0)
-                    {
-                        BookWord bw;
-                        bw.word = word;
-                        bw.ancestors = parents;
-                        bw.first_ancestor_start_index = parent_start;
-                        bw.index_within_first_ancestor = index_within_parent;
-                        bw.referenced = referenced;
-                        paragraph.push_back(bw);
-                    }
-                    else
-                    {
-                        parent_start = (int) paragraph.size();
-                        parents.push_front(word);
-                        for (size_t i = 0; i < embedded_words[word].size(); ++i)
-                        {
-                            add_to_paragraph(embedded_words[word][i],
-                                             parents,
-                                             parent_start,
-                                             i,
-                                             referenced,
-                                             embedded_words,
-                                             paragraph);
-                        }
-                    }
-                };
-
-            // current line as string
-            int s_len = 0;
-            char const * s = mm_at(line_as_term, &s_len);
-
-            // check for linked text
-            if (s_len > 3 && s[0] == '>' && s[1] == '>')
-            {
-                bool numbers_only = true;
-                for (int si = 2; numbers_only && si < s_len; ++si)
-                    numbers_only = s[si] >= '0' && s[si] <= '9';
-
-                if (numbers_only)
-                {
-                    {
-                        std::vector<BookWord> link_paragraph;
-                        BookWord link_bw;
-                        link_bw.word = line_as_term;
-                        link_bw.ancestors.clear();
-                        link_bw.first_ancestor_start_index = -1;
-                        link_bw.index_within_first_ancestor = -1;
-                        link_bw.referenced = false;
-                        link_paragraph.push_back(link_bw);
-                        crumbs.chapters.back().paragraphs.push_back(link_paragraph);
-                    }
-
-                    std::vector<int> link_lines;
-
-                    if (!read_link(line_as_term, link_lines))
-                    {
-                        std::cout << "failed to read link for post: " << post_number << std::endl;
-                        return false;
-                    }
-
-                    for (int link_line : link_lines)
-                    {
-                        int ll_s_len = 0;
-                        char const * ll_s = mm_at(link_line, &ll_s_len);
-
-                        bool is_link = ll_s_len > 3;
-                        is_link = is_link && ll_s[0] == '>' && ll_s[1] == '>';
-                        for (int i = 2; is_link && i < s_len; ++i)
-                            is_link = s[i] >= '0' && s[i] <= '9';
-
-                        // check for lines that must be added as whole paragraphs
-                        if (
-                            ll_s_len > 3 &&
-                            (
-                                is_link ||
-                                (ll_s[0] == '~' && ll_s[1] == '~' && ll_s[2] == '~') ||
-                                (ll_s[0] == 'h' && ll_s[1] == 't' && ll_s[2] == 't' && ll_s[3] == 'p')
-                            )
-                        )
-                        {
-                            std::vector<BookWord> image_paragraph;
-                            BookWord image_bw;
-                            image_bw.word = link_line;
-                            image_bw.ancestors.clear();
-                            image_bw.first_ancestor_start_index = -1;
-                            image_bw.index_within_first_ancestor = -1;
-                            image_bw.referenced = true;
-                            image_paragraph.push_back(image_bw);
-                            crumbs.chapters.back().paragraphs.push_back(image_paragraph);
-                        }
-                        else
-                        {
-                            std::vector<BookWord> paragraph;
-                            std::deque<int> parents;
-                            add_to_paragraph(link_line, parents, -1, -1, true, embedded_words, paragraph);
-                            crumbs.chapters.back().paragraphs.push_back(paragraph);
-                        }
-                    }
-
-                    // add blank line after linked post
-                    crumbs.chapters.back().paragraphs.push_back({});
-
-                    continue; // to next line
-                }
-            }
-
-            bool is_link = s_len > 3;
-            is_link = is_link && s[0] == '>' && s[1] == '>';
-            for (int i = 2; is_link && i < s_len; ++i)
-                is_link = s[i] >= '0' && s[i] <= '9';
-
-            // check for lines that must be added as whole paragraphs
-            if (
-                s_len > 3 &&
-                ((s[0] == '~' && s[1] == '~' && s[2] == '~') ||
-                 is_link || (s[0] == 'h' && s[1] == 't' && s[2] == 't' && s[3] == 'p'))
-            )
-            {
-                std::vector<BookWord> image_paragraph;
-                BookWord image_bw;
-                image_bw.word = line_as_term;
-                image_bw.ancestors.clear();
-                image_bw.first_ancestor_start_index = -1;
-                image_bw.index_within_first_ancestor = -1;
-                image_bw.referenced = false;
-                image_paragraph.push_back(image_bw);
-                crumbs.chapters.back().paragraphs.push_back(image_paragraph);
-            }
-            else
-            {
-                std::vector<BookWord> paragraph;
-                std::deque<int> parents;
-                add_to_paragraph(line_as_term, parents, -1, -1, false, embedded_words, paragraph);
-                crumbs.chapters.back().paragraphs.push_back(paragraph);
-            }
+            std::cout << "read_chapter() --> failed to parse post: " << post << std::endl;
+            return false;
         }
     }
     return true;
@@ -388,7 +655,7 @@ bool read_header(std::string const & header, Chapter & chapter)
     tokenize(header, ',', tokenized_on_comma);
     if (tokenized_on_comma.size() < 2 || tokenized_on_comma.size() > 3)
     {
-        std::cout << "FAILED!\nfailed to parse header line! text: " << mm_at(chapter.title[0], nullptr)
+        std::cout << "FAILED!\nfailed to parse header line! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
@@ -398,7 +665,7 @@ bool read_header(std::string const & header, Chapter & chapter)
     tokenize(tokenized_on_comma[0], ' ', tokenized_date_time);
     if (tokenized_date_time.size() != 4)
     {
-        std::cout << "FAILED!\nfailed to parse date/time stamp! text: " << mm_at(chapter.title[0], nullptr)
+        std::cout << "FAILED!\nfailed to parse date/time stamp! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
@@ -408,7 +675,7 @@ bool read_header(std::string const & header, Chapter & chapter)
     tokenize(tokenized_date_time[0], '-', tokenized_date);
     if (tokenized_date.size() != 3)
     {
-        std::cout << "FAILED!\nfailed to parse date stamp! text: " << mm_at(chapter.title[0], nullptr)
+        std::cout << "FAILED!\nfailed to parse date stamp! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
@@ -418,7 +685,7 @@ bool read_header(std::string const & header, Chapter & chapter)
     tokenize(tokenized_date_time[1], ':', tokenized_time);
     if (tokenized_time.size() != 3)
     {
-        std::cout << "FAILED!\nfailed to parse time stamp! text: " << mm_at(chapter.title[0], nullptr)
+        std::cout << "FAILED!\nfailed to parse time stamp! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
@@ -428,28 +695,28 @@ bool read_header(std::string const & header, Chapter & chapter)
     int const dash = mm_lookup("-", &found_in_dictionary);
     if (!found_in_dictionary)
     {
-        std::cout << "FAILED!\n'-' is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
+        std::cout << "FAILED!\n'-' is not in the dictionary! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
     int const space = mm_lookup(" ", &found_in_dictionary);
     if (!found_in_dictionary)
     {
-        std::cout << "FAILED!\n' ' is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
+        std::cout << "FAILED!\n' ' is not in the dictionary! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
     int const colon = mm_lookup(":", &found_in_dictionary);
     if (!found_in_dictionary)
     {
-        std::cout << "FAILED!\n':' is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
+        std::cout << "FAILED!\n':' is not in the dictionary! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
     int const comma = mm_lookup(",", &found_in_dictionary);
     if (!found_in_dictionary)
     {
-        std::cout << "FAILED!\n',' is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
+        std::cout << "FAILED!\n',' is not in the dictionary! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
@@ -461,7 +728,7 @@ bool read_header(std::string const & header, Chapter & chapter)
     if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_date[2]
-                  << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
+                  << "' which is not in the dictionary! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
@@ -473,7 +740,7 @@ bool read_header(std::string const & header, Chapter & chapter)
     if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_date[1]
-                  << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
+                  << "' which is not in the dictionary! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
@@ -485,7 +752,7 @@ bool read_header(std::string const & header, Chapter & chapter)
     if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_date[0]
-                  << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
+                  << "' which is not in the dictionary! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
@@ -515,7 +782,7 @@ bool read_header(std::string const & header, Chapter & chapter)
     if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << hr_as_str
-                  << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
+                  << "' which is not in the dictionary! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
@@ -528,7 +795,7 @@ bool read_header(std::string const & header, Chapter & chapter)
     if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_time[1]
-                  << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
+                  << "' which is not in the dictionary! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
@@ -541,7 +808,7 @@ bool read_header(std::string const & header, Chapter & chapter)
     if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_time[2]
-                  << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
+                  << "' which is not in the dictionary! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
@@ -553,7 +820,7 @@ bool read_header(std::string const & header, Chapter & chapter)
     if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_date_time[3]
-                  << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
+                  << "' which is not in the dictionary! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
@@ -565,7 +832,7 @@ bool read_header(std::string const & header, Chapter & chapter)
     if (!found_in_dictionary)
     {
         std::cout << "FAILED!\nencountered '" << tokenized_on_comma[1]
-                  << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
+                  << "' which is not in the dictionary! post: " << mm_at(chapter.title[0], nullptr)
                   << std::endl;
         return false;
     }
@@ -576,7 +843,7 @@ bool read_header(std::string const & header, Chapter & chapter)
         if (!found_in_dictionary)
         {
             std::cout << "FAILED!\nencountered '" << tokenized_on_comma[2]
-                    << "' which is not in the dictionary! text: " << mm_at(chapter.title[0], nullptr)
+                    << "' which is not in the dictionary! post: " << mm_at(chapter.title[0], nullptr)
                     << std::endl;
             return false;
         }
@@ -599,51 +866,30 @@ void tokenize(std::string const & str, char const delim, std::vector<std::string
 }
 
 
-bool read_link(int link_as_term, std::vector<int> & lines)
+bool read_link(std::string const & link_number_as_string, std::vector<std::string> & lines)
 {
-    int link_as_str_len = 0;
-    char const * link_as_str = mm_at(link_as_term, &link_as_str_len);
-    if (link_as_str_len < 3)
-        return false;
-
-    ++link_as_str;
-    ++link_as_str;
-
     std::string const & DATA_DIR = Stage1Data::nil.as_data_dir();
 
     std::string fn = DATA_DIR;
     fn += "/Crumbs/linked_text/";
-    fn += link_as_str;
+    fn += link_number_as_string;
     fn += "/post";
 
     FILE * link_file = fopen(fn.c_str(), "r");
     if (link_file == 0)
     {
-        perror(link_as_str);
+        perror(link_number_as_string.c_str());
         return false;
     }
 
     lines.clear();
     std::string line;
-    bool term_in_dictionary{false};
-    int line_as_term{-1};
-
-
     while (read_link_line(link_file, line))
     {
         if (line.length() == 0)
             continue;
 
-        // entire line should exist as a term
-        line_as_term = mm_lookup(line.c_str(), &term_in_dictionary);
-        if (!term_in_dictionary)
-        {
-            std::cout << "\nterm '" << line
-                        << "' not in the dictionary! link: " << link_as_str << std::endl;
-            return false;
-        }
-
-        lines.push_back(line_as_term);
+        lines.push_back(line);
     }
 
     fclose(link_file);
@@ -671,3 +917,43 @@ bool read_link_line(FILE * f, std::string & line)
 
     return true;
 }
+
+
+void add_to_paragraph(
+    int word,
+    std::deque<int> parents,
+    int parent_start,
+    int index_within_parent,
+    bool referenced,
+    std::vector<BookWord> & paragraph
+)
+{
+    IndexTable const & embedded_words = Stage1Data::nil.as_embedded_words();
+
+    if (embedded_words[word].size() == 0)
+    {
+        BookWord bw;
+        bw.word = word;
+        bw.ancestors = parents;
+        bw.first_ancestor_start_index = parent_start;
+        bw.index_within_first_ancestor = index_within_parent;
+        bw.referenced = referenced;
+        paragraph.push_back(bw);
+    }
+    else
+    {
+        parent_start = (int) paragraph.size();
+        parents.push_front(word);
+        for (size_t i = 0; i < embedded_words[word].size(); ++i)
+        {
+            add_to_paragraph(
+                embedded_words[word][i],
+                parents,
+                parent_start,
+                i,
+                referenced,
+                paragraph
+            );
+        }
+    }
+};
