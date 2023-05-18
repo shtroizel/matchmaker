@@ -12,7 +12,6 @@ from pathlib import Path
 
 
 
-
 def usage():
     print(sys.argv[0] + ' [OPTION]')
     print('    -h, --help                  print this message')
@@ -622,6 +621,7 @@ def prepare_letters(workspace_root, q, parents_only):
         print(progress[progress_index], end='')
         progress_index += 1
         sys.stdout.flush()
+
 
 
 def main():
