@@ -76,7 +76,8 @@ int main(int argc, char ** argv)
             abort();
         }
 
-        task.as_run()(task);
+        if (!task.as_run()(task))
+            abort();
 
         for (int i = task.as_printed_progress(); i < task.as_progress_steps(); ++i)
             ++task.as_mutable_progress();

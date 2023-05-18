@@ -12,7 +12,7 @@
 
 
 MATCHABLE_FWD(SerialTask)
-using run_func = std::function<void (SerialTask::Type)>;
+using run_func = std::function<bool (SerialTask::Type)>;
 
 PROPERTYx5_MATCHABLE(
     run_func, run,
