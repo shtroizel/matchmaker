@@ -504,6 +504,12 @@ ParseStatus::Type parse_body_line(
 {
     (void) input_file;
 
+    if (line.empty())
+    {
+        crumbs.chapters.back().paragraphs.push_back({});
+        return ParseStatus::Success::grab();
+    }
+
     // entire line should exist as a term
     bool term_exists{false};
     int line_as_term = mm_lookup(line.c_str(), &term_exists);
@@ -596,9 +602,6 @@ bool read_chapter(
     std::string line;
     while (read_line(input_file, line))
     {
-        if (line.length() == 0)
-            continue;
-
         // get line start code
         LineStart::Type line_start;
         for (auto code : LineStartCode::variants())
