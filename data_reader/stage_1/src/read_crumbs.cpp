@@ -418,16 +418,83 @@ ParseStatus::Type parse_archived_link(
 )
 {
     (void) input_file;
+    std::vector<BookWord> paragraph;
+    bool term_exists{false};
 
-    LineStartCode::Type start_code = LineStart_as_code.at(LineStart::ArchivedLink::grab());
-    if (line.size() <= start_code.as_string().size())
+    // create a term for the ArchivedLink start code
     {
-        std::cout << "FAILED\narchived link is empty! post: " << post << std::endl;
+        LineStartCode::Type archived_link_start_code = LineStart_as_code.at(LineStart::ArchivedLink::grab());
+        if (line.size() <= archived_link_start_code.as_string().size())
+        {
+            std::cout << "FAILED\narchived link is empty! post: " << post << std::endl;
+            return ParseStatus::Failed::grab();
+        }
+        int code_as_term = mm_lookup(archived_link_start_code.as_string().c_str(), &term_exists);
+        if (!term_exists)
+        {
+            std::cout << "FAILED!\nArchivedLink start code '" << archived_link_start_code
+                        << "' not in the dictionary! post: " << post << std::endl;
+            return ParseStatus::Failed::grab();
+        }
+        BookWord code_bw;
+        code_bw.word = code_as_term;
+        code_bw.ancestors.clear();
+        code_bw.first_ancestor_start_index = -1;
+        code_bw.index_within_first_ancestor = -1;
+        code_bw.referenced = within_linked_post;
+        paragraph.push_back(code_bw);
+    }
+
+    // then parse the rest of the link as a normal hyperlink
+    LineStartCode::Type start_code = LineStart_as_code.at(LineStart::Hyperlink::grab());
+    std::string link_line = line.substr(start_code.as_string().size());
+    if (link_line.size() <= start_code.as_string().size())
+    {
+        std::cout << "FAILED\nlink within archived link is empty! post: " << post << std::endl;
         return ParseStatus::Failed::grab();
     }
 
-    std::string link_line = line.substr(start_code.as_string().size());
-    return parse_hyperlink(link_line, within_linked_post, post, input_file, crumbs);
+    // create term for the Hyperlink start code
+    {
+        int code_as_term = mm_lookup(start_code.as_string().c_str(), &term_exists);
+        if (!term_exists)
+        {
+            std::cout << "FAILED!\nHyperlink start code '" << start_code
+                        << "' not in the dictionary! post: " << post << std::endl;
+            return ParseStatus::Failed::grab();
+        }
+        BookWord code_bw;
+        code_bw.word = code_as_term;
+        code_bw.ancestors.clear();
+        code_bw.first_ancestor_start_index = -1;
+        code_bw.index_within_first_ancestor = -1;
+        code_bw.referenced = within_linked_post;
+        paragraph.push_back(code_bw);
+    }
+
+    // then create terms for each character in the link
+    for (auto ch : link_line.substr(start_code.as_string().size()))
+    {
+        int ch_as_term = mm_lookup(std::string(1, ch).c_str(), &term_exists);
+        if (!term_exists)
+        {
+            std::cout << "FAILED!\ncharacter '" << ch
+                      << "' not in the dictionary! post: " << post << std::endl;
+            return ParseStatus::Failed::grab();
+        }
+        BookWord ch_bw;
+        ch_bw.word = ch_as_term;
+        ch_bw.ancestors.clear();
+        ch_bw.first_ancestor_start_index = -1;
+        ch_bw.index_within_first_ancestor = -1;
+        ch_bw.referenced = within_linked_post;
+        paragraph.push_back(ch_bw);
+    }
+
+    // finally add the paragraph to the last chapter
+    crumbs.chapters.back().paragraphs.push_back(paragraph);
+
+    return ParseStatus::Success::grab();
 }
 
 
@@ -450,7 +517,7 @@ ParseStatus::Type parse_hyperlink(
         return ParseStatus::Failed::grab();
     }
 
-    // first create a word for the start code
+    // first create a term for the start code
     {
         int code_as_term = mm_lookup(start_code.as_string().c_str(), &term_exists);
         if (!term_exists)
@@ -468,7 +535,7 @@ ParseStatus::Type parse_hyperlink(
         paragraph.push_back(code_bw);
     }
 
-    // then create words for each character in the link (links no longer exist as whole words!)
+    // then create terms for each character in the link
     for (auto ch : line.substr(start_code.as_string().size()))
     {
         int ch_as_term = mm_lookup(std::string(1, ch).c_str(), &term_exists);
