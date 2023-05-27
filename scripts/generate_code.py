@@ -256,7 +256,6 @@ def prepare_letters(workspace_root, q, parents_only):
                     (l0 == 'm' and l1 == 'y') or                                                           \
                     (l0 == 'esc_T' and l1 == 'h') or                                                       \
                     (l0 == 'esc_W' and l1 == 'h') or                                                       \
-                    (l0 == 'h' and l1 == 't') or                                                           \
                     (l0 == 'r' and l1 == 'i'):
 
                 # two letter parent
@@ -389,7 +388,6 @@ def prepare_letters(workspace_root, q, parents_only):
                             (l0 == 'w' and l1 == 'e' and l2 == 'l') or                                     \
                             (l0 == 's' and l1 == 'c' and l2 == 'r') or                                     \
                             (l0 == 'c' and l1 == 'l' and l2 == 'a') or                                     \
-                            (l0 == 'h' and l1 == 't' and l2 == 't') or                                     \
                             (l0 == 'c' and l1 == 'o' and l2 == 'u'):
 
                         # three letter parent
@@ -431,7 +429,6 @@ def prepare_letters(workspace_root, q, parents_only):
                                     (l0 == 't' and l1 == 'r' and l2 == 'a' and l3 == 'n') or               \
                                     (l0 == 'f' and l1 == 'o' and l2 == 'r' and l3 == 'e') or               \
                                     (l0 == 'p' and l1 == 's' and l2 == 'e' and l3 == 'u') or               \
-                                    (l0 == 'h' and l1 == 't' and l2 == 't' and l3 == 'p') or               \
                                     (l0 == 'n' and l1 == 'o' and l2 == 'n' and l3 == 'c'):
 
                                 # four letter parent
@@ -468,9 +465,6 @@ def prepare_letters(workspace_root, q, parents_only):
                                                     l4 == 't') or                                          \
                                                                                                            \
                                             (l0 == 't' and l1 == 'r' and l2 == 'a' and l3 == 'n' and       \
-                                                    l4 == 's') or                                          \
-                                                                                                           \
-                                            (l0 == 'h' and l1 == 't' and l2 == 't' and l3 == 'p' and       \
                                                     l4 == 's') or                                          \
                                                                                                            \
                                             (l0 == 'u' and l1 == 'n' and l2 == 'd' and l3 == 'e' and       \
