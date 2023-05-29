@@ -1,6 +1,7 @@
 #include "discover_embedded_words.h"
 
 #include <iostream>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
