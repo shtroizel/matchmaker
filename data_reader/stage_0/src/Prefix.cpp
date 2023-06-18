@@ -42,7 +42,7 @@ Prefix & Prefix::operator=(Prefix && other)
 
 bool Prefix::operator<(Prefix const & other) const
 {
-    return str  < other.str;
+    return matchable::str_lt_str(str, other.str);
 }
 
 

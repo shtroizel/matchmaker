@@ -62,33 +62,74 @@ macro(add_lib_finalization lib_name)
 endmacro()
 
 
-
 set(prefix_list)
 
-set(A_z_letters)
-set(l0_A_z_letters)
+set(
+    symbol_list
+    "_spc_"
+    "_bng_"
+    "_quot_"
+    "_hsh_"
+    "_dol_"
+    "_pct_"
+    "_und_"
+    "_sqt_"
+    "_parl_"
+    "_parr_"
+    "_ast_"
+    "_plus_"
+    "_cma_"
+    "_mns_"
+    "_dot_"
+    "_slsh_"
+    "esc_0"
+    "esc_1"
+    "esc_2"
+    "esc_3"
+    "esc_4"
+    "esc_5"
+    "esc_6"
+    "esc_7"
+    "esc_8"
+    "esc_9"
+    "_cln_"
+    "_scln_"
+    "_lt_"
+    "_eq_"
+    "_gt_"
+    "_qstn_"
+    "_atsym_"
+    "_sbl_"
+    "_bslsh_"
+    "_sbr_"
+    "_dach_"
+    "_"
+    "_bqt_"
+    "_cbl_"
+    "_pip_"
+    "_cbr_"
+    "_tld_"
+)
 foreach(A_Z_number RANGE 65 90)
     string(ASCII ${A_Z_number} A_Z_letter)
     string(PREPEND A_Z_letter "esc_")
-    list(APPEND A_z_letters ${A_Z_letter})
-    list(APPEND l0_A_z_letters ${A_Z_letter})
+    list(APPEND symbol_list ${A_Z_letter})
 endforeach()
 
 foreach(a_z_number RANGE 97 122)
     string(ASCII ${a_z_number} a_z_letter)
-    list(APPEND A_z_letters ${a_z_letter})
-    list(APPEND l0_A_z_letters ${a_z_letter})
+    list(APPEND symbol_list ${a_z_letter})
 endforeach()
 
 # matchmaker_srcs are parents (no leaves)
 set(matchmaker_srcs)
 
-foreach(l0 ${l0_A_z_letters})
+foreach(l0 ${symbol_list})
 
     # add single letter parents to matchmaker_srcs
     list(APPEND matchmaker_srcs generated_src/${l0}.cpp)
 
-    foreach(l1 ${A_z_letters})
+    foreach(l1 ${symbol_list})
         if(
             (l0 STREQUAL "q" AND l1 STREQUAL "u") OR
             (l0 STREQUAL "p" AND l1 STREQUAL "r") OR
@@ -253,12 +294,13 @@ foreach(l0 ${l0_A_z_letters})
             (l0 STREQUAL "m" AND l1 STREQUAL "y") OR
             (l0 STREQUAL "esc_T" AND l1 STREQUAL "h") OR
             (l0 STREQUAL "esc_W" AND l1 STREQUAL "h") OR
+            (l0 STREQUAL "_tld_" AND l1 STREQUAL "_tld_") OR
             (l0 STREQUAL "r" AND l1 STREQUAL "i")
         )
             # two letter parents
             list(APPEND matchmaker_srcs generated_src/${l0}_${l1}.cpp)
 
-            foreach(l2 ${A_z_letters})
+            foreach(l2 ${symbol_list})
                 if(
                     (l0 STREQUAL "p" AND l1 STREQUAL "r" AND l2 STREQUAL "e") OR
                     (l0 STREQUAL "q" AND l1 STREQUAL "u" AND l2 STREQUAL "a") OR
@@ -371,12 +413,13 @@ foreach(l0 ${l0_A_z_letters})
                     (l0 STREQUAL "w" AND l1 STREQUAL "e" AND l2 STREQUAL "l") OR
                     (l0 STREQUAL "s" AND l1 STREQUAL "c" AND l2 STREQUAL "r") OR
                     (l0 STREQUAL "c" AND l1 STREQUAL "l" AND l2 STREQUAL "a") OR
+                    (l0 STREQUAL "_tld_" AND l1 STREQUAL "_tld_" AND l2 STREQUAL "_tld_") OR
                     (l0 STREQUAL "c" AND l1 STREQUAL "o" AND l2 STREQUAL "u")
                 )
                     # three letter parents
                     list(APPEND matchmaker_srcs generated_src/${l0}_${l1}_${l2}.cpp)
 
-                    foreach(l3 ${A_z_letters})
+                    foreach(l3 ${symbol_list})
                         if(
                             (l0 STREQUAL "o" AND l1 STREQUAL "v" AND l2 STREQUAL "e" AND l3 STREQUAL "r") OR
                             (l0 STREQUAL "i" AND l1 STREQUAL "n" AND l2 STREQUAL "t" AND l3 STREQUAL "e") OR
@@ -402,7 +445,7 @@ foreach(l0 ${l0_A_z_letters})
                             # four letter parents
                             list(APPEND matchmaker_srcs generated_src/${l0}_${l1}_${l2}_${l3}.cpp)
 
-                            foreach(l4 ${A_z_letters})
+                            foreach(l4 ${symbol_list})
                                 if(
                                     (l0 STREQUAL "i" AND l1 STREQUAL "n" AND l2 STREQUAL "t"
                                             AND l3 STREQUAL "e" AND l4 STREQUAL "r") OR
@@ -424,7 +467,7 @@ foreach(l0 ${l0_A_z_letters})
                                         generated_src/${l0}_${l1}_${l2}_${l3}_${l4}.cpp
                                     )
 
-                                    foreach(l5 ${A_z_letters})
+                                    foreach(l5 ${symbol_list})
                                         # six letter leaves
                                         list(APPEND prefix_list "${l0}_${l1}_${l2}_${l3}_${l4}_${l5}")
                                     endforeach()
@@ -449,31 +492,6 @@ foreach(l0 ${l0_A_z_letters})
         endif()
     endforeach()
 endforeach()
-
-list(APPEND prefix_list esc_0)
-list(APPEND prefix_list esc_1)
-list(APPEND prefix_list esc_2)
-list(APPEND prefix_list esc_3)
-list(APPEND prefix_list esc_4)
-list(APPEND prefix_list esc_5)
-list(APPEND prefix_list esc_6)
-list(APPEND prefix_list esc_7)
-list(APPEND prefix_list esc_8)
-list(APPEND prefix_list esc_9)
-list(APPEND prefix_list _mns_)
-list(APPEND prefix_list _dot_)
-list(APPEND prefix_list _slsh_)
-list(APPEND prefix_list _cln_)
-list(APPEND prefix_list _quot_)
-list(APPEND prefix_list _hsh_)
-list(APPEND prefix_list _dol_)
-list(APPEND prefix_list _sqt_)
-list(APPEND prefix_list _parl_)
-list(APPEND prefix_list _plus_)
-list(APPEND prefix_list _gt_)
-list(APPEND prefix_list _sbr_)
-list(APPEND prefix_list _)
-list(APPEND prefix_list _tld_)
 
 # books first
 file(GLOB book_srcs "generated_src/books/*.cpp")

@@ -45,6 +45,49 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <matchable/matchable.h>
 
+#include <matchmaker/generated_symbols/aoeu/_spc_/snth__spc_.h>
+#include <matchmaker/generated_symbols/aoeu/_bng_/snth__bng_.h>
+#include <matchmaker/generated_symbols/aoeu/_quot_/snth__quot_.h>
+#include <matchmaker/generated_symbols/aoeu/_hsh_/snth__hsh_.h>
+#include <matchmaker/generated_symbols/aoeu/_dol_/snth__dol_.h>
+#include <matchmaker/generated_symbols/aoeu/_pct_/snth__pct_.h>
+#include <matchmaker/generated_symbols/aoeu/_und_/snth__und_.h>
+#include <matchmaker/generated_symbols/aoeu/_sqt_/snth__sqt_.h>
+#include <matchmaker/generated_symbols/aoeu/_parl_/snth__parl_.h>
+#include <matchmaker/generated_symbols/aoeu/_parr_/snth__parr_.h>
+#include <matchmaker/generated_symbols/aoeu/_ast_/snth__ast_.h>
+#include <matchmaker/generated_symbols/aoeu/_plus_/snth__plus_.h>
+#include <matchmaker/generated_symbols/aoeu/_cma_/snth__cma_.h>
+#include <matchmaker/generated_symbols/aoeu/_mns_/snth__mns_.h>
+#include <matchmaker/generated_symbols/aoeu/_dot_/snth__dot_.h>
+#include <matchmaker/generated_symbols/aoeu/_slsh_/snth__slsh_.h>
+#include <matchmaker/generated_symbols/aoeu/esc_0/snth_esc_0.h>
+#include <matchmaker/generated_symbols/aoeu/esc_1/snth_esc_1.h>
+#include <matchmaker/generated_symbols/aoeu/esc_2/snth_esc_2.h>
+#include <matchmaker/generated_symbols/aoeu/esc_3/snth_esc_3.h>
+#include <matchmaker/generated_symbols/aoeu/esc_4/snth_esc_4.h>
+#include <matchmaker/generated_symbols/aoeu/esc_5/snth_esc_5.h>
+#include <matchmaker/generated_symbols/aoeu/esc_6/snth_esc_6.h>
+#include <matchmaker/generated_symbols/aoeu/esc_7/snth_esc_7.h>
+#include <matchmaker/generated_symbols/aoeu/esc_8/snth_esc_8.h>
+#include <matchmaker/generated_symbols/aoeu/esc_9/snth_esc_9.h>
+#include <matchmaker/generated_symbols/aoeu/_cln_/snth__cln_.h>
+#include <matchmaker/generated_symbols/aoeu/_scln_/snth__scln_.h>
+#include <matchmaker/generated_symbols/aoeu/_lt_/snth__lt_.h>
+#include <matchmaker/generated_symbols/aoeu/_eq_/snth__eq_.h>
+#include <matchmaker/generated_symbols/aoeu/_gt_/snth__gt_.h>
+#include <matchmaker/generated_symbols/aoeu/_qstn_/snth__qstn_.h>
+#include <matchmaker/generated_symbols/aoeu/_atsym_/snth__atsym_.h>
+#include <matchmaker/generated_symbols/aoeu/_sbl_/snth__sbl_.h>
+#include <matchmaker/generated_symbols/aoeu/_bslsh_/snth__bslsh_.h>
+#include <matchmaker/generated_symbols/aoeu/_sbr_/snth__sbr_.h>
+#include <matchmaker/generated_symbols/aoeu/_dach_/snth__dach_.h>
+#include <matchmaker/generated_symbols/aoeu/_/snth__.h>
+#include <matchmaker/generated_symbols/aoeu/_bqt_/snth__bqt_.h>
+#include <matchmaker/generated_symbols/aoeu/_cbl_/snth__cbl_.h>
+#include <matchmaker/generated_symbols/aoeu/_pip_/snth__pip_.h>
+#include <matchmaker/generated_symbols/aoeu/_cbr_/snth__cbr_.h>
+#include <matchmaker/generated_symbols/aoeu/_tld_/snth__tld_.h>
 #include <matchmaker/generated_symbols/aoeu/esc_A/snth_esc_A.h>
 #include <matchmaker/generated_symbols/aoeu/esc_B/snth_esc_B.h>
 #include <matchmaker/generated_symbols/aoeu/esc_C/snth_esc_C.h>
@@ -126,46 +169,37 @@ using locations_func = std::function<void (int,
                                            int *)>;
 
 PROPERTYx19_MATCHABLE(
-    count_func,
-    count,
-    as_longest_func,
-    as_longest,
-    at_func,
-    at,
-    lookup_func,
-    lookup,
-    ordinal_summation_func,
-    ordinal_summation,
-    flagged_parts_of_speech_func,
-    flagged_parts_of_speech,
-    synonyms_func,
-    synonyms,
-    antonyms_func,
-    antonyms,
-    embedded_func,
-    embedded,
-    definition_func,
-    definition,
-    locations_func,
-    locations,
-    is_name_func,
-    is_name,
-    is_male_name_func,
-    is_male_name,
-    is_female_name_func,
-    is_female_name,
-    is_place_func,
-    is_place,
-    is_compound_func,
-    is_compound,
-    is_acronym_func,
-    is_acronym,
-    is_phrase_func,
-    is_phrase,
-    is_used_in_book_func,
-    is_used_in_book,
+    // properties
+    count_func, count,
+    as_longest_func, as_longest,
+    at_func, at,
+    lookup_func, lookup,
+    ordinal_summation_func, ordinal_summation,
+    flagged_parts_of_speech_func, flagged_parts_of_speech,
+    synonyms_func, synonyms,
+    antonyms_func, antonyms,
+    embedded_func, embedded,
+    definition_func, definition,
+    locations_func, locations,
+    is_name_func, is_name,
+    is_male_name_func, is_male_name,
+    is_female_name_func, is_female_name,
+    is_place_func, is_place,
+    is_compound_func, is_compound,
+    is_acronym_func, is_acronym,
+    is_phrase_func, is_phrase,
+    is_used_in_book_func, is_used_in_book,
 
-    letter_snth,
+    // name
+    symbol_snth,
+
+    // variants
+    _spc_, _bng_, _quot_, _hsh_, _dol_, _pct_, _und_, _sqt_, _parl_, _parr_,
+    _ast_, _plus_, _cma_, _mns_, _dot_, _slsh_,
+    esc_0, esc_1, esc_2, esc_3, esc_4, esc_5, esc_6, esc_7, esc_8, esc_9,
+    _cln_, _scln_, _lt_, _eq_, _gt_, _qstn_, _atsym_,
+    _sbl_, _bslsh_, _sbr_, _dach_, _, _bqt_,
+    _cbl_, _pip_, _cbr_, _tld_,
     esc_A, esc_B, esc_C, esc_D, esc_E, esc_F, esc_G, esc_H, esc_I, esc_J, esc_K, esc_L, esc_M,
     esc_N, esc_O, esc_P, esc_Q, esc_R, esc_S, esc_T, esc_U, esc_V, esc_W, esc_X, esc_Y, esc_Z,
     a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
@@ -173,28 +207,71 @@ PROPERTYx19_MATCHABLE(
 
 
 #define _set_properties(_letter)                                                                           \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, count, &mm_count_snth_##_letter)                    \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, as_longest, &mm_as_longest_snth_##_letter)          \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, at, &mm_at_snth_##_letter)                          \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, lookup, &mm_lookup_snth_##_letter)                  \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter,                                                     \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, count, &mm_count_snth_##_letter)                    \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, as_longest, &mm_as_longest_snth_##_letter)          \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, at, &mm_at_snth_##_letter)                          \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, lookup, &mm_lookup_snth_##_letter)                  \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter,                                                     \
                                  ordinal_summation, &mm_ordinal_summation_snth_##_letter)                  \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter,                                                     \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter,                                                     \
                                  flagged_parts_of_speech, &mm_flagged_parts_of_speech_snth_##_letter)      \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, synonyms, &mm_synonyms_snth_##_letter)              \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, antonyms, &mm_antonyms_snth_##_letter)              \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, embedded, &mm_embedded_snth_##_letter)              \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, definition, &mm_definition_snth_##_letter)          \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, locations, &mm_locations_snth_##_letter)            \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_name, &mm_is_name_snth_##_letter)                \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_male_name, &mm_is_male_name_snth_##_letter)      \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_female_name, &mm_is_female_name_snth_##_letter)  \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_place, &mm_is_place_snth_##_letter)              \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_compound, &mm_is_compound_snth_##_letter)        \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_acronym, &mm_is_acronym_snth_##_letter)          \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_phrase, &mm_is_phrase_snth_##_letter)            \
-MATCHABLE_VARIANT_PROPERTY_VALUE(letter_snth, _letter, is_used_in_book, &mm_is_used_in_book_snth_##_letter)
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, synonyms, &mm_synonyms_snth_##_letter)              \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, antonyms, &mm_antonyms_snth_##_letter)              \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, embedded, &mm_embedded_snth_##_letter)              \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, definition, &mm_definition_snth_##_letter)          \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, locations, &mm_locations_snth_##_letter)            \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, is_name, &mm_is_name_snth_##_letter)                \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, is_male_name, &mm_is_male_name_snth_##_letter)      \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, is_female_name, &mm_is_female_name_snth_##_letter)  \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, is_place, &mm_is_place_snth_##_letter)              \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, is_compound, &mm_is_compound_snth_##_letter)        \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, is_acronym, &mm_is_acronym_snth_##_letter)          \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, is_phrase, &mm_is_phrase_snth_##_letter)            \
+MATCHABLE_VARIANT_PROPERTY_VALUE(symbol_snth, _letter, is_used_in_book, &mm_is_used_in_book_snth_##_letter)
 
+_set_properties(_spc_)
+_set_properties(_bng_)
+_set_properties(_quot_)
+_set_properties(_hsh_)
+_set_properties(_dol_)
+_set_properties(_pct_)
+_set_properties(_und_)
+_set_properties(_sqt_)
+_set_properties(_parl_)
+_set_properties(_parr_)
+_set_properties(_ast_)
+_set_properties(_plus_)
+_set_properties(_cma_)
+_set_properties(_mns_)
+_set_properties(_dot_)
+_set_properties(_slsh_)
+_set_properties(esc_0)
+_set_properties(esc_1)
+_set_properties(esc_2)
+_set_properties(esc_3)
+_set_properties(esc_4)
+_set_properties(esc_5)
+_set_properties(esc_6)
+_set_properties(esc_7)
+_set_properties(esc_8)
+_set_properties(esc_9)
+_set_properties(_cln_)
+_set_properties(_scln_)
+_set_properties(_lt_)
+_set_properties(_eq_)
+_set_properties(_gt_)
+_set_properties(_qstn_)
+_set_properties(_atsym_)
+_set_properties(_sbl_)
+_set_properties(_bslsh_)
+_set_properties(_sbr_)
+_set_properties(_dach_)
+_set_properties(_)
+_set_properties(_bqt_)
+_set_properties(_cbl_)
+_set_properties(_pip_)
+_set_properties(_cbr_)
+_set_properties(_tld_)
 _set_properties(esc_A)
 _set_properties(esc_B)
 _set_properties(esc_C)
@@ -250,11 +327,70 @@ _set_properties(z)
 #undef _set_properties
 
 
+
+matchable::MatchBox<symbol_snth::Type, int> boundaries_snth =
+    []()
+    {
+        int i{0};
+        matchable::MatchBox<symbol_snth::Type, int> b;
+        for (auto const & sym_snth : symbol_snth::variants_by_string())
+        {
+            b.set(sym_snth, i);
+            i += sym_snth.as_count()();
+        }
+        return b;
+    }();
+
+
 int mm_count_snth()
 {
     static int const ret =
-        [&](){
+        [&]()
+        {
             int r{0};
+            r += mm_count_snth__spc_();
+            r += mm_count_snth__bng_();
+            r += mm_count_snth__quot_();
+            r += mm_count_snth__hsh_();
+            r += mm_count_snth__dol_();
+            r += mm_count_snth__pct_();
+            r += mm_count_snth__und_();
+            r += mm_count_snth__sqt_();
+            r += mm_count_snth__parl_();
+            r += mm_count_snth__parr_();
+            r += mm_count_snth__ast_();
+            r += mm_count_snth__plus_();
+            r += mm_count_snth__cma_();
+            r += mm_count_snth__mns_();
+            r += mm_count_snth__dot_();
+            r += mm_count_snth__slsh_();
+            r += mm_count_snth_esc_0();
+            r += mm_count_snth_esc_1();
+            r += mm_count_snth_esc_2();
+            r += mm_count_snth_esc_3();
+            r += mm_count_snth_esc_4();
+            r += mm_count_snth_esc_5();
+            r += mm_count_snth_esc_6();
+            r += mm_count_snth_esc_7();
+            r += mm_count_snth_esc_8();
+            r += mm_count_snth_esc_9();
+            r += mm_count_snth__cln_();
+            r += mm_count_snth__scln_();
+            r += mm_count_snth__lt_();
+            r += mm_count_snth__eq_();
+            r += mm_count_snth__gt_();
+            r += mm_count_snth__qstn_();
+            r += mm_count_snth__atsym_();
+            r += mm_count_snth__sbl_();
+            r += mm_count_snth__bslsh_();
+            r += mm_count_snth__sbr_();
+            r += mm_count_snth__dach_();
+            r += mm_count_snth__();
+            r += mm_count_snth__bqt_();
+            r += mm_count_snth__cbl_();
+            r += mm_count_snth__pip_();
+            r += mm_count_snth__cbr_();
+            r += mm_count_snth__tld_();
             r += mm_count_snth_esc_A();
             r += mm_count_snth_esc_B();
             r += mm_count_snth_esc_C();
@@ -314,42 +450,75 @@ int mm_count_snth()
 }
 
 
-static std::vector<std::pair<int, letter_snth::Type>> const letter_boundries =
-    []()
-    {
-        int b{0};
-        std::vector<std::pair<int, letter_snth::Type>> boundries;
+int mm_lookup_snth(std::string const & term, bool * found)
+{
+    static std::string const d_str{"aoeu"};
+    static int const depth = std::count(d_str.begin(), d_str.end(), '/') + 1;
 
-        for (auto const & l : letter_snth::variants())
+    if (term.size() < 1)
+        goto lookup_failed;
+
+    if ((int) term.size() <= depth)
+        return mm_lookup_snth__spc_(term, found);
+
+    if (term[depth] < 32 || term[depth] > 126)
+        goto lookup_failed;
+
+    {
+        int i = term[depth];
+        if (term[depth] >= 'a' && term[depth] <= 'z')
         {
-            boundries.push_back(std::make_pair(b, l));
-            b += l.as_count()();
+            // lower case letters start after the 43 non-letter symbols and the 26 capital letters
+            i = (int16_t) (term[depth] - 'a' + 69);
         }
 
-        return boundries;
-    }();
+        else if (term[depth] >= 'A' && term[depth] <= 'Z')
+        {
+            // in our list, capital letters start just after the last non-letter symbol
+            // there are a total of 95 symbols, and 52 are letters
+            // 95 - 52 = 43 non-letter symbols that precede all letters
+            i = (int16_t) (term[depth] - 'A' + 43);
+        }
 
+        // 33 symbols precede the capital letters on the ascii table, and occur first in our list
+        else if (term[depth] >= ' ' && term[depth] <= '@')
+        {
+            i = (int16_t) (term[depth] - ' ');
+        }
 
-int mm_as_longest_snth(int index)
-{
-    if (index < 0 || index >= mm_count_snth())
-    {
-        std::cout << "mm_as_longest_snth(" << index << ") out of bounds with mm_count_snth() of: "
-                    << mm_count_snth() << std::endl;
-        return 0;
+        // these symbols fall between the capital and lower case letters on the ascii table
+        else if (term[depth] >= '[' && term[depth] <= '`')
+        {
+            // 33 symbols precede 'A' in the ascii table, so these symbols start at index 33 in our list
+            i = (int16_t) (term[depth] - '[' + 33);
+        }
+
+        // these symbols fall after the lower case letters on the ascii table
+        else if (term[depth] >= '{' && term[depth] <= '~')
+        {
+            // for our list, this last group of symbols starts after the initial group of 33
+            // and the second group of 6
+            i = (int16_t) (term[depth] - '{' + 39);
+        }
+
+        symbol_snth::Type sym = symbol_snth::from_by_string_index(i);
+        if (sym.is_nil())
+        {
+            std::cout << "\nlookup_snth() :  bug detected! index [" << i
+                        << "] is out of bounds! (lookup_snth() failed)" << std::endl;
+            goto lookup_failed;
+        }
+
+        int ret = sym.as_lookup()(term, found);
+        ret += boundaries_snth.at(sym);
+
+        return ret;
     }
 
-    auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
-                    index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
-                );
-
-    if (iter != letter_boundries.begin())
-        --iter;
-
-    return iter->second.as_as_longest()(index - iter->first);
+lookup_failed:
+    if (nullptr != found)
+        *found = false;
+    return 0;
 }
 
 
@@ -364,132 +533,39 @@ std::string const & mm_at_snth(int index)
     }
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
 
-    if (iter != letter_boundries.begin())
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_at()(index - iter->first);
+    return iter->as_at()(index - boundaries_snth.at(*iter));
 }
 
 
-int mm_lookup_snth(std::string const & word, bool * found)
+int mm_as_longest_snth(int index)
 {
-    static std::array<std::pair<letter_snth::Type, int>, 52> const io_snth {
-        std::make_pair(letter_snth::esc_A::grab(), letter_boundries[0].first),
-        std::make_pair(letter_snth::esc_B::grab(), letter_boundries[1].first),
-        std::make_pair(letter_snth::esc_C::grab(), letter_boundries[2].first),
-        std::make_pair(letter_snth::esc_D::grab(), letter_boundries[3].first),
-        std::make_pair(letter_snth::esc_E::grab(), letter_boundries[4].first),
-        std::make_pair(letter_snth::esc_F::grab(), letter_boundries[5].first),
-        std::make_pair(letter_snth::esc_G::grab(), letter_boundries[6].first),
-        std::make_pair(letter_snth::esc_H::grab(), letter_boundries[7].first),
-        std::make_pair(letter_snth::esc_I::grab(), letter_boundries[8].first),
-        std::make_pair(letter_snth::esc_J::grab(), letter_boundries[9].first),
-        std::make_pair(letter_snth::esc_K::grab(), letter_boundries[10].first),
-        std::make_pair(letter_snth::esc_L::grab(), letter_boundries[11].first),
-        std::make_pair(letter_snth::esc_M::grab(), letter_boundries[12].first),
-        std::make_pair(letter_snth::esc_N::grab(), letter_boundries[13].first),
-        std::make_pair(letter_snth::esc_O::grab(), letter_boundries[14].first),
-        std::make_pair(letter_snth::esc_P::grab(), letter_boundries[15].first),
-        std::make_pair(letter_snth::esc_Q::grab(), letter_boundries[16].first),
-        std::make_pair(letter_snth::esc_R::grab(), letter_boundries[17].first),
-        std::make_pair(letter_snth::esc_S::grab(), letter_boundries[18].first),
-        std::make_pair(letter_snth::esc_T::grab(), letter_boundries[19].first),
-        std::make_pair(letter_snth::esc_U::grab(), letter_boundries[20].first),
-        std::make_pair(letter_snth::esc_V::grab(), letter_boundries[21].first),
-        std::make_pair(letter_snth::esc_W::grab(), letter_boundries[22].first),
-        std::make_pair(letter_snth::esc_X::grab(), letter_boundries[23].first),
-        std::make_pair(letter_snth::esc_Y::grab(), letter_boundries[24].first),
-        std::make_pair(letter_snth::esc_Z::grab(), letter_boundries[25].first),
-        std::make_pair(letter_snth::a::grab(), letter_boundries[26].first),
-        std::make_pair(letter_snth::b::grab(), letter_boundries[27].first),
-        std::make_pair(letter_snth::c::grab(), letter_boundries[28].first),
-        std::make_pair(letter_snth::d::grab(), letter_boundries[29].first),
-        std::make_pair(letter_snth::e::grab(), letter_boundries[30].first),
-        std::make_pair(letter_snth::f::grab(), letter_boundries[31].first),
-        std::make_pair(letter_snth::g::grab(), letter_boundries[32].first),
-        std::make_pair(letter_snth::h::grab(), letter_boundries[33].first),
-        std::make_pair(letter_snth::i::grab(), letter_boundries[34].first),
-        std::make_pair(letter_snth::j::grab(), letter_boundries[35].first),
-        std::make_pair(letter_snth::k::grab(), letter_boundries[36].first),
-        std::make_pair(letter_snth::l::grab(), letter_boundries[37].first),
-        std::make_pair(letter_snth::m::grab(), letter_boundries[38].first),
-        std::make_pair(letter_snth::n::grab(), letter_boundries[39].first),
-        std::make_pair(letter_snth::o::grab(), letter_boundries[40].first),
-        std::make_pair(letter_snth::p::grab(), letter_boundries[41].first),
-        std::make_pair(letter_snth::q::grab(), letter_boundries[42].first),
-        std::make_pair(letter_snth::r::grab(), letter_boundries[43].first),
-        std::make_pair(letter_snth::s::grab(), letter_boundries[44].first),
-        std::make_pair(letter_snth::t::grab(), letter_boundries[45].first),
-        std::make_pair(letter_snth::u::grab(), letter_boundries[46].first),
-        std::make_pair(letter_snth::v::grab(), letter_boundries[47].first),
-        std::make_pair(letter_snth::w::grab(), letter_boundries[48].first),
-        std::make_pair(letter_snth::x::grab(), letter_boundries[49].first),
-        std::make_pair(letter_snth::y::grab(), letter_boundries[50].first),
-        std::make_pair(letter_snth::z::grab(), letter_boundries[51].first),
-    };
-
-    static std::string const d_str{"aoeu"};
-    static int const depth = std::count(d_str.begin(), d_str.end(), '/') + 1;
-
-    if (word.size() < 1)
-        goto lookup_failed;
-
-    if ((int) word.size() <= depth)
-        return mm_lookup_snth_esc_A(word, found);
-
-    if (word[depth] < 32 || word[depth] > 126)
-        goto lookup_failed;
-
-    for (int i = 0; i <= depth; ++i)
-        if (word[i] < 'A' || (word[i] > 'Z' && word[i] < 'a') || word[i] > 'z')
-            return mm_lookup_snth_esc_A(word, found);
-
+    if (index < 0 || index >= mm_count_snth())
     {
-        int i = word[depth];
-        if (word[depth] < 'A')
-        {
-            i = 0;
-        }
-        else if (word[depth] <= 'Z')
-        {
-            i -= 'A';
-        }
-        else if (word[depth] < 'a')
-        {
-            i = 0;
-        }
-        else if (word[depth] <= 'z')
-        {
-            i -= 'a';
-            i += 26;
-        }
-        else // word[depth] < 127
-        {
-            i = 0;
-        }
-
-        if (i < 0 || i > 51)
-        {
-            std::cout << "\nlookup_snth() :  bug detected! index [" << i
-                        << "] is out of bounds! (lookup_snth() failed)" << std::endl;
-            goto lookup_failed;
-        }
-
-        int ret = io_snth[i].first.as_lookup()(word, found);
-        ret += io_snth[i].second;
-        return ret;
+        std::cout << "mm_as_longest_snth(" << index << ") out of bounds with mm_count_snth() of: "
+                    << mm_count_snth() << std::endl;
+        return 0;
     }
 
-lookup_failed:
-    if (nullptr != found)
-        *found = false;
-    return 0;
+    auto iter = std::lower_bound(
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
+                    index,
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
+                );
+
+    if (iter != symbol_snth::variants_by_string().begin())
+        --iter;
+
+    return iter->as_as_longest()(index - boundaries_snth.at(*iter));
 }
 
 
@@ -499,15 +575,16 @@ int mm_ordinal_summation_snth(int index)
         return 0;
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
-    if (iter != letter_boundries.begin())
+
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_ordinal_summation()(index - iter->first);
+    return iter->as_ordinal_summation()(index - boundaries_snth.at(*iter));
 }
 
 
@@ -524,16 +601,16 @@ std::vector<int8_t> const & mm_flagged_parts_of_speech_snth(int index)
     }
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
 
-    if (iter != letter_boundries.begin())
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_flagged_parts_of_speech()(index - iter->first);
+    return iter->as_flagged_parts_of_speech()(index - boundaries_snth.at(*iter));
 }
 
 
@@ -543,16 +620,16 @@ bool mm_is_name_snth(int index)
         return false;
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
 
-    if (iter != letter_boundries.begin())
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_name()(index - iter->first) != 0;
+    return iter->as_is_name()(index - boundaries_snth.at(*iter)) != 0;
 }
 
 
@@ -562,16 +639,16 @@ bool mm_is_male_name_snth(int index)
         return false;
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
 
-    if (iter != letter_boundries.begin())
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_male_name()(index - iter->first) != 0;
+    return iter->as_is_male_name()(index - boundaries_snth.at(*iter)) != 0;
 }
 
 
@@ -581,16 +658,16 @@ bool mm_is_female_name_snth(int index)
         return false;
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
 
-    if (iter != letter_boundries.begin())
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_female_name()(index - iter->first) != 0;
+    return iter->as_is_female_name()(index - boundaries_snth.at(*iter)) != 0;
 }
 
 
@@ -600,15 +677,16 @@ bool mm_is_place_snth(int index)
         return false;
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
-    if (iter != letter_boundries.begin())
+
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_place()(index - iter->first) != 0;
+    return iter->as_is_place()(index - boundaries_snth.at(*iter)) != 0;
 }
 
 
@@ -618,16 +696,16 @@ bool mm_is_compound_snth(int index)
         return false;
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
 
-    if (iter != letter_boundries.begin())
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_compound()(index - iter->first) != 0;
+    return iter->as_is_compound()(index - boundaries_snth.at(*iter)) != 0;
 }
 
 
@@ -637,16 +715,16 @@ bool mm_is_acronym_snth(int index)
         return false;
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
 
-    if (iter != letter_boundries.begin())
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_acronym()(index - iter->first) != 0;
+    return iter->as_is_acronym()(index - boundaries_snth.at(*iter)) != 0;
 }
 
 
@@ -656,16 +734,16 @@ bool mm_is_phrase_snth(int index)
         return false;
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
 
-    if (iter != letter_boundries.begin())
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_phrase()(index - iter->first) != 0;
+    return iter->as_is_phrase()(index - boundaries_snth.at(*iter)) != 0;
 }
 
 
@@ -675,16 +753,16 @@ bool mm_is_used_in_book_snth(int book_index, int index)
         return false;
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
 
-    if (iter != letter_boundries.begin())
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_used_in_book()(book_index, index - iter->first) != 0;
+    return iter->as_is_used_in_book()(book_index, index - boundaries_snth.at(*iter)) != 0;
 }
 
 
@@ -700,16 +778,16 @@ std::vector<int> const & mm_synonyms_snth(int index)
     }
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
 
-    if (iter != letter_boundries.begin())
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_synonyms()(index - iter->first);
+    return iter->as_synonyms()(index - boundaries_snth.at(*iter));
 }
 
 
@@ -725,16 +803,16 @@ std::vector<int> const & mm_antonyms_snth(int index)
     }
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
 
-    if (iter != letter_boundries.begin())
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_antonyms()(index - iter->first);
+    return iter->as_antonyms()(index - boundaries_snth.at(*iter));
 }
 
 
@@ -750,16 +828,16 @@ std::vector<int> const & mm_embedded_snth(int index)
     }
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
 
-    if (iter != letter_boundries.begin())
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_embedded()(index - iter->first);
+    return iter->as_embedded()(index - boundaries_snth.at(*iter));
 }
 
 
@@ -775,16 +853,16 @@ std::vector<int> const & mm_definition_snth(int index)
     }
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
 
-    if (iter != letter_boundries.begin())
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_definition()(index - iter->first);
+    return iter->as_definition()(index - boundaries_snth.at(*iter));
 }
 
 
@@ -810,19 +888,21 @@ void mm_locations_snth(
     }
 
     auto iter = std::lower_bound(
-                    letter_boundries.begin(),
-                    letter_boundries.end(),
+                    symbol_snth::variants_by_string().begin(),
+                    symbol_snth::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [&](symbol_snth::Type const & sym, int i){ return boundaries_snth.at(sym) <= i; }
                 );
 
-    if (iter != letter_boundries.begin())
+    if (iter != symbol_snth::variants_by_string().begin())
         --iter;
 
-    iter->second.as_locations()(index - iter->first,
-                                book_indexes,
-                                chapter_indexes,
-                                paragraph_indexes,
-                                word_indexes,
-                                count);
+    iter->as_locations()(
+        index - boundaries_snth.at(*iter),
+        book_indexes,
+        chapter_indexes,
+        paragraph_indexes,
+        word_indexes,
+        count
+    );
 }

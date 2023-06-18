@@ -52,10 +52,54 @@ def prepare_letters(workspace_root, q, parents_only):
     parent_h = matchmaker_root / 'templates' / 'internal_interface.h'
     parent_cpp = matchmaker_root / 'templates' / 'parent.cpp'
 
-    progress = 'generating matchmaker code that is now finally ready!';
+  #            '         1         2         3         4         5         6         7         0'
+  #            '12345678901234567890123456789012345678901234567890123456789012345678901234567890'
+    progress = "Buckle up, buttercups - it's about to get bumpy!";
     progress_index = 0
 
-    prefixes = []
+    prefixes = ["_spc_",
+                "_bng_",
+                "_quot_",
+                "_hsh_",
+                "_dol_",
+                "_pct_",
+                "_und_",
+                "_sqt_",
+                "_parl_",
+                "_parr_",
+                "_ast_",
+                "_plus_",
+                "_cma_",
+                "_mns_",
+                "_dot_",
+                "_slsh_",
+                "esc_0",
+                "esc_1",
+                "esc_2",
+                "esc_3",
+                "esc_4",
+                "esc_5",
+                "esc_6",
+                "esc_7",
+                "esc_8",
+                "esc_9",
+                "_cln_",
+                "_scln_",
+                "_lt_",
+                "_eq_",
+                "_gt_",
+                "_qstn_",
+                "_atsym_",
+                "_sbl_",
+                "_bslsh_",
+                "_sbr_",
+                "_dach_",
+                "_",
+                "_bqt_",
+                "_cbl_",
+                "_pip_",
+                "_cbr_",
+                "_tld_"]
     for ch in ascii_uppercase:
         prefixes.append('esc_' + ch)
     for ch in ascii_lowercase:
@@ -64,7 +108,8 @@ def prepare_letters(workspace_root, q, parents_only):
     for l0 in prefixes:
 
         # update progress
-        print(progress[progress_index], end='')
+        if progress_index % 2 == 0:
+            print(progress[progress_index // 2], end='')
         progress_index += 1
         sys.stdout.flush()
 
@@ -256,6 +301,7 @@ def prepare_letters(workspace_root, q, parents_only):
                     (l0 == 'm' and l1 == 'y') or                                                           \
                     (l0 == 'esc_T' and l1 == 'h') or                                                       \
                     (l0 == 'esc_W' and l1 == 'h') or                                                       \
+                    (l0 == '_tld_' and l1 == '_tld_') or                                                   \
                     (l0 == 'r' and l1 == 'i'):
 
                 # two letter parent
@@ -388,6 +434,7 @@ def prepare_letters(workspace_root, q, parents_only):
                             (l0 == 'w' and l1 == 'e' and l2 == 'l') or                                     \
                             (l0 == 's' and l1 == 'c' and l2 == 'r') or                                     \
                             (l0 == 'c' and l1 == 'l' and l2 == 'a') or                                     \
+                            (l0 == '_tld_' and l1 == '_tld_' and l2 == '_tld_') or                         \
                             (l0 == 'c' and l1 == 'o' and l2 == 'u'):
 
                         # three letter parent
@@ -569,52 +616,7 @@ def prepare_letters(workspace_root, q, parents_only):
                         replaced = line.replace("aoeu", l0 + '/' + l1)
                         replaced = replaced.replace("snth", l0 + '_' + l1)
                         print(replaced, end='')
-
-
-    if not parents_only:
-        syms = [("0", "esc_0"),
-                ("1", "esc_1"),
-                ("2", "esc_2"),
-                ("3", "esc_3"),
-                ("4", "esc_4"),
-                ("5", "esc_5"),
-                ("6", "esc_6"),
-                ("7", "esc_7"),
-                ("8", "esc_8"),
-                ("9", "esc_9"),
-                ("-", "_mns_"),
-                (".", "_dot_"),
-                ("/", "_slsh_"),
-                (":", "_cln_"),
-                ("\"", "_quot_"),
-                ("#", "_hsh_"),
-                ("$", "_dol_"),
-                ("'", "_sqt_"),
-                ("(", "_parl_"),
-                ("+", "_plus_"),
-                (">", "_gt_"),
-                ("]", "_sbr_"),
-                ("_", "_"),
-                ("~", "_tld_")]
-
-        for sym in syms:
-            os.makedirs(generated_symbols / sym[1])
-            os.makedirs(generated_matchables / sym[1])
-            prefix_file.write(sym[0] + " nil nil nil nil nil\n")
-            sym_h = generated_symbols / sym[1] / (sym[1] + '.h')
-            sym_cpp = generated_src / (sym[1] + '.cpp')
-            shutil.copy(leaf_h, sym_h)
-            shutil.copy(leaf_cpp, sym_cpp)
-            for filename in [sym_h, sym_cpp]:
-                for line in fileinput.input(filename, inplace=True):
-                    replaced = line.replace("aoeu", sym[1])
-                    replaced = replaced.replace("snth", sym[1])
-                    print(replaced, end='')
-
-        prefix_file.close()
-        print(progress[progress_index], end='')
-        progress_index += 1
-        sys.stdout.flush()
+    print('')
 
 
 

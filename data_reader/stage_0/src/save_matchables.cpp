@@ -25,9 +25,7 @@ void save_matchables(SerialTask::Type task)
     }
 
     task.set_progress(0);
-    task.set_goal(Stage0Data::symbols_1d_prefixes().size() +
-                  Stage0Data::prefixes_2d_to_5d().size() +
-                  Stage0Data::prefixes_6d().size());
+    task.set_goal(Stage0Data::prefixes_2d_to_5d().size() + Stage0Data::prefixes_6d().size());
 
     // save save save
     Stage0Data::foreach_prefix(

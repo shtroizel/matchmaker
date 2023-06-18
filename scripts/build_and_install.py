@@ -342,6 +342,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
             shutil.copytree(stage_0_workspace_dir + 'generated_include/matchmaker/generated_matchables',
                             stage_1_workspace_dir + 'generated_include/matchmaker/generated_matchables')
 
+        if not retain_leaves or force_stage_1:
             print('building data reader for stage 1 ...\n\n')
 
             # build and install stage 1 data reader

@@ -17,6 +17,9 @@ matchable with by_index required for stage 0 reader
 
 
 
+int const DIM = 95;
+using index_t = uint16_t;
+
 namespace Stage0Data
 {
     MATCHABLE(Encountered, Yes)
@@ -47,10 +50,6 @@ namespace Stage0Data
 
     q_usage::Type & q_mode();
 
-    // All prefixes with a depth of 1 are symbols
-    std::array<Prefix, 24> & symbols_1d_prefixes();
-
-    // All prefixes with a depth > 1 are letters
     std::vector<Prefix> & prefixes_2d_to_5d();
 
     // A 6D lookup table would require too much RAM,
@@ -58,7 +57,8 @@ namespace Stage0Data
     std::vector<Prefix> & prefixes_6d();
 
     // lookup table for constant lookup of indexes into prefixes_2d_to_5d
-    using LookupTable = std::array<std::array<std::array<std::array<std::array<int16_t, 52>, 52>, 52>, 52>, 52>;
+    using LookupTable =
+            std::array<std::array<std::array<std::array<std::array<index_t, DIM>, DIM>, DIM>, DIM>, DIM>;
     LookupTable & lookup_table_2d_to_5d();
 
     // ***************************
@@ -96,7 +96,7 @@ namespace Stage0Data
 
     Prefix * prefix_for_d1_symbol(char sym);
 
-    int16_t calc_letter_index(char ch);
+    index_t calc_index(char ch);
 
     Prefix * lookup(std::string const & str);
 

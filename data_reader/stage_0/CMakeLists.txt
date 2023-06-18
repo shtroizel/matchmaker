@@ -9,6 +9,12 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-dangling-reference")
 endif()
 
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "sparc64")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mcmodel=medany")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mcmodel=medium")
+endif()
+
 find_package(matchable 14.0.0 REQUIRED)
 include_directories(
     ${matchable_DIR}/../../../include

@@ -34,12 +34,13 @@ void prepare_prefixes(SerialTask::Type task)
     }
 
     std::array<std::string, Stage0Data::MAX_PREFIX_DEPTH> p;
-    std::array<int16_t, 6> p_i = { -1, -1, -1, -1, -1, -1 };
+    std::array<index_t, 6> p_i = { (index_t) -1, (index_t) -1, (index_t) -1,
+                                   (index_t) -1, (index_t) -1, (index_t) -1 };
 
     while (read_prefix(f, p, task))
     {
         std::string p_as_str;
-        for (int i = 0; i < Stage0Data::MAX_PREFIX_DEPTH && p[i] != "nil"; ++i)
+        for (index_t i = 0; i < Stage0Data::MAX_PREFIX_DEPTH && p[i] != "nil"; ++i)
         {
             if (p[i].empty())
             {
@@ -56,52 +57,29 @@ void prepare_prefixes(SerialTask::Type task)
                 abort();
             }
 
-            if (p[i].rfind("esc_", 0) == 0)
-                p[i] = p[i].substr(4);
-
+            p[i] = matchable::escapable::unescape_all(p[i]);
             p_as_str += p[i];
         }
 
-        if (p[0] == "nil")
+        if (p[0] == "nil" || p[1] == "nil")
         {
             std::cout << "read_prefixes() --> invalid prefix: " << p_as_str << std::endl;
             abort();
         }
 
-        // handle 1d prefix (only symbols have depth of 1)
-        if (p[1] == "nil")
-        {
-            // std::cout << "    --> 1d prefix!" << std::endl;
-            if (p[0].empty())
-            {
-                std::cout << "first char of prefix is null (failed to load prefix file)" << std::endl;
-                abort();
-            }
+        index_t const maker_index{(index_t) Stage0Data::prefixes_2d_to_5d().size()};
 
-            Prefix * prefix = Stage0Data::prefix_for_d1_symbol(p[0][0]);
-            if (nullptr == prefix)
-            {
-                std::cout << "depth is 1, failed to get maker for symbol: '" << p[0][0] << "'" << std::endl;
-                abort();
-            }
-
-            prefix->initialize(p_as_str);
-            continue;
-        }
-
-        int16_t const maker_index{(int16_t) Stage0Data::prefixes_2d_to_5d().size()};
-
-        p_i[0] = Stage0Data::calc_letter_index(p[0][0]);
-        p_i[1] = Stage0Data::calc_letter_index(p[1][0]);
-        p_i[2] = Stage0Data::calc_letter_index(p[2][0]);
-        p_i[3] = Stage0Data::calc_letter_index(p[3][0]);
-        p_i[4] = Stage0Data::calc_letter_index(p[4][0]);
-        p_i[5] = Stage0Data::calc_letter_index(p[5][0]);
+        p_i[0] = Stage0Data::calc_index(p[0][0]);
+        p_i[1] = Stage0Data::calc_index(p[1][0]);
+        p_i[2] = Stage0Data::calc_index(p[2][0]);
+        p_i[3] = Stage0Data::calc_index(p[3][0]);
+        p_i[4] = Stage0Data::calc_index(p[4][0]);
+        p_i[5] = Stage0Data::calc_index(p[5][0]);
 
         // handle 2d prefix
         if (p[2] == "nil")
         {
-            std::array<std::array<std::array<int16_t, 52>, 52>, 52> & d3 =
+            std::array<std::array<std::array<index_t, DIM>, DIM>, DIM> & d3 =
                     Stage0Data::lookup_table_2d_to_5d() [p_i[0]] [p_i[1]];
             for (auto & d4 : d3)
                 for (auto & d5 : d4)
@@ -112,7 +90,8 @@ void prepare_prefixes(SerialTask::Type task)
         // handle 3d prefix
         else if (p[3] == "nil")
         {
-            std::array<std::array<int16_t, 52>, 52> & d4 = Stage0Data::lookup_table_2d_to_5d() [p_i[0]] [p_i[1]] [p_i[2]];
+            std::array<std::array<index_t, DIM>, DIM> & d4 =
+                    Stage0Data::lookup_table_2d_to_5d() [p_i[0]] [p_i[1]] [p_i[2]];
             for (auto & d5 : d4)
                 for (auto & i : d5)
                     i = maker_index;
@@ -121,7 +100,8 @@ void prepare_prefixes(SerialTask::Type task)
         // handle 4d prefix
         else if (p[4] == "nil")
         {
-            std::array<int16_t, 52> & d5 = Stage0Data::lookup_table_2d_to_5d() [p_i[0]] [p_i[1]] [p_i[2]] [p_i[3]];
+            std::array<index_t, DIM> & d5 =
+                    Stage0Data::lookup_table_2d_to_5d() [p_i[0]] [p_i[1]] [p_i[2]] [p_i[3]];
             for (auto & i : d5)
                 i = maker_index;
         }

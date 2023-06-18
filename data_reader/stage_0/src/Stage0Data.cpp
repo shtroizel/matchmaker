@@ -15,12 +15,6 @@ namespace Stage0Data
 
     q_usage::Type & q_mode() { static q_usage::Type mode; return mode; }
 
-    std::array<Prefix, 24> & symbols_1d_prefixes()
-    {
-        static std::array<Prefix, 24> prefixes;
-        return prefixes;
-    }
-
     std::vector<Prefix> & prefixes_2d_to_5d()
     {
         static std::vector<Prefix> prefixes;
@@ -43,7 +37,7 @@ namespace Stage0Data
                         for (auto & d2 : d1)
                             for (auto & d3 : d2)
                                 for (auto & d4 : d3)
-                                    for (int16_t & i : d4)
+                                    for (index_t & i : d4)
                                         i = -1;
                     return t;
                 }();
@@ -243,108 +237,67 @@ namespace Stage0Data
     }
 
 
-
-
-    Prefix * prefix_for_d1_symbol(char sym)
+    index_t calc_index(char ch)
     {
-        //  0  "\"
-        //  1  "#"
-        //  2  "$"
+        //   0  ' '
+        //   1  '!'
+        //   2  '"'
+        //   3  '#'
+        //   4  '$'
+        //   5  '%'
+        //   6  '&'
+        //   7  '''
+        //   8  '('
+        //   9  ')'
+        //  10  '*'
+        //  11  '+'
+        //  12  ','
+        //  13  '-'
+        //  14  '.'
+        //  15  '/'
+        //  16  '0'
+        //  17  '1'
+        //  18  '2'
+        //  19  '3'
+        //  20  '4'
+        //  21  '5'
+        //  22  '6'
+        //  23  '7'
+        //  24  '8'
+        //  25  '9'
+        //  26  ':'
+        //  27  ';'
+        //  28  '<'
+        //  29  '='
+        //  30  '>'
+        //  31  '?'
+        //  32  '@'
+        //  33  '['
+        //  34  '\'
+        //  35  ']'
+        //  36  '^'
+        //  37  '_'
+        //  38  '`'
+        //  39  '{'
+        //  40  '|'
+        //  41  '}'
+        //  42  '~'
+        //  43 - 95 --> 'A' - 'z'
 
-        //  3  "'"
-        //  4  "("
-
-        //  5  "+"
-
-        //  6  "-"
-        //  7  "."
-        //  8  "/"
-        //  9  "0"
-        // 10  "1"
-        // 11  "2"
-        // 12  "3"
-        // 13  "4"
-        // 14  "5"
-        // 15  "6"
-        // 16  "7"
-        // 17  "8"
-        // 18  "9"
-        // 19  ":"
-
-        // 20  ">"
-
-        // 21  "]"
-
-        // 22  "_"
-
-        // 23  "~"
-
-        // check largest ranges first...
-
-
-        // 7th - 20th
-        if (sym >= '-' && sym <= ':')
-            return &symbols_1d_prefixes()[(int16_t) (sym - '-' + 6)];
-
-        // first 3
-        if (sym >= '"' && sym <= '$')
-            return &symbols_1d_prefixes()[(int16_t) (sym - '"')];
-
-        // 4th and 5th
-        if (sym >= '\'' && sym <= '(')
-            return &symbols_1d_prefixes()[(int16_t) (sym - '\'' + 3)];
-
-        // 6th
-        if (sym == '+')
-            return &symbols_1d_prefixes()[5];
-
-        // 21st
-        if (sym == '>')
-            return &symbols_1d_prefixes()[20];
-
-        // 22nd
-        if (sym == ']')
-            return &symbols_1d_prefixes()[21];
-
-        // 23rd
-        if (sym == '_')
-            return &symbols_1d_prefixes()[22];
-
-        // 24th
-        if (sym == '~')
-            return &symbols_1d_prefixes()[23];
-
-        return nullptr;
-    }
-
-
-
-    int16_t calc_letter_index(char ch)
-    {
-        int leaf_index{0};
-
-        if (ch >= 'A' && ch <= 'Z')
-        {
-            leaf_index = (int16_t) ch - 'A';
-        }
+        if (ch >= ' ' && ch <= '@')
+            return (int) (ch - ' ');
+        else if (ch >= 'A' && ch <= 'Z')
+            return (int) (ch - 'A' + 43);
+        else if (ch >= '[' && ch <= '`')
+            return (int) (ch - '[' + 33);
         else if (ch >= 'a' && ch <= 'z')
-        {
-            leaf_index = (int16_t) ch - 'a' + ('Z' - 'A') + 1;
-        }
+            return (int) (ch - 'a' + 69);
+        else if (ch >= '{' && ch <= '~')
+            return (int) (ch - '{' + 39);
 
-        if (leaf_index < 0)
-        {
-            std::cout << "calc_letter_index(" << ch << ") --> leaf_index < 0!";
-            abort();
-        }
-
-        if (leaf_index > 51)
-        {
-            std::cout << "calc_letter_index(" << ch << ") --> leaf_index > 51!";
-            abort();
-        }
-
-        return leaf_index;
+        std::cout << "calc_index(" << ch << ") --> unhandled symbol!";
+        abort();
+        return -1;
     }
 
 
@@ -357,34 +310,9 @@ namespace Stage0Data
             abort();
         }
 
-        // check for d1 symbol
-        {
-            Prefix * p = prefix_for_d1_symbol(str[0]);
-            if (nullptr != p)
-                return p;
-
-            // refer any symbols at 1d to deeper depth - but in a way that precedes all letters
-            if (str[0] < 'A' || (str[0] > 'Z' && str[0] < 'a') || str[0] > 'z')
-            {
-                int16_t l = lookup_table_2d_to_5d()[0][0][0][0][0];
-                if (l < 0 || l >= (int16_t) prefixes_2d_to_5d().size())
-                {
-                    std::cout << "lookup() failed given string: \"" << str << "\"" << std::endl;
-                    abort();
-                }
-                return &prefixes_2d_to_5d()[l];
-            }
-        }
-
-        // first six chars as a string with short strings filled with 'A'
-        std::string first_six{"AAAAAA"};
-        for
-        (
-            int16_t str_i = 0;
-            str_i < (int16_t) first_six.size() && str_i < (int16_t) str.size() &&
-                    ((str[str_i] >= 'A' && str[str_i] <= 'Z') || (str[str_i] >= 'a' && str[str_i] <= 'z'));
-            ++str_i
-        )
+        // first six chars as a string with short strings filled with first symbol (space)
+        std::string first_six = "      ";
+        for (size_t str_i = 0; str_i < first_six.size() && str_i < str.size(); ++str_i)
             first_six[str_i] = str[str_i];
 
         // check for 6D prefix
@@ -392,36 +320,49 @@ namespace Stage0Data
                         prefixes_6d().begin(),
                         prefixes_6d().end(),
                         first_six,
-                        [](Prefix const & l, std::string const & r) { return l.as_string() < r; }
+                        [](Prefix const & l, std::string const & r)
+                        {
+                            return matchable::str_lt_str(l.as_string(), r);
+                        }
                     );
         if (it != prefixes_6d().end() && first_six == it->as_string())
             return &*it;
 
         // 6D prefix not found so look for a shorter prefix,
         // but first we need the index for each dimension
-        std::array<int16_t, 5> i = { 0, 0, 0, 0, 0 };
-        for (int16_t str_i = 0; str_i < (int16_t) str.length() && str_i < 5; ++str_i)
-        {
-            i[str_i] = calc_letter_index(str[str_i]);
-        }
+        std::array<size_t, 5> i = { 0, 0, 0, 0, 0 };
+        for (size_t str_i = 0; str_i < str.length() && str_i < 5; ++str_i)
+            i[str_i] = calc_index(str[str_i]);
 
-        int16_t l = lookup_table_2d_to_5d()[i[0]][i[1]][i[2]][i[3]][i[4]];
+        int l = lookup_table_2d_to_5d()[i[0]][i[1]][i[2]][i[3]][i[4]];
 
         if (l == -1)
         {
-            std::cout << "lookup() --> -1 for given string: \"" << str << "\"" << std::endl;
+            std::cout << "lookup() --> "
+                      << "[" << i[0]
+                      << "][" << i[1]
+                      << "][" << i[2]
+                      << "][" << i[3]
+                      << "][" << i[4]
+                      << "] --> -1 for given string: \"" << str << "\"" << std::endl;
+            std::cout << "first six: '" << first_six << "'" << std::endl;
+            std::cout << "6D prefixes:" << std::endl;
+            for (auto const & p : prefixes_6d())
+                std::cout << "    --> " << p.as_string() << std::endl;
             abort();
         }
 
         if (l < 0)
             goto err;
-        if (l >= (int16_t) prefixes_2d_to_5d().size())
+        if (l >= (int) prefixes_2d_to_5d().size())
             goto err;
 
         return &prefixes_2d_to_5d()[l];
 
     err:
         std::cout << "lookup() failed given string: \"" << str << "\"" << std::endl;
+        std::cout << "    --> l: " << l << std::endl;
+        std::cout << "    --> prefixes_2d_to_5d().size(): " << prefixes_2d_to_5d().size() << std::endl;
         abort();
 
         return nullptr;
@@ -431,9 +372,6 @@ namespace Stage0Data
 
     void foreach_prefix(std::function<void (Prefix & p)> func)
     {
-        for (auto & p : symbols_1d_prefixes())
-            func(p);
-
         for (auto & p : prefixes_2d_to_5d())
             func(p);
 

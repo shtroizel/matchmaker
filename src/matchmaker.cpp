@@ -9,6 +9,22 @@
 
 #include <matchable/matchable.h>
 
+#include <matchmaker/generated_symbols/_spc_/_spc_.h>
+#include <matchmaker/generated_symbols/_bng_/_bng_.h>
+#include <matchmaker/generated_symbols/_quot_/_quot_.h>
+#include <matchmaker/generated_symbols/_hsh_/_hsh_.h>
+#include <matchmaker/generated_symbols/_dol_/_dol_.h>
+#include <matchmaker/generated_symbols/_pct_/_pct_.h>
+#include <matchmaker/generated_symbols/_und_/_und_.h>
+#include <matchmaker/generated_symbols/_sqt_/_sqt_.h>
+#include <matchmaker/generated_symbols/_parl_/_parl_.h>
+#include <matchmaker/generated_symbols/_parr_/_parr_.h>
+#include <matchmaker/generated_symbols/_ast_/_ast_.h>
+#include <matchmaker/generated_symbols/_plus_/_plus_.h>
+#include <matchmaker/generated_symbols/_cma_/_cma_.h>
+#include <matchmaker/generated_symbols/_mns_/_mns_.h>
+#include <matchmaker/generated_symbols/_dot_/_dot_.h>
+#include <matchmaker/generated_symbols/_slsh_/_slsh_.h>
 #include <matchmaker/generated_symbols/esc_0/esc_0.h>
 #include <matchmaker/generated_symbols/esc_1/esc_1.h>
 #include <matchmaker/generated_symbols/esc_2/esc_2.h>
@@ -19,19 +35,22 @@
 #include <matchmaker/generated_symbols/esc_7/esc_7.h>
 #include <matchmaker/generated_symbols/esc_8/esc_8.h>
 #include <matchmaker/generated_symbols/esc_9/esc_9.h>
-#include <matchmaker/generated_symbols/_mns_/_mns_.h>
-#include <matchmaker/generated_symbols/_dot_/_dot_.h>
-#include <matchmaker/generated_symbols/_slsh_/_slsh_.h>
 #include <matchmaker/generated_symbols/_cln_/_cln_.h>
-#include <matchmaker/generated_symbols/_quot_/_quot_.h>
-#include <matchmaker/generated_symbols/_hsh_/_hsh_.h>
-#include <matchmaker/generated_symbols/_dol_/_dol_.h>
-#include <matchmaker/generated_symbols/_sqt_/_sqt_.h>
-#include <matchmaker/generated_symbols/_parl_/_parl_.h>
-#include <matchmaker/generated_symbols/_plus_/_plus_.h>
+#include <matchmaker/generated_symbols/_scln_/_scln_.h>
+#include <matchmaker/generated_symbols/_lt_/_lt_.h>
+#include <matchmaker/generated_symbols/_eq_/_eq_.h>
 #include <matchmaker/generated_symbols/_gt_/_gt_.h>
+#include <matchmaker/generated_symbols/_qstn_/_qstn_.h>
+#include <matchmaker/generated_symbols/_atsym_/_atsym_.h>
+#include <matchmaker/generated_symbols/_sbl_/_sbl_.h>
+#include <matchmaker/generated_symbols/_bslsh_/_bslsh_.h>
 #include <matchmaker/generated_symbols/_sbr_/_sbr_.h>
+#include <matchmaker/generated_symbols/_dach_/_dach_.h>
 #include <matchmaker/generated_symbols/_/_.h>
+#include <matchmaker/generated_symbols/_bqt_/_bqt_.h>
+#include <matchmaker/generated_symbols/_cbl_/_cbl_.h>
+#include <matchmaker/generated_symbols/_pip_/_pip_.h>
+#include <matchmaker/generated_symbols/_cbr_/_cbr_.h>
 #include <matchmaker/generated_symbols/_tld_/_tld_.h>
 #include <matchmaker/generated_symbols/esc_A/esc_A.h>
 #include <matchmaker/generated_symbols/esc_B/esc_B.h>
@@ -124,52 +143,36 @@ using locations_func = std::function<void (int,
 
 PROPERTYx19_MATCHABLE(
     // properties
-    count_func,
-    count,
-    as_longest_func,
-    as_longest,
-    at_func,
-    at,
-    lookup_func,
-    lookup,
-    ordinal_summation_func,
-    ordinal_summation,
-    flagged_parts_of_speech_func,
-    flagged_parts_of_speech,
-    synonyms_func,
-    synonyms,
-    antonyms_func,
-    antonyms,
-    embedded_func,
-    embedded,
-    definition_func,
-    definition,
-    locations_func,
-    locations,
-    is_name_func,
-    is_name,
-    is_male_name_func,
-    is_male_name,
-    is_female_name_func,
-    is_female_name,
-    is_place_func,
-    is_place,
-    is_compound_func,
-    is_compound,
-    is_acronym_func,
-    is_acronym,
-    is_phrase_func,
-    is_phrase,
-    is_used_in_book_func,
-    is_used_in_book,
+    count_func, count,
+    as_longest_func, as_longest,
+    at_func, at,
+    lookup_func, lookup,
+    ordinal_summation_func, ordinal_summation,
+    flagged_parts_of_speech_func, flagged_parts_of_speech,
+    synonyms_func, synonyms,
+    antonyms_func, antonyms,
+    embedded_func, embedded,
+    definition_func, definition,
+    locations_func, locations,
+    is_name_func, is_name,
+    is_male_name_func, is_male_name,
+    is_female_name_func, is_female_name,
+    is_place_func, is_place,
+    is_compound_func, is_compound,
+    is_acronym_func, is_acronym,
+    is_phrase_func, is_phrase,
+    is_used_in_book_func, is_used_in_book,
 
     // name
     symbol,
 
     // variants
-    _quot_, _hsh_, _dol_, _sqt_, _parl_, _plus_, _mns_, _dot_, _slsh_,
+    _spc_, _bng_, _quot_, _hsh_, _dol_, _pct_, _und_, _sqt_, _parl_, _parr_,
+    _ast_, _plus_, _cma_, _mns_, _dot_, _slsh_,
     esc_0, esc_1, esc_2, esc_3, esc_4, esc_5, esc_6, esc_7, esc_8, esc_9,
-    _cln_, _gt_, _sbr_, _, _tld_,
+    _cln_, _scln_, _lt_, _eq_, _gt_, _qstn_, _atsym_,
+    _sbl_, _bslsh_, _sbr_, _dach_, _, _bqt_,
+    _cbl_, _pip_, _cbr_, _tld_,
     esc_A, esc_B, esc_C, esc_D, esc_E, esc_F, esc_G, esc_H, esc_I, esc_J, esc_K, esc_L, esc_M,
     esc_N, esc_O, esc_P, esc_Q, esc_R, esc_S, esc_T, esc_U, esc_V, esc_W, esc_X, esc_Y, esc_Z,
     a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
@@ -197,12 +200,19 @@ MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, is_acronym, &mm_is_acronym_##_
 MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, is_phrase, &mm_is_phrase_##_symbol)                      \
 MATCHABLE_VARIANT_PROPERTY_VALUE(symbol, _symbol, is_used_in_book, &mm_is_used_in_book_##_symbol)
 
+_set_properties(_spc_)
+_set_properties(_bng_)
 _set_properties(_quot_)
 _set_properties(_hsh_)
 _set_properties(_dol_)
+_set_properties(_pct_)
+_set_properties(_und_)
 _set_properties(_sqt_)
 _set_properties(_parl_)
+_set_properties(_parr_)
+_set_properties(_ast_)
 _set_properties(_plus_)
+_set_properties(_cma_)
 _set_properties(_mns_)
 _set_properties(_dot_)
 _set_properties(_slsh_)
@@ -217,9 +227,21 @@ _set_properties(esc_7)
 _set_properties(esc_8)
 _set_properties(esc_9)
 _set_properties(_cln_)
+_set_properties(_scln_)
+_set_properties(_lt_)
+_set_properties(_eq_)
 _set_properties(_gt_)
+_set_properties(_qstn_)
+_set_properties(_atsym_)
+_set_properties(_sbl_)
+_set_properties(_bslsh_)
 _set_properties(_sbr_)
+_set_properties(_dach_)
 _set_properties(_)
+_set_properties(_bqt_)
+_set_properties(_cbl_)
+_set_properties(_pip_)
+_set_properties(_cbr_)
 _set_properties(_tld_)
 _set_properties(esc_A)
 _set_properties(esc_B)
@@ -277,286 +299,102 @@ _set_properties(z)
 #undef _set_properties
 
 
-// store the start indexes for each symbol
-static std::vector<std::pair<int, symbol::Type>> const boundries_by_index =
-//     // this code requires variants_by_index() which is disabled!
-//     //
-//     // variants() is the same as variants_by_string() when MATCHABLE_OMIT_BY_INDEX is used!
-//     // this worked back when all we had were A-Z,a-z since for this case the two sorting orders
-//     // are equivalent
-//     //
-//     // we now have symbols, so the sorting orders are different!
-//     //
-//     // potential solutions:
-//     //
-//     //     0) stop using MATCHABLE_OMIT_BY_INDEX which will bloat all the term matchables even though
-//     //        they are fine with alphabetical order only - and the library is already huge!
-//     //
-//     //     1) conjure up some fragile way of using MATCHABLE_OMIT_BY_INDEX for the terms while using
-//     //        the normal full featured matchable here
-//     //
-//     //     2) unroll the super-cool matchable variant iteration which is tedious and typo prone but
-//     //        if correct will preserve stability, simplicity and performance
-//     [](){
-//         int b{0};
-//         std::vector<std::pair<int, symbol::Type>> boundries;
-//         for (auto const & s : symbol::variants())
-//         {
-//             boundries.push_back(std::make_pair(b, s));
-//             b += s.as_count()();
-//         }
-//         return boundries;
-//     }();
 
-    // solution 2
-    [](){
-        int b{0};
-        std::vector<std::pair<int, symbol::Type>> boundries;
-
-        boundries.push_back(std::make_pair(b, symbol::_quot_::grab()));
-        b += symbol::_quot_::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::_hsh_::grab()));
-        b += symbol::_hsh_::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::_dol_::grab()));
-        b += symbol::_dol_::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::_sqt_::grab()));
-        b += symbol::_sqt_::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::_parl_::grab()));
-        b += symbol::_parl_::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::_plus_::grab()));
-        b += symbol::_plus_::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::_mns_::grab()));
-        b += symbol::_mns_::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::_dot_::grab()));
-        b += symbol::_dot_::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::_slsh_::grab()));
-        b += symbol::_slsh_::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_0::grab()));
-        b += symbol::esc_0::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_1::grab()));
-        b += symbol::esc_1::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_2::grab()));
-        b += symbol::esc_2::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_3::grab()));
-        b += symbol::esc_3::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_4::grab()));
-        b += symbol::esc_4::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_5::grab()));
-        b += symbol::esc_5::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_6::grab()));
-        b += symbol::esc_6::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_7::grab()));
-        b += symbol::esc_7::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_8::grab()));
-        b += symbol::esc_8::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_9::grab()));
-        b += symbol::esc_9::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::_cln_::grab()));
-        b += symbol::_cln_::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::_gt_::grab()));
-        b += symbol::_gt_::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::_sbr_::grab()));
-        b += symbol::_sbr_::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::_::grab()));
-        b += symbol::_::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::_tld_::grab()));
-        b += symbol::_tld_::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_A::grab()));
-        b += symbol::esc_A::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_B::grab()));
-        b += symbol::esc_B::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_C::grab()));
-        b += symbol::esc_C::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_D::grab()));
-        b += symbol::esc_D::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_E::grab()));
-        b += symbol::esc_E::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_F::grab()));
-        b += symbol::esc_F::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_G::grab()));
-        b += symbol::esc_G::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_H::grab()));
-        b += symbol::esc_H::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_I::grab()));
-        b += symbol::esc_I::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_J::grab()));
-        b += symbol::esc_J::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_K::grab()));
-        b += symbol::esc_K::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_L::grab()));
-        b += symbol::esc_L::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_M::grab()));
-        b += symbol::esc_M::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_N::grab()));
-        b += symbol::esc_N::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_O::grab()));
-        b += symbol::esc_O::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_P::grab()));
-        b += symbol::esc_P::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_Q::grab()));
-        b += symbol::esc_Q::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_R::grab()));
-        b += symbol::esc_R::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_S::grab()));
-        b += symbol::esc_S::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_T::grab()));
-        b += symbol::esc_T::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_U::grab()));
-        b += symbol::esc_U::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_V::grab()));
-        b += symbol::esc_V::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_W::grab()));
-        b += symbol::esc_W::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_X::grab()));
-        b += symbol::esc_X::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_Y::grab()));
-        b += symbol::esc_Y::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::esc_Z::grab()));
-        b += symbol::esc_Z::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::a::grab()));
-        b += symbol::a::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::b::grab()));
-        b += symbol::b::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::c::grab()));
-        b += symbol::c::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::d::grab()));
-        b += symbol::d::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::e::grab()));
-        b += symbol::e::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::f::grab()));
-        b += symbol::f::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::g::grab()));
-        b += symbol::g::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::h::grab()));
-        b += symbol::h::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::i::grab()));
-        b += symbol::i::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::j::grab()));
-        b += symbol::j::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::k::grab()));
-        b += symbol::k::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::l::grab()));
-        b += symbol::l::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::m::grab()));
-        b += symbol::m::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::n::grab()));
-        b += symbol::n::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::o::grab()));
-        b += symbol::o::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::p::grab()));
-        b += symbol::p::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::q::grab()));
-        b += symbol::q::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::r::grab()));
-        b += symbol::r::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::s::grab()));
-        b += symbol::s::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::t::grab()));
-        b += symbol::t::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::u::grab()));
-        b += symbol::u::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::v::grab()));
-        b += symbol::v::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::w::grab()));
-        b += symbol::w::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::x::grab()));
-        b += symbol::x::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::y::grab()));
-        b += symbol::y::grab().as_count()();
-
-        boundries.push_back(std::make_pair(b, symbol::z::grab()));
-        b += symbol::z::grab().as_count()();
-
-        return boundries;
+matchable::MatchBox<symbol::Type, int> boundaries =
+    []()
+    {
+        int i{0};
+        matchable::MatchBox<symbol::Type, int> b;
+        for (auto const & sym : symbol::variants_by_string())
+        {
+            b.set(sym, i);
+            i += sym.as_count()();
+        }
+        return b;
     }();
-
 
 
 int mm_count()
 {
     static int const ret =
-        [&](){
+        [&]()
+        {
             int r{0};
-            for (auto const & l : symbol::variants())
-                r += l.as_count()();
+            for (auto const & s : symbol::variants())
+                r += s.as_count()();
             return r;
         }();
 
     return ret;
+}
+
+
+int mm_lookup(char const * term, bool * found)
+{
+    if (strlen(term) == 0)
+        goto lookup_failed;
+
+    if (term[0] < 32 || term[0] > 126)
+        goto lookup_failed;
+
+    {
+        int i = -1;
+
+        if (term[0] >= 'a' && term[0] <= 'z')
+        {
+            // lower case letters start after the 43 non-letter symbols and the 26 capital letters
+            i = (int16_t) (term[0] - 'a' + 69);
+        }
+
+        else if (term[0] >= 'A' && term[0] <= 'Z')
+        {
+            // in our list, capital letters start just after the last non-letter symbol
+            // there are a total of 95 symbols, and 52 are letters
+            // 95 - 52 = 43 non-letter symbols that precede all letters
+            i = (int16_t) (term[0] - 'A' + 43);
+        }
+
+        // 33 symbols precede the capital letters on the ascii table, and occur first in our list
+        else if (term[0] >= ' ' && term[0] <= '@')
+        {
+            i = (int16_t) (term[0] - ' ');
+        }
+
+        // these symbols fall between the capital and lower case letters on the ascii table
+        else if (term[0] >= '[' && term[0] <= '`')
+        {
+            // 33 symbols precede 'A' in the ascii table, so these symbols start at index 33 in our list
+            i = (int16_t) (term[0] - '[' + 33);
+        }
+
+        // these symbols fall after the lower case letters on the ascii table
+        else if (term[0] >= '{' && term[0] <= '~')
+        {
+            // for our list, this last group of symbols starts after the initial group of 33
+            // and the second group of 6
+            i = (int16_t) (term[0] - '{' + 39);
+        }
+
+        symbol::Type sym = symbol::from_by_string_index(i);
+        if (sym.is_nil())
+        {
+            std::cout << "\nmm_lookup() :  bug detected! index [" << i
+                        << "] is out of bounds! (lookup failed)" << std::endl;
+            goto lookup_failed;
+        }
+
+        int ret = sym.as_lookup()(term, found);
+        ret += boundaries.at(sym);
+
+        // int ret = boundaries_by_symbol[i].first.as_lookup()(term, found);
+        // ret += boundaries_by_symbol[i].second;
+        return ret;
+    }
+
+lookup_failed:
+    if (nullptr != found)
+        *found = false;
+    return 0;
 }
 
 
@@ -572,199 +410,18 @@ char const * mm_at(int index, int * length)
     }
 
     auto iter = std::lower_bound(
-        boundries_by_index.begin(),
-        boundries_by_index.end(),
+        symbol::variants_by_string().begin(),
+        symbol::variants_by_string().end(),
         index,
-        [](auto const & b, auto const & i){ return b.first <= i; }
+        [](symbol::Type const & sym, int i){ return boundaries.at(sym) <= i; }
     );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    auto & w = iter->second.as_at()(index - iter->first);
+    auto & ret_str = iter->as_at()(index - boundaries.at(*iter));
     if (nullptr != length)
-        *length = (int) w.length();
-    return w.c_str();
-}
-
-
-int mm_lookup(char const * word, bool * found)
-{
-    static std::array<std::pair<symbol::Type, int>, 76> const boundries_by_symbol {
-        std::make_pair(symbol::_quot_::grab(), boundries_by_index[0].first),
-        std::make_pair(symbol::_hsh_::grab(), boundries_by_index[1].first),
-        std::make_pair(symbol::_dol_::grab(), boundries_by_index[2].first),
-        std::make_pair(symbol::_sqt_::grab(), boundries_by_index[3].first),
-        std::make_pair(symbol::_parl_::grab(), boundries_by_index[4].first),
-        std::make_pair(symbol::_plus_::grab(), boundries_by_index[5].first),
-        std::make_pair(symbol::_mns_::grab(), boundries_by_index[6].first),
-        std::make_pair(symbol::_dot_::grab(), boundries_by_index[7].first),
-        std::make_pair(symbol::_slsh_::grab(), boundries_by_index[8].first),
-        std::make_pair(symbol::esc_0::grab(), boundries_by_index[9].first),
-        std::make_pair(symbol::esc_1::grab(), boundries_by_index[10].first),
-        std::make_pair(symbol::esc_2::grab(), boundries_by_index[11].first),
-        std::make_pair(symbol::esc_3::grab(), boundries_by_index[12].first),
-        std::make_pair(symbol::esc_4::grab(), boundries_by_index[13].first),
-        std::make_pair(symbol::esc_5::grab(), boundries_by_index[14].first),
-        std::make_pair(symbol::esc_6::grab(), boundries_by_index[15].first),
-        std::make_pair(symbol::esc_7::grab(), boundries_by_index[16].first),
-        std::make_pair(symbol::esc_8::grab(), boundries_by_index[17].first),
-        std::make_pair(symbol::esc_9::grab(), boundries_by_index[18].first),
-        std::make_pair(symbol::_cln_::grab(), boundries_by_index[19].first),
-        std::make_pair(symbol::_gt_::grab(), boundries_by_index[20].first),
-        std::make_pair(symbol::_sbr_::grab(), boundries_by_index[21].first),
-        std::make_pair(symbol::_::grab(), boundries_by_index[22].first),
-        std::make_pair(symbol::_tld_::grab(), boundries_by_index[23].first),
-        std::make_pair(symbol::esc_A::grab(), boundries_by_index[24].first),
-        std::make_pair(symbol::esc_B::grab(), boundries_by_index[25].first),
-        std::make_pair(symbol::esc_C::grab(), boundries_by_index[26].first),
-        std::make_pair(symbol::esc_D::grab(), boundries_by_index[27].first),
-        std::make_pair(symbol::esc_E::grab(), boundries_by_index[28].first),
-        std::make_pair(symbol::esc_F::grab(), boundries_by_index[29].first),
-        std::make_pair(symbol::esc_G::grab(), boundries_by_index[30].first),
-        std::make_pair(symbol::esc_H::grab(), boundries_by_index[31].first),
-        std::make_pair(symbol::esc_I::grab(), boundries_by_index[32].first),
-        std::make_pair(symbol::esc_J::grab(), boundries_by_index[33].first),
-        std::make_pair(symbol::esc_K::grab(), boundries_by_index[34].first),
-        std::make_pair(symbol::esc_L::grab(), boundries_by_index[35].first),
-        std::make_pair(symbol::esc_M::grab(), boundries_by_index[36].first),
-        std::make_pair(symbol::esc_N::grab(), boundries_by_index[37].first),
-        std::make_pair(symbol::esc_O::grab(), boundries_by_index[38].first),
-        std::make_pair(symbol::esc_P::grab(), boundries_by_index[39].first),
-        std::make_pair(symbol::esc_Q::grab(), boundries_by_index[40].first),
-        std::make_pair(symbol::esc_R::grab(), boundries_by_index[41].first),
-        std::make_pair(symbol::esc_S::grab(), boundries_by_index[42].first),
-        std::make_pair(symbol::esc_T::grab(), boundries_by_index[43].first),
-        std::make_pair(symbol::esc_U::grab(), boundries_by_index[44].first),
-        std::make_pair(symbol::esc_V::grab(), boundries_by_index[45].first),
-        std::make_pair(symbol::esc_W::grab(), boundries_by_index[46].first),
-        std::make_pair(symbol::esc_X::grab(), boundries_by_index[47].first),
-        std::make_pair(symbol::esc_Y::grab(), boundries_by_index[48].first),
-        std::make_pair(symbol::esc_Z::grab(), boundries_by_index[49].first),
-        std::make_pair(symbol::a::grab(), boundries_by_index[50].first),
-        std::make_pair(symbol::b::grab(), boundries_by_index[51].first),
-        std::make_pair(symbol::c::grab(), boundries_by_index[52].first),
-        std::make_pair(symbol::d::grab(), boundries_by_index[53].first),
-        std::make_pair(symbol::e::grab(), boundries_by_index[54].first),
-        std::make_pair(symbol::f::grab(), boundries_by_index[55].first),
-        std::make_pair(symbol::g::grab(), boundries_by_index[56].first),
-        std::make_pair(symbol::h::grab(), boundries_by_index[57].first),
-        std::make_pair(symbol::i::grab(), boundries_by_index[58].first),
-        std::make_pair(symbol::j::grab(), boundries_by_index[59].first),
-        std::make_pair(symbol::k::grab(), boundries_by_index[60].first),
-        std::make_pair(symbol::l::grab(), boundries_by_index[61].first),
-        std::make_pair(symbol::m::grab(), boundries_by_index[62].first),
-        std::make_pair(symbol::n::grab(), boundries_by_index[63].first),
-        std::make_pair(symbol::o::grab(), boundries_by_index[64].first),
-        std::make_pair(symbol::p::grab(), boundries_by_index[65].first),
-        std::make_pair(symbol::q::grab(), boundries_by_index[66].first),
-        std::make_pair(symbol::r::grab(), boundries_by_index[67].first),
-        std::make_pair(symbol::s::grab(), boundries_by_index[68].first),
-        std::make_pair(symbol::t::grab(), boundries_by_index[69].first),
-        std::make_pair(symbol::u::grab(), boundries_by_index[70].first),
-        std::make_pair(symbol::v::grab(), boundries_by_index[71].first),
-        std::make_pair(symbol::w::grab(), boundries_by_index[72].first),
-        std::make_pair(symbol::x::grab(), boundries_by_index[73].first),
-        std::make_pair(symbol::y::grab(), boundries_by_index[74].first),
-        std::make_pair(symbol::z::grab(), boundries_by_index[75].first),
-    };
-
-    if (strlen(word) == 0)
-        goto lookup_failed;
-
-    if (word[0] < 32 || word[0] > 126)
-        goto lookup_failed;
-
-    {
-        int i = word[0];
-        if (word[0] >= 'a' && word[0] <= 'z')
-        {
-//             i -= 'a';
-//             i += 50;
-            // "simplify for speed!
-            i -= 47;
-        }
-        else if (word[0] >= 'A' && word[0] <= 'Z')
-        {
-//             i -= 'A';  // ascii table location
-//             i += 24;   // boundries_by_index location
-            // "simplify" for speed!
-            i -= 41;
-        }
-        else if (word[0] >= '-' && word[0] <= ':')
-        {
-//             i -= '-';
-//             i += 6;
-            // "simplify for speed!
-            i -= 39;
-        }
-        else if (word[0] == '\'' || word[0] == '(')
-        {
-//             i -= '\'';
-//             i += 3;
-            // "simplify for speed!
-            i -= 36;
-        }
-        else if (word[0] >= '"' && word[0] <= '$')
-        {
-            i -= '"';
-//             i += 0;
-        }
-        else if (word[0] == '>')
-        {
-//             i -= '>';
-//             i += 20;
-            // "simplify for speed!
-            i -= 42;
-        }
-        else if (word[0] == ']')
-        {
-//             i -= ']';
-//             i += 21;
-            // "simplify for speed!
-            i -= 72;
-        }
-        else if (word[0] == '_')
-        {
-//             i -= '_';
-//             i += 22;
-            // "simplify for speed!
-            i -= 73;
-        }
-        else if (word[0] == '~')
-        {
-//             i -= '~';
-//             i += 23;
-            // "simplify for speed!
-            i -= 103;
-        }
-        else if (word[0] == '+')
-        {
-//             i -= '+';
-//             i += 5;
-            // "simplify for speed!
-            i -= 38;
-        }
-        else
-        {
-            i = 24; // 'A'
-        }
-
-        if (i < 0 || i > 75)
-        {
-            std::cout << "\nmm_lookup() :  bug detected! index [" << i
-                        << "] is out of bounds! (lookup failed)" << std::endl;
-            goto lookup_failed;
-        }
-
-        int ret = boundries_by_symbol[i].first.as_lookup()(word, found);
-        ret += boundries_by_symbol[i].second;
-        return ret;
-    }
-
-lookup_failed:
-    if (nullptr != found)
-        *found = false;
-    return 0;
+        *length = (int) ret_str.length();
+    return ret_str.c_str();
 }
 
 
@@ -774,15 +431,15 @@ int mm_as_longest(int index)
         return -1;
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, int i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_as_longest()(index - iter->first);
+    return iter->as_as_longest()(index - boundaries.at(*iter));
 }
 
 
@@ -827,15 +484,15 @@ int mm_ordinal_summation(int index)
         return 0;
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, int i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_ordinal_summation()(index - iter->first);
+    return iter->as_ordinal_summation()(index - boundaries.at(*iter));
 }
 
 
@@ -871,15 +528,15 @@ bool mm_parts_of_speech(int index, char const * const * * pos, int8_t const * * 
         return false;
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, int i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    auto const & f = iter->second.as_flagged_parts_of_speech()(index - iter->first);
+    auto const & f = iter->as_flagged_parts_of_speech()(index - boundaries.at(*iter));
     if (f.size() != all.size())
     {
         std::cout << "******* mm_parts_of_speech() -> f.size() != all.size() *******"
@@ -899,15 +556,15 @@ bool mm_is_name(int index)
         return false;
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, auto const & i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_name()(index - iter->first) != 0;
+    return iter->as_is_name()(index - boundaries.at(*iter)) != 0;
 }
 
 
@@ -917,15 +574,16 @@ bool mm_is_male_name(int index)
         return false;
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, auto const & i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_male_name()(index - iter->first) != 0;
+
+    return iter->as_is_male_name()(index - boundaries.at(*iter)) != 0;
 }
 
 
@@ -935,15 +593,15 @@ bool mm_is_female_name(int index)
         return false;
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, auto const & i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_female_name()(index - iter->first) != 0;
+    return iter->as_is_female_name()(index - boundaries.at(*iter)) != 0;
 }
 
 
@@ -953,15 +611,15 @@ bool mm_is_place(int index)
         return false;
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, auto const & i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_place()(index - iter->first) != 0;
+    return iter->as_is_place()(index - boundaries.at(*iter)) != 0;
 }
 
 
@@ -971,15 +629,15 @@ bool mm_is_compound(int index)
         return false;
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, auto const & i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_compound()(index - iter->first) != 0;
+    return iter->as_is_compound()(index - boundaries.at(*iter)) != 0;
 }
 
 
@@ -989,15 +647,15 @@ bool mm_is_acronym(int index)
         return false;
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, auto const & i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_acronym()(index - iter->first) != 0;
+    return iter->as_is_acronym()(index - boundaries.at(*iter)) != 0;
 }
 
 
@@ -1007,15 +665,15 @@ bool mm_is_phrase(int index)
         return false;
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, auto const & i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_phrase()(index - iter->first) != 0;
+    return iter->as_is_phrase()(index - boundaries.at(*iter)) != 0;
 }
 
 
@@ -1025,15 +683,15 @@ bool mm_is_used_in_book(int book_index, int index)
         return false;
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, auto const & i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    return iter->second.as_is_used_in_book()(book_index, index - iter->first) != 0;
+    return iter->as_is_used_in_book()(book_index, index - boundaries.at(*iter)) != 0;
 }
 
 
@@ -1047,15 +705,15 @@ void mm_synonyms(int index, int const * * synonyms, int * count)
     }
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, auto const & i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    auto & s = iter->second.as_synonyms()(index - iter->first);
+    auto & s = iter->as_synonyms()(index - boundaries.at(*iter));
     *synonyms = s.data();
     *count = (int) s.size();
 }
@@ -1071,15 +729,15 @@ void mm_antonyms(int index, int const * * antonyms, int * count)
     }
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, auto const & i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    auto & a = iter->second.as_antonyms()(index - iter->first);
+    auto & a = iter->as_antonyms()(index - boundaries.at(*iter));
     *antonyms = a.data();
     *count = (int) a.size();
 }
@@ -1095,15 +753,15 @@ void mm_embedded(int index, int const * * embedded, int * count)
     }
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, auto const & i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    auto & e = iter->second.as_embedded()(index - iter->first);
+    auto & e = iter->as_embedded()(index - boundaries.at(*iter));
     *embedded = e.data();
     *count = (int) e.size();
 }
@@ -1119,15 +777,15 @@ void mm_definition(int index, int const * * definition, int * count)
     }
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, auto const & i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    auto & d = iter->second.as_definition()(index - iter->first);
+    auto & d = iter->as_definition()(index - boundaries.at(*iter));
     *definition = d.data();
     *count = (int) d.size();
 }
@@ -1153,20 +811,22 @@ void mm_locations(
     }
 
     auto iter = std::lower_bound(
-                    boundries_by_index.begin(),
-                    boundries_by_index.end(),
+                    symbol::variants_by_string().begin(),
+                    symbol::variants_by_string().end(),
                     index,
-                    [](auto const & b, auto const & i){ return b.first <= i; }
+                    [](symbol::Type const & sym, auto const & i){ return boundaries.at(sym) <= i; }
                 );
-    if (iter != boundries_by_index.begin())
+    if (iter != symbol::variants_by_string().begin())
         --iter;
 
-    iter->second.as_locations()(index - iter->first,
-                                book_indexes,
-                                chapter_indexes,
-                                paragraph_indexes,
-                                word_indexes,
-                                count);
+    iter->as_locations()(
+        index - boundaries.at(*iter),
+        book_indexes,
+        chapter_indexes,
+        paragraph_indexes,
+        word_indexes,
+        count
+    );
 }
 
 
