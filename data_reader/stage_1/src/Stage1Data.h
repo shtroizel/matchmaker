@@ -64,7 +64,7 @@ using UsedInBookTable = std::vector<Buch::Flags>;
 using LongestOffsetsMap = std::map<int, std::pair<int, int>>;
 using KeyWords = std::vector<int>;
 
-PROPERTYx15_MATCHABLE(
+PROPERTYx16_MATCHABLE(
     std::string, workspace_dir,
     std::string, data_dir,
     std::string, template_dir,
@@ -80,6 +80,7 @@ PROPERTYx15_MATCHABLE(
     IndexTable, paragraph_indexes,
     IndexTable, word_indexes,
     KeyWords, key_words,
+    int, thread_count,
 
     Stage1Data
 )

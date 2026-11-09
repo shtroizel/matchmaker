@@ -39,13 +39,13 @@ def usage():
     print('    -a, --atomic_libs             instead of multi-libs, each prefix gets its own lib')
     print('                                    * increases startup time for programs 80x')
     print('                                    * adds \'_atomic\' suffix to build_dir')
-    print('                                    * adds \'_atomic\' suffix to install_dir')
+    print('                                    * adds \'_atomic\' suffix to library name in install_dir')
     print('                                    * avoidance recommended\n')
     print('    -q, --q                       q only')
     print('                                    * only build minimal dictionary for "Crumbs"')
     print('                                    * builds much faster')
     print('                                    * adds \'_q\' suffix to build_dir')
-    print('                                    * adds \'_q\' suffix to install_dir\n')
+    print('                                    * adds \'_q\' suffix to library name in install_dir\n')
     print('    -d, --debug                   debug build\n')
 
 
@@ -86,6 +86,13 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
         abs_install_dir = build_dir + install_dir
     stage_0_install_prefix = stage_0_build_dir + 'install/'
 
+    stage_0_matchable_build_dir = stage_0_build_dir + 'matchable_build'
+    stage_1_matchable_build_dir = build_dir + 'matchable_build'
+    stage_0_data_reader_build_dir = stage_0_build_dir + 'data_reader_build'
+    stage_0_data_reader_install_dir = stage_0_build_dir + 'data_reader_install'
+    stage_1_data_reader_build_dir = build_dir + 'data_reader_build'
+    stage_1_data_reader_install_dir = build_dir + 'data_reader_install'
+
     try:
         if not retain and not retain_leaves and os.path.exists(stage_0_build_dir):
             shutil.rmtree(stage_0_build_dir)
@@ -107,8 +114,8 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
         exit(1)
 
     try:
-        if not os.path.exists(install_dir):
-            os.makedirs(install_dir)
+        if not os.path.exists(abs_install_dir):
+            os.makedirs(abs_install_dir)
     except OSError as error:
         pass
 
@@ -157,7 +164,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
             if use_clang:
                 build_matchable_cmd.append('-c')
             build_matchable_cmd.append('-b')
-            build_matchable_cmd.append('build_mm' + suffix)
+            build_matchable_cmd.append(stage_0_matchable_build_dir)
             build_matchable_cmd.append('-i')
             build_matchable_cmd.append(stage_0_install_prefix)
             if subprocess.run(build_matchable_cmd).returncode != 0:
@@ -173,7 +180,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
             if use_clang:
                 build_matchable_cmd.append('-c')
             build_matchable_cmd.append('-b')
-            build_matchable_cmd.append('build_mm' + suffix)
+            build_matchable_cmd.append(stage_1_matchable_build_dir)
             build_matchable_cmd.append('-i')
             build_matchable_cmd.append(abs_install_dir)
             if subprocess.run(build_matchable_cmd).returncode != 0:
@@ -184,10 +191,11 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
 
             # then build and install data reader for stage 0
             build_data_reader_cmd = ['data_reader/stage_0/scripts/build_and_install.py']
+            build_data_reader_cmd.append('-j' + jobs)
             build_data_reader_cmd.append('-b')
-            build_data_reader_cmd.append('build_mm' + suffix)
+            build_data_reader_cmd.append(stage_0_data_reader_build_dir)
             build_data_reader_cmd.append('-i')
-            build_data_reader_cmd.append('../install_mm' + suffix)
+            build_data_reader_cmd.append(stage_0_data_reader_install_dir)
             build_data_reader_cmd.append('-m')
             build_data_reader_cmd.append(stage_0_install_prefix + '/lib/matchable/cmake')
             if use_clang:
@@ -210,7 +218,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
             shutil.rmtree(book_vocabulary_dir, ignore_errors=True)
             os.makedirs(book_vocabulary_dir)
 
-            reader_loc = matchmaker_root + 'data_reader/stage_0/install_mm' + suffix
+            reader_loc = stage_0_data_reader_install_dir
             data_reader_stage_0 = reader_loc + "/bin/data_reader_stage_0"
             data_reader_stage_0_data = reader_loc + "/share/matchmaker/data_reader_stage_0/data"
             out_dir = stage_0_workspace_dir + "/generated_include/matchmaker/generated_matchables/"
@@ -346,10 +354,11 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
 
             # build and install stage 1 data reader
             build_data_reader_cmd = ['data_reader/stage_1/scripts/build_and_install.py']
+            build_data_reader_cmd.append('-j' + jobs)
             build_data_reader_cmd.append('-b')
-            build_data_reader_cmd.append('build_mm' + suffix)
+            build_data_reader_cmd.append(stage_1_data_reader_build_dir)
             build_data_reader_cmd.append('-i')
-            build_data_reader_cmd.append('../install_mm' + suffix)
+            build_data_reader_cmd.append(stage_1_data_reader_install_dir)
             build_data_reader_cmd.append('-m')
             build_data_reader_cmd.append(abs_install_dir + '/lib/matchable/cmake')
             build_data_reader_cmd.append('-s')
@@ -369,12 +378,13 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
             print('\n\nreading stage 1 data ...\n\n')
 
             # run stage 1 data reader to create matchables for stage 1
-            dr_stage_1_install_dir = 'data_reader/stage_1/install_mm' + suffix
+            dr_stage_1_install_dir = stage_1_data_reader_install_dir
             dr_stage_1_binary = dr_stage_1_install_dir + '/bin/data_reader_stage_1'
             template_dir = matchmaker_root + '/templates'
             dr_stage_1_data = dr_stage_1_install_dir + '/share/matchmaker/data_reader_stage_1/data'
 
-            run_dr_stage_1_cmd = [dr_stage_1_binary, dr_stage_1_data, stage_1_workspace_dir, template_dir, q_mode]
+            run_dr_stage_1_cmd = [dr_stage_1_binary, dr_stage_1_data, stage_1_workspace_dir, template_dir,
+                                  q_mode, jobs]
             if subprocess.run(run_dr_stage_1_cmd).returncode != 0:
                 print('\ndata_reader_stage_1 failed')
                 build_cmd_as_str = ''
@@ -393,7 +403,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
 
     os.chdir(build_dir)
 
-    cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + install_dir]
+    cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + abs_install_dir]
 
     if os.name == 'nt':
         cmake_cmd.append('-G Ninja')

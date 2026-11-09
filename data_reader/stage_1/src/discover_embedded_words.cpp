@@ -32,7 +32,7 @@ inline bool is_word_separator(char ch)
 bool discover_embedded_words(SerialTask::Type task)
 {
     // create vector of indexes for each thread
-    int const CPU_COUNT = std::thread::hardware_concurrency();
+    int const CPU_COUNT = Stage1Data::nil.as_thread_count();
     std::vector<std::vector<int>> dealt_word_indexes;
     dealt_word_indexes.reserve(CPU_COUNT);
     for (int i = 0; i < CPU_COUNT; ++i)

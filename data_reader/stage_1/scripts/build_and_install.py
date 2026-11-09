@@ -25,10 +25,13 @@ def usage():
     print('    -c  --clang             force use of clang compiler')
     print('                              * system compiler used by default\n')
     print('    -d  --debug             debug build\n')
+    print('    -j  --jobs              max jobs')
+    print('                              * default is cpu count ['
+          + str(multiprocessing.cpu_count()) + ']\n')
 
 
 
-def build_and_install(build_dir, install_dir, matchable_dir, stage_0_dir, use_clang, debug):
+def build_and_install(build_dir, install_dir, matchable_dir, stage_0_dir, use_clang, debug, jobs):
     start_dir = os.getcwd()
 
     data_reader_stage_1_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
@@ -82,7 +85,7 @@ def build_and_install(build_dir, install_dir, matchable_dir, stage_0_dir, use_cl
         os.chdir(data_reader_stage_1_root)
         exit(1)
 
-    if subprocess.run(['make', '-j' + str(multiprocessing.cpu_count()), 'install']).returncode != 0:
+    if subprocess.run(['make', '-j' + jobs, 'install']).returncode != 0:
         print('make failed')
         os.chdir(data_reader_stage_1_root)
         exit(1)
@@ -93,8 +96,9 @@ def build_and_install(build_dir, install_dir, matchable_dir, stage_0_dir, use_cl
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:m:s:d',
-                ['help', 'clang', 'build_dir', 'install_dir', 'matchable_dir', 'stage_0_dir' 'debug'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:m:s:dj:',
+                ['help', 'clang', 'build_dir', 'install_dir', 'matchable_dir', 'stage_0_dir', 'debug',
+                 'jobs='])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -106,6 +110,7 @@ def main():
     matchable_dir = ''
     stage_0_dir = ''
     debug = False
+    jobs = str(multiprocessing.cpu_count())
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -123,10 +128,12 @@ def main():
             stage_0_dir = a
         elif o in ('-d', '--debug'):
             debug = True
+        elif o in ('-j', '--jobs'):
+            jobs = a
         else:
             assert False, "unhandled option"
 
-    build_and_install(build_dir, install_dir, matchable_dir, stage_0_dir, use_clang, debug)
+    build_and_install(build_dir, install_dir, matchable_dir, stage_0_dir, use_clang, debug, jobs)
 
     exit(0)
 
