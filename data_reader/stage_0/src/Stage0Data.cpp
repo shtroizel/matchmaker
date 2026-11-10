@@ -13,7 +13,7 @@ namespace Stage0Data
     std::string & output_dir() { static std::string s; return s; }
     std::string & prefixes_filename() { static std::string s; return s; }
 
-    q_usage::Type & q_mode() { static q_usage::Type mode; return mode; }
+    dictionary_usage::Type & dictionary_mode() { static dictionary_usage::Type mode; return mode; }
 
     std::array<Prefix, 24> & symbols_1d_prefixes()
     {
@@ -140,7 +140,16 @@ namespace Stage0Data
 
         if (
             MATCHABLE_INSTANCE_IN(SerialTask, task, reading_spc_Crumbs, reading_spc_Keys)
-            || q_mode() != q_usage::only::grab()
+            || dictionary_mode() == dictionary_usage::all::grab()
+            || (
+                dictionary_mode() == dictionary_usage::reduced::grab()
+                && !MATCHABLE_INSTANCE_IN(
+                    SerialTask,
+                    task,
+                    reading_spc_3201_spc__parl_SINGLE_parr_,
+                    reading_spc_3201_spc__parl_COMPOUND_parr_
+                )
+            )
         )
             mm.grab(matchable_name)->add_variant(escaped);
 

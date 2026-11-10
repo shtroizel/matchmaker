@@ -8,10 +8,10 @@
 
 
 MATCHABLE(
-    q_usage,
-    included,
-    omitted,
-    only
+    dictionary_usage,
+    all,
+    reduced,
+    none
 )
 
 

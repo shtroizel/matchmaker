@@ -48,34 +48,22 @@ int main(int argc, char ** argv)
     Stage0Data::output_dir() = argv[3];
     Stage0Data::prefixes_filename() = argv[4];
 
+    Stage0Data::dictionary_mode() = dictionary_usage::all::grab();
     if (argc == 6)
     {
-        Stage0Data::q_mode() = q_usage::from_string(argv[5]);
-        if (Stage0Data::q_mode().is_nil())
+        Stage0Data::dictionary_mode() = dictionary_usage::from_string(argv[5]);
+        if (Stage0Data::dictionary_mode().is_nil())
         {
-            std::cout << "\"" << argv[5] << "\"is not a variant of q_usage. valid variants are:"
-                      << std::endl;
-            for (auto v : q_usage::variants_by_string())
-                std::cout << "  --> " << v << std::endl;
-
-            std::cout << "\nusing default q_usage of: \"" << q_usage::included::grab() << "\"" << std::endl;
+            print_usage();
+            return 2;
         }
     }
-    else
-    {
-        std::cout << "\"q_usage\" not specified, defaulting to \""
-                  << q_usage::included::grab() << "\"" << std::endl;
-    }
-    if (Stage0Data::q_mode().is_nil())
-        Stage0Data::q_mode() = q_usage::included::grab();
+    std::cout << "dictionary usage: " << Stage0Data::dictionary_mode() << std::endl;
 
 
     SerialTask::Flags tasks;
     for (auto const & task : SerialTask::variants_by_index())
         tasks.set(task);
-
-    if (Stage0Data::q_mode() == q_usage::omitted::grab())
-        tasks.unset(SerialTask::reading_spc_Crumbs::grab());
 
     SerialTask::reset_progress();
     int const magic_number = 58;
@@ -112,8 +100,8 @@ void print_usage()
               << "    [2]  book vocabulary directory\n"
               << "    [3]  output directory\n"
               << "    [4]  prefix filename\n"
-              << "    [5]  one of the following q modes:";
-    for (auto v : q_usage::variants_by_string())
+              << "    [5]  dictionary usage (optional, defaults to all), one of:";
+    for (auto v : dictionary_usage::variants_by_string())
         std::cout << " " << v;
     std::cout << std::endl;
 }

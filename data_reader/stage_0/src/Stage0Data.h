@@ -45,7 +45,7 @@ namespace Stage0Data
     std::string & output_dir();
     std::string & prefixes_filename();
 
-    q_usage::Type & q_mode();
+    dictionary_usage::Type & dictionary_mode();
 
     // All prefixes with a depth of 1 are symbols
     std::array<Prefix, 24> & symbols_1d_prefixes();

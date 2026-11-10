@@ -41,8 +41,13 @@ def usage():
     print('                                    * adds \'_atomic\' suffix to build_dir')
     print('                                    * adds \'_atomic\' suffix to library name in install_dir')
     print('                                    * avoidance recommended\n')
+    print('    --dictionary=<usage>          which dictionary sources add words')
+    print('                                    * all: every source (default)')
+    print('                                    * reduced: all but 3201 SINGLE and COMPOUND')
+    print('                                    * none: only "Crumbs" and its keys')
+    print('                                    * every source still annotates the words it finds\n')
     print('    -q, --q                       q only')
-    print('                                    * only build minimal dictionary for "Crumbs"')
+    print('                                    * same as --dictionary=none')
     print('                                    * builds much faster')
     print('                                    * adds \'_q\' suffix to build_dir')
     print('                                    * adds \'_q\' suffix to library name in install_dir\n')
@@ -51,17 +56,15 @@ def usage():
 
 
 def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
-                      build_dir, install_dir, atomic_libs, q, debug):
+                      build_dir, install_dir, atomic_libs, q, debug, dictionary):
 
     start_dir = os.getcwd()
 
     matchmaker_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
     os.chdir(matchmaker_root)
 
-    q_mode = "included"
     suffix = ''
     if q:
-        q_mode = "only"
         suffix = '_q'
     if atomic_libs:
         suffix = suffix + '_atomic'
@@ -225,7 +228,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
             prefix_filename = stage_0_workspace_dir + "/prefix_list"
 
             run_data_reader_cmd = [data_reader_stage_0, data_reader_stage_0_data, book_vocabulary_dir,
-                                   out_dir, prefix_filename, q_mode]
+                                   out_dir, prefix_filename, dictionary]
             if subprocess.run(run_data_reader_cmd).returncode != 0:
                 print('\ndata_reader_stage_0 failed')
                 build_cmd_as_str = ''
@@ -384,7 +387,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
             dr_stage_1_data = dr_stage_1_install_dir + '/share/matchmaker/data_reader_stage_1/data'
 
             run_dr_stage_1_cmd = [dr_stage_1_binary, dr_stage_1_data, stage_1_workspace_dir, template_dir,
-                                  q_mode, jobs]
+                                  jobs]
             if subprocess.run(run_dr_stage_1_cmd).returncode != 0:
                 print('\ndata_reader_stage_1 failed')
                 build_cmd_as_str = ''
@@ -459,7 +462,7 @@ def main():
         opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crlmfj:aql:d',
                 ['help', 'build_dir', 'install_dir', 'clang', 'retain', 'retain_leaves',
                  'force_stage_1', 'jobs', 'atomic_libs', 'q', 'memory_usage_limit',
-                 'debug'])
+                 'debug', 'dictionary='])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -475,6 +478,7 @@ def main():
     atomic_libs = False
     q = False
     debug = False
+    dictionary = ''
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -498,13 +502,24 @@ def main():
             atomic_libs = True
         elif o in ('-q', '--q'):
             q = True
+        elif o == '--dictionary':
+            dictionary = a
         elif o in ('-d, --debug'):
             debug = True
         else:
             assert False, "unhandled option"
 
+    if dictionary not in ('', 'all', 'reduced', 'none'):
+        print('--dictionary must be one of: all, reduced, none')
+        sys.exit(2)
+    if q and dictionary not in ('', 'none'):
+        print('-q builds with --dictionary=none and can\'t be combined with --dictionary=' + dictionary)
+        sys.exit(2)
+    if dictionary == '':
+        dictionary = 'none' if q else 'all'
+
     build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs, build_dir,
-                      install_dir, atomic_libs, q, debug)
+                      install_dir, atomic_libs, q, debug, dictionary)
 
     exit(0)
 
