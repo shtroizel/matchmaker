@@ -841,13 +841,14 @@ int mm_ordinal_summation(int index)
 
 void mm_from_ordinal_summation(int summation, int const * * words, int * count)
 {
-    if (count == nullptr)
+    if (nullptr == words || nullptr == count)
         return;
 
     if (summation < 0 || summation >= (int) ORDINAL_SUMMATIONS.size())
     {
-        words = nullptr;
+        *words = nullptr;
         *count = 0;
+        return;
     }
 
     *words = ORDINAL_SUMMATIONS[summation].data();
@@ -865,7 +866,8 @@ bool mm_parts_of_speech(int index, char const * const * * pos, int8_t const * * 
                                                              return ret;
                                                  }();
     *pos = all.data();
-    *count = (int) all.size();
+    *flagged = nullptr;
+    *count = 0;
 
     if (index < 0 || index >= mm_count())
         return false;
@@ -888,6 +890,7 @@ bool mm_parts_of_speech(int index, char const * const * * pos, int8_t const * * 
     }
 
     *flagged = f.data();
+    *count = (int) all.size();
 
     return true;
 }

@@ -175,7 +175,8 @@ int mm_ordinal_summation(int index);
  * @param[out] terms
  *     alphabetic indexes for each term with the given summation
  * @param[out] count
- *     number of terms found with the given ordinal sum
+ *     number of terms found with the given ordinal sum, or 0 (with terms set to NULL) when the summation
+ *     is out of range
  */
 void mm_from_ordinal_summation(int summation, int const * * terms, int * count);
 
@@ -195,7 +196,8 @@ void mm_from_ordinal_summation(int summation, int const * * terms, int * count);
  * @param[out] count
  *     number of array elements (same for both pos and flagged)
  * @returns
- *     true when index in range [0..mm_count() - 1] and false when index out of range
+ *     true when index in range [0..mm_count() - 1] and false when index out of range,
+ *     in which case flagged is set to NULL and count to 0
  */
 bool mm_parts_of_speech(int index, char const * const * * pos, int8_t const * * flagged, int * count);
 
