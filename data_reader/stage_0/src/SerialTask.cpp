@@ -36,6 +36,13 @@ namespace SerialTask
         prev_mod_progress.set(task, mod_progress.at(task));
     }
 
+    Buch::Type book_of(SerialTask::Type task)
+    {
+        if (MATCHABLE_INSTANCE_IN(SerialTask, task, reading_spc_Crumbs, reading_spc_Keys))
+            return Buch::Crumbs::grab();
+        return Buch::nil;
+    }
+
     char progress_char(SerialTask::Type task)
     {
         static std::string const success = "..SUCCESS";

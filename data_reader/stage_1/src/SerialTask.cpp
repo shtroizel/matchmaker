@@ -39,6 +39,13 @@ namespace SerialTask
 
 
 
+    Buch::Type book_of(SerialTask::Type task)
+    {
+        if (MATCHABLE_INSTANCE_IN(SerialTask, task, reading_spc_crumbs, reading_spc_Keys))
+            return Buch::Crumbs::grab();
+        return Buch::nil;
+    }
+
     char progress_char(SerialTask::Type task)
     {
         static std::string const success = "..SUCCESS";

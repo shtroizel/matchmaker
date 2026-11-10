@@ -11,6 +11,8 @@ matchable with by_index required for stage 1 reader
 #include <functional>
 #include <map>
 
+#include <matchmaker/data_reader_common.h>
+
 
 struct BookWord
 {
@@ -48,13 +50,6 @@ MATCHABLE(
     has_spaces,
     has_hyphens,
     has_other_symbols
-)
-
-
-MATCHABLE(
-    Buch,
-
-    Crumbs
 )
 
 

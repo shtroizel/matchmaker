@@ -246,7 +246,7 @@ bool patch_matchable_header(
                     {
                         bool in_at_least_one_book{false};
                         std::vector<std::string> used_in_book_vect;
-                        for (auto const & book : Buch::variants_by_index())
+                        for (auto const & book : selected_books().currently_set())
                         {
                             if (used_in_book[existing_word_index].is_set(book))
                             {

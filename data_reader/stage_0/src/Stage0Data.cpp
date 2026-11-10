@@ -139,7 +139,7 @@ namespace Stage0Data
         }
 
         if (
-            MATCHABLE_INSTANCE_IN(SerialTask, task, reading_spc_Crumbs, reading_spc_Keys)
+            !SerialTask::book_of(task).is_nil()
             || dictionary_mode() == dictionary_usage::all::grab()
             || (
                 dictionary_mode() == dictionary_usage::reduced::grab()
