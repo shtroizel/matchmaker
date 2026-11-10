@@ -41,6 +41,12 @@ add_definitions(-DMATCHABLE_OMIT_BY_INDEX)
 find_package(matchable 14.0.0 REQUIRED)
 include_directories(${matchable_DIR}/../../../include)
 
+set(mm_exports_map ${MATCHMAKER_ROOT}/workspace_common/mm_exports.map)
+macro(export_mm_only target)
+    target_link_options(${target} PRIVATE -Wl,--version-script=${mm_exports_map})
+    set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS ${mm_exports_map})
+endmacro()
+
 set(lib_list)
 macro(add_lib_finalization lib_name)
     list(APPEND lib_list matchmaker_${lib_name})
@@ -54,6 +60,7 @@ macro(add_lib_finalization lib_name)
         $<INSTALL_INTERFACE:include>
     )
     set_target_properties(matchmaker_${lib_name} PROPERTIES POSITION_INDEPENDENT_CODE 1)
+    export_mm_only(matchmaker_${lib_name})
     install(
         TARGETS matchmaker_${lib_name}
         DESTINATION ${lib_destination}
@@ -525,6 +532,7 @@ target_include_directories(
 foreach(lib ${lib_list})
     target_link_libraries(matchmaker ${lib})
 endforeach()
+export_mm_only(matchmaker)
 if(NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "sparc64")
     find_program(ld_gold ld.gold)
     if(NOT "${ld_gold}" STREQUAL "ld_gold-NOTFOUND")
