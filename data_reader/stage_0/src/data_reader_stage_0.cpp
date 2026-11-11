@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <iostream>
 #include <queue>
+#include <vector>
 
 #include <matchable/matchable.h>
 #include <matchable/matchable_fwd.h>
@@ -71,17 +72,29 @@ int main(int argc, char ** argv)
     std::cout << std::endl;
 
 
-    SerialTask::Flags tasks;
+    // sources that only annotate run after every source that adds words, so they see all the words
+    std::vector<SerialTask::Type> tasks{SerialTask::preparing_spc_prefixes::grab()};
+    std::vector<SerialTask::Type> annotating;
     for (auto const & task : SerialTask::variants_by_index())
-        if (SerialTask::book_of(task).is_nil() || selected_books().is_set(SerialTask::book_of(task)))
-            tasks.set(task);
+    {
+        if (MATCHABLE_INSTANCE_IN(SerialTask, task, preparing_spc_prefixes, saving_spc_matchables))
+            continue;
+        if (!SerialTask::book_of(task).is_nil() && !selected_books().is_set(SerialTask::book_of(task)))
+            continue;
+        if (Stage0Data::adds_words(task))
+            tasks.push_back(task);
+        else
+            annotating.push_back(task);
+    }
+    tasks.insert(tasks.end(), annotating.begin(), annotating.end());
+    tasks.push_back(SerialTask::saving_spc_matchables::grab());
 
     SerialTask::reset_progress();
     int const magic_number = 58;
     // std::cout << "         1         2         3         4         5         6         7         8\n"
     //           << "12345678901234567890123456789012345678901234567890123456789012345678901234567890"
     //           << std::endl;
-    for (SerialTask::Type task : tasks.currently_set())
+    for (SerialTask::Type task : tasks)
     {
         std::cout << "       ------> " << task << std::flush;
         task.set_progress_steps(magic_number - task.as_string().length());

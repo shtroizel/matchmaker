@@ -46,6 +46,7 @@ namespace Stage0Data
     std::string & prefixes_filename();
 
     dictionary_usage::Type & dictionary_mode();
+    bool adds_words(SerialTask::Type task);
 
     // All prefixes with a depth of 1 are symbols
     std::array<Prefix, 24> & symbols_1d_prefixes();

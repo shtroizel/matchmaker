@@ -15,6 +15,21 @@ namespace Stage0Data
 
     dictionary_usage::Type & dictionary_mode() { static dictionary_usage::Type mode; return mode; }
 
+    bool adds_words(SerialTask::Type task)
+    {
+        return !SerialTask::book_of(task).is_nil()
+            || dictionary_mode() == dictionary_usage::all::grab()
+            || (
+                dictionary_mode() == dictionary_usage::reduced::grab()
+                && !MATCHABLE_INSTANCE_IN(
+                    SerialTask,
+                    task,
+                    reading_spc_3201_spc__parl_SINGLE_parr_,
+                    reading_spc_3201_spc__parl_COMPOUND_parr_
+                )
+            );
+    }
+
     std::array<Prefix, 24> & symbols_1d_prefixes()
     {
         static std::array<Prefix, 24> prefixes;
@@ -138,19 +153,7 @@ namespace Stage0Data
             abort();
         }
 
-        if (
-            !SerialTask::book_of(task).is_nil()
-            || dictionary_mode() == dictionary_usage::all::grab()
-            || (
-                dictionary_mode() == dictionary_usage::reduced::grab()
-                && !MATCHABLE_INSTANCE_IN(
-                    SerialTask,
-                    task,
-                    reading_spc_3201_spc__parl_SINGLE_parr_,
-                    reading_spc_3201_spc__parl_COMPOUND_parr_
-                )
-            )
-        )
+        if (adds_words(task))
             mm.grab(matchable_name)->add_variant(escaped);
 
         if (!mm.grab(matchable_name)->has_variant(escaped))
