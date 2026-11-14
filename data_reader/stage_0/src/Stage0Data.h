@@ -8,6 +8,8 @@ matchable with by_index required for stage 0 reader
 #include <matchable/matchable.h>
 
 #include <functional>
+#include <string>
+#include <unordered_map>
 
 #include <matchmaker/data_reader_common.h>
 #include <matchmaker/parts_of_speech.h>
@@ -16,9 +18,6 @@ matchable with by_index required for stage 0 reader
 #include <SerialTask.h>
 
 
-
-int const DIM = 95;
-using index_t = uint16_t;
 
 namespace Stage0Data
 {
@@ -52,14 +51,11 @@ namespace Stage0Data
 
     std::vector<Prefix> & prefixes_2d_to_5d();
 
-    // A 6D lookup table would require too much RAM,
-    // so the 6th dimension is handled separately
+    // sorted, for binary search
     std::vector<Prefix> & prefixes_6d();
 
-    // lookup table for constant lookup of indexes into prefixes_2d_to_5d
-    using LookupTable =
-            std::array<std::array<std::array<std::array<std::array<index_t, DIM>, DIM>, DIM>, DIM>, DIM>;
-    LookupTable & lookup_table_2d_to_5d();
+    // indexes into prefixes_2d_to_5d, keyed by prefix
+    std::unordered_map<std::string, int> & prefix_indexes_2d_to_5d();
 
     // ***************************
 
@@ -93,10 +89,6 @@ namespace Stage0Data
         SerialTask::Type task,
         parts_of_speech::Flags const & pos_flags
     );
-
-    Prefix * prefix_for_d1_symbol(char sym);
-
-    index_t calc_index(char ch);
 
     Prefix * lookup(std::string const & str);
 

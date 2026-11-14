@@ -22,6 +22,7 @@ void prepare_prefixes(SerialTask::Type task)
     task.set_progress(0);
 
     Stage0Data::prefixes_2d_to_5d().reserve(1000);
+    Stage0Data::prefix_indexes_2d_to_5d().clear();
     Stage0Data::prefixes_6d().clear();
     if (Stage0Data::output_dir().empty())
         abort();
@@ -34,13 +35,11 @@ void prepare_prefixes(SerialTask::Type task)
     }
 
     std::array<std::string, Stage0Data::MAX_PREFIX_DEPTH> p;
-    std::array<index_t, 6> p_i = { (index_t) -1, (index_t) -1, (index_t) -1,
-                                   (index_t) -1, (index_t) -1, (index_t) -1 };
 
     while (read_prefix(f, p, task))
     {
         std::string p_as_str;
-        for (index_t i = 0; i < Stage0Data::MAX_PREFIX_DEPTH && p[i] != "nil"; ++i)
+        for (int i = 0; i < Stage0Data::MAX_PREFIX_DEPTH && p[i] != "nil"; ++i)
         {
             if (p[i].empty())
             {
@@ -67,52 +66,15 @@ void prepare_prefixes(SerialTask::Type task)
             abort();
         }
 
-        index_t const maker_index{(index_t) Stage0Data::prefixes_2d_to_5d().size()};
-
-        p_i[0] = Stage0Data::calc_index(p[0][0]);
-        p_i[1] = Stage0Data::calc_index(p[1][0]);
-        p_i[2] = Stage0Data::calc_index(p[2][0]);
-        p_i[3] = Stage0Data::calc_index(p[3][0]);
-        p_i[4] = Stage0Data::calc_index(p[4][0]);
-        p_i[5] = Stage0Data::calc_index(p[5][0]);
-
-        // handle 2d prefix
-        if (p[2] == "nil")
+        if (p[5] == "nil")
         {
-            std::array<std::array<std::array<index_t, DIM>, DIM>, DIM> & d3 =
-                    Stage0Data::lookup_table_2d_to_5d() [p_i[0]] [p_i[1]];
-            for (auto & d4 : d3)
-                for (auto & d5 : d4)
-                    for (auto & i : d5)
-                        i = maker_index;
+            int const index{(int) Stage0Data::prefixes_2d_to_5d().size()};
+            if (!Stage0Data::prefix_indexes_2d_to_5d().emplace(p_as_str, index).second)
+            {
+                std::cout << "read_prefixes() --> duplicate prefix: " << p_as_str << std::endl;
+                abort();
+            }
         }
-
-        // handle 3d prefix
-        else if (p[3] == "nil")
-        {
-            std::array<std::array<index_t, DIM>, DIM> & d4 =
-                    Stage0Data::lookup_table_2d_to_5d() [p_i[0]] [p_i[1]] [p_i[2]];
-            for (auto & d5 : d4)
-                for (auto & i : d5)
-                    i = maker_index;
-        }
-
-        // handle 4d prefix
-        else if (p[4] == "nil")
-        {
-            std::array<index_t, DIM> & d5 =
-                    Stage0Data::lookup_table_2d_to_5d() [p_i[0]] [p_i[1]] [p_i[2]] [p_i[3]];
-            for (auto & i : d5)
-                i = maker_index;
-        }
-
-        // handle 5d prefix
-        else if (p[5] == "nil")
-        {
-            Stage0Data::lookup_table_2d_to_5d() [p_i[0]] [p_i[1]] [p_i[2]] [p_i[3]] [p_i[4]] = maker_index;
-        }
-
-        // handle 6d prefix
         else
         {
             Prefix p_6d;
@@ -127,6 +89,19 @@ void prepare_prefixes(SerialTask::Type task)
         Stage0Data::prefixes_2d_to_5d().push_back(std::move(p_2_to_5d));
 
         SerialTask::check_progress(task);
+    }
+
+    for (auto const & [prefix, index] : Stage0Data::prefix_indexes_2d_to_5d())
+    {
+        for (size_t len = 2; len < prefix.size(); ++len)
+        {
+            if (Stage0Data::prefix_indexes_2d_to_5d().count(prefix.substr(0, len)) > 0)
+            {
+                std::cout << "read_prefixes() --> prefix: " << prefix
+                          << " overlaps prefix: " << prefix.substr(0, len) << std::endl;
+                abort();
+            }
+        }
     }
 
     if (!std::is_sorted(Stage0Data::prefixes_6d().begin(), Stage0Data::prefixes_6d().end()))

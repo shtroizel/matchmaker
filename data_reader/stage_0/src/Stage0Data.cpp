@@ -27,21 +27,10 @@ namespace Stage0Data
         return prefixes;
     }
 
-    LookupTable & lookup_table_2d_to_5d()
+    std::unordered_map<std::string, int> & prefix_indexes_2d_to_5d()
     {
-        static LookupTable t =
-                []()
-                {
-                    LookupTable t;
-                    for (auto & d1 : t)
-                        for (auto & d2 : d1)
-                            for (auto & d3 : d2)
-                                for (auto & d4 : d3)
-                                    for (index_t & i : d4)
-                                        i = -1;
-                    return t;
-                }();
-        return t;
+        static std::unordered_map<std::string, int> indexes;
+        return indexes;
     }
 
 
@@ -237,71 +226,6 @@ namespace Stage0Data
     }
 
 
-    index_t calc_index(char ch)
-    {
-        //   0  ' '
-        //   1  '!'
-        //   2  '"'
-        //   3  '#'
-        //   4  '$'
-        //   5  '%'
-        //   6  '&'
-        //   7  '''
-        //   8  '('
-        //   9  ')'
-        //  10  '*'
-        //  11  '+'
-        //  12  ','
-        //  13  '-'
-        //  14  '.'
-        //  15  '/'
-        //  16  '0'
-        //  17  '1'
-        //  18  '2'
-        //  19  '3'
-        //  20  '4'
-        //  21  '5'
-        //  22  '6'
-        //  23  '7'
-        //  24  '8'
-        //  25  '9'
-        //  26  ':'
-        //  27  ';'
-        //  28  '<'
-        //  29  '='
-        //  30  '>'
-        //  31  '?'
-        //  32  '@'
-        //  33  '['
-        //  34  '\'
-        //  35  ']'
-        //  36  '^'
-        //  37  '_'
-        //  38  '`'
-        //  39  '{'
-        //  40  '|'
-        //  41  '}'
-        //  42  '~'
-        //  43 - 95 --> 'A' - 'z'
-
-        if (ch >= ' ' && ch <= '@')
-            return (int) (ch - ' ');
-        else if (ch >= 'A' && ch <= 'Z')
-            return (int) (ch - 'A' + 43);
-        else if (ch >= '[' && ch <= '`')
-            return (int) (ch - '[' + 33);
-        else if (ch >= 'a' && ch <= 'z')
-            return (int) (ch - 'a' + 69);
-        else if (ch >= '{' && ch <= '~')
-            return (int) (ch - '{' + 39);
-
-        std::cout << "calc_index(" << ch << ") --> unhandled symbol!";
-        abort();
-        return -1;
-    }
-
-
-
     Prefix * lookup(std::string const & str)
     {
         if (str.empty())
@@ -328,41 +252,15 @@ namespace Stage0Data
         if (it != prefixes_6d().end() && first_six == it->as_string())
             return &*it;
 
-        // 6D prefix not found so look for a shorter prefix,
-        // but first we need the index for each dimension
-        std::array<size_t, 5> i = { 0, 0, 0, 0, 0 };
-        for (size_t str_i = 0; str_i < str.length() && str_i < 5; ++str_i)
-            i[str_i] = calc_index(str[str_i]);
-
-        int l = lookup_table_2d_to_5d()[i[0]][i[1]][i[2]][i[3]][i[4]];
-
-        if (l == -1)
+        // 6D prefix not found so look for the longest shorter one
+        for (size_t len = 5; len >= 2; --len)
         {
-            std::cout << "lookup() --> "
-                      << "[" << i[0]
-                      << "][" << i[1]
-                      << "][" << i[2]
-                      << "][" << i[3]
-                      << "][" << i[4]
-                      << "] --> -1 for given string: \"" << str << "\"" << std::endl;
-            std::cout << "first six: '" << first_six << "'" << std::endl;
-            std::cout << "6D prefixes:" << std::endl;
-            for (auto const & p : prefixes_6d())
-                std::cout << "    --> " << p.as_string() << std::endl;
-            abort();
+            auto found = prefix_indexes_2d_to_5d().find(first_six.substr(0, len));
+            if (found != prefix_indexes_2d_to_5d().end())
+                return &prefixes_2d_to_5d()[found->second];
         }
 
-        if (l < 0)
-            goto err;
-        if (l >= (int) prefixes_2d_to_5d().size())
-            goto err;
-
-        return &prefixes_2d_to_5d()[l];
-
-    err:
-        std::cout << "lookup() failed given string: \"" << str << "\"" << std::endl;
-        std::cout << "    --> l: " << l << std::endl;
-        std::cout << "    --> prefixes_2d_to_5d().size(): " << prefixes_2d_to_5d().size() << std::endl;
+        std::cout << "lookup() found no prefix for: \"" << str << "\"" << std::endl;
         abort();
 
         return nullptr;
