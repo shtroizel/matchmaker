@@ -47,7 +47,8 @@ namespace Stage0Data
     std::string & output_dir();
     std::string & prefixes_filename();
 
-    q_usage::Type & q_mode();
+    dictionary_usage::Type & dictionary_mode();
+    bool adds_words(SerialTask::Type task);
 
     std::vector<Prefix> & prefixes_2d_to_5d();
 

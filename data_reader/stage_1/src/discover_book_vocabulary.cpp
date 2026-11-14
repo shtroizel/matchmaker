@@ -32,7 +32,7 @@ bool discover_book_vocabulary(SerialTask::Type task)
 
     std::vector<std::pair<Buch::Type, std::filesystem::directory_entry>> dir_entries;
     dir_entries.reserve(10000);
-    for (auto const & book : Buch::variants_by_index())
+    for (auto const & book : selected_books().currently_set())
     {
         std::string BOOK_VOCAB_DIR{Stage1Data::nil.as_workspace_dir()};
         BOOK_VOCAB_DIR += "/book_vocabulary/";

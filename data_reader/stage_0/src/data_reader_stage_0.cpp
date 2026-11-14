@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <iostream>
 #include <queue>
+#include <vector>
 
 #include <matchable/matchable.h>
 #include <matchable/matchable_fwd.h>
@@ -37,7 +38,7 @@ void print_usage();
 
 int main(int argc, char ** argv)
 {
-    if (argc < 5 || argc > 6)
+    if (argc < 5 || argc > 7)
     {
         std::cout << "invalid usage!" << std::endl;
         return 2;
@@ -48,41 +49,52 @@ int main(int argc, char ** argv)
     Stage0Data::output_dir() = argv[3];
     Stage0Data::prefixes_filename() = argv[4];
 
-    if (argc == 6)
+    Stage0Data::dictionary_mode() = dictionary_usage::all::grab();
+    if (argc >= 6)
     {
-        Stage0Data::q_mode() = q_usage::from_string(argv[5]);
-        if (Stage0Data::q_mode().is_nil())
+        Stage0Data::dictionary_mode() = dictionary_usage::from_string(argv[5]);
+        if (Stage0Data::dictionary_mode().is_nil())
         {
-            std::cout << "\"" << argv[5] << "\"is not a variant of q_usage. valid variants are:"
-                      << std::endl;
-            for (auto v : q_usage::variants_by_string())
-                std::cout << "  --> " << v << std::endl;
-
-            std::cout << "\nusing default q_usage of: \"" << q_usage::included::grab() << "\"" << std::endl;
+            print_usage();
+            return 2;
         }
     }
-    else
+    std::cout << "dictionary usage: " << Stage0Data::dictionary_mode() << std::endl;
+
+    if (!select_books(argc == 7 ? argv[6] : "all"))
     {
-        std::cout << "\"q_usage\" not specified, defaulting to \""
-                  << q_usage::included::grab() << "\"" << std::endl;
+        print_usage();
+        return 2;
     }
-    if (Stage0Data::q_mode().is_nil())
-        Stage0Data::q_mode() = q_usage::included::grab();
+    std::cout << "books:";
+    for (auto const & book : selected_books().currently_set())
+        std::cout << " " << book;
+    std::cout << std::endl;
 
 
-    SerialTask::Flags tasks;
+    // sources that only annotate run after every source that adds words, so they see all the words
+    std::vector<SerialTask::Type> tasks{SerialTask::preparing_spc_prefixes::grab()};
+    std::vector<SerialTask::Type> annotating;
     for (auto const & task : SerialTask::variants_by_index())
-        tasks.set(task);
-
-    if (Stage0Data::q_mode() == q_usage::omitted::grab())
-        tasks.unset(SerialTask::reading_spc_Crumbs::grab());
+    {
+        if (MATCHABLE_INSTANCE_IN(SerialTask, task, preparing_spc_prefixes, saving_spc_matchables))
+            continue;
+        if (!SerialTask::book_of(task).is_nil() && !selected_books().is_set(SerialTask::book_of(task)))
+            continue;
+        if (Stage0Data::adds_words(task))
+            tasks.push_back(task);
+        else
+            annotating.push_back(task);
+    }
+    tasks.insert(tasks.end(), annotating.begin(), annotating.end());
+    tasks.push_back(SerialTask::saving_spc_matchables::grab());
 
     SerialTask::reset_progress();
     int const magic_number = 58;
     // std::cout << "         1         2         3         4         5         6         7         8\n"
     //           << "12345678901234567890123456789012345678901234567890123456789012345678901234567890"
     //           << std::endl;
-    for (SerialTask::Type task : tasks.currently_set())
+    for (SerialTask::Type task : tasks)
     {
         std::cout << "       ------> " << task << std::flush;
         task.set_progress_steps(magic_number - task.as_string().length());
@@ -107,13 +119,16 @@ int main(int argc, char ** argv)
 
 void print_usage()
 {
-    std::cout << "program expects 4 or 5 arguments:\n"
+    std::cout << "program expects 4 to 6 arguments:\n"
               << "    [1]  data directory\n"
               << "    [2]  book vocabulary directory\n"
               << "    [3]  output directory\n"
               << "    [4]  prefix filename\n"
-              << "    [5]  one of the following q modes:";
-    for (auto v : q_usage::variants_by_string())
+              << "    [5]  dictionary usage (optional, defaults to all), one of:";
+    for (auto v : dictionary_usage::variants_by_string())
+        std::cout << " " << v;
+    std::cout << "\n    [6]  books (optional, defaults to all), all or a comma separated list of:";
+    for (auto v : Buch::variants_by_index())
         std::cout << " " << v;
     std::cout << std::endl;
 }

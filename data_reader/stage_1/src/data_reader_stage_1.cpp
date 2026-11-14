@@ -13,7 +13,6 @@
 
 
 
-MATCHABLE(q_usage, included, omitted, only)
 
 
 void print_usage();
@@ -22,7 +21,7 @@ void print_usage();
 
 int main(int argc, char ** argv)
 {
-    if (argc != 5 && argc != 6)
+    if (argc < 4 || argc > 6)
     {
         print_usage();
         return 2;
@@ -33,13 +32,20 @@ int main(int argc, char ** argv)
     Stage1Data::nil.as_mutable_data_dir() = argv[1];
     Stage1Data::nil.as_mutable_workspace_dir() = argv[2];
     Stage1Data::nil.as_mutable_template_dir() = argv[3];
-    q_usage::Type q_mode = q_usage::from_string(argv[4]);
-    if (q_mode.is_nil())
-        q_mode = q_usage::included::grab();
-    int thread_count = argc == 6 ? std::atoi(argv[5]) : (int) std::thread::hardware_concurrency();
+    int thread_count = argc >= 5 ? std::atoi(argv[4]) : (int) std::thread::hardware_concurrency();
     if (thread_count < 1)
         thread_count = 1;
     Stage1Data::nil.as_mutable_thread_count() = thread_count;
+
+    if (!select_books(argc == 6 ? argv[5] : "all"))
+    {
+        print_usage();
+        return 2;
+    }
+    std::cout << "books:";
+    for (auto const & book : selected_books().currently_set())
+        std::cout << " " << book;
+    std::cout << "\n" << std::endl;
 
     Stage1Data::nil.as_mutable_used_in_book().reserve(mm_count());
     Stage1Data::nil.as_mutable_by_longest().reserve(mm_count());
@@ -62,10 +68,8 @@ int main(int argc, char ** argv)
 
     SerialTask::Flags tasks;
     for (auto const & task : SerialTask::variants_by_index())
-        tasks.set(task);
-
-    if (q_mode == q_usage::omitted::grab())
-        tasks.unset(SerialTask::reading_spc_crumbs::grab());
+        if (SerialTask::book_of(task).is_nil() || selected_books().is_set(SerialTask::book_of(task)))
+            tasks.set(task);
 
     SerialTask::reset_progress();
     int const magic_number = 58;
@@ -98,11 +102,13 @@ int main(int argc, char ** argv)
 
 void print_usage()
 {
-    std::cout << "program expects 4 or 5 arguments:\n"
+    std::cout << "program expects 3 to 5 arguments:\n"
               << "    [1]  data directory\n"
               << "    [2]  stage 1 workspace directory\n"
               << "    [3]  template directory\n"
-              << "    [4]  Q mode (one of \"included\", \"omitted\", or \"only\")\n"
-              << "    [5]  thread count (optional, defaults to the number of hardware threads)\n"
-              << std::flush;
+              << "    [4]  thread count (optional, defaults to the number of hardware threads)\n"
+              << "    [5]  books (optional, defaults to all), all or a comma separated list of:";
+    for (auto v : Buch::variants_by_index())
+        std::cout << " " << v;
+    std::cout << std::endl;
 }

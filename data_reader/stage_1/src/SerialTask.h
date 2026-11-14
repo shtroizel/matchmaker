@@ -9,6 +9,8 @@
 
 #include <functional>
 
+#include <matchmaker/data_reader_common.h>
+
 
 
 MATCHABLE_FWD(SerialTask)
@@ -42,4 +44,5 @@ namespace SerialTask
 {
     void reset_progress();
     void check_progress(SerialTask::Type task);
+    Buch::Type book_of(SerialTask::Type task);
 }
