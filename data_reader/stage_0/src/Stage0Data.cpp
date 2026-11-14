@@ -142,19 +142,23 @@ namespace Stage0Data
         if (!mm.grab(matchable_name)->has_variant(escaped))
             return;
 
-        // property for parts of speech
-        std::vector<std::string> property_values;
-        mm.grab(matchable_name)->get_propertyvect(escaped, "pos", property_values);
-        if (property_values.empty())
+        // property for parts of speech, merged across sources
         {
-            for (auto p : parts_of_speech::variants_by_string())
+            std::vector<std::string> property_values;
+            mm.grab(matchable_name)->get_propertyvect(escaped, "pos", property_values);
+            auto const & pos_variants = parts_of_speech::variants_by_string();
+            bool changed = property_values.empty();
+            property_values.resize(pos_variants.size(), "0");
+            for (size_t i = 0; i < pos_variants.size(); ++i)
             {
-                if (pos_flags.is_set(p))
-                    property_values.push_back("1");
-                else
-                    property_values.push_back("0");
+                if (pos_flags.is_set(pos_variants[i]) && property_values[i] != "1")
+                {
+                    property_values[i] = "1";
+                    changed = true;
+                }
             }
-            mm.grab(matchable_name)->set_propertyvect(escaped, "pos", property_values);
+            if (changed)
+                mm.grab(matchable_name)->set_propertyvect(escaped, "pos", property_values);
         }
 
         // property for ordinal sum
