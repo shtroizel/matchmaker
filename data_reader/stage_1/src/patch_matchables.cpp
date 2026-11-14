@@ -1,5 +1,6 @@
 #include "patch_matchables.h"
 
+#include <atomic>
 #include <cstdio>
 #include <filesystem>
 #include <iostream>
@@ -63,7 +64,7 @@ bool patch_matchables(SerialTask::Type task)
     task.set_progress(0);
 
     // create vector of header entries for each thread
-    int const CPU_COUNT = std::thread::hardware_concurrency();
+    int const CPU_COUNT = Stage1Data::nil.as_thread_count();
     std::vector<std::vector<HeaderEntry>> dealt_header_entries;
     dealt_header_entries.reserve(CPU_COUNT);
     for (int i = 0; i < CPU_COUNT; ++i)
@@ -82,7 +83,7 @@ bool patch_matchables(SerialTask::Type task)
 
     // los gehts
     std::vector<std::thread> threads;
-    bool all_ok{true};
+    std::atomic<bool> all_ok{true};
     for (auto const & deal : dealt_header_entries)
         threads.emplace_back(
             std::thread(

@@ -1,4 +1,6 @@
+#include <cstdlib>
 #include <iostream>
+#include <thread>
 
 #ifdef Q_ONLY
     #include <matchmaker_q/matchmaker.h>
@@ -20,7 +22,7 @@ void print_usage();
 
 int main(int argc, char ** argv)
 {
-    if (argc != 5)
+    if (argc != 5 && argc != 6)
     {
         print_usage();
         return 2;
@@ -34,6 +36,10 @@ int main(int argc, char ** argv)
     q_usage::Type q_mode = q_usage::from_string(argv[4]);
     if (q_mode.is_nil())
         q_mode = q_usage::included::grab();
+    int thread_count = argc == 6 ? std::atoi(argv[5]) : (int) std::thread::hardware_concurrency();
+    if (thread_count < 1)
+        thread_count = 1;
+    Stage1Data::nil.as_mutable_thread_count() = thread_count;
 
     Stage1Data::nil.as_mutable_used_in_book().reserve(mm_count());
     Stage1Data::nil.as_mutable_by_longest().reserve(mm_count());
@@ -92,10 +98,11 @@ int main(int argc, char ** argv)
 
 void print_usage()
 {
-    std::cout << "program expects 4 arguments:\n"
+    std::cout << "program expects 4 or 5 arguments:\n"
               << "    [1]  data directory\n"
               << "    [2]  stage 1 workspace directory\n"
               << "    [3]  template directory\n"
               << "    [4]  Q mode (one of \"included\", \"omitted\", or \"only\")\n"
+              << "    [5]  thread count (optional, defaults to the number of hardware threads)\n"
               << std::flush;
 }
