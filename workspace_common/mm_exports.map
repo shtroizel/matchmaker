@@ -1,0 +1,7 @@
+{
+    global:
+        mm_*;
+        extern "C++" { mm_*; };
+    local:
+        *;
+};
