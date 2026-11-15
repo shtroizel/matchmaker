@@ -38,7 +38,7 @@ void print_usage();
 
 int main(int argc, char ** argv)
 {
-    if (argc < 5 || argc > 7)
+    if (argc < 6 || argc > 8)
     {
         std::cout << "invalid usage!" << std::endl;
         return 2;
@@ -47,12 +47,13 @@ int main(int argc, char ** argv)
     Stage0Data::data_dir() = argv[1];
     Stage0Data::book_vocab_dir() = argv[2];
     Stage0Data::output_dir() = argv[3];
-    Stage0Data::prefixes_filename() = argv[4];
+    Stage0Data::parents_filename() = argv[4];
+    Stage0Data::leaves_filename() = argv[5];
 
     Stage0Data::dictionary_mode() = dictionary_usage::all::grab();
-    if (argc >= 6)
+    if (argc >= 7)
     {
-        Stage0Data::dictionary_mode() = dictionary_usage::from_string(argv[5]);
+        Stage0Data::dictionary_mode() = dictionary_usage::from_string(argv[6]);
         if (Stage0Data::dictionary_mode().is_nil())
         {
             print_usage();
@@ -61,7 +62,7 @@ int main(int argc, char ** argv)
     }
     std::cout << "dictionary usage: " << Stage0Data::dictionary_mode() << std::endl;
 
-    if (!select_books(argc == 7 ? argv[6] : "all"))
+    if (!select_books(argc == 8 ? argv[7] : "all"))
     {
         print_usage();
         return 2;
@@ -119,15 +120,16 @@ int main(int argc, char ** argv)
 
 void print_usage()
 {
-    std::cout << "program expects 4 to 6 arguments:\n"
+    std::cout << "program expects 5 to 7 arguments:\n"
               << "    [1]  data directory\n"
               << "    [2]  book vocabulary directory\n"
               << "    [3]  output directory\n"
-              << "    [4]  prefix filename\n"
-              << "    [5]  dictionary usage (optional, defaults to all), one of:";
+              << "    [4]  parent prefix filename (scripts/parent_prefixes.txt)\n"
+              << "    [5]  leaf list filename (written: the leaves with words)\n"
+              << "    [6]  dictionary usage (optional, defaults to all), one of:";
     for (auto v : dictionary_usage::variants_by_string())
         std::cout << " " << v;
-    std::cout << "\n    [6]  books (optional, defaults to all), all or a comma separated list of:";
+    std::cout << "\n    [7]  books (optional, defaults to all), all or a comma separated list of:";
     for (auto v : Buch::variants_by_index())
         std::cout << " " << v;
     std::cout << std::endl;

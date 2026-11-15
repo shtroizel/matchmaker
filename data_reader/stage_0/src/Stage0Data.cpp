@@ -11,7 +11,8 @@ namespace Stage0Data
     std::string & data_dir() { static std::string s; return s; }
     std::string & book_vocab_dir() { static std::string s; return s; }
     std::string & output_dir() { static std::string s; return s; }
-    std::string & prefixes_filename() { static std::string s; return s; }
+    std::string & parents_filename() { static std::string s; return s; }
+    std::string & leaves_filename() { static std::string s; return s; }
 
     dictionary_usage::Type & dictionary_mode() { static dictionary_usage::Type mode; return mode; }
 
@@ -30,30 +31,17 @@ namespace Stage0Data
             );
     }
 
-    std::vector<Prefix> & prefixes_2d_to_5d()
+    std::set<std::string> & parent_prefixes()
     {
-        static std::vector<Prefix> prefixes;
-        return prefixes;
+        static std::set<std::string> parents{""};
+        return parents;
     }
 
-    std::vector<Prefix> & prefixes_6d()
+    std::map<std::string, Prefix, TermLess> & leaves()
     {
-        static std::vector<Prefix> prefixes;
-        return prefixes;
+        static std::map<std::string, Prefix, TermLess> l;
+        return l;
     }
-
-    std::unordered_map<std::string, int> & prefix_indexes_2d_to_5d()
-    {
-        static std::unordered_map<std::string, int> indexes;
-        return indexes;
-    }
-
-
-
-
-
-
-
 
 
 
@@ -112,12 +100,10 @@ namespace Stage0Data
             return;
         }
 
-        Prefix * p = lookup(word);
+        // a source that only annotates has nothing to annotate in a leaf without words
+        Prefix * p = lookup(word, adds_words(task));
         if (nullptr == p)
-        {
-            std::cout << "add_word() --> lookup() failed for word: \"" << word << "\"" << std::endl;
-            abort();
-        }
+            return;
 
         matchable::MatchableMaker & mm = p->as_mutable_maker();
 
@@ -242,7 +228,7 @@ namespace Stage0Data
     }
 
 
-    Prefix * lookup(std::string const & str)
+    Prefix * lookup(std::string const & str, bool create)
     {
         if (str.empty())
         {
@@ -250,46 +236,28 @@ namespace Stage0Data
             abort();
         }
 
-        // first six chars as a string with short strings filled with first symbol (space)
-        std::string first_six = "      ";
-        for (size_t str_i = 0; str_i < first_six.size() && str_i < str.size(); ++str_i)
-            first_six[str_i] = str[str_i];
+        // a word that ends above its leaf continues with space, the first symbol
+        std::string prefix;
+        while (parent_prefixes().count(prefix) > 0)
+            prefix += prefix.size() < str.size() ? str[prefix.size()] : ' ';
 
-        // check for 6D prefix
-        auto it = std::lower_bound(
-                        prefixes_6d().begin(),
-                        prefixes_6d().end(),
-                        first_six,
-                        [](Prefix const & l, std::string const & r)
-                        {
-                            return matchable::str_lt_str(l.as_string(), r);
-                        }
-                    );
-        if (it != prefixes_6d().end() && first_six == it->as_string())
-            return &*it;
+        auto it = leaves().find(prefix);
+        if (it != leaves().end())
+            return &it->second;
 
-        // 6D prefix not found so look for the longest shorter one
-        for (size_t len = 5; len >= 2; --len)
-        {
-            auto found = prefix_indexes_2d_to_5d().find(first_six.substr(0, len));
-            if (found != prefix_indexes_2d_to_5d().end())
-                return &prefixes_2d_to_5d()[found->second];
-        }
+        if (!create)
+            return nullptr;
 
-        std::cout << "lookup() found no prefix for: \"" << str << "\"" << std::endl;
-        abort();
-
-        return nullptr;
+        Prefix & p = leaves()[prefix];
+        p.initialize(prefix);
+        return &p;
     }
 
 
 
     void foreach_prefix(std::function<void (Prefix & p)> func)
     {
-        for (auto & p : prefixes_2d_to_5d())
-            func(p);
-
-        for (auto & p : prefixes_6d())
+        for (auto & [str, p] : leaves())
             func(p);
     }
 }

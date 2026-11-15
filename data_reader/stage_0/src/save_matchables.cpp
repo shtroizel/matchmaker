@@ -1,5 +1,7 @@
 #include <read_crumbs.h>
 
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 
 #include <Prefix.h>
@@ -25,7 +27,7 @@ void save_matchables(SerialTask::Type task)
     }
 
     task.set_progress(0);
-    task.set_goal(Stage0Data::prefixes_2d_to_5d().size() + Stage0Data::prefixes_6d().size());
+    task.set_goal(Stage0Data::leaves().size());
 
     // save save save
     Stage0Data::foreach_prefix(
@@ -33,7 +35,7 @@ void save_matchables(SerialTask::Type task)
         {
             ++task.as_mutable_progress();
             std::string path = p.save_path(Stage0Data::output_dir());
-            // std::cout << "    --> " << path << std::endl;
+            std::filesystem::create_directories(std::filesystem::path(path).parent_path());
             auto sa_status = p.as_mutable_maker().save_as(
                 path,
                 {matchable::save__content::matchables::grab()},
@@ -49,4 +51,15 @@ void save_matchables(SerialTask::Type task)
             SerialTask::check_progress(task);
         }
     );
+
+    // the leaves with words, for generate_code.py
+    std::ofstream leaves_file{Stage0Data::leaves_filename()};
+    Stage0Data::foreach_prefix(
+        [&leaves_file](Prefix & p) { leaves_file << p.escaped_and_delimited(' ') << '\n'; }
+    );
+    if (!leaves_file)
+    {
+        std::cout << "failed to write: '" << Stage0Data::leaves_filename() << "'" << std::endl;
+        abort();
+    }
 }

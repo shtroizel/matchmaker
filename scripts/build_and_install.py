@@ -130,6 +130,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
         pass
 
     stage_0_workspace_dir = stage_0_build_dir + 'workspace/'
+    leaf_list = stage_0_workspace_dir + 'leaf_list'
 
     # always update cmake files
     if os.path.exists(stage_0_workspace_dir):
@@ -149,16 +150,6 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
                         stage_0_workspace_dir + 'CMakeLists.txt')
             shutil.copy(matchmaker_root + 'workspace_common/config.cmake.in',
                         stage_0_workspace_dir + 'config.cmake.in')
-
-        if os.name == 'nt':
-            generate_code_cmd = ['python', 'scripts\\generate_code.py', '-w', stage_0_workspace_dir]
-        else:
-            generate_code_cmd = ['scripts/generate_code.py', '-w', stage_0_workspace_dir]
-        if retain_leaves:
-            generate_code_cmd.append('-p')
-        if subprocess.run(generate_code_cmd).returncode != 0:
-            print('generate_code.py failed')
-            exit(1)
 
         if not retain_leaves:
 
@@ -232,10 +223,12 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
             data_reader_stage_0 = reader_loc + "/bin/data_reader_stage_0"
             data_reader_stage_0_data = reader_loc + "/share/matchmaker/data_reader_stage_0/data"
             out_dir = stage_0_workspace_dir + "/generated_include/matchmaker/generated_matchables/"
-            prefix_filename = stage_0_workspace_dir + "/prefix_list"
+            shutil.rmtree(out_dir, ignore_errors=True)
+            os.makedirs(out_dir)
 
             run_data_reader_cmd = [data_reader_stage_0, data_reader_stage_0_data, book_vocabulary_dir,
-                                   out_dir, prefix_filename, dictionary, books]
+                                   out_dir, matchmaker_root + 'scripts/parent_prefixes.txt', leaf_list,
+                                   dictionary, books]
             if subprocess.run(run_data_reader_cmd).returncode != 0:
                 print('\ndata_reader_stage_0 failed')
                 build_cmd_as_str = ''
@@ -251,6 +244,15 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
                 exit(1)
 
         print('\n\nmatchables are ready!')
+
+        # generate code for the leaves the reader filled
+        generate_code_cmd = [sys.executable, matchmaker_root + 'scripts/generate_code.py',
+                             '-w', stage_0_workspace_dir, '-l', leaf_list]
+        if retain_leaves:
+            generate_code_cmd.append('-p')
+        if subprocess.run(generate_code_cmd).returncode != 0:
+            print('generate_code.py failed')
+            exit(1)
 
 
         # create longest_words.h for stage 0

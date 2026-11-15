@@ -8,8 +8,9 @@ matchable with by_index required for stage 0 reader
 #include <matchable/matchable.h>
 
 #include <functional>
+#include <map>
+#include <set>
 #include <string>
-#include <unordered_map>
 
 #include <matchmaker/data_reader_common.h>
 #include <matchmaker/parts_of_speech.h>
@@ -37,7 +38,6 @@ namespace Stage0Data
         phrase
     )
 
-    int const MAX_PREFIX_DEPTH{6};
 
 
     // ******* data **************
@@ -45,18 +45,25 @@ namespace Stage0Data
     std::string & data_dir();
     std::string & book_vocab_dir();
     std::string & output_dir();
-    std::string & prefixes_filename();
+    std::string & parents_filename();
+    std::string & leaves_filename();
 
     dictionary_usage::Type & dictionary_mode();
     bool adds_words(SerialTask::Type task);
 
-    std::vector<Prefix> & prefixes_2d_to_5d();
+    // characters of each parent prefix, the root ("") included
+    std::set<std::string> & parent_prefixes();
 
-    // sorted, for binary search
-    std::vector<Prefix> & prefixes_6d();
+    struct TermLess
+    {
+        bool operator()(std::string const & l, std::string const & r) const
+        {
+            return matchable::str_lt_str(l, r);
+        }
+    };
 
-    // indexes into prefixes_2d_to_5d, keyed by prefix
-    std::unordered_map<std::string, int> & prefix_indexes_2d_to_5d();
+    // leaves holding at least one word, keyed by their characters, in term order
+    std::map<std::string, Prefix, TermLess> & leaves();
 
     // ***************************
 
@@ -91,7 +98,8 @@ namespace Stage0Data
         parts_of_speech::Flags const & pos_flags
     );
 
-    Prefix * lookup(std::string const & str);
+    // the leaf for str, created when missing only if create is true (else nullptr)
+    Prefix * lookup(std::string const & str, bool create);
 
     void foreach_prefix(std::function<void (Prefix & p)> func);
 
