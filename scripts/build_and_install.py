@@ -412,6 +412,8 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
 
     print('\n\nMATCHMAKER!\n\n')
 
+    shutil.copy(stage_0_workspace_dir + 'tree.cmake', stage_1_workspace_dir + 'tree.cmake')
+
     os.chdir(build_dir)
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + abs_install_dir]

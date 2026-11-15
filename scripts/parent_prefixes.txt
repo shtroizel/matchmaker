@@ -1,0 +1,398 @@
+_spc_
+_bng_
+_quot_
+_hsh_
+_dol_
+_pct_
+_und_
+_sqt_
+_parl_
+_parr_
+_ast_
+_plus_
+_cma_
+_mns_
+_dot_
+_slsh_
+esc_0
+esc_1
+esc_2
+esc_3
+esc_4
+esc_5
+esc_6
+esc_7
+esc_8
+esc_9
+_cln_
+_scln_
+_lt_
+_eq_
+_gt_
+_qstn_
+_atsym_
+_sbl_
+_bslsh_
+_sbr_
+_dach_
+_
+_bqt_
+_cbl_
+_pip_
+_cbr_
+_tld_
+_tld_ _tld_
+_tld_ _tld_ _tld_
+esc_A
+esc_A l
+esc_A n
+esc_A r
+esc_B
+esc_B a
+esc_B e
+esc_B o
+esc_B r
+esc_C
+esc_C a
+esc_C h
+esc_C o
+esc_D
+esc_D e
+esc_D e c
+esc_E
+esc_F
+esc_G
+esc_G r
+esc_H
+esc_H a
+esc_H e
+esc_I
+esc_J
+esc_K
+esc_L
+esc_L a
+esc_L e
+esc_M
+esc_M e
+esc_M i
+esc_M o
+esc_N
+esc_O
+esc_P
+esc_P a
+esc_P e
+esc_P r
+esc_Q
+esc_R
+esc_R o
+esc_S
+esc_S a
+esc_S t
+esc_T
+esc_T h
+esc_U
+esc_V
+esc_W
+esc_W h
+esc_X
+esc_Y
+esc_Z
+a
+a b
+a c
+a d
+a g
+a l
+a l l
+a m
+a n
+a n t
+a n t i
+a p
+a r
+a s
+a t
+a u
+a u t
+b
+b a
+b a c
+b a r
+b e
+b e a
+b i
+b l
+b l a
+b o
+b r
+b r a
+b r i
+b r o
+b u
+c
+c a
+c a l
+c a n
+c a r
+c a t
+c e
+c h
+c h a
+c h e
+c h i
+c h o
+c i
+c l
+c l a
+c l o
+c o
+c o l
+c o m
+c o m p
+c o n
+c o n t
+c o r
+c o u
+c o u n
+c o u n t
+c r
+c r o
+c u
+c y
+d
+d a
+d e
+d e c
+d i
+d i a
+d i s
+d o
+d r
+d u
+e
+e l
+e l e
+e m
+e n
+e p
+e p i
+e x
+f
+f a
+f e
+f i
+f l
+f l a
+f o
+f o r
+f o r e
+f r
+f u
+g
+g a
+g e
+g i
+g l
+g o
+g r
+g r a
+g u
+h
+h a
+h a l
+h a l f
+h a r
+h a v
+h e
+h e a
+h i
+h o
+h u
+h y
+h y p
+i
+i m
+i m p
+i n
+i n c
+i n d
+i n s
+i n t
+i n t e
+i n t e r
+i s
+j
+j a
+j u
+k
+k e
+k i
+l
+l a
+l e
+l i
+l o
+l u
+m
+m a
+m a k
+m a n
+m a r
+m e
+m e t
+m i
+m i c
+m i s
+m o
+m o n
+m u
+m y
+n
+n a
+n e
+n i
+n o
+n o n
+n o n c
+n o t
+o
+o b
+o n
+o p
+o r
+o u
+o u t
+o v
+o v e
+o v e r
+p
+p a
+p a l
+p a n
+p a r
+p a r a
+p e
+p e r
+p h
+p h o
+p i
+p l
+p l a
+p o
+p o l
+p o l y
+p o s
+p r
+p r e
+p r e s
+p r i
+p r o
+p s
+p s e
+p s e u
+p u
+q
+q u
+q u a
+q u a s
+q u a s i
+q u i
+r
+r a
+r e
+r e a
+r e c
+r e d
+r e p
+r e s
+r e t
+r i
+r o
+r u
+s
+s a
+s a l
+s c
+s c a
+s c r
+s e
+s e a
+s e l
+s e l f
+s e m
+s e m i
+s h
+s h a
+s h o
+s i
+s k
+s l
+s m
+s n
+s o
+s p
+s p e
+s p i
+s t
+s t a
+s t e
+s t o
+s t r
+s u
+s u b
+s u p
+s u p e
+s u p e r
+s w
+s y
+t
+t a
+t e
+t h
+t h e
+t h i
+t h r
+t i
+t o
+t r
+t r a
+t r a n
+t r a n s
+t r i
+t u
+t w
+t w i
+u
+u n
+u n a
+u n c
+u n c o
+u n d
+u n d e
+u n d e r
+u n e
+u n f
+u n i
+u n p
+u n r
+u n s
+u n t
+u p
+v
+v a
+v e
+v i
+v o
+w
+w a
+w e
+w e l
+w h
+w h i
+w i
+w i n
+w o
+w o r
+x
+y
+z
