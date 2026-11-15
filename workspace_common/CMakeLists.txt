@@ -69,7 +69,7 @@ macro(add_lib_finalization lib_name)
 endmacro()
 
 
-# defines matchmaker_srcs (parents) and prefix_list (leaves)
+# defines matchmaker_srcs (the tree tables) and prefix_list (leaves)
 include(${CMAKE_CURRENT_SOURCE_DIR}/tree.cmake)
 
 # books first
@@ -78,8 +78,8 @@ foreach(book_src ${book_srcs})
     list(PREPEND matchmaker_srcs ${book_src})
 endforeach()
 
-# except for this
-list(PREPEND matchmaker_srcs ${MATCHMAKER_ROOT}/src/matchmaker.cpp)
+# except for these
+list(PREPEND matchmaker_srcs ${MATCHMAKER_ROOT}/src/matchmaker.cpp ${MATCHMAKER_ROOT}/src/tree.cpp)
 
 if(ATOMIC_LIBS)
     foreach(prefix ${prefix_list})
@@ -117,6 +117,7 @@ add_library(matchmaker SHARED ${matchmaker_srcs})
 target_include_directories(
     matchmaker
     PRIVATE
+    ${MATCHMAKER_ROOT}/src
     ${MATCHMAKER_ROOT}/data_reader/stage_0/include
 )
 foreach(lib ${lib_list})
