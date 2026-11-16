@@ -377,36 +377,43 @@ void mm_complete(char const * prefix, int * start, int * length)
         return;
     }
 
-    auto str_starts_with =
-        [](char const * str, int str_len, char const * starts_with)
+    int const prefix_len = strlen(prefix);
+    auto matches =
+        [&](int index)
         {
-            int starts_with_len = strlen(starts_with);
-
-            if (starts_with_len > str_len)
-                return false;
-
-            for (int i = 0; i < starts_with_len; ++i)
-                if (str[i] != starts_with[i])
-                    return false;
-
-            return true;
+            int s_len = 0;
+            char const * s = mm_at(index, &s_len);
+            return s_len >= prefix_len && 0 == memcmp(s, prefix, prefix_len);
         };
 
-    int index = mm_lookup(prefix, nullptr);
-
-    *start = index;
+    int const first = mm_lookup(prefix, nullptr);
+    int const count = mm_count();
+    *start = first;
     *length = 0;
-    int s_len = 0;
-    char const * s = nullptr;
-    for (; index < mm_count(); ++index)
-    {
-        s = mm_at(index, &s_len);
+    if (first >= count || !matches(first))
+        return;
 
-        if (str_starts_with(s, s_len, prefix))
-            *length += 1;
-        else
+    // terms starting with prefix are contiguous: gallop past the last match, then bisect
+    int good = first;
+    int bad = count;
+    for (int step = 1; good + step < count; step *= 2)
+    {
+        if (!matches(good + step))
+        {
+            bad = good + step;
             break;
+        }
+        good += step;
     }
+    while (bad - good > 1)
+    {
+        int const mid = good + (bad - good) / 2;
+        if (matches(mid))
+            good = mid;
+        else
+            bad = mid;
+    }
+    *length = bad - first;
 }
 
 
