@@ -53,6 +53,10 @@ all of matchmaker's functions adhere to the following:
     * dynamic memory allocation is avoided completely
     * all arrays or strings retrieved always exist because they are static!
 
+complexities below use N for the number of terms in the dictionary. functions taking an alphabetic
+index first find the part of the dictionary holding that index with a binary search, so they are
+O(log N) even though the rest of their work is O(1).
+
 matchmaker works with built-in types only
 
 this is the only header you need for using the matchmaker library.
@@ -65,7 +69,7 @@ thats it, have fun!
 
 /**
  * retrieve the dictionary's term count.
- * the complexity for this fuction is O(1).
+ * the complexity for this function is O(1).
  * @returns
  *     the number of terms in the dictionary
  */
@@ -73,7 +77,7 @@ int mm_count();
 
 /**
  * retrieve a dictionary index from a string.
- * the complexity for this function is O(log N).
+ * the complexity for this function is O(log N) string comparisons.
  * @param[in] term
  *     string to look up in the dictionary
  * @param[out] found
@@ -89,7 +93,7 @@ int mm_lookup(char const * term, bool * found);
 /**
  * retrieve the null-terminated byte string for a given dictionary index.
  * the length of the string can optionally also be retrieved, saving a call to strlen().
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic index of a term in the dictionary. valid indexes fall in the range of [0..mm_count()-1]
  * @param[out] length
@@ -102,7 +106,7 @@ char const * mm_at(int index, int * length);
 /**
  * matchmaker also provides its dictionary in an alternative sorting order (longest terms first).
  * use this function to retrieve a "length index" from an "alphabetic index".
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @returns
@@ -142,7 +146,7 @@ void mm_lengths(int const * * lengths, int * count);
 /**
  * retrieve the "length index" of the first term (in descending length order) having the given length,
  * as well as the number of terms that share this length.
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log D), where D is the number of distinct term lengths.
  * @param[in] length
  *     length of a term
  * @param[out] length_index
@@ -158,7 +162,7 @@ bool mm_length_location(int length, int * length_index, int * count);
 
 /**
  * retrieve the ordinal summation of a dictionary term.
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @returns
@@ -183,7 +187,7 @@ void mm_from_ordinal_summation(int summation, int const * * terms, int * count);
 /**
  * retrieve the parts of speech for a given term (word).
  * parts of speech are available for some terms.
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @param[out] pos
@@ -191,7 +195,7 @@ void mm_from_ordinal_summation(int summation, int const * * terms, int * count);
  * @param[out] flagged
  *     pointer to an array of booleans (stored as int8_t) such that the array's length is equal to the
  *     length of the array pointed to by pos
- *     elements are set to 1 if their cooresponding pos index pertains to the
+ *     elements are set to 1 if their corresponding pos index pertains to the
  *     given term, or 0 otherwise.
  * @param[out] count
  *     number of array elements (same for both pos and flagged)
@@ -203,7 +207,7 @@ bool mm_parts_of_speech(int index, char const * const * * pos, int8_t const * * 
 
 /**
  * discover whether a given term happens to be a name.
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @returns
@@ -213,7 +217,7 @@ bool mm_is_name(int index);
 
 /**
  * discover whether a given term happens to be a male name.
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @returns
@@ -223,7 +227,7 @@ bool mm_is_male_name(int index);
 
 /**
  * discover whether a given term happens to be a female name.
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @returns
@@ -233,7 +237,7 @@ bool mm_is_female_name(int index);
 
 /**
  * discover whether a given term happens to be a place.
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @returns
@@ -243,7 +247,7 @@ bool mm_is_place(int index);
 
 /**
  * discover whether a given term happens to be a compound word or phrase.
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @returns
@@ -253,7 +257,7 @@ bool mm_is_compound(int index);
 
 /**
  * discover whether a given term happens to be an acronym.
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @returns
@@ -263,7 +267,7 @@ bool mm_is_acronym(int index);
 
 /**
  * discover whether a given term is a phrase
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @returns
@@ -273,7 +277,7 @@ bool mm_is_phrase(int index);
 
 /**
  * discover whether a given term is used in a given book
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] book_index
  *     index of a book in the library
  * @param[in] index
@@ -285,7 +289,7 @@ bool mm_is_used_in_book(int book_index, int index);
 
 /**
  * retrieve an array of synonyms for a given term.
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @param[out] synonyms
@@ -297,7 +301,7 @@ void mm_synonyms(int index, int const * * synonyms, int * count);
 
 /**
  * retrieve an array of antonyms for a given term.
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @param[out] antonyms
@@ -309,7 +313,7 @@ void mm_antonyms(int index, int const * * antonyms, int * count);
 
 /**
  * retrieve the embedded terms within a phrase or expression.
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @param[out] embedded
@@ -322,15 +326,15 @@ void mm_embedded(int index, int const * * embedded, int * count);
 /**
  * retrieve the definition for a given term.
  * note that definitions are still empty for almost all terms! (use mm_synonyms() instead)
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @param[out] definition
- *     pointer to an array of alphabetic indexes of terms definining the given term
+ *     pointer to an array of alphabetic indexes of terms defining the given term
  * @param[out] count
  *     number of terms in the "definition" array
  */
-void mm_definition(int index, int const * * embedded, int * count);
+void mm_definition(int index, int const * * definition, int * count);
 
 /**
  * instantly retrieve all locations within books where a given term is used.
@@ -338,7 +342,7 @@ void mm_definition(int index, int const * * embedded, int * count);
  * book_indexes[i], chapter_indexes[i], paragraph_indexes[i], and word_indexes[i] together make up
  * a "location" that could be passed to mm_word(), which would return the same alphabetic dictionary
  * index used here as input.
- * the complexity for this function is O(1).
+ * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic dictionary index
  * @param[out] book_indexes
@@ -365,16 +369,13 @@ void mm_locations(
 
 /**
  * retrieve all terms beginning with a given prefix.
- * the worst case complexity for this function appears to be O(N)...
- *     However, completing the entire dictionary (when prefix is empty) shortcuts to O(1).
- *     Assuming even distribution (it isn't),
- *     the worst case is actually mm_count() / 52 possible first letters.
- *     Each additional letter in the prefix divides this by another 52, so the average complexity is
- *     actually something like mm_count() / pow(52, strlen(prefix)) for non-empty prefixes
+ * the complexity for this function is O(log N * log K), where K is the number of matching terms.
+ *     completing the entire dictionary (when prefix is empty) shortcuts to O(1).
  * @param[in] prefix
  *     prefix to complete
  * @param[out] start
- *     index of first word with the given prefix, or -1 if length is 0
+ *     index of the first term with the given prefix, or, when length is 0, the index such a term
+ *     would have (as mm_lookup() returns). note that this could be mm_count(), which is an invalid index!
  * @param[out] length
  *     number of words with the given prefix
  */
@@ -498,7 +499,7 @@ int mm_word_count(int book_index, int chapter_index, int paragraph_index);
  *     the number of ancestors at the given location
  * @param[out] index_within_first_ancestor
  *     index within the first ancestor if there is one or -1 otherwise.
- *     cat be NULL if not needed.
+ *     can be NULL if not needed.
  * @param[out] referenced
  *     indicates whether the word is not part of the main body of text (references, citations, etc).
  * @returns
