@@ -58,6 +58,7 @@
 [Abbey] esc_A | pos= os=35 name female_name
 [About] esc_A | pos= os=59
 [Abu Dhabi] esc_A | pos= os=48 place
+[Crumbs] esc_C | pos= os=76
 [Follow] esc_F | pos= os=83
 [Huma] esc_H | pos= os=43
 [Linked] esc_L | pos= os=55
@@ -200,3 +201,4 @@ vocabulary Crumbs:
     [30]
     [Noon.]
     [Noon]
+    [Crumbs]

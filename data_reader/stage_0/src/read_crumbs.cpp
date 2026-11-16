@@ -250,6 +250,11 @@ void read_crumbs(SerialTask::Type task)
         q_files.pop();
     }
 
+    // stage 1 looks up the book's title and author, so they must be words even when the text lacks them
+    // (added last, so the vocabulary order of a text that has them is unchanged)
+    for (std::string const word : {"Crumbs", "Q"})
+        Stage0Data::add_book_vocab(word, Stage0Data::word_attribute::Flags(), task, vocab_file, encounters);
+
     fclose(vocab_file);
     vocab_file = nullptr;
 }

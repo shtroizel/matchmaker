@@ -48,6 +48,7 @@
 [~~~] _tld_ _tld_ | pos= os=0
 [~~~1_image.png] _tld_ _tld_ | pos= os=72
 [AM] esc_A | pos= os=14
+[Crumbs] esc_C | pos= os=76
 [Follow] esc_F | pos= os=83
 [Huma] esc_H | pos= os=43
 [Linked] esc_L | pos= os=55
@@ -165,3 +166,4 @@ vocabulary Crumbs:
     [30]
     [Noon.]
     [Noon]
+    [Crumbs]
