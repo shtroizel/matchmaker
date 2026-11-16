@@ -55,6 +55,8 @@ def usage():
     print('                                    * adds \'_q\' suffix to build_dir')
     print('                                    * adds \'_q\' suffix to library name in install_dir\n')
     print('    -d, --debug                   debug build\n')
+    print('    -s, --skip_tests              skip the tests run before the stage 0 data reader')
+    print('                                    * tests are in <matchmaker root>/test, built in Release\n')
 
 
 
@@ -62,8 +64,33 @@ BOOKS = ['Crumbs']
 
 
 
+def run_tests(matchmaker_root, test_build_dir, jobs, use_clang):
+    print('\n\nbuild and run the matchmaker tests:\n\n')
+    cmake_cmd = ['cmake', '-S', matchmaker_root + 'test', '-B', test_build_dir,
+                 '-DCMAKE_BUILD_TYPE=Release']
+    if os.name == 'nt':
+        cmake_cmd.append('-G Ninja')
+    if use_clang:
+        clang_c = which('clang')
+        clang_cxx = which('clang++')
+        if clang_c is None or clang_cxx is None:
+            print('search for clang compiler failed')
+            return False
+        cmake_cmd.append('-DCMAKE_C_COMPILER=' + clang_c)
+        cmake_cmd.append('-DCMAKE_CXX_COMPILER=' + clang_cxx)
+    for cmd in [cmake_cmd, ['cmake', '--build', test_build_dir, '-j' + jobs]]:
+        if subprocess.run(cmd).returncode != 0:
+            print('building the tests failed')
+            return False
+    if subprocess.run(['ctest', '--output-on-failure', '-j' + jobs], cwd=test_build_dir).returncode != 0:
+        print('\ntests failed (skip them with -s)')
+        return False
+    return True
+
+
+
 def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
-                      build_dir, install_dir, atomic_libs, q, debug, dictionary, books):
+                      build_dir, install_dir, atomic_libs, q, debug, dictionary, books, skip_tests):
 
     start_dir = os.getcwd()
 
@@ -150,6 +177,11 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
                         stage_0_workspace_dir + 'CMakeLists.txt')
             shutil.copy(matchmaker_root + 'workspace_common/config.cmake.in',
                         stage_0_workspace_dir + 'config.cmake.in')
+
+        if not retain_leaves and not skip_tests:
+            if not run_tests(matchmaker_root, stage_0_build_dir + 'test_build', jobs, use_clang):
+                os.chdir(start_dir)
+                exit(1)
 
         if not retain_leaves:
 
@@ -471,10 +503,10 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crlmfj:aql:d',
+        opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crlmfj:aql:ds',
                 ['help', 'build_dir', 'install_dir', 'clang', 'retain', 'retain_leaves',
                  'force_stage_1', 'jobs', 'atomic_libs', 'q', 'memory_usage_limit',
-                 'debug', 'dictionary=', 'books='])
+                 'debug', 'dictionary=', 'books=', 'skip_tests'])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -492,6 +524,7 @@ def main():
     debug = False
     dictionary = None
     books = None
+    skip_tests = False
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -521,6 +554,8 @@ def main():
             books = a
         elif o in ('-d, --debug'):
             debug = True
+        elif o in ('-s', '--skip_tests'):
+            skip_tests = True
         else:
             assert False, "unhandled option"
 
@@ -547,7 +582,7 @@ def main():
         books = 'Crumbs' if q else 'all'
 
     build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs, build_dir,
-                      install_dir, atomic_libs, q, debug, dictionary, books)
+                      install_dir, atomic_libs, q, debug, dictionary, books, skip_tests)
 
     exit(0)
 
