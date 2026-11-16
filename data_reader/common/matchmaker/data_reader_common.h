@@ -65,3 +65,21 @@ inline bool operator<(QFile const & l, QFile const & r)
 {
     return r.entry.path().filename() < l.entry.path().filename();
 }
+
+
+
+// a Crumbs post hour ("1" to "12" with "AM" or "PM") on the 24 hour clock padded to two digits ("00" to
+// "23"), as stage 1 prints it in each chapter subtitle and stage 0 adds it to the vocabulary; empty when
+// the hour or AM/PM is not valid
+inline std::string crumbs_hour_24(std::string const & hour, std::string const & am_pm)
+{
+    if (hour.empty() || hour.size() > 2 || hour.find_first_not_of("0123456789") != std::string::npos)
+        return "";
+    if (am_pm != "AM" && am_pm != "PM")
+        return "";
+    int h = std::stoi(hour);
+    if (h < 1 || h > 12)
+        return "";
+    h = h % 12 + (am_pm == "PM" ? 12 : 0);
+    return std::string{char('0' + h / 10), char('0' + h % 10)};
+}

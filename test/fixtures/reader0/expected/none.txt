@@ -11,16 +11,15 @@
 [.] _dot_ | pos= os=0
 [/] _slsh_ | pos= os=0
 [00] esc_0 | pos= os=0
-[01] esc_0 | pos= os=0
 [05] esc_0 | pos= os=0
 [1] esc_1 | pos= os=0
 [12] esc_1 | pos= os=0
+[13] esc_1 | pos= os=0
 [15] esc_1 | pos= os=0
 [1647] esc_1 | pos= os=0
 [2] esc_2 | pos= os=0
 [2017] esc_2 | pos= os=0
 [23] esc_2 | pos= os=0
-[24] esc_2 | pos= os=0
 [28] esc_2 | pos= os=0
 [29] esc_2 | pos= os=0
 [3] esc_3 | pos= os=0
@@ -119,7 +118,7 @@ vocabulary Crumbs:
     [28]
     [Oct]
     [2017]
-    [01]
+    [13]
     [44]
     [1647]
     [Linked [text] here.]
@@ -160,13 +159,12 @@ vocabulary Crumbs:
     [3]
     [AM]
     [29]
-    [12]
-    [05]
     [00]
+    [05]
     [Night.]
     [Night]
     [4]
-    [24]
+    [12]
     [30]
     [Noon.]
     [Noon]

@@ -146,6 +146,12 @@ target_link_libraries(reader0 PUBLIC matchablemaker_for_tests)
 add_executable(reader0_fixture reader0_fixture.cpp)
 target_link_libraries(reader0_fixture reader0)
 
+# crumbs_hour: the post hour conversion both data readers share (data_reader/common)
+add_executable(crumbs_hour_check crumbs_hour_check.cpp)
+target_link_libraries(crumbs_hour_check reader0)
+add_test(NAME crumbs_hour COMMAND crumbs_hour_check)
+set_tests_properties(crumbs_hour PROPERTIES LABELS reader0)
+
 set(READER0_DATA ${FIXTURES}/reader0/data)
 set(READER0_EXPECTED ${FIXTURES}/reader0/expected)
 

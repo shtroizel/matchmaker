@@ -411,18 +411,12 @@ ParseStatus::Type parse_post_start(
         return ParseStatus::Failed::grab();
     }
 
-    // guarantee 2 digit hour
-    if (tokenized_time[0].length() == 1)
+    // the hour as stage 1 prints it: 24 hr clock (military is the only way), two digits
+    tokenized_time[0] = crumbs_hour_24(tokenized_time[0], tokenized_date_time[2]);
+    if (tokenized_time[0].empty())
     {
-        tokenized_time[0].insert(0, 1, '0');
-    }
-
-    // use 24 hr clock (military is the only way)
-    else if (tokenized_date_time[2] == "PM")
-    {
-        int hr = std::stoi(tokenized_time[0]);
-        hr += 12;
-        tokenized_time[0] = std::to_string(hr);
+        std::cout << "failed to parse hour! post: " << post << std::endl;
+        return ParseStatus::Failed::grab();
     }
 
     // now add them all including all tokens & symbols

@@ -832,21 +832,12 @@ bool read_header(std::string const & header, Chapter & chapter)
     // add the hour
     //
     // but use the 24hr clock (military is the only way)
-    std::string hr_as_str = tokenized_time[0];
-    if (tokenized_date_time[2] == "PM")
+    std::string const hr_as_str = crumbs_hour_24(tokenized_time[0], tokenized_date_time[2]);
+    if (hr_as_str.empty())
     {
-        int hr = std::stoi(hr_as_str);
-        hr += 12;
-        if (hr > 24)
-        {
-            std::cout << "FAILED\nam/pm time format but encountered hour: " << hr_as_str << std::endl;
-            abort();
-        }
-        else if (hr == 24)
-        {
-            hr = 0;
-        }
-        hr_as_str = std::to_string(hr);
+        std::cout << "FAILED\nam/pm time format but encountered hour: " << tokenized_time[0] << " "
+                  << tokenized_date_time[2] << " post: " << mm_at(chapter.title[0], nullptr) << std::endl;
+        return false;
     }
     chapter.subtitle.push_back(mm_lookup(hr_as_str.c_str(), &found_in_dictionary));
     if (!found_in_dictionary)
