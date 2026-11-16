@@ -172,3 +172,16 @@ add_reader0_test(crumbs all "reading Crumbs")
 add_reader0_test(all all ${READ_DICTIONARIES} "reading Crumbs" "reading Keys")
 add_reader0_test(reduced reduced ${READ_DICTIONARIES} "reading Crumbs" "reading Keys")
 add_reader0_test(none none ${READ_DICTIONARIES} "reading Crumbs" "reading Keys")
+
+# reader0_saved: saving writes one header per leaf with words, declaring exactly its words and their
+# property values, and the leaf list
+add_test(
+    NAME reader0_saved
+    COMMAND reader0_fixture ${READER0_DATA} ${FIXTURES}/parents_small.txt all
+            ${CMAKE_CURRENT_BINARY_DIR}/reader0_saved ${READ_DICTIONARIES} "reading Crumbs" "reading Keys"
+            "saving matchables"
+)
+set_tests_properties(reader0_saved PROPERTIES
+    LABELS reader0
+    PASS_REGULAR_EXPRESSION "saved [0-9]+ leaves, [0-9]+ words, [0-9]+ values: ok"
+)
