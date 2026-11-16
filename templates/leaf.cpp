@@ -59,7 +59,7 @@ int mm_as_longest_snth(int index)
         return 0;
     }
 
-    return word_snth::from_by_string_index(index).as_by_longest_index();
+    return word_snth::from_by_string_index_as_ref(index).as_by_longest_index();
 }
 
 
@@ -73,7 +73,7 @@ std::string const & mm_at_snth(int index)
         return empty_str;
     }
 
-    std::string const & str = word_snth::from_by_string_index(index).as_string();
+    std::string const & str = word_snth::from_by_string_index_as_ref(index).as_string();
     return str;
 }
 
@@ -93,7 +93,7 @@ int mm_ordinal_summation_snth(int index)
         return 0;
     }
 
-    return word_snth::from_by_string_index(index).as_ordinal_summation();
+    return word_snth::from_by_string_index_as_ref(index).as_ordinal_summation();
 }
 
 
@@ -106,7 +106,7 @@ std::vector<int8_t> const & mm_flagged_parts_of_speech_snth(int index)
                   << ") out of bounds with mm_count_snth() of: " << mm_count_snth() << std::endl;
         return empty;
     }
-    return word_snth::from_by_string_index(index).as_pos_vect();
+    return word_snth::from_by_string_index_as_ref(index).as_pos_vect();
 }
 
 
@@ -119,7 +119,7 @@ bool mm_is_name_snth(int index)
         return false;
     }
 
-    return word_snth::from_by_string_index(index).as_is_name();
+    return word_snth::from_by_string_index_as_ref(index).as_is_name();
 }
 
 
@@ -132,7 +132,7 @@ bool mm_is_male_name_snth(int index)
         return false;
     }
 
-    return word_snth::from_by_string_index(index).as_is_male_name();
+    return word_snth::from_by_string_index_as_ref(index).as_is_male_name();
 }
 
 
@@ -145,7 +145,7 @@ bool mm_is_female_name_snth(int index)
         return false;
     }
 
-    return word_snth::from_by_string_index(index).as_is_female_name();
+    return word_snth::from_by_string_index_as_ref(index).as_is_female_name();
 }
 
 
@@ -158,7 +158,7 @@ bool mm_is_place_snth(int index)
         return false;
     }
 
-    return word_snth::from_by_string_index(index).as_is_place();
+    return word_snth::from_by_string_index_as_ref(index).as_is_place();
 }
 
 
@@ -171,7 +171,7 @@ bool mm_is_compound_snth(int index)
         return false;
     }
 
-    return word_snth::from_by_string_index(index).as_is_compound();
+    return word_snth::from_by_string_index_as_ref(index).as_is_compound();
 }
 
 
@@ -184,7 +184,7 @@ bool mm_is_acronym_snth(int index)
         return false;
     }
 
-    return word_snth::from_by_string_index(index).as_is_acronym();
+    return word_snth::from_by_string_index_as_ref(index).as_is_acronym();
 }
 
 
@@ -197,7 +197,7 @@ bool mm_is_phrase_snth(int index)
         return false;
     }
 
-    return word_snth::from_by_string_index(index).as_is_phrase();
+    return word_snth::from_by_string_index_as_ref(index).as_is_phrase();
 }
 
 
@@ -210,7 +210,8 @@ bool mm_is_used_in_book_snth(int book_index, int index)
         return false;
     }
 
-    auto const & book_vect = word_snth::from_by_string_index(index).as_is_used_in_book_vect();
+    auto const & book_vect =
+        word_snth::from_by_string_index_as_ref(index).as_is_used_in_book_vect();
     if (0 == book_vect.size())
         return false;
 
@@ -234,7 +235,7 @@ std::vector<int> const & mm_synonyms_snth(int index)
                   << mm_count_snth() << std::endl;
         return empty;
     }
-    return word_snth::from_by_string_index(index).as_syn_vect();
+    return word_snth::from_by_string_index_as_ref(index).as_syn_vect();
 }
 
 
@@ -247,7 +248,7 @@ std::vector<int> const & mm_antonyms_snth(int index)
                   << mm_count_snth() << std::endl;
         return empty;
     }
-    return word_snth::from_by_string_index(index).as_ant_vect();
+    return word_snth::from_by_string_index_as_ref(index).as_ant_vect();
 }
 
 
@@ -260,7 +261,7 @@ std::vector<int> const & mm_embedded_snth(int index)
                   << mm_count_snth() << std::endl;
         return empty;
     }
-    return word_snth::from_by_string_index(index).as_embedded_vect();
+    return word_snth::from_by_string_index_as_ref(index).as_embedded_vect();
 }
 
 
@@ -273,7 +274,7 @@ std::vector<int> const & mm_definition_snth(int index)
                   << mm_count_snth() << std::endl;
         return empty;
     }
-    return word_snth::from_by_string_index(index).as_definition_vect();
+    return word_snth::from_by_string_index_as_ref(index).as_definition_vect();
 }
 
 
@@ -298,7 +299,7 @@ void mm_locations_snth(
         return;
     }
 
-    auto w = word_snth::from_by_string_index(index);
+    auto const & w = word_snth::from_by_string_index_as_ref(index);
     *count = (int) w.as_book_index_vect().size();
     if (*count == (int) w.as_chapter_index_vect().size() &&
             *count == (int) w.as_paragraph_index_vect().size() &&
