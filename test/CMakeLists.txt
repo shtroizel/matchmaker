@@ -2,14 +2,20 @@ cmake_minimum_required(VERSION 3.16.3)
 
 # matchmaker checks, labeled by the point in the build they check:
 #     generator  scripts/generate_code.py and src/tree.cpp, with no data read
-#     reader0    the stage 0 data reader
+#     reader0    the stage 0 data reader, on small fixture data
+#     full_data  the stage 0 data reader on all of data_reader/data (about 45 s; -LE full_data skips it)
 #
-# reader0_* tests compare what the reader keeps from fixture data with test/fixtures/reader0/expected;
-# after a deliberate change, UPDATE_EXPECTED=1 ctest -R reader0_ rewrites those files (review the diff)
+# reader0_* tests compare what the reader keeps with test/fixtures/reader0/expected; after a deliberate
+# change, UPDATE_EXPECTED=1 ctest -R reader0_ rewrites those files (review the diff)
 #
 # cmake -S test -B <build dir> && cmake --build <build dir> && ctest --test-dir <build dir> -L <label>
 
 project(matchmaker_tests)
+
+# optimized like build_and_install.py builds the reader; unoptimized, reader0_full takes minutes
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -185,3 +191,24 @@ set_tests_properties(reader0_saved PROPERTIES
     LABELS reader0
     PASS_REGULAR_EXPRESSION "saved [0-9]+ leaves, [0-9]+ words, [0-9]+ values: ok"
 )
+
+
+
+# full_data: the stage 0 reader over all of data_reader/data with the real parent prefixes;
+# reader0_full.py checks how the modes relate and prints counts compared with expected/full.txt
+set(FULL_DATA ${CMAKE_CURRENT_BINARY_DIR}/full_data)
+add_test(
+    NAME full_data_unpack
+    COMMAND ${CMAKE_COMMAND} -DDATA=${MATCHMAKER_ROOT}/data_reader/data -DOUT=${FULL_DATA}
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/extract_data.cmake
+)
+set_tests_properties(full_data_unpack PROPERTIES LABELS full_data FIXTURES_SETUP full_data)
+
+add_test(
+    NAME reader0_full
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py ${READER0_EXPECTED}/full.txt
+            ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reader0_full.py $<TARGET_FILE:reader0_fixture>
+            ${FULL_DATA} ${MATCHMAKER_ROOT}/scripts/parent_prefixes.txt
+            ${CMAKE_CURRENT_BINARY_DIR}/reader0_full
+)
+set_tests_properties(reader0_full PROPERTIES LABELS full_data FIXTURES_REQUIRED full_data)
