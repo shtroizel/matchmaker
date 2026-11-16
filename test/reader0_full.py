@@ -4,9 +4,8 @@
 # (counts per mode) for expect_output.py to compare:
 # - each mode saves exactly the words it keeps (reader0_fixture checks this)
 # - every book vocabulary word is a word, and the vocabulary is the same in every mode
-# - none is the books (vocabulary and keys); reduced adds every dictionary but 3201 SINGLE and COMPOUND,
-#   and the words saving adds (in none those only annotate, like any source that is not a book); all adds
-#   SINGLE and COMPOUND
+# - none is the books (vocabulary and keys) and the words saving adds; reduced adds every dictionary but
+#   3201 SINGLE and COMPOUND; all adds SINGLE and COMPOUND
 # - a word kept in more than one mode has the same leaf, parts of speech, ordinal summation and flags
 
 import collections
@@ -92,9 +91,9 @@ for m in modes:
     check(not missing, m + ': vocabulary words not kept: ' + str(len(missing)) + ' ' + str(sample(missing)))
 
 expected = {
-    'none': set(vocabulary) | set(results['keys'][0]),
+    'none': set(vocabulary) | set(results['keys'][0]) | SAVED_BY_READER,
 }
-expected['reduced'] = expected['none'] | set(results['reduced_adds'][0]) | SAVED_BY_READER
+expected['reduced'] = expected['none'] | set(results['reduced_adds'][0])
 expected['all'] = expected['reduced'] | set(results['all_adds'][0])
 for m in modes:
     extra = words[m] - expected[m]

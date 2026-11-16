@@ -20,6 +20,7 @@ namespace Stage0Data
     bool adds_words(SerialTask::Type task)
     {
         return !SerialTask::book_of(task).is_nil()
+            || task == SerialTask::saving_spc_matchables::grab()
             || dictionary_mode() == dictionary_usage::all::grab()
             || (
                 dictionary_mode() == dictionary_usage::reduced::grab()
