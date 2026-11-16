@@ -71,34 +71,19 @@ bool read_3201_default_line(
     word.clear();
 
     int ch;
-    while (true)
+    while ((ch = fgetc(f)) != EOF)
     {
-        ch = fgetc(f);
         ++task.as_mutable_progress();
-        if (ch == EOF)
-            return false;
-
-        if (ch == 10 || ch == 13)
+        if (ch == '\n' || ch == '\r')
         {
-            while (true)
-            {
-                ch = fgetc(f);
-                ++task.as_mutable_progress();
-                if (ch == EOF)
-                    return false;
-
-                if (ch != 10 && ch != 13)
-                {
-                    ungetc(ch, f);
-                    break;
-                }
-            }
-            break;
+            if (word.empty())
+                continue;
+            return true;
         }
 
         Stage0Data::update_word_attribute(attributes, ch);
         word += (char) ch;
     }
 
-    return true;
+    return !word.empty();
 }
