@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION 3.16.3)
 #     generator  scripts/generate_code.py and src/tree.cpp, with no data read
 #     reader0    the stage 0 data reader
 #
+# reader0_* tests compare what the reader keeps from fixture data with test/fixtures/reader0/expected;
+# after a deliberate change, UPDATE_EXPECTED=1 ctest -R reader0_ rewrites those files (review the diff)
+#
 # cmake -S test -B <build dir> && cmake --build <build dir> && ctest --test-dir <build dir> -L <label>
 
 project(matchmaker_tests)
@@ -113,3 +116,59 @@ endfunction()
 
 add_reader_refusal_test(too_deep "parent prefix deeper than 5" ${FIXTURES}/parents_too_deep.txt)
 add_reader_refusal_test(bad_symbol "invalid symbol 'xyz'" ${FIXTURES}/parents_bad_symbol.txt)
+
+
+
+# the stage 0 reader without its main, and MatchableMaker, which it saves leaves with; an object library,
+# so every task's object is linked and sets its own run function, as in data_reader_stage_0
+set(READER0_SRC ${MATCHMAKER_ROOT}/data_reader/stage_0/src)
+file(GLOB reader0_srcs ${READER0_SRC}/*.cpp)
+list(REMOVE_ITEM reader0_srcs ${READER0_SRC}/data_reader_stage_0.cpp)
+add_library(matchablemaker_for_tests STATIC ${MATCHMAKER_ROOT}/matchable/src/MatchableMaker.cpp)
+add_library(reader0 OBJECT ${reader0_srcs})
+target_include_directories(reader0 PUBLIC
+    ${READER0_SRC}
+    ${MATCHMAKER_ROOT}/data_reader/stage_0/include
+    ${MATCHMAKER_ROOT}/data_reader/common
+)
+target_compile_options(reader0 PUBLIC -Wall -Werror -Wextra)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(reader0 PUBLIC -Wno-dangling-reference)
+endif()
+target_link_libraries(reader0 PUBLIC matchablemaker_for_tests)
+
+add_executable(reader0_fixture reader0_fixture.cpp)
+target_link_libraries(reader0_fixture reader0)
+
+set(READER0_DATA ${FIXTURES}/reader0/data)
+set(READER0_EXPECTED ${FIXTURES}/reader0/expected)
+
+
+# reader0_<name>: the words the stage 0 reader keeps from the fixture data for these tasks, in this
+# dictionary mode, with their leaves and properties (test/fixtures/reader0/expected/<name>.txt)
+function(add_reader0_test name mode)
+    add_test(
+        NAME reader0_${name}
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+                ${READER0_EXPECTED}/${name}.txt
+                $<TARGET_FILE:reader0_fixture> ${READER0_DATA} ${FIXTURES}/parents_small.txt ${mode}
+                ${CMAKE_CURRENT_BINARY_DIR}/reader0_${name} ${ARGN}
+    )
+    set_tests_properties(reader0_${name} PROPERTIES LABELS reader0)
+endfunction()
+
+set(READ_3201
+    "reading 3201 (SINGLE)" "reading 3201 (COMPOUND)" "reading 3201 (COMMON)" "reading 3201 (NAMES)"
+    "reading 3201 (NAMES-F)" "reading 3201 (NAMES-M)" "reading 3201 (PLACES)" "reading 3201 (CROSSWD)"
+    "reading 3201 (CRSWD D)" "reading 3201 (ACRONYMS)"
+)
+set(READ_DICTIONARIES ${READ_3201} "reading 3202" "reading 3203")
+
+add_reader0_test(3201 all ${READ_3201})
+add_reader0_test(3202 all "reading 3202")
+add_reader0_test(3203 all "reading 3203")
+add_reader0_test(keys all "reading Keys")
+add_reader0_test(crumbs all "reading Crumbs")
+add_reader0_test(all all ${READ_DICTIONARIES} "reading Crumbs" "reading Keys")
+add_reader0_test(reduced reduced ${READ_DICTIONARIES} "reading Crumbs" "reading Keys")
+add_reader0_test(none none ${READ_DICTIONARIES} "reading Crumbs" "reading Keys")

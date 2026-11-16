@@ -1,0 +1,6 @@
+[4-H'er] esc_4 | pos=N os=31
+[about] a b o u t _spc_ | pos=Pv os=59
+[bark] b | pos=NVt os=32
+[hello] h | pos=n os=52
+[quux] q u u | pos=N os=83
+[the] t h e | pos=D os=33

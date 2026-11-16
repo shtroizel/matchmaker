@@ -1,0 +1,6 @@
+about\vP
+the\D
+bark\NVt
+hello\!
+4-H'er\N
+quux\Nx

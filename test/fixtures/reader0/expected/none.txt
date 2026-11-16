@@ -1,0 +1,171 @@
+[ ] _spc_ _spc_ | pos= os=0
+[!] _bng_ | pos= os=0
+["] _quot_ | pos= os=0
+[#] _hsh_ | pos= os=0
+[$] _dol_ | pos= os=0
+[%] _pct_ | pos= os=0
+[(] _parl_ | pos= os=0
+[)] _parr_ | pos= os=0
+[,] _cma_ | pos= os=0
+[-] _mns_ | pos= os=0
+[.] _dot_ | pos= os=0
+[/] _slsh_ | pos= os=0
+[00] esc_0 | pos= os=0
+[01] esc_0 | pos= os=0
+[05] esc_0 | pos= os=0
+[1] esc_1 | pos= os=0
+[12] esc_1 | pos= os=0
+[15] esc_1 | pos= os=0
+[1647] esc_1 | pos= os=0
+[2] esc_2 | pos= os=0
+[2017] esc_2 | pos= os=0
+[23] esc_2 | pos= os=0
+[24] esc_2 | pos= os=0
+[28] esc_2 | pos= os=0
+[29] esc_2 | pos= os=0
+[3] esc_3 | pos= os=0
+[30] esc_3 | pos= os=0
+[4] esc_4 | pos= os=0
+[44] esc_4 | pos= os=0
+[48] esc_4 | pos= os=0
+[4ch/pol] esc_4 | pos= os=54
+[8ch/qresearch] esc_8 | pos= os=105
+[99] esc_9 | pos= os=0
+[:] _cln_ | pos= os=0
+[;] _scln_ | pos= os=0
+[=] _eq_ | pos= os=0
+[>>] _gt_ | pos= os=0
+[?] _qstn_ | pos= os=0
+[[] _sbl_ | pos= os=0
+[[Q]] _sbl_ | pos= os=17
+[[Q] marks/the spot.] _sbl_ | pos= os=182 phrase
+[[text]] _sbl_ | pos= os=69
+[]] _sbr_ | pos= os=0
+[]~~] _sbr_ | pos= os=0
+[^] _dach_ | pos= os=0
+[|] _pip_ | pos= os=0
+[~~:] _tld_ _tld_ | pos= os=0
+[~~~] _tld_ _tld_ | pos= os=0
+[~~~1_image.png] _tld_ _tld_ | pos= os=72
+[AM] esc_A | pos= os=14
+[Follow] esc_F | pos= os=83
+[Huma] esc_H | pos= os=43
+[Linked] esc_L | pos= os=55
+[Linked [text] here.] esc_L | pos= os=160 phrase
+[Night] esc_N | pos= os=58
+[Night.] esc_N | pos= os=58 phrase
+[Noon] esc_N | pos= os=58
+[Noon.] esc_N | pos= os=58 phrase
+[Oct] esc_O | pos= os=38
+[PDT] esc_P | pos= os=40
+[PM] esc_P | pos= os=29
+[Presidecy] esc_P | pos= os=104
+[Presidency] esc_P | pos= os=118
+[Q] esc_Q | pos= os=17
+[Where] esc_W | pos= os=59
+[Where is "Huma"? Follow (the money).] esc_W | pos= os=318 phrase
+[a] a _spc_ | pos= os=1
+[abc123] a b c | pos= os=6
+[about] a b o u t _spc_ | pos=Pv os=59
+[c] c | pos= os=3
+[e] e | pos= os=5
+[h] h | pos= os=8
+[here] h | pos= os=36
+[http] h | pos= os=64
+[is] i | pos= os=28
+[m] m | pos= os=13
+[marks] m | pos= os=62
+[money] m | pos= os=72
+[o] o | pos= os=15
+[p] p | pos= os=16
+[shtroizel] s | pos= os=132
+[spot] s | pos= os=70
+[t] t _spc_ | pos= os=20
+[text] t e | pos= os=69
+[the] t h e | pos=D os=33
+[the money] t h e | pos= os=105 phrase
+[x] x | pos= os=24
+vocabulary Crumbs:
+    [~~:]
+    [>>]
+    [~~~]
+    []~~]
+    [http]
+    [1]
+    [ ]
+    [-]
+    [:]
+    [,]
+    [=]
+    [/]
+    [%]
+    [$]
+    ["]
+    [|]
+    [^]
+    [!]
+    [?]
+    [.]
+    [(]
+    [)]
+    [[]
+    []]
+    [#]
+    [;]
+    [PM]
+    [PDT]
+    [4ch/pol]
+    [28]
+    [Oct]
+    [2017]
+    [01]
+    [44]
+    [1647]
+    [Linked [text] here.]
+    [Linked]
+    [[text]]
+    [text]
+    [here]
+    [99]
+    [Where is "Huma"? Follow (the money).]
+    [Where]
+    [is]
+    [Huma]
+    [Follow]
+    [the]
+    [money]
+    [the money]
+    [~~~1_image.png]
+    [h]
+    [t]
+    [p]
+    [e]
+    [x]
+    [c]
+    [o]
+    [m]
+    [a]
+    [2]
+    [8ch/qresearch]
+    [abc123]
+    [23]
+    [15]
+    [48]
+    [[Q] marks/the spot.]
+    [[Q]]
+    [Q]
+    [marks]
+    [spot]
+    [3]
+    [AM]
+    [29]
+    [12]
+    [05]
+    [00]
+    [Night.]
+    [Night]
+    [4]
+    [24]
+    [30]
+    [Noon.]
+    [Noon]

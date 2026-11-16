@@ -1,0 +1,26 @@
+[$100-a-plate dinner] _dol_ | pos= os=119 compound
+[&c] _und_ | pos= os=3 acronym
+['em] _sqt_ | pos= os=18
+[3D] esc_3 | pos= os=4 acronym
+[AAA] esc_A | pos= os=3 acronym
+[Abbe] esc_A | pos= os=10 name male_name
+[Abbey] esc_A | pos= os=35 name female_name
+[About] esc_A | pos= os=59
+[Abu Dhabi] esc_A | pos= os=48 place
+[Quebec] esc_Q | pos= os=53 place
+[T] esc_T _spc_ | pos= os=20
+[Thea] esc_T h e a | pos= os=34 name female_name
+[Theo] esc_T h e o | pos= os=48 name male_name
+[a-b] a _mns_ | pos= os=3
+[about] a b o u t _spc_ | pos= os=59
+[about-face] a b o u t _mns_ | pos= os=74 compound
+[abouts] a b o u t s | pos= os=78
+[ice cream] i | pos= os=57 compound
+[qua] q u a | pos= os=39
+[quu] q u u | pos= os=59
+[quux] q u u | pos= os=83
+[tail] t a | pos= os=42
+[the] t h e | pos= os=33
+[thee] t h e | pos= os=38
+[x y] x | pos= os=49
+[zz] z | pos= os=52
