@@ -99,3 +99,17 @@ add_generator_refusal_test(orphan "parent prefix \"a b\" lacks parent \"a\""
 add_generator_refusal_test(not_a_leaf "1 leaves are not leaves of the tree"
     -t ${FIXTURES}/parents_small.txt -l ${FIXTURES}/leaf_list_not_a_leaf.txt
 )
+
+
+# the stage 0 reader refuses the parent prefix files generate_code.py refuses (read through the reader's
+# routing::parent_of_line by sparse_leaf_list)
+function(add_reader_refusal_test name expected parents)
+    add_test(NAME reader_refuses_${name} COMMAND sparse_leaf_list ${parents})
+    set_tests_properties(reader_refuses_${name} PROPERTIES
+        LABELS reader0
+        PASS_REGULAR_EXPRESSION "${expected}"
+    )
+endfunction()
+
+add_reader_refusal_test(too_deep "parent prefix deeper than 5" ${FIXTURES}/parents_too_deep.txt)
+add_reader_refusal_test(bad_symbol "invalid symbol 'xyz'" ${FIXTURES}/parents_bad_symbol.txt)

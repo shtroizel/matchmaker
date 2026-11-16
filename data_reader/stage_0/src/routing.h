@@ -14,9 +14,13 @@
 // (scripts/generate_code.py, src/tree.cpp) agrees
 namespace routing
 {
-    // the characters of a parent prefix file line; false, with prefix set to the symbol, if a symbol is not
-    // one character
-    inline bool parent_of_line(std::string const & line, std::string & prefix)
+    // as in generate_code.py (MAX_PREFIX_DEPTH - 1)
+    size_t constexpr MAX_PARENT_DEPTH{5};
+
+
+    // reads the characters of a parent prefix file line into prefix; returns what is wrong with the line,
+    // or "" if nothing is
+    inline std::string parent_of_line(std::string const & line, std::string & prefix)
     {
         prefix.clear();
         std::istringstream symbols{line};
@@ -24,13 +28,12 @@ namespace routing
         {
             std::string const ch = matchable::escapable::unescape_all(symbol);
             if (ch.size() != 1)
-            {
-                prefix = symbol;
-                return false;
-            }
+                return "invalid symbol '" + symbol + "'";
             prefix += ch;
         }
-        return true;
+        if (prefix.size() > MAX_PARENT_DEPTH)
+            return "parent prefix deeper than " + std::to_string(MAX_PARENT_DEPTH);
+        return "";
     }
 
 

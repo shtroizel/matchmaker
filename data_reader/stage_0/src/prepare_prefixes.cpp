@@ -29,9 +29,10 @@ void prepare_prefixes(SerialTask::Type task)
         task.as_mutable_progress() += line.size() + 1;
 
         std::string prefix;
-        if (!routing::parent_of_line(line, prefix))
+        std::string const error = routing::parent_of_line(line, prefix);
+        if (!error.empty())
         {
-            std::cout << "prepare_prefixes() --> invalid symbol: '" << prefix << "'" << std::endl;
+            std::cout << "prepare_prefixes() --> " << parents_path.string() << ": " << error << std::endl;
             abort();
         }
         if (!prefix.empty())

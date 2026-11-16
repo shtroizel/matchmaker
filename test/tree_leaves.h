@@ -26,9 +26,10 @@ inline std::set<std::string> read_parents(std::string const & filename)
     for (std::string line; std::getline(f, line);)
     {
         std::string prefix;
-        if (!routing::parent_of_line(line, prefix))
+        std::string const error = routing::parent_of_line(line, prefix);
+        if (!error.empty())
         {
-            std::cerr << filename << ": invalid symbol '" << prefix << "'" << std::endl;
+            std::cerr << filename << ": " << error << std::endl;
             exit(2);
         }
         if (!prefix.empty())
