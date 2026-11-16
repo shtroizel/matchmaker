@@ -26,6 +26,10 @@ namespace SerialTask
 
     void check_progress(SerialTask::Type task)
     {
+        // a goal smaller than the steps (a small or empty input) has no progress to show
+        if (task.as_progress_steps() <= 0 || task.as_goal() < (unsigned long) task.as_progress_steps())
+            return;
+
         mod_progress.set(task, task.as_progress() % (task.as_goal() / task.as_progress_steps()));
 
         if (mod_progress.at(task) < prev_mod_progress.at(task) &&
