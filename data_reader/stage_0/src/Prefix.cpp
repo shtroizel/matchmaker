@@ -7,6 +7,7 @@
 #include <matchable/MatchableMaker.h>
 
 #include <Stage0Data.h>
+#include <routing.h>
 
 
 
@@ -115,50 +116,7 @@ std::string & Prefix::as_mutable_string()
 
 std::string Prefix::escaped_and_delimited(char delim) const
 {
-    std::string ret;
-
-    if (str.empty())
-    {
-        std::cout << "Prefix::escaped_and_delimited('"
-                    << delim << "') --> str is empty!" << std::endl;
-        abort();
-    }
-
-    for (size_t i = 0; i < str.size(); ++i)
-    {
-        std::string escaped = matchable::escapable::escape(str.substr(i, 1));
-        if (escaped.size() > 2)
-        {
-            if (escaped[0] != escaped[escaped.size() - 1])
-            {
-                std::cout << "Prefix::escaped_and_delimited('" << delim << "')\n"
-                            << "    --> escaped.size() > 2 but first and last do not match!\n"
-                            << "    --> str is: '" << str << "'" << std::endl;
-                abort();
-            }
-        }
-        else if (escaped.size() != 1)
-        {
-            std::cout << "Prefix::escaped_and_delimited('" << delim << "')\n"
-                    << "    --> escape failed with: '" << escaped << "'\n"
-                    << "    -->             str is: '" << str << "'" << std::endl;
-            abort();
-        }
-
-        if (i > 0)
-            ret += delim;
-
-        // manually explicitly escape numbers and upper case letters
-        if (
-            (str[i] >= '0' && str[i] <= '9') ||
-            (str[i] >= 'A' && str[i] <= 'Z')
-        )
-            ret += "esc_";
-
-        ret += escaped;
-    }
-
-    return ret;
+    return routing::symbols(str, delim);
 }
 
 

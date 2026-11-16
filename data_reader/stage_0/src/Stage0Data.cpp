@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include <SerialTask.h>
+#include <routing.h>
 
 
 
@@ -236,10 +237,7 @@ namespace Stage0Data
             abort();
         }
 
-        // a word that ends above its leaf continues with space, the first symbol
-        std::string prefix;
-        while (parent_prefixes().count(prefix) > 0)
-            prefix += prefix.size() < str.size() ? str[prefix.size()] : ' ';
+        std::string const prefix = routing::leaf_of(parent_prefixes(), str);
 
         auto it = leaves().find(prefix);
         if (it != leaves().end())

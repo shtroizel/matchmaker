@@ -3,9 +3,9 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 
 #include <Stage0Data.h>
+#include <routing.h>
 
 
 
@@ -28,17 +28,11 @@ void prepare_prefixes(SerialTask::Type task)
     {
         task.as_mutable_progress() += line.size() + 1;
 
-        std::istringstream symbols{line};
         std::string prefix;
-        for (std::string symbol; symbols >> symbol;)
+        if (!routing::parent_of_line(line, prefix))
         {
-            std::string const ch = matchable::escapable::unescape_all(symbol);
-            if (ch.size() != 1)
-            {
-                std::cout << "prepare_prefixes() --> invalid symbol: '" << symbol << "'" << std::endl;
-                abort();
-            }
-            prefix += ch;
+            std::cout << "prepare_prefixes() --> invalid symbol: '" << prefix << "'" << std::endl;
+            abort();
         }
         if (!prefix.empty())
             Stage0Data::parent_prefixes().insert(prefix);

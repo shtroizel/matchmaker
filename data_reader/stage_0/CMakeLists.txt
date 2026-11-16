@@ -115,6 +115,7 @@ set(
     src/read_crumbs.h
     src/read_keys.cpp
     src/read_keys.h
+    src/routing.h
     src/save_matchables.cpp
     src/save_matchables.h
 )
