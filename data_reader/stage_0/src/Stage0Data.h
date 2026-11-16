@@ -11,6 +11,7 @@ matchable with by_index required for stage 0 reader
 #include <map>
 #include <set>
 #include <string>
+#include <vector>
 
 #include <matchmaker/data_reader_common.h>
 #include <matchmaker/parts_of_speech.h>
@@ -50,6 +51,10 @@ namespace Stage0Data
 
     dictionary_usage::Type & dictionary_mode();
     bool adds_words(SerialTask::Type task);
+
+    // the tasks that read sources, in the order they run: sources that add words, then sources that only
+    // annotate, so they see all the words (each in SerialTask order); unselected books are left out
+    std::vector<SerialTask::Type> reading_order();
 
     // characters of each parent prefix, the root ("") included
     std::set<std::string> & parent_prefixes();

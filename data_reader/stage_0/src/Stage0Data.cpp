@@ -32,6 +32,25 @@ namespace Stage0Data
             );
     }
 
+    std::vector<SerialTask::Type> reading_order()
+    {
+        std::vector<SerialTask::Type> adding;
+        std::vector<SerialTask::Type> annotating;
+        for (auto const & task : SerialTask::variants_by_index())
+        {
+            if (MATCHABLE_INSTANCE_IN(SerialTask, task, preparing_spc_prefixes, saving_spc_matchables))
+                continue;
+            if (!SerialTask::book_of(task).is_nil() && !selected_books().is_set(SerialTask::book_of(task)))
+                continue;
+            if (adds_words(task))
+                adding.push_back(task);
+            else
+                annotating.push_back(task);
+        }
+        adding.insert(adding.end(), annotating.begin(), annotating.end());
+        return adding;
+    }
+
     std::set<std::string> & parent_prefixes()
     {
         static std::set<std::string> parents{""};

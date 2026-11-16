@@ -73,21 +73,9 @@ int main(int argc, char ** argv)
     std::cout << std::endl;
 
 
-    // sources that only annotate run after every source that adds words, so they see all the words
     std::vector<SerialTask::Type> tasks{SerialTask::preparing_spc_prefixes::grab()};
-    std::vector<SerialTask::Type> annotating;
-    for (auto const & task : SerialTask::variants_by_index())
-    {
-        if (MATCHABLE_INSTANCE_IN(SerialTask, task, preparing_spc_prefixes, saving_spc_matchables))
-            continue;
-        if (!SerialTask::book_of(task).is_nil() && !selected_books().is_set(SerialTask::book_of(task)))
-            continue;
-        if (Stage0Data::adds_words(task))
-            tasks.push_back(task);
-        else
-            annotating.push_back(task);
-    }
-    tasks.insert(tasks.end(), annotating.begin(), annotating.end());
+    for (auto const & task : Stage0Data::reading_order())
+        tasks.push_back(task);
     tasks.push_back(SerialTask::saving_spc_matchables::grab());
 
     SerialTask::reset_progress();
