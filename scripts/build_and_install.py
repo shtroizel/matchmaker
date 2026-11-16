@@ -57,6 +57,9 @@ def usage():
     print('    -d, --debug                   debug build\n')
     print('    -s, --skip_tests              skip the tests run before the stage 0 data reader')
     print('                                    * tests are in <matchmaker root>/test, built in Release\n')
+    print('    --data_dir=<dir>              data both data readers read instead of their own copies')
+    print('                                    * same layout as the unpacked data_reader/data')
+    print('                                    * for building from small test data\n')
 
 
 
@@ -90,7 +93,8 @@ def run_tests(matchmaker_root, test_build_dir, jobs, use_clang):
 
 
 def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
-                      build_dir, install_dir, atomic_libs, q, debug, dictionary, books, skip_tests):
+                      build_dir, install_dir, atomic_libs, q, debug, dictionary, books, skip_tests,
+                      data_dir):
 
     start_dir = os.getcwd()
 
@@ -254,6 +258,8 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
             reader_loc = stage_0_data_reader_install_dir
             data_reader_stage_0 = reader_loc + "/bin/data_reader_stage_0"
             data_reader_stage_0_data = reader_loc + "/share/matchmaker/data_reader_stage_0/data"
+            if data_dir is not None:
+                data_reader_stage_0_data = data_dir
             out_dir = stage_0_workspace_dir + "/generated_include/matchmaker/generated_matchables/"
             shutil.rmtree(out_dir, ignore_errors=True)
             os.makedirs(out_dir)
@@ -427,6 +433,8 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
             dr_stage_1_binary = dr_stage_1_install_dir + '/bin/data_reader_stage_1'
             template_dir = matchmaker_root + '/templates'
             dr_stage_1_data = dr_stage_1_install_dir + '/share/matchmaker/data_reader_stage_1/data'
+            if data_dir is not None:
+                dr_stage_1_data = data_dir
 
             run_dr_stage_1_cmd = [dr_stage_1_binary, dr_stage_1_data, stage_1_workspace_dir, template_dir,
                                   jobs, books]
@@ -506,7 +514,7 @@ def main():
         opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crlmfj:aql:ds',
                 ['help', 'build_dir', 'install_dir', 'clang', 'retain', 'retain_leaves',
                  'force_stage_1', 'jobs', 'atomic_libs', 'q', 'memory_usage_limit',
-                 'debug', 'dictionary=', 'books=', 'skip_tests'])
+                 'debug', 'dictionary=', 'books=', 'skip_tests', 'data_dir='])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -525,6 +533,7 @@ def main():
     dictionary = None
     books = None
     skip_tests = False
+    data_dir = None
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -556,6 +565,8 @@ def main():
             debug = True
         elif o in ('-s', '--skip_tests'):
             skip_tests = True
+        elif o == '--data_dir':
+            data_dir = os.path.abspath(a)
         else:
             assert False, "unhandled option"
 
@@ -582,7 +593,7 @@ def main():
         books = 'Crumbs' if q else 'all'
 
     build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs, build_dir,
-                      install_dir, atomic_libs, q, debug, dictionary, books, skip_tests)
+                      install_dir, atomic_libs, q, debug, dictionary, books, skip_tests, data_dir)
 
     exit(0)
 
