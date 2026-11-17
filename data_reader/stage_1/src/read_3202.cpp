@@ -1,5 +1,6 @@
 #include "read_3202.h"
 
+#include <algorithm>
 #include <filesystem>
 #include <iostream>
 #include <string>
@@ -28,85 +29,54 @@ bool read_3202(SerialTask::Type task)
     task.set_goal(std::filesystem::file_size(p));
     task.set_progress(0);
 
-    std::string syn;
-    std::string key;
-    bool found = false;
-    int term = -1;
+    auto const is_key_word =
+        [](int term)
+        {
+            return std::binary_search(Stage1Data::nil.as_mutable_key_words().begin(),
+                                      Stage1Data::nil.as_mutable_key_words().end(),
+                                      term);
+        };
 
+    // each line is a key followed by its comma separated synonyms; a line whose key is unknown or a key
+    // word is skipped whole, and the last line needs no line end
+    std::string line;
+    bool found = false;
     int ch = 0;
-    while (true)
+    while (ch != EOF)
     {
-        // read key (up to first ',')
-        key.clear();
+        line.clear();
         while (true)
         {
             ch = fgetc(f);
             ++task.as_mutable_progress();
-            if (ch == EOF)
-                goto end;
-
-            if (ch == ',')
+            if (ch == EOF || ch == '\n' || ch == '\r')
                 break;
-
-            key += (char) ch;
+            line += (char) ch;
         }
 
-        term = mm_lookup(key.c_str(), &found);
-        if (found && !std::binary_search(Stage1Data::nil.as_mutable_key_words().begin(),
-                                         Stage1Data::nil.as_mutable_key_words().end(),
-                                         term))
+        size_t comma = line.find(',');
+        if (comma == std::string::npos)
+            continue;
+        std::string const key = line.substr(0, comma);
+        int const key_term = mm_lookup(key.c_str(), &found);
+        if (!found || is_key_word(key_term))
+            continue;
+
+        auto & syns = Stage1Data::nil.as_mutable_syn_ant_table()[key].syn;
+        for (size_t start = comma + 1; start <= line.size(); start = comma + 1)
         {
-            // read each comma separated synonym
-            do
-            {
-                // read next synonym
-                syn.clear();
-                while (true)
-                {
-                    ch = fgetc(f);
-                    ++task.as_mutable_progress();
-                    if (ch == EOF)
-                        goto end;
-
-                    if (ch == ',' || ch == 10 || ch == 13)
-                        break;
-
-                    syn += (char) ch;
-                }
-
-                term = mm_lookup(syn.c_str(), &found);
-                if (
-                    found &&
-                    !std::binary_search(Stage1Data::nil.as_mutable_key_words().begin(),
-                                        Stage1Data::nil.as_mutable_key_words().end(),
-                                        term) &&
-                    std::find(
-                        Stage1Data::nil.as_mutable_syn_ant_table()[key].syn.begin(),
-                        Stage1Data::nil.as_mutable_syn_ant_table()[key].syn.end(),
-                        syn
-                    ) == Stage1Data::nil.as_mutable_syn_ant_table()[key].syn.end()
-                )
-                    Stage1Data::nil.as_mutable_syn_ant_table()[key].syn.push_back(syn);
-            }
-            while (ch == ',');
+            comma = std::min(line.find(',', start), line.size());
+            std::string const syn = line.substr(start, comma - start);
+            if (syn.empty())
+                continue;
+            int const term = mm_lookup(syn.c_str(), &found);
+            if (found && !is_key_word(term) && std::find(syns.begin(), syns.end(), syn) == syns.end())
+                syns.push_back(syn);
         }
-
-        // skip to beginning of next line
-        do
-        {
-            ch = fgetc(f);
-            ++task.as_mutable_progress();
-            if (ch == EOF)
-                goto end;
-        }
-        while (ch == 10 || ch == 13);
-        ungetc(ch, f);
-        --task.as_mutable_progress();
 
         SerialTask::check_progress(task);
     }
 
-end:
     fclose(f);
     return true;
 }

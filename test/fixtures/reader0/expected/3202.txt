@@ -1,7 +1,9 @@
 [about] a b o u t _spc_ | pos= os=59
 [approximately] a p | pos= os=175
 [around] a r | pos= os=73
+[crumbles] c | pos= os=93
 [quagga] q u a | pos= os=54
+[shtroizel] s | pos= os=132
 [the] t h e | pos= os=33
 [thee] t h e | pos= os=38
 [zebra] z | pos= os=52

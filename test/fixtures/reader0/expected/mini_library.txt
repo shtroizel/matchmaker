@@ -1,4 +1,4 @@
-120 terms
+121 terms
 [ ] pos= os=0
 [!] pos= os=0
 ["] pos= os=0
@@ -87,10 +87,11 @@
 [about] pos=Preposition;Adverb; os=59
 [about-face] pos= os=74 compound
 [abouts] pos= os=78
-[approximately] pos= os=175 syn=[around]
-[around] pos= os=73 syn=[approximately]
+[approximately] pos= os=175
+[around] pos= os=73
 [bark] pos=Noun;Verb _pl_usu participle_pr_;Verb _pl_transitive_pr_; os=32
 [c] pos= os=3
+[crumbles] pos= os=93
 [e] pos= os=5
 [h] pos= os=8
 [hello] pos=Interjection; os=52
@@ -104,7 +105,7 @@
 [o] pos= os=15
 [p] pos= os=16
 [qua] pos= os=39
-[quagga] pos= os=54
+[quagga] pos= os=54 syn=[zebra]
 [quu] pos= os=59
 [quux] pos=Noun; os=83
 [shtroizel] pos=Noun; os=132 name
@@ -117,7 +118,7 @@
 [thee] pos= os=38 syn=[the]
 [x] pos= os=24
 [x y] pos= os=49
-[zebra] pos= os=52
+[zebra] pos= os=52 syn=[quagga]
 [zz] pos= os=52
 book 0: Crumbs by Q, 4 chapters
   chapter 0: 1 | 2017-Oct-28 13:44:28 PDT,4ch/pol

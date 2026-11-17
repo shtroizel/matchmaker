@@ -82,6 +82,7 @@
 [around] a r | pos= os=73
 [bark] b | pos=NVt os=32
 [c] c | pos= os=3
+[crumbles] c | pos= os=93
 [e] e | pos= os=5
 [h] h | pos= os=8
 [hello] h | pos=n os=52

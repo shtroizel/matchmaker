@@ -1,3 +1,4 @@
 about,around,approximately
+shtroizel,crumbles
 the,thee
 zebra,quagga
