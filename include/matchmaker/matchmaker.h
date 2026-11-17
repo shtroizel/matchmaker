@@ -340,8 +340,10 @@ void mm_definition(int index, int const * * definition, int * count);
  * instantly retrieve all locations within books where a given term is used.
  * for any i in [0..(count - 1)],
  * book_indexes[i], chapter_indexes[i], paragraph_indexes[i], and word_indexes[i] together make up
- * a "location" that could be passed to mm_word(), which would return the same alphabetic dictionary
- * index used here as input.
+ * a "location" that could be passed to mm_word(). for a word, mm_word() returns the same alphabetic
+ * dictionary index used here as input. a phrase's location is where the phrase starts: there mm_word()
+ * returns the phrase's first word, with the phrase among that word's ancestors (not always the first
+ * ancestor, since phrases can be nested).
  * the complexity for this function is O(log N).
  * @param[in] index
  *     alphabetic dictionary index
