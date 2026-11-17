@@ -218,3 +218,32 @@ add_test(
             ${CMAKE_CURRENT_BINARY_DIR}/reader0_full
 )
 set_tests_properties(reader0_full PROPERTIES LABELS full_data FIXTURES_REQUIRED full_data)
+
+
+
+# mini_build: the whole matchmaker build (build_and_install.py, both stages, without these tests) from the
+# fixture data, about 4 minutes; mini_library checks the library it installs and compares a dump of it with
+# expected/mini_library.txt
+set(MINI_BUILD ${CMAKE_CURRENT_BINARY_DIR}/mini_build)
+include(ProcessorCount)
+ProcessorCount(MINI_BUILD_JOBS)
+if (MINI_BUILD_JOBS EQUAL 0)
+    set(MINI_BUILD_JOBS 1)
+endif()
+add_test(
+    NAME mini_build
+    COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -j ${MINI_BUILD_JOBS}
+            --data_dir=${READER0_DATA} -b ${MINI_BUILD}/build -i ${MINI_BUILD}/install
+)
+set_tests_properties(mini_build PROPERTIES LABELS mini_build FIXTURES_SETUP mini_library TIMEOUT 3600)
+
+add_executable(mini_library_check mini_library_check.cpp)
+target_compile_options(mini_library_check PRIVATE -Wall -Werror -Wextra)
+target_link_libraries(mini_library_check ${CMAKE_DL_LIBS})
+add_test(
+    NAME mini_library
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+            ${READER0_EXPECTED}/mini_library.txt
+            $<TARGET_FILE:mini_library_check> ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
+)
+set_tests_properties(mini_library PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_library)

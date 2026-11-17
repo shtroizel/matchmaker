@@ -46,6 +46,7 @@
 [~~:] _tld_ _tld_ | pos= os=0
 [~~~] _tld_ _tld_ | pos= os=0
 [~~~1_image.png] _tld_ _tld_ | pos= os=72
+[A] esc_A | pos= os=1
 [AM] esc_A | pos= os=14
 [Crumbs] esc_C | pos= os=76
 [Follow] esc_F | pos= os=83

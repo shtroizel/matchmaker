@@ -1,0 +1,14 @@
+The Project Gutenberg EBook of English Synonyms and Antonyms (test excerpt)
+
+KEY: About.
+SYN: Around, nearly,
+approximately.
+ANT: Exactly.
+=
+KEY: Tail.
+SYN: Back_end, end.
+ANT: Head, the.
+=
+KEY: Unknownword.
+SYN: About.
+=

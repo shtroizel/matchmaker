@@ -1,4 +1,7 @@
+[A] esc_A | pos= os=1
 [Presidecy] esc_P | pos= os=104
 [Presidency] esc_P | pos= os=118
+[Q] esc_Q | pos= os=17
 [about] a b o u t _spc_ | pos= os=59
 [shtroizel] s | pos= os=132
+[spot] s | pos= os=70
