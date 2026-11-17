@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.16.3)
 #     generator  scripts/generate_code.py and src/tree.cpp, with no data read
 #     reader0    the stage 0 data reader, on small fixture data
 #     full_data  the stage 0 data reader on all of data_reader/data (about 45 s; -LE full_data skips it)
+#     mini_build build_and_install.py on the fixture data, then the library it installs (about 4 minutes;
+#                build_and_install.py runs every label but this one before its stage 0 data reader)
 #
 # reader0_* tests compare what the reader keeps with test/fixtures/reader0/expected; after a deliberate
 # change, UPDATE_EXPECTED=1 ctest -R reader0_ rewrites those files (review the diff)

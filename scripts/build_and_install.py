@@ -56,7 +56,8 @@ def usage():
     print('                                    * adds \'_q\' suffix to library name in install_dir\n')
     print('    -d, --debug                   debug build\n')
     print('    -s, --skip_tests              skip the tests run before the stage 0 data reader')
-    print('                                    * tests are in <matchmaker root>/test, built in Release\n')
+    print('                                    * tests are in <matchmaker root>/test, built in Release')
+    print('                                    * every label but mini_build, which is a whole build\n')
     print('    --data_dir=<dir>              data both data readers read instead of their own copies')
     print('                                    * same layout as the unpacked data_reader/data')
     print('                                    * for building from small test data\n')
@@ -85,7 +86,8 @@ def run_tests(matchmaker_root, test_build_dir, jobs, use_clang):
         if subprocess.run(cmd).returncode != 0:
             print('building the tests failed')
             return False
-    if subprocess.run(['ctest', '--output-on-failure', '-j' + jobs], cwd=test_build_dir).returncode != 0:
+    ctest_cmd = ['ctest', '--output-on-failure', '-j' + jobs, '-LE', 'mini_build']
+    if subprocess.run(ctest_cmd, cwd=test_build_dir).returncode != 0:
         print('\ntests failed (skip them with -s)')
         return False
     return True
