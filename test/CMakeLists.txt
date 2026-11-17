@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16.3)
 
 # matchmaker checks, labeled by the point in the build they check:
 #     generator  scripts/generate_code.py and src/tree.cpp, with no data read
+#     options    option parsing in the build scripts (-h comes last, so nothing is built)
 #     reader0    the stage 0 data reader, on small fixture data
 #     full_data  the stage 0 data reader on all of data_reader/data (about 45 s; -LE full_data skips it)
 #     mini_build build_and_install.py on the fixture data, then the library it installs (about 4 minutes;
@@ -220,6 +221,42 @@ add_test(
             ${CMAKE_CURRENT_BINARY_DIR}/reader0_full
 )
 set_tests_properties(reader0_full PROPERTIES LABELS full_data FIXTURES_REQUIRED full_data)
+
+
+
+# the build scripts take each long option that has a value in its --name=value form, and
+# build_and_install.py refuses options it doesn't have
+set(BUILD_AND_INSTALL ${MATCHMAKER_ROOT}/scripts/build_and_install.py)
+add_test(
+    NAME options_long_values
+    COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --jobs=2 --build_dir=b --install_dir=i --debug -h
+)
+add_test(
+    NAME options_long_values_stage_0
+    COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/data_reader/stage_0/scripts/build_and_install.py
+            --build_dir=b --install_dir=i --matchable_dir=m --jobs=2 -h
+)
+add_test(
+    NAME options_long_values_stage_1
+    COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/data_reader/stage_1/scripts/build_and_install.py
+            --build_dir=b --install_dir=i --matchable_dir=m --stage_0_dir=s --jobs=2 -h
+)
+add_test(NAME options_refuse_m COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} -m -h)
+add_test(
+    NAME options_refuse_memory_usage_limit
+    COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --memory_usage_limit -h
+)
+set_tests_properties(options_long_values options_long_values_stage_0 options_long_values_stage_1
+    PROPERTIES LABELS options
+)
+set_tests_properties(options_refuse_m PROPERTIES
+    LABELS options
+    PASS_REGULAR_EXPRESSION "^option -m not recognized"
+)
+set_tests_properties(options_refuse_memory_usage_limit PROPERTIES
+    LABELS options
+    PASS_REGULAR_EXPRESSION "^option --memory_usage_limit not recognized"
+)
 
 
 

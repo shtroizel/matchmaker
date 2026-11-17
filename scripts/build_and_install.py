@@ -32,7 +32,7 @@ def usage():
     print('                                    * skips building of matchable')
     print('                                    * skips building and running of data readers\n')
     print('    -f  --force_stage_1           force stage 1 complete rebuild even when incremental')
-    print('                                    * incremental as having -r, -l, or -m options\n')
+    print('                                    * incremental as having -r or -l options\n')
     print('    -j  --jobs                    max jobs')
     print('                                    * default is cpu count [' +                                 \
             str(multiprocessing.cpu_count()) + ']\n')
@@ -513,9 +513,9 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crlmfj:aql:ds',
-                ['help', 'build_dir', 'install_dir', 'clang', 'retain', 'retain_leaves',
-                 'force_stage_1', 'jobs', 'atomic_libs', 'q', 'memory_usage_limit',
+        opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crlfj:aqds',
+                ['help', 'build_dir=', 'install_dir=', 'clang', 'retain', 'retain_leaves',
+                 'force_stage_1', 'jobs=', 'atomic_libs', 'q',
                  'debug', 'dictionary=', 'books=', 'skip_tests', 'data_dir='])
     except getopt.GetoptError as err:
         print(err)
@@ -563,7 +563,7 @@ def main():
             dictionary = a
         elif o == '--books':
             books = a
-        elif o in ('-d, --debug'):
+        elif o in ('-d', '--debug'):
             debug = True
         elif o in ('-s', '--skip_tests'):
             skip_tests = True

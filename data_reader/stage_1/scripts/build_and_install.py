@@ -97,7 +97,7 @@ def build_and_install(build_dir, install_dir, matchable_dir, stage_0_dir, use_cl
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:m:s:dj:',
-                ['help', 'clang', 'build_dir', 'install_dir', 'matchable_dir', 'stage_0_dir', 'debug',
+                ['help', 'clang', 'build_dir=', 'install_dir=', 'matchable_dir=', 'stage_0_dir=', 'debug',
                  'jobs='])
     except getopt.GetoptError as err:
         print(err)
