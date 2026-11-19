@@ -21,7 +21,7 @@ if ("${matchmaker_folder_name}" STREQUAL "matchmaker_q")
 endif()
 
 message(STATUS "matchable_DIR: ${matchable_DIR}")
-find_package(matchable 14.0.0 REQUIRED)
+find_package(matchable 15.0.0 REQUIRED)
 include_directories(
     ${matchable_DIR}/../../../include
     ${PROJECT_SOURCE_DIR}/../common
