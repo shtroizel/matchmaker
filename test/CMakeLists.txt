@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.16.3)
 # matchmaker checks, labeled by the point in the build they check:
 #     generator  scripts/generate_code.py and src/tree.cpp, with no data read
 #     options    option parsing in the build scripts (-h comes last, so nothing is built)
+#     time_compiles  scripts/time_compile.py, the launcher build_and_install.py --time_compiles runs
+#                each compile through
 #     reader0    the stage 0 data reader, on small fixture data
 #     full_data  the stage 0 data reader on all of data_reader/data (about 45 s; -LE full_data skips it)
 #     mini_build build_and_install.py on the fixture data, then the library it installs (about 4 minutes;
@@ -229,7 +231,8 @@ set_tests_properties(reader0_full PROPERTIES LABELS full_data FIXTURES_REQUIRED 
 set(BUILD_AND_INSTALL ${MATCHMAKER_ROOT}/scripts/build_and_install.py)
 add_test(
     NAME options_long_values
-    COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --jobs=2 --build_dir=b --install_dir=i --debug -h
+    COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --jobs=2 --build_dir=b --install_dir=i --debug
+            --time_compiles=t -h
 )
 add_test(
     NAME options_long_values_stage_0
@@ -242,6 +245,23 @@ add_test(
             --build_dir=b --install_dir=i --matchable_dir=m --stage_0_dir=s --jobs=2 -h
 )
 add_test(NAME options_refuse_m COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} -m -h)
+add_test(
+    NAME options_time_compiles_needs_file
+    COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --time_compiles
+)
+set_tests_properties(options_time_compiles_needs_file PROPERTIES
+    LABELS options
+    PASS_REGULAR_EXPRESSION "^option --time_compiles requires argument"
+)
+
+# time_compiles: scripts/time_compile.py, the compiler launcher behind build_and_install.py --time_compiles
+add_test(
+    NAME time_compile
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/time_compile_check.py
+            ${MATCHMAKER_ROOT}/scripts/time_compile.py ${CMAKE_CXX_COMPILER}
+            ${CMAKE_CURRENT_BINARY_DIR}/time_compile
+)
+set_tests_properties(time_compile PROPERTIES LABELS time_compiles)
 add_test(
     NAME options_refuse_memory_usage_limit
     COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --memory_usage_limit -h
@@ -262,19 +282,34 @@ set_tests_properties(options_refuse_memory_usage_limit PROPERTIES
 
 # mini_build: the whole matchmaker build (build_and_install.py, both stages, without these tests) from the
 # fixture data, about 4 minutes; mini_library checks the library it installs and compares a dump of it with
-# expected/mini_library.txt
+# expected/mini_library.txt; mini_build_compiles checks the --time_compiles log it writes
 set(MINI_BUILD ${CMAKE_CURRENT_BINARY_DIR}/mini_build)
+set(MINI_BUILD_COMPILES ${CMAKE_CURRENT_BINARY_DIR}/mini_build_compiles.txt)
 include(ProcessorCount)
 ProcessorCount(MINI_BUILD_JOBS)
 if (MINI_BUILD_JOBS EQUAL 0)
     set(MINI_BUILD_JOBS 1)
 endif()
+add_test(NAME mini_build_compiles_clear COMMAND ${CMAKE_COMMAND} -E rm -f ${MINI_BUILD_COMPILES})
+set_tests_properties(mini_build_compiles_clear PROPERTIES LABELS mini_build FIXTURES_SETUP mini_build_start)
 add_test(
     NAME mini_build
     COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -j ${MINI_BUILD_JOBS}
             --data_dir=${READER0_DATA} -b ${MINI_BUILD}/build -i ${MINI_BUILD}/install
+            --time_compiles=${MINI_BUILD_COMPILES}
 )
-set_tests_properties(mini_build PROPERTIES LABELS mini_build FIXTURES_SETUP mini_library TIMEOUT 3600)
+set_tests_properties(mini_build PROPERTIES
+    LABELS mini_build
+    FIXTURES_REQUIRED mini_build_start
+    FIXTURES_SETUP mini_library
+    TIMEOUT 3600
+)
+add_test(
+    NAME mini_build_compiles
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_build_compiles_check.py
+            ${MINI_BUILD_COMPILES} ${MINI_BUILD}/build
+)
+set_tests_properties(mini_build_compiles PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_library)
 
 add_executable(mini_library_check mini_library_check.cpp)
 target_compile_options(mini_library_check PRIVATE -Wall -Werror -Wextra)

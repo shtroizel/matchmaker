@@ -61,6 +61,10 @@ def usage():
     print('    --data_dir=<dir>              data both data readers read instead of their own copies')
     print('                                    * same layout as the unpacked data_reader/data')
     print('                                    * for building from small test data\n')
+    print('    --time_compiles=<file>        append "<seconds> <peak RSS KB> <source>" to file per compile')
+    print('                                    * covers matchable, the data readers and both stages')
+    print('                                    * applies to build directories configured with it')
+    print('                                    * Linux and macOS\n')
 
 
 
@@ -516,7 +520,7 @@ def main():
         opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crlfj:aqds',
                 ['help', 'build_dir=', 'install_dir=', 'clang', 'retain', 'retain_leaves',
                  'force_stage_1', 'jobs=', 'atomic_libs', 'q',
-                 'debug', 'dictionary=', 'books=', 'skip_tests', 'data_dir='])
+                 'debug', 'dictionary=', 'books=', 'skip_tests', 'data_dir=', 'time_compiles='])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -536,6 +540,7 @@ def main():
     books = None
     skip_tests = False
     data_dir = None
+    time_compiles = None
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -569,6 +574,8 @@ def main():
             skip_tests = True
         elif o == '--data_dir':
             data_dir = os.path.abspath(a)
+        elif o == '--time_compiles':
+            time_compiles = os.path.abspath(a)
         else:
             assert False, "unhandled option"
 
@@ -593,6 +600,14 @@ def main():
         sys.exit(2)
     if books is None:
         books = 'Crumbs' if q else 'all'
+
+    if time_compiles is not None:
+        if os.name == 'nt':
+            print('--time_compiles works on Linux and macOS')
+            sys.exit(2)
+        launcher = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'time_compile.py')
+        os.environ['CMAKE_CXX_COMPILER_LAUNCHER'] = ';'.join([sys.executable, launcher, time_compiles])
+        print('timing each compile into ' + time_compiles)
 
     build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs, build_dir,
                       install_dir, atomic_libs, q, debug, dictionary, books, skip_tests, data_dir)
