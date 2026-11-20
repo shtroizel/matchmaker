@@ -7,6 +7,13 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
 
 ## [Unreleased]
 
+### Added
+- `-e` (`--export`) in build_and_install.py exports every symbol and installs a type header per leaf in
+  `include/matchmaker/leaf_types/`, so units of words compiled with MATCHABLE_UNLOADABLE can be loaded and
+  unloaded at run time. Programs start slower with it
+- mini_export and mini_export_units tests (Linux): a mini build with `-e`, then two units loaded, unloaded
+  and swapped on top of it
+
 ### Changed
 - Requires matchable 15.1.0
 

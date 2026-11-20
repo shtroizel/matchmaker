@@ -17,6 +17,7 @@ endif()
 option(ATOMIC_LIBS "builds a library for every prefix" OFF)
 option(q "suffix lib & inc destination with _q" OFF)
 option(STAGE0 "build stage 0" OFF)
+option(EXPORT_ALL "export every symbol and install a type header per leaf, for loading units of words" OFF)
 
 set(LEAFLIB_COUNT 16)
 
@@ -43,7 +44,9 @@ include_directories(${matchable_DIR}/../../../include)
 
 set(mm_exports_map ${MATCHMAKER_ROOT}/workspace_common/mm_exports.map)
 macro(export_mm_only target)
-    target_link_options(${target} PRIVATE -Wl,--version-script=${mm_exports_map})
+    if(NOT EXPORT_ALL)
+        target_link_options(${target} PRIVATE -Wl,--version-script=${mm_exports_map})
+    endif()
     set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS ${mm_exports_map})
 endmacro()
 
@@ -140,6 +143,34 @@ install(
     DESTINATION ${inc_destination}
     FILES_MATCHING PATTERN "*.h"
 )
+
+
+
+
+# with EXPORT_ALL, a header per leaf holding only its type, without words or values, for units of words to
+# compile against: leaf_types/<path>.h mirrors generated_matchables/<path>.h
+if(EXPORT_ALL)
+    set(generated_matchables ${CMAKE_CURRENT_SOURCE_DIR}/generated_include/matchmaker/generated_matchables)
+    set(leaf_types ${CMAKE_CURRENT_BINARY_DIR}/leaf_types)
+    file(REMOVE_RECURSE ${leaf_types})
+    file(GLOB_RECURSE leaf_headers RELATIVE ${generated_matchables} ${generated_matchables}/*.h)
+    foreach(leaf_header ${leaf_headers})
+        get_filename_component(prefix ${leaf_header} NAME_WE)
+        file(READ ${generated_matchables}/${leaf_header} head LIMIT 65536)
+        string(FIND "${head}" "\nPROPERTYx" begin)
+        string(FIND "${head}" ", word_${prefix}" end)
+        if(begin EQUAL -1 OR end EQUAL -1 OR end LESS begin)
+            message(FATAL_ERROR "no declaration of word_${prefix} in ${leaf_header}")
+        endif()
+        math(EXPR begin "${begin} + 1")
+        string(LENGTH ", word_${prefix}" name_length)
+        math(EXPR length "${end} + ${name_length} - ${begin}")
+        string(SUBSTRING "${head}" ${begin} ${length} declaration)
+        file(WRITE ${leaf_types}/${leaf_header}
+            "#pragma once\n#include <matchable/matchable.h>\n\n${declaration})\n")
+    endforeach()
+    install(DIRECTORY ${leaf_types}/ DESTINATION ${inc_destination}/leaf_types)
+endif()
 
 
 

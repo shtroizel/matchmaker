@@ -7,8 +7,9 @@ cmake_minimum_required(VERSION 3.16.3)
 #                each compile through
 #     reader0    the stage 0 data reader, on small fixture data
 #     full_data  the stage 0 data reader on all of data_reader/data (about 45 s; -LE full_data skips it)
-#     mini_build build_and_install.py on the fixture data, then the library it installs (about 4 minutes;
-#                build_and_install.py runs every label but this one before its stage 0 data reader)
+#     mini_build build_and_install.py on the fixture data, then the library it installs, and again with -e,
+#                then units of words loaded on top (about 7 minutes; build_and_install.py runs every label
+#                but this one before its stage 0 data reader)
 #
 # reader0_* tests compare what the reader keeps with test/fixtures/reader0/expected; after a deliberate
 # change, UPDATE_EXPECTED=1 ctest -R reader0_ rewrites those files (review the diff)
@@ -321,3 +322,27 @@ add_test(
             $<TARGET_FILE:mini_library_check> ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
 )
 set_tests_properties(mini_library PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_library)
+
+# mini_export: the same build with -e, which exports every symbol and installs a type header per leaf;
+# mini_export_units builds two units of words against that install and loads, unloads and swaps them
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(MINI_EXPORT ${CMAKE_CURRENT_BINARY_DIR}/mini_export)
+    # the units are compiled with this compiler, so the library is too
+    set(MINI_EXPORT_CLANG "")
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        set(MINI_EXPORT_CLANG -c)
+    endif()
+    add_test(
+        NAME mini_export
+        COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -e
+                ${MINI_EXPORT_CLANG} -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA}
+                -b ${MINI_EXPORT}/build -i ${MINI_EXPORT}/install
+    )
+    set_tests_properties(mini_export PROPERTIES LABELS mini_build FIXTURES_SETUP mini_export TIMEOUT 3600)
+    add_test(
+        NAME mini_export_units
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_export_check.py ${CMAKE_CXX_COMPILER}
+                ${CMAKE_CXX_COMPILER_ID} ${MINI_EXPORT}/install ${MINI_EXPORT}/units
+    )
+    set_tests_properties(mini_export_units PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_export)
+endif()

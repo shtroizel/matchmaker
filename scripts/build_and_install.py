@@ -55,6 +55,10 @@ def usage():
     print('                                    * adds \'_q\' suffix to build_dir')
     print('                                    * adds \'_q\' suffix to library name in install_dir\n')
     print('    -d, --debug                   debug build\n')
+    print('    -e, --export                  export every symbol, for loading units of words at run time')
+    print('                                    * units are compiled with MATCHABLE_UNLOADABLE against the')
+    print('                                      type header installed per leaf in leaf_types/')
+    print('                                    * programs start slower and the link needs more memory\n')
     print('    -s, --skip_tests              skip the tests run before the stage 0 data reader')
     print('                                    * tests are in <matchmaker root>/test, built in Release')
     print('                                    * every label but mini_build, which is a whole build\n')
@@ -100,7 +104,7 @@ def run_tests(matchmaker_root, test_build_dir, jobs, use_clang):
 
 def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
                       build_dir, install_dir, atomic_libs, q, debug, dictionary, books, skip_tests,
-                      data_dir):
+                      data_dir, export):
 
     start_dir = os.getcwd()
 
@@ -482,6 +486,8 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
     if atomic_libs:
         cmake_cmd.append('-DATOMIC_LIBS=ON')
 
+    cmake_cmd.append('-DEXPORT_ALL=' + ('ON' if export else 'OFF'))
+
     if use_clang:
         clang_c = which('clang')
         clang_cxx = which('clang++')
@@ -517,10 +523,10 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crlfj:aqds',
+        opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crlfj:aqdes',
                 ['help', 'build_dir=', 'install_dir=', 'clang', 'retain', 'retain_leaves',
                  'force_stage_1', 'jobs=', 'atomic_libs', 'q',
-                 'debug', 'dictionary=', 'books=', 'skip_tests', 'data_dir=', 'time_compiles='])
+                 'debug', 'export', 'dictionary=', 'books=', 'skip_tests', 'data_dir=', 'time_compiles='])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -536,6 +542,7 @@ def main():
     atomic_libs = False
     q = False
     debug = False
+    export = False
     dictionary = None
     books = None
     skip_tests = False
@@ -570,6 +577,8 @@ def main():
             books = a
         elif o in ('-d', '--debug'):
             debug = True
+        elif o in ('-e', '--export'):
+            export = True
         elif o in ('-s', '--skip_tests'):
             skip_tests = True
         elif o == '--data_dir':
@@ -610,7 +619,7 @@ def main():
         print('timing each compile into ' + time_compiles)
 
     build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs, build_dir,
-                      install_dir, atomic_libs, q, debug, dictionary, books, skip_tests, data_dir)
+                      install_dir, atomic_libs, q, debug, dictionary, books, skip_tests, data_dir, export)
 
     exit(0)
 

@@ -95,6 +95,20 @@ scripts/build_and_install.py
 scripts/build_and_install.py -b build_2020-12-08 -i ../install_2020-12-08
 ```
 
+### example: loading units of words at run time
+```
+scripts/build_and_install.py -e
+```
+`-e` exports every symbol and installs a header per leaf holding only its type, under
+`include/matchmaker/leaf_types/`. A unit of words grows a leaf with GROW_MATCHABLE and is compiled with:
+* `-DMATCHABLE_UNLOADABLE -DMATCHABLE_OMIT_BY_INDEX -fPIC -shared` and the leaf's type header
+* `-fno-gnu-unique` with GCC, so dlclose unloads it
+* the same compiler the library was built with
+
+The program that loads units links matchmaker and exports its own symbols (`-rdynamic`), so the library,
+the program and every unit share one copy of each leaf. Unloading a unit removes its words. Programs start
+slower with `-e`. Example: test/mini_export/
+
 ## using matchmaker in your cmake project
 just use find_package() like completable does:<br>
 https://github.com/shtroizel/completable/blob/master/CMakeLists.txt <br>
