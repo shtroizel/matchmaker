@@ -20,7 +20,7 @@ def usage():
     print('    -i  --install_dir             install directory')
     print('                                    * default is <matchmaker root>/install')
     print('                                    * relative paths are relative to <build_dir>\n')
-    print('    -c  --clang                   force use of clang compiler (clang build currently broken!)')
+    print('    -c  --clang                   build with clang')
     print('                                    * use system compiler by default\n')
     print('    -r  --retain                  retain previous build')
     print('                                    * continuation/incremental building')
