@@ -7,6 +7,9 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
 
 ## [Unreleased]
 
+### Changed
+- Requires matchable 15.1.0
+
 ### Fixed
 - The `--clang` help no longer says the clang build is broken; it builds and passes the mini build checks
 
