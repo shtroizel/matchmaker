@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.16.3)
 #     options    option parsing in the build scripts (-h comes last, so nothing is built)
 #     time_compiles  scripts/time_compile.py, the launcher build_and_install.py --time_compiles runs
 #                each compile through
+#     link       workspace_common's link pool estimate and the library size check
 #     reader0    the stage 0 data reader, on small fixture data
 #     full_data  the stage 0 data reader on all of data_reader/data (about 45 s; -LE full_data skips it)
 #     mini_build build_and_install.py on the fixture data, then the library it installs, and again with -e,
@@ -254,6 +255,30 @@ set_tests_properties(options_time_compiles_needs_file PROPERTIES
     LABELS options
     PASS_REGULAR_EXPRESSION "^option --time_compiles requires argument"
 )
+
+# link: the pool that keeps leaf library links within the machine's memory, and the warning for a
+# library whose loaded sections grow too large
+add_test(
+    NAME link_pool
+    COMMAND ${CMAKE_COMMAND} -DMATCHMAKER_ROOT=${MATCHMAKER_ROOT}
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/link_pool_check.cmake
+)
+find_program(SIZE_TOOL NAMES size llvm-size)
+add_test(
+    NAME link_size_warns
+    COMMAND ${CMAKE_COMMAND} -DLIB=$<TARGET_FILE:sparse_leaf_list> -DLIMIT=1 -DSIZE=${SIZE_TOOL}
+            -P ${MATCHMAKER_ROOT}/workspace_common/check_lib_size.cmake
+)
+add_test(
+    NAME link_size_quiet
+    COMMAND ${CMAKE_COMMAND} -DLIB=$<TARGET_FILE:sparse_leaf_list> -DLIMIT=1000000000 -DSIZE=${SIZE_TOOL}
+            -P ${MATCHMAKER_ROOT}/workspace_common/check_lib_size.cmake
+)
+set_tests_properties(link_pool link_size_warns link_size_quiet PROPERTIES LABELS link)
+set_tests_properties(link_size_warns PROPERTIES
+    PASS_REGULAR_EXPRESSION "sparse_leaf_list loads [0-9]+ bytes"
+)
+set_tests_properties(link_size_quiet PROPERTIES FAIL_REGULAR_EXPRESSION "loads")
 
 # time_compiles: scripts/time_compile.py, the compiler launcher behind build_and_install.py --time_compiles
 add_test(

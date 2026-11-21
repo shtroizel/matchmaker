@@ -19,7 +19,7 @@ option(q "suffix lib & inc destination with _q" OFF)
 option(STAGE0 "build stage 0" OFF)
 option(EXPORT_ALL "export every symbol and install a type header per leaf, for loading units of words" OFF)
 
-set(LEAFLIB_COUNT 16)
+set(LEAFLIB_COUNT 4)
 
 set(CMAKE_INSTALL_RPATH "$\{ORIGIN\}")
 
@@ -50,9 +50,51 @@ macro(export_mm_only target)
     set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS ${mm_exports_map})
 endmacro()
 
+set(use_gold OFF)
+if(NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "sparc64")
+    find_program(ld_gold ld.gold)
+    if(NOT "${ld_gold}" STREQUAL "ld_gold-NOTFOUND")
+        set(use_gold ON)
+    endif()
+endif()
+find_program(size_tool NAMES size llvm-size)
+set(lib_size_limit 1610612736)
+macro(finish_link target)
+    if(use_gold)
+        target_link_options(${target} PRIVATE -fuse-ld=gold)
+    endif()
+    if(size_tool)
+        add_custom_command(TARGET ${target} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -DLIB=$<TARGET_FILE:${target}> -DLIMIT=${lib_size_limit}
+                    -DSIZE=${size_tool} -P ${MATCHMAKER_ROOT}/workspace_common/check_lib_size.cmake
+            VERBATIM
+        )
+    endif()
+endmacro()
+
+include(${MATCHMAKER_ROOT}/workspace_common/link_pool.cmake)
+set(generated_matchables ${CMAKE_CURRENT_SOURCE_DIR}/generated_include/matchmaker/generated_matchables)
+file(GLOB_RECURSE leaf_headers ${generated_matchables}/*.h)
+foreach(leaf_header ${leaf_headers})
+    get_filename_component(prefix ${leaf_header} NAME_WE)
+    file(SIZE ${leaf_header} header_bytes_${prefix})
+endforeach()
+set(largest_link_mib 0)
+
 set(lib_list)
 macro(add_lib_finalization lib_name)
     list(APPEND lib_list matchmaker_${lib_name})
+    set(lib_header_bytes 0)
+    foreach(prefix ${ARGN})
+        if(DEFINED header_bytes_${prefix})
+            math(EXPR lib_header_bytes "${lib_header_bytes} + ${header_bytes_${prefix}}")
+        endif()
+    endforeach()
+    mm_link_estimate_mib(lib_link_mib ${lib_header_bytes} ${use_gold})
+    if(lib_link_mib GREATER largest_link_mib)
+        set(largest_link_mib ${lib_link_mib})
+    endif()
+    finish_link(matchmaker_${lib_name})
     target_include_directories(
         matchmaker_${lib_name}
         PRIVATE
@@ -87,7 +129,7 @@ list(PREPEND matchmaker_srcs ${MATCHMAKER_ROOT}/src/matchmaker.cpp ${MATCHMAKER_
 if(ATOMIC_LIBS)
     foreach(prefix ${prefix_list})
         add_library(matchmaker_${prefix} SHARED "generated_src/${prefix}.cpp")
-        add_lib_finalization(${prefix})
+        add_lib_finalization(${prefix} ${prefix})
     endforeach()
 else()
     # deal out prefixes
@@ -108,7 +150,7 @@ else()
             list(APPEND cur_sources "generated_src/${prefix}.cpp")
         endforeach()
         add_library(matchmaker_${index} SHARED ${cur_sources})
-        add_lib_finalization(${index})
+        add_lib_finalization(${index} ${leaflib_${index}})
         math(EXPR index "${index} + 1")
     endwhile()
 endif()
@@ -127,12 +169,25 @@ foreach(lib ${lib_list})
     target_link_libraries(matchmaker ${lib})
 endforeach()
 export_mm_only(matchmaker)
-if(NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "sparc64")
-    find_program(ld_gold ld.gold)
-    if(NOT "${ld_gold}" STREQUAL "ld_gold-NOTFOUND")
-        target_link_options(matchmaker PUBLIC -fuse-ld=gold)
-    endif()
+finish_link(matchmaker)
+
+cmake_host_system_information(RESULT total_mib QUERY TOTAL_PHYSICAL_MEMORY)
+mm_link_pool_depth(link_depth ${total_mib} ${largest_link_mib})
+set_property(GLOBAL APPEND PROPERTY JOB_POOLS mm_link=${link_depth})
+set_property(TARGET matchmaker ${lib_list} PROPERTY JOB_POOL_LINK mm_link)
+list(LENGTH lib_list leaf_lib_count)
+message(STATUS "links: ${link_depth} at a time, the largest needs about ${largest_link_mib} MiB "
+               "(${total_mib} MiB of memory)")
+mm_link_fits(link_fits ${total_mib} ${largest_link_mib})
+if(NOT link_fits)
+    message(WARNING "linking the largest leaf library needs about ${largest_link_mib} MiB, more than half "
+                    "of this machine's ${total_mib} MiB")
 endif()
+if(NOT CMAKE_GENERATOR MATCHES "Ninja" AND link_depth LESS leaf_lib_count)
+    message(WARNING "only Ninja limits how many links run at once (${link_depth} fit in memory here); "
+                    "with ${CMAKE_GENERATOR}, -j decides")
+endif()
+
 install(
     TARGETS matchmaker
     DESTINATION ${lib_destination}
