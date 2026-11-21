@@ -76,12 +76,21 @@ BOOKS = ['Crumbs']
 
 
 
+# Ninja limits how many leaf libraries link at once; a build directory keeps the generator it was made with
+def generator_args(build_dir):
+    if os.path.exists(os.path.join(build_dir, 'CMakeCache.txt')):
+        return []
+    if os.name == 'nt' or which('ninja') is not None:
+        return ['-G', 'Ninja']
+    return []
+
+
+
 def run_tests(matchmaker_root, test_build_dir, jobs, use_clang):
     print('\n\nbuild and run the matchmaker tests:\n\n')
     cmake_cmd = ['cmake', '-S', matchmaker_root + 'test', '-B', test_build_dir,
                  '-DCMAKE_BUILD_TYPE=Release']
-    if os.name == 'nt':
-        cmake_cmd.append('-G Ninja')
+    cmake_cmd += generator_args(test_build_dir)
     if use_clang:
         clang_c = which('clang')
         clang_cxx = which('clang++')
@@ -323,9 +332,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
     print('\n\nbegin first stage matchmaker build - this will take a while...\n\n')
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + stage_0_install_prefix]
-
-    if os.name == 'nt':
-        cmake_cmd.append('-G Ninja')
+    cmake_cmd += generator_args('.')
 
     if debug:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
@@ -358,8 +365,8 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
         os.chdir(start_dir)
         exit(1)
 
-    if subprocess.run(['make', '-j' + jobs, 'install']).returncode != 0:
-        print('make failed')
+    if subprocess.run(['cmake', '--build', '.', '-j', jobs, '--target', 'install']).returncode != 0:
+        print('build failed')
         os.chdir(start_dir)
         exit(1)
 
@@ -469,9 +476,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
     os.chdir(build_dir)
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + abs_install_dir]
-
-    if os.name == 'nt':
-        cmake_cmd.append('-G Ninja')
+    cmake_cmd += generator_args('.')
 
     if debug:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
@@ -505,15 +510,15 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
         os.chdir(start_dir)
         exit(1)
 
-    if subprocess.run(['make', '-j' + jobs]).returncode != 0:
-        print('make failed')
+    if subprocess.run(['cmake', '--build', '.', '-j', jobs]).returncode != 0:
+        print('build failed')
         os.chdir(start_dir)
         exit(1)
 
-    if subprocess.run(['make', '-j' + jobs, 'install']).returncode != 0:
-        print('make install failed, trying sudo make install...')
-        if subprocess.run(['sudo', 'make', '-j' + jobs, 'install']).returncode != 0:
-            print('sudo make install failed')
+    if subprocess.run(['cmake', '--install', '.']).returncode != 0:
+        print('install failed, trying sudo cmake --install ...')
+        if subprocess.run(['sudo', 'cmake', '--install', '.']).returncode != 0:
+            print('sudo cmake --install failed')
             os.chdir(start_dir)
             exit(1)
 

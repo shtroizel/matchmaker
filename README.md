@@ -42,6 +42,8 @@ https://github.com/shtroizel/matchmaker/blob/master/include/matchmaker/matchmake
 ## dependencies
 the matchmaker library relies only on standard C/C++ libraries for its implementation<br>
 for building however, matchmaker requires both cmake and python<br>
+with ninja installed, builds use it and link only as many leaf libraries at once as fit in half of the
+machine's memory (a complete build's links need about 10 GB each with gold, 14 GB without)<br>
 
 ## clone and initialize
 * remember to initialize submodules before building

@@ -13,9 +13,19 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   unloaded at run time. Programs start slower with it
 - mini_export and mini_export_units tests (Linux): a mini build with `-e`, then two units loaded, unloaded
   and swapped on top of it
+- Builds warn when a library's loaded sections pass 1.5 GiB, well before the 2 GiB that 32-bit offsets
+  reach, and when the largest leaf library's link needs more than half of the machine's memory
+- link tests: the link pool calculation and the library size warning
 
 ### Changed
 - Requires matchable 15.1.0
+- The leaves go into 4 libraries instead of 16 (`LEAFLIB_COUNT`); each holds about a quarter of a
+  complete build
+- Every library links with gold where it is available (except on sparc64), the leaf libraries too; gold is
+  no longer passed on to programs that link matchmaker
+- build_and_install.py builds with Ninja when it is installed, and Ninja links only as many leaf libraries
+  at once as fit in half of the machine's memory, estimated from the size of each library's generated
+  headers. A build directory keeps the generator it was made with
 
 ### Fixed
 - The `--clang` help no longer says the clang build is broken; it builds and passes the mini build checks
