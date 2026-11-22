@@ -429,6 +429,10 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
         if not retain_leaves or force_stage_1:
             print('building data reader for stage 1 ...\n\n')
 
+            # the stage 1 reader finds matchable in the final install's include directory, where an earlier
+            # build's matchmaker headers would shadow stage 0's; the final install writes them again
+            shutil.rmtree(abs_install_dir + '/include/matchmaker' + ('_q' if q else ''), ignore_errors=True)
+
             # build and install stage 1 data reader
             build_data_reader_cmd = ['data_reader/stage_1/scripts/build_and_install.py']
             build_data_reader_cmd.append('-j' + jobs)
