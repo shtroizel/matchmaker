@@ -5,12 +5,13 @@ cmake_minimum_required(VERSION 3.16.3)
 #     options    option parsing in the build scripts (-h comes last, so nothing is built)
 #     time_compiles  scripts/time_compile.py, the launcher build_and_install.py --time_compiles runs
 #                each compile through
-#     link       workspace_common's link pool estimate and the library size check
+#     link       workspace_common's linker choice, link pool estimate and library size check
 #     reader0    the stage 0 data reader, on small fixture data
 #     full_data  the stage 0 data reader on all of data_reader/data (about 45 s; -LE full_data skips it)
-#     mini_build build_and_install.py on the fixture data, then the library it installs, and again with -e,
-#                then units of words loaded on top (about 7 minutes; build_and_install.py runs every label
-#                but this one before its stage 0 data reader)
+#     mini_build build_and_install.py on the fixture data, then the library it installs, again with -e,
+#                then units of words loaded on top, and again with --linker=lld when the compiler can link
+#                with lld (about 10 minutes; build_and_install.py runs every label but this one before its
+#                stage 0 data reader)
 #
 # reader0_* tests compare what the reader keeps with test/fixtures/reader0/expected; after a deliberate
 # change, UPDATE_EXPECTED=1 ctest -R reader0_ rewrites those files (review the diff)
@@ -234,7 +235,7 @@ set(BUILD_AND_INSTALL ${MATCHMAKER_ROOT}/scripts/build_and_install.py)
 add_test(
     NAME options_long_values
     COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --jobs=2 --build_dir=b --install_dir=i --debug
-            --time_compiles=t -h
+            --time_compiles=t --linker=lld -h
 )
 add_test(
     NAME options_long_values_stage_0
@@ -256,8 +257,27 @@ set_tests_properties(options_time_compiles_needs_file PROPERTIES
     PASS_REGULAR_EXPRESSION "^option --time_compiles requires argument"
 )
 
-# link: the pool that keeps leaf library links within the machine's memory, and the warning for a
-# library whose loaded sections grow too large
+add_test(
+    NAME options_linker_needs_name
+    COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --linker
+)
+set_tests_properties(options_linker_needs_name PROPERTIES
+    LABELS options
+    PASS_REGULAR_EXPRESSION "^option --linker requires argument"
+)
+
+# link: the linker choice and the pool that keeps leaf library links within the machine's memory, a linker
+# the compiler can't use, and the warning for a library whose loaded sections grow too large
+add_test(
+    NAME link_refuses_unknown
+    COMMAND ${CMAKE_COMMAND} -S ${CMAKE_CURRENT_SOURCE_DIR}/linker_check
+            -B ${CMAKE_CURRENT_BINARY_DIR}/linker_check -DMATCHMAKER_ROOT=${MATCHMAKER_ROOT}
+            -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DMM_LINKER=no_such_linker
+)
+set_tests_properties(link_refuses_unknown PROPERTIES
+    LABELS link
+    PASS_REGULAR_EXPRESSION "can't link with -fuse-ld=no_such_linker \\(MM_LINKER\\)"
+)
 add_test(
     NAME link_pool
     COMMAND ${CMAKE_COMMAND} -DMATCHMAKER_ROOT=${MATCHMAKER_ROOT}
@@ -370,4 +390,41 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
                 ${CMAKE_CXX_COMPILER_ID} ${MINI_EXPORT}/install ${MINI_EXPORT}/units
     )
     set_tests_properties(mini_export_units PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_export)
+endif()
+
+# mini_lld: the same build with --linker=lld, when this compiler can link with lld; mini_lld_linker checks
+# that lld linked every library, and mini_lld_library that the library matches mini_library
+include(CheckCXXSourceCompiles)
+set(CMAKE_REQUIRED_LINK_OPTIONS -fuse-ld=lld)
+check_cxx_source_compiles("int main() { return 0; }" LINKS_WITH_LLD)
+unset(CMAKE_REQUIRED_LINK_OPTIONS)
+if (LINKS_WITH_LLD AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(MINI_LLD ${CMAKE_CURRENT_BINARY_DIR}/mini_lld)
+    set(MINI_LLD_CLANG "")
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        set(MINI_LLD_CLANG -c)
+    endif()
+    add_test(
+        NAME mini_lld
+        COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s --linker=lld
+                ${MINI_LLD_CLANG} -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA}
+                -b ${MINI_LLD}/build -i ${MINI_LLD}/install
+    )
+    set_tests_properties(mini_lld PROPERTIES LABELS mini_build FIXTURES_SETUP mini_lld TIMEOUT 3600)
+    add_test(
+        NAME mini_lld_linker
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/linker_comment_check.py LLD
+                ${MINI_LLD}/install/lib/matchmaker
+    )
+    add_test(
+        NAME mini_lld_library
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+                ${READER0_EXPECTED}/mini_library.txt
+                $<TARGET_FILE:mini_library_check> ${MINI_LLD}/install/lib/matchmaker/libmatchmaker.so
+    )
+    set_tests_properties(mini_lld_linker mini_lld_library PROPERTIES
+        LABELS mini_build FIXTURES_REQUIRED mini_lld
+    )
+else()
+    message(STATUS "mini_lld skipped: ${CMAKE_CXX_COMPILER} can't link with -fuse-ld=lld")
 endif()

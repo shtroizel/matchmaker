@@ -43,7 +43,10 @@ https://github.com/shtroizel/matchmaker/blob/master/include/matchmaker/matchmake
 the matchmaker library relies only on standard C/C++ libraries for its implementation<br>
 for building however, matchmaker requires both cmake and python<br>
 with ninja installed, builds use it and link only as many leaf libraries at once as fit in half of the
-machine's memory (a complete build's links need about 10 GB each with gold, 14 GB without)<br>
+machine's memory (a complete build's links need about 10 GB each with gold, 9 GB with lld, 7 GB with mold
+and 14 GB with GNU ld)<br>
+builds link with gold when it is installed; build_and_install.py --linker=lld (or mold, or default for the
+compiler's own) picks another<br>
 
 ## clone and initialize
 * remember to initialize submodules before building

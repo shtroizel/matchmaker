@@ -16,6 +16,12 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
 - Builds warn when a library's loaded sections pass 1.5 GiB, well before the 2 GiB that 32-bit offsets
   reach, and when the largest leaf library's link needs more than half of the machine's memory
 - link tests: the link pool calculation and the library size warning
+- `--linker=<linker>` in build_and_install.py (`MM_LINKER` in CMake) picks the linker for every library:
+  gold, lld, mold, `default` for the compiler's own, or another name the compiler takes as `-fuse-ld=`.
+  The configure stops when the compiler can't link with it. Without it, gold is used when installed
+- link_refuses_unknown and options_linker_needs_name tests, and mini_lld tests (when the compiler can
+  link with lld): a mini build with `--linker=lld`, checked for lld in every library and against
+  mini_library
 
 ### Changed
 - Requires matchable 15.1.0
@@ -25,7 +31,8 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   no longer passed on to programs that link matchmaker
 - build_and_install.py builds with Ninja when it is installed, and Ninja links only as many leaf libraries
   at once as fit in half of the machine's memory, estimated from the size of each library's generated
-  headers. A build directory keeps the generator it was made with
+  headers. A build directory keeps the generator it was made with. The estimate follows the linker: lld
+  and mold need less memory than gold
 
 ### Fixed
 - The `--clang` help no longer says the clang build is broken; it builds and passes the mini build checks

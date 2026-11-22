@@ -65,6 +65,11 @@ def usage():
     print('    --data_dir=<dir>              data both data readers read instead of their own copies')
     print('                                    * same layout as the unpacked data_reader/data')
     print('                                    * for building from small test data\n')
+    print('    --linker=<linker>             linker for the matchmaker libraries')
+    print('                                    * gold, lld, mold, or another name the compiler takes')
+    print('                                      as -fuse-ld=<linker>')
+    print('                                    * default: the compiler\'s own linker')
+    print('                                    * without it, gold when installed\n')
     print('    --time_compiles=<file>        append "<seconds> <peak RSS KB> <source>" to file per compile')
     print('                                    * covers matchable, the data readers and both stages')
     print('                                    * applies to build directories configured with it')
@@ -113,7 +118,7 @@ def run_tests(matchmaker_root, test_build_dir, jobs, use_clang):
 
 def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
                       build_dir, install_dir, atomic_libs, q, debug, dictionary, books, skip_tests,
-                      data_dir, export):
+                      data_dir, export, linker):
 
     start_dir = os.getcwd()
 
@@ -347,6 +352,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
         cmake_cmd.append('-DATOMIC_LIBS=ON')
 
     cmake_cmd.append('-DSTAGE0=ON')
+    cmake_cmd.append('-DMM_LINKER=' + linker)
 
     if use_clang:
         clang_c = which('clang')
@@ -492,6 +498,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
         cmake_cmd.append('-DATOMIC_LIBS=ON')
 
     cmake_cmd.append('-DEXPORT_ALL=' + ('ON' if export else 'OFF'))
+    cmake_cmd.append('-DMM_LINKER=' + linker)
 
     if use_clang:
         clang_c = which('clang')
@@ -531,7 +538,8 @@ def main():
         opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crlfj:aqdes',
                 ['help', 'build_dir=', 'install_dir=', 'clang', 'retain', 'retain_leaves',
                  'force_stage_1', 'jobs=', 'atomic_libs', 'q',
-                 'debug', 'export', 'dictionary=', 'books=', 'skip_tests', 'data_dir=', 'time_compiles='])
+                 'debug', 'export', 'dictionary=', 'books=', 'skip_tests', 'data_dir=', 'time_compiles=',
+                 'linker='])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -553,6 +561,7 @@ def main():
     skip_tests = False
     data_dir = None
     time_compiles = None
+    linker = ''
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -590,6 +599,8 @@ def main():
             data_dir = os.path.abspath(a)
         elif o == '--time_compiles':
             time_compiles = os.path.abspath(a)
+        elif o == '--linker':
+            linker = a
         else:
             assert False, "unhandled option"
 
@@ -624,7 +635,8 @@ def main():
         print('timing each compile into ' + time_compiles)
 
     build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs, build_dir,
-                      install_dir, atomic_libs, q, debug, dictionary, books, skip_tests, data_dir, export)
+                      install_dir, atomic_libs, q, debug, dictionary, books, skip_tests, data_dir, export,
+                      linker)
 
     exit(0)
 
