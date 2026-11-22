@@ -1,9 +1,41 @@
-# Linking a leaf library takes memory in proportion to its leaves' generated headers: about 125 times their
-# size with gold and 170 times with GNU ld (full build, 2026-11-21), so these ratios leave some margin
+# The linker for every library: the one asked for (MM_LINKER), else gold when it is installed (not on
+# sparc64), else the compiler's own. "default" asks for the compiler's own
+function(mm_choose_linker out requested gold_found processor)
+    if("${requested}" STREQUAL "default")
+        set(linker "")
+    elseif(NOT "${requested}" STREQUAL "")
+        set(linker ${requested})
+    elseif(gold_found AND NOT "${processor}" STREQUAL "sparc64")
+        set(linker gold)
+    else()
+        set(linker "")
+    endif()
+    set(${out} "${linker}" PARENT_SCOPE)
+endfunction()
 
-function(mm_link_estimate_mib out header_bytes gold)
-    if(gold)
+# stops the configure when the compiler can't link with the linker
+function(mm_check_linker linker)
+    if("${linker}" STREQUAL "")
+        return()
+    endif()
+    include(CheckCXXSourceCompiles)
+    set(CMAKE_REQUIRED_LINK_OPTIONS -fuse-ld=${linker})
+    check_cxx_source_compiles("int main() { return 0; }" mm_links_with_${linker})
+    if(NOT mm_links_with_${linker})
+        message(FATAL_ERROR "${CMAKE_CXX_COMPILER} can't link with -fuse-ld=${linker} (MM_LINKER)")
+    endif()
+endfunction()
+
+# Linking a leaf library takes memory in proportion to its leaves' generated headers: about 124 times their
+# size with gold, 110 with lld, 88 with mold and 170 with GNU ld (full build, 2026-11-21), so these ratios
+# leave some margin; a linker not measured gets GNU ld's
+function(mm_link_estimate_mib out header_bytes linker)
+    if("${linker}" STREQUAL "gold")
         set(ratio 130)
+    elseif("${linker}" STREQUAL "lld")
+        set(ratio 115)
+    elseif("${linker}" STREQUAL "mold")
+        set(ratio 95)
     else()
         set(ratio 180)
     endif()
