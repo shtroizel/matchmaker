@@ -210,7 +210,9 @@ install(
 
 
 # with EXPORT_ALL, a header per leaf holding only its type, without words or values, for units of words to
-# compile against: leaf_types/<path>.h mirrors generated_matchables/<path>.h
+# compile against: leaf_types/<name>/<name>.h mirrors generated_matchables/<name>/<name>.h, and
+# leaf_types/leaf_list names each leaf and its first word, in term order, so a unit can find the leaf a
+# word belongs in
 if(EXPORT_ALL)
     set(generated_matchables ${CMAKE_CURRENT_SOURCE_DIR}/generated_include/matchmaker/generated_matchables)
     set(leaf_types ${CMAKE_CURRENT_BINARY_DIR}/leaf_types)
@@ -232,6 +234,7 @@ if(EXPORT_ALL)
             "#pragma once\n#include <matchable/matchable.h>\n\n${declaration})\n")
     endforeach()
     install(DIRECTORY ${leaf_types}/ DESTINATION ${inc_destination}/leaf_types)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/leaf_list DESTINATION ${inc_destination}/leaf_types)
 endif()
 
 

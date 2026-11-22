@@ -48,6 +48,8 @@ namespace Stage0Data
     std::string & output_dir();
     std::string & parents_filename();
     std::string & leaves_filename();
+    // the most words in a leaf (leaf_cuts.h)
+    int & leaf_budget();
 
     dictionary_usage::Type & dictionary_mode();
     bool adds_words(SerialTask::Type task);

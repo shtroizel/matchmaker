@@ -1,9 +1,10 @@
 // reader0_fixture <data dir> <parent prefix file> <none|reduced|all> <work dir> <task>...
 // Runs the named stage 0 reader tasks ("reading 3202", ...) over a data directory, in the order
-// data_reader_stage_0 runs them, and prints each word kept, in term order, with its leaf and properties,
-// then each book vocabulary written. With the task "saving matchables" it also saves, as the reader does
-// last, and checks what was written against the words kept.
+// data_reader_stage_0 runs them, and prints each word kept, in term order, with the reader's bucket for
+// it while reading and its properties, then each book vocabulary written. With the task "saving
+// matchables" it also saves, as the reader does last, and checks what was written against the words kept.
 #include <algorithm>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -19,6 +20,7 @@
 #include <matchmaker/data_reader_common.h>
 #include <matchmaker/parts_of_speech.h>
 
+#include <leaf_cuts.h>
 #include <SerialTask.h>
 #include <Stage0Data.h>
 
@@ -162,75 +164,100 @@ namespace
     }
 
 
-    // checks what saving wrote against the words kept: one header per leaf with words, declaring exactly
-    // that leaf's words with exactly their property values, no other headers, and a leaf list naming each
-    // of those leaves once
+    // checks what saving wrote against the words kept: the kept words in term order, cut by leaf_cuts.h at
+    // the reader's budget, one header per leaf declaring exactly its words with exactly their property
+    // values, no other headers, and a leaf list naming each leaf and its first word, in order
     int check_saved(std::filesystem::path const & work)
     {
         int problems = 0;
-        size_t leaves = 0;
-        size_t words = 0;
         size_t values = 0;
-        std::set<std::string> expected_headers;
-        std::multiset<std::string> expected_leaves;
+
+        // every kept word, with its variant and its values
+        struct Kept
+        {
+            std::string term;
+            std::string variant;
+            std::map<std::pair<std::string, std::string>, std::string> values;
+        };
+        std::vector<Kept> all;
         Stage0Data::foreach_prefix(
             [&](Prefix & p)
             {
-                std::string const path = p.save_path(Stage0Data::output_dir());
-                expected_headers.insert(std::filesystem::path(path).lexically_normal().string());
-                expected_leaves.insert(p.escaped_and_delimited(' '));
-                std::vector<std::string> kept;
-                std::map<std::pair<std::string, std::string>, std::string> kept_values;
                 for (auto const & [name, m] : p.as_maker().matchables)
                     for (auto const & v : m->variants)
                     {
-                        kept.push_back(v.variant_name);
+                        Kept k{matchable::escapable::unescape_all(v.variant_name), v.variant_name, {}};
                         for (auto const & [property, value, values] : v.properties)
                         {
                             if (!value.empty())
-                                kept_values[{v.variant_name, property}] = value;
+                                k.values[{v.variant_name, property}] = value;
                             if (!values.empty())
                             {
                                 std::string joined;
                                 for (auto const & element : values)
                                     joined += (joined.empty() ? "" : ",") + element;
-                                kept_values[{v.variant_name, property + "[]"}] = joined;
+                                k.values[{v.variant_name, property + "[]"}] = joined;
                             }
                         }
+                        all.push_back(k);
                     }
-                SavedLeaf saved = read_saved(path, "word_" + p.escaped_and_delimited('_'));
-                std::sort(kept.begin(), kept.end());
-                std::sort(saved.variants.begin(), saved.variants.end());
-                if (kept.empty() || saved.variants != kept)
-                    saved.problems.push_back(std::to_string(kept.size()) + " words kept, " +
-                                             std::to_string(saved.variants.size()) + " variants saved");
-                if (saved.values != kept_values)
-                {
-                    size_t differ = 0;
-                    std::string first;
-                    for (auto const & [key, value] : kept_values)
-                    {
-                        auto const found = saved.values.find(key);
-                        if (found == saved.values.end() || found->second != value)
-                        {
-                            if (differ++ == 0)
-                                first = key.first + " " + key.second + " kept " + value + ", saved " +
-                                        (found == saved.values.end() ? "nothing" : found->second);
-                        }
-                    }
-                    for (auto const & [key, value] : saved.values)
-                        if (kept_values.count(key) == 0 && differ++ == 0)
-                            first = key.first + " " + key.second + " saved " + value + ", kept nothing";
-                    saved.problems.push_back(std::to_string(differ) + " values differ, first: " + first);
-                }
-                for (auto const & problem : saved.problems)
-                    std::cerr << path << ": " << problem << std::endl;
-                problems += saved.problems.size();
-                ++leaves;
-                words += kept.size();
-                values += kept_values.size();
             }
         );
+        std::sort(all.begin(), all.end(),
+                  [](Kept const & l, Kept const & r) { return matchable::str_lt_str(l.term, r.term); });
+        std::vector<std::string> terms;
+        for (auto const & k : all)
+            terms.push_back(k.term);
+        leaf_cuts::Rule const rule = leaf_cuts::rule(Stage0Data::leaf_budget());
+        std::vector<size_t> const starts = leaf_cuts::starts(terms, rule);
+
+        std::set<std::string> expected_headers;
+        std::vector<std::string> expected_list;
+        for (size_t l = 0; l < starts.size(); ++l)
+        {
+            size_t const leaf_end = l + 1 < starts.size() ? starts[l + 1] : all.size();
+            std::string const name = leaf_cuts::name(terms[starts[l]]);
+            std::string const path = Stage0Data::output_dir() + "/" + name + "/" + name + ".h";
+            expected_headers.insert(std::filesystem::path(path).lexically_normal().string());
+            expected_list.push_back(name + " " + terms[starts[l]]);
+
+            std::vector<std::string> kept;
+            std::map<std::pair<std::string, std::string>, std::string> kept_values;
+            for (size_t i = starts[l]; i < leaf_end; ++i)
+            {
+                kept.push_back(all[i].variant);
+                kept_values.insert(all[i].values.begin(), all[i].values.end());
+            }
+            SavedLeaf saved = read_saved(path, "word_" + name);
+            std::sort(kept.begin(), kept.end());
+            std::sort(saved.variants.begin(), saved.variants.end());
+            if (kept.empty() || saved.variants != kept)
+                saved.problems.push_back(std::to_string(kept.size()) + " words kept, " +
+                                         std::to_string(saved.variants.size()) + " variants saved");
+            if (saved.values != kept_values)
+            {
+                size_t differ = 0;
+                std::string first;
+                for (auto const & [key, value] : kept_values)
+                {
+                    auto const found = saved.values.find(key);
+                    if (found == saved.values.end() || found->second != value)
+                    {
+                        if (differ++ == 0)
+                            first = key.first + " " + key.second + " kept " + value + ", saved " +
+                                    (found == saved.values.end() ? "nothing" : found->second);
+                    }
+                }
+                for (auto const & [key, value] : saved.values)
+                    if (kept_values.count(key) == 0 && differ++ == 0)
+                        first = key.first + " " + key.second + " saved " + value + ", kept nothing";
+                saved.problems.push_back(std::to_string(differ) + " values differ, first: " + first);
+            }
+            for (auto const & problem : saved.problems)
+                std::cerr << path << ": " << problem << std::endl;
+            problems += saved.problems.size();
+            values += kept_values.size();
+        }
 
         std::set<std::string> headers;
         for (auto const & entry : std::filesystem::recursive_directory_iterator(work / "out"))
@@ -249,19 +276,19 @@ namespace
                 ++problems;
             }
 
-        std::multiset<std::string> listed;
-        std::ifstream leaf_list{work / "leaf_list"};
+        std::vector<std::string> listed;
+        std::ifstream leaf_list{work / "leaf_list", std::ios::binary};
         for (std::string line; std::getline(leaf_list, line);)
-            listed.insert(line);
-        if (listed != expected_leaves)
+            listed.push_back(line);
+        if (listed != expected_list)
         {
-            std::cerr << "leaf list: " << listed.size() << " lines, " << expected_leaves.size()
-                      << " leaves with words" << std::endl;
+            std::cerr << "leaf list: " << listed.size() << " lines, " << expected_list.size()
+                      << " leaves expected" << std::endl;
             ++problems;
         }
 
-        std::cout << "saved " << leaves << " leaves, " << words << " words, " << values << " values: "
-                  << (problems == 0 ? "ok" : "PROBLEMS") << "\n";
+        std::cout << "saved " << starts.size() << " leaves, " << all.size() << " words, " << values
+                  << " values: " << (problems == 0 ? "ok" : "PROBLEMS") << "\n";
         return problems;
     }
 }
@@ -288,6 +315,9 @@ int main(int argc, char ** argv)
     Stage0Data::book_vocab_dir() = (work / "book_vocabulary").string();
     Stage0Data::output_dir() = (work / "out").string();
     Stage0Data::leaves_filename() = (work / "leaf_list").string();
+    // LEAF_BUDGET, or a small budget so the fixture words fill several leaves
+    char const * const budget = std::getenv("LEAF_BUDGET");
+    Stage0Data::leaf_budget() = nullptr == budget ? 10 : std::atoi(budget);
     Stage0Data::dictionary_mode() = dictionary_usage::from_string(argv[3]);
     if (Stage0Data::dictionary_mode().is_nil())
     {

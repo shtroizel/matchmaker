@@ -1,9 +1,14 @@
 #include <save_matchables.h>
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <set>
+#include <utility>
+#include <vector>
 
+#include <leaf_cuts.h>
 #include <Prefix.h>
 #include <SerialTask.h>
 #include <Stage0Data.h>
@@ -26,37 +31,70 @@ void save_matchables(SerialTask::Type task)
             Stage0Data::add_word(s, word_attributes, task, pos);
     }
 
-    task.set_progress(0);
-    task.set_goal(Stage0Data::leaves().size());
-
-    // save save save
+    // every word kept, in term order; the reader's buckets all declare the same properties
+    std::vector<std::pair<std::string, matchable::MatchableVariant *>> words;
+    std::vector<std::pair<std::string, std::string>> property_types_and_names;
     Stage0Data::foreach_prefix(
-        [&task](Prefix & p)
+        [&](Prefix & p)
         {
-            ++task.as_mutable_progress();
-            std::string path = p.save_path(Stage0Data::output_dir());
-            std::filesystem::create_directories(std::filesystem::path(path).parent_path());
-            auto sa_status = p.as_mutable_maker().save_as(
-                path,
-                {matchable::save__content::matchables::grab()},
-                matchable::save__grow_mode::wrap::grab()
-            );
-            if (sa_status != matchable::save__status::success::grab())
+            for (auto & [name, m] : p.as_mutable_maker().matchables)
             {
-                std::cout << "failed to save prefix: '" << p.as_string() << "'\n"
-                          << "              to file: '" << p.save_path(Stage0Data::output_dir()) << "'\n"
-                          << "    with save__status: '" << sa_status << "'" << std::endl;
-                abort();
+                if (property_types_and_names.empty())
+                    property_types_and_names = m->property_types_and_names;
+                for (auto & v : m->variants)
+                    words.emplace_back(matchable::escapable::unescape_all(v.variant_name), &v);
             }
-            SerialTask::check_progress(task);
         }
     );
+    std::sort(words.begin(), words.end(),
+              [](auto const & l, auto const & r) { return matchable::str_lt_str(l.first, r.first); });
+    std::vector<std::string> terms;
+    terms.reserve(words.size());
+    for (auto const & w : words)
+        terms.push_back(w.first);
+    std::vector<size_t> const starts = leaf_cuts::starts(terms, leaf_cuts::rule(Stage0Data::leaf_budget()));
 
-    // the leaves with words, for generate_code.py
-    std::ofstream leaves_file{Stage0Data::leaves_filename()};
-    Stage0Data::foreach_prefix(
-        [&leaves_file](Prefix & p) { leaves_file << p.escaped_and_delimited(' ') << '\n'; }
-    );
+    task.set_progress(0);
+    task.set_goal(starts.size());
+
+    // one header per leaf, and the leaf list for generate_code.py: "<name> <first word>" per leaf
+    std::ofstream leaves_file{Stage0Data::leaves_filename(), std::ios::binary};
+    std::set<std::string> names;
+    for (size_t l = 0; l < starts.size(); ++l)
+    {
+        ++task.as_mutable_progress();
+        size_t const end = l + 1 < starts.size() ? starts[l + 1] : words.size();
+        std::string const name = leaf_cuts::name(terms[starts[l]]);
+        if (!names.insert(name).second)
+        {
+            std::cout << "two leaves are named " << name << ", the second starting at '" << terms[starts[l]]
+                      << "'" << std::endl;
+            abort();
+        }
+
+        matchable::MatchableMaker mm;
+        matchable::Matchable * m = mm.grab("word_" + name);
+        m->property_types_and_names = property_types_and_names;
+        for (size_t i = starts[l]; i < end; ++i)
+            m->variants.push_back(*words[i].second);
+
+        std::string const path = Stage0Data::output_dir() + "/" + name + "/" + name + ".h";
+        std::filesystem::create_directories(std::filesystem::path(path).parent_path());
+        auto sa_status = mm.save_as(
+            path,
+            {matchable::save__content::matchables::grab()},
+            matchable::save__grow_mode::wrap::grab()
+        );
+        if (sa_status != matchable::save__status::success::grab())
+        {
+            std::cout << "failed to save leaf: '" << name << "'\n"
+                      << "           to file: '" << path << "'\n"
+                      << " with save__status: '" << sa_status << "'" << std::endl;
+            abort();
+        }
+        leaves_file << name << ' ' << terms[starts[l]] << '\n';
+        SerialTask::check_progress(task);
+    }
     if (!leaves_file)
     {
         std::cout << "failed to write: '" << Stage0Data::leaves_filename() << "'" << std::endl;

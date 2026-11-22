@@ -1,6 +1,9 @@
 #include <tree.h>
 
 #include <algorithm>
+#include <cstring>
+
+#include <matchable/matchable.h>
 
 
 
@@ -53,28 +56,25 @@ namespace tree
         if (term.empty())
             return 0;
 
-        int node{0};
-        for (size_t depth = 0; ; ++depth)
+        // the last leaf whose first term is not after term, or the first leaf for terms before every leaf
+        int first = 0;
+        int count = leaf_count;
+        while (count > 0)
         {
-            // terms that end before reaching a leaf sort first, with space
-            unsigned char const byte = depth < term.size() ? (unsigned char) term[depth] : ' ';
-            int32_t const slot = parents[node][byte];
-            int const index = slot >> 2;
-            switch (slot & 3)
+            int const step = count / 2;
+            int const middle = first + step;
+            if (matchable::chars_lt_chars(term.data(), term.size(),
+                                          first_terms[middle], std::strlen(first_terms[middle])))
             {
-                case parent:
-                    node = index;
-                    break;
-
-                case leaf:
-                    return leaves[index].lookup(term, found) + offsets()[index];
-
-                case missing:
-                    return offsets()[index];
-
-                default:
-                    return 0;
+                count = step;
+            }
+            else
+            {
+                first = middle + 1;
+                count -= step + 1;
             }
         }
+        int const leaf = first == 0 ? 0 : first - 1;
+        return leaves[leaf].lookup(term, found) + offsets()[leaf];
     }
 }

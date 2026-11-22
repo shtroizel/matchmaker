@@ -1,0 +1,12 @@
+l00  
+l01 !
+l02 0
+l03 1a
+l04 A
+l05 Ab
+l06 Z
+l07 a
+l08 a b
+l09 ab
+l10 b~
+l11 z

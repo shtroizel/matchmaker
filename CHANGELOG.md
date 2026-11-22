@@ -22,9 +22,20 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
 - link_refuses_unknown and options_linker_needs_name tests, and mini_lld tests (when the compiler can
   link with lld): a mini build with `--linker=lld`, checked for lld in every library and against
   mini_library
+- `--leaf_budget=<words>` in build_and_install.py (default 170): the most words in a leaf
+- `-e` installs `include/matchmaker/leaf_types/leaf_list`, each leaf's name and first word in term order,
+  so a unit can find the leaf a word belongs in
+- leaf_cuts and generator refusal tests, routing over leaf first words, and `--by-spelling` and
+  `--no-checks` in mini_library_check with order tests (test/order.py) for a later sort order change
 
 ### Changed
 - Requires matchable 15.1.0
+- Leaves are ranges of the sorted words instead of prefix tree nodes. The stage 0 reader cuts the words
+  by content: a leaf ends before a word whose hash is 0 mod 60 once it holds 20 words, and always at the
+  budget, so the same words always give the same leaves and an added word usually changes only its own
+  leaf. Leaves are named by up to 4 bytes of their first word and 12 hex digits of its hash, and lookups
+  binary search the leaves' first words. The reader still sorts words into the parent prefix buckets while
+  reading. Term indexes and mm_* answers are unchanged
 - The leaves go into 4 libraries instead of 16 (`LEAFLIB_COUNT`); each holds about a quarter of a
   complete build
 - Every library links with gold where it is available (except on sparc64), the leaf libraries too; gold is

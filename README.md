@@ -105,7 +105,9 @@ scripts/build_and_install.py -b build_2020-12-08 -i ../install_2020-12-08
 scripts/build_and_install.py -e
 ```
 `-e` exports every symbol and installs a header per leaf holding only its type, under
-`include/matchmaker/leaf_types/`. A unit of words grows a leaf with GROW_MATCHABLE and is compiled with:
+`include/matchmaker/leaf_types/`, with `leaf_list` there naming each leaf and its first word in term
+order. A word belongs in the last leaf whose first word is not after it. A unit of words grows that leaf
+with GROW_MATCHABLE and is compiled with:
 * `-DMATCHABLE_UNLOADABLE -DMATCHABLE_OMIT_BY_INDEX -fPIC -shared` and the leaf's type header
 * `-fno-gnu-unique` with GCC, so dlclose unloads it
 * the same compiler the library was built with

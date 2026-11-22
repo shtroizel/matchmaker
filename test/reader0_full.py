@@ -15,6 +15,9 @@ import sys
 
 fixture, data, parents, work = sys.argv[1:5]
 
+# the default leaf budget, so the leaf counts are those of a real build
+env = dict(os.environ, LEAF_BUDGET='170')
+
 READ_3201 = ['reading 3201 (' + n + ')' for n in
              ['SINGLE', 'COMPOUND', 'COMMON', 'NAMES', 'NAMES-F', 'NAMES-M', 'PLACES', 'CROSSWD', 'CRSWD D',
               'ACRONYMS']]
@@ -36,7 +39,7 @@ processes = {}
 for name, (mode, tasks) in runs.items():
     output = os.path.join(work, name)
     with open(output + '.txt', 'wb') as out, open(output + '.err', 'wb') as err:
-        processes[name] = subprocess.Popen([fixture, data, parents, mode, output] + tasks,
+        processes[name] = subprocess.Popen([fixture, data, parents, mode, output] + tasks, env=env,
                                            stdout=out, stderr=err)
 
 problems = []

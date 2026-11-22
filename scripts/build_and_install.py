@@ -70,6 +70,9 @@ def usage():
     print('                                      as -fuse-ld=<linker>')
     print('                                    * default: the compiler\'s own linker')
     print('                                    * without it, gold when installed\n')
+    print('    --leaf_budget=<words>         the most words in a leaf (default 170)')
+    print('                                    * leaves are cut by content (leaf_cuts.h)')
+    print('                                    * smaller budgets give more, smaller leaves (mini builds)\n')
     print('    --time_compiles=<file>        append "<seconds> <peak RSS KB> <source>" to file per compile')
     print('                                    * covers matchable, the data readers and both stages')
     print('                                    * applies to build directories configured with it')
@@ -118,7 +121,7 @@ def run_tests(matchmaker_root, test_build_dir, jobs, use_clang):
 
 def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
                       build_dir, install_dir, atomic_libs, q, debug, dictionary, books, skip_tests,
-                      data_dir, export, linker):
+                      data_dir, export, linker, leaf_budget):
 
     start_dir = os.getcwd()
 
@@ -290,7 +293,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
 
             run_data_reader_cmd = [data_reader_stage_0, data_reader_stage_0_data, book_vocabulary_dir,
                                    out_dir, matchmaker_root + 'scripts/parent_prefixes.txt', leaf_list,
-                                   dictionary, books]
+                                   dictionary, books, leaf_budget]
             if subprocess.run(run_data_reader_cmd).returncode != 0:
                 print('\ndata_reader_stage_0 failed')
                 build_cmd_as_str = ''
@@ -478,6 +481,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
     print('\n\nMATCHMAKER!\n\n')
 
     shutil.copy(stage_0_workspace_dir + 'tree.cmake', stage_1_workspace_dir + 'tree.cmake')
+    shutil.copy(stage_0_workspace_dir + 'leaf_list', stage_1_workspace_dir + 'leaf_list')
 
     os.chdir(build_dir)
 
@@ -539,7 +543,7 @@ def main():
                 ['help', 'build_dir=', 'install_dir=', 'clang', 'retain', 'retain_leaves',
                  'force_stage_1', 'jobs=', 'atomic_libs', 'q',
                  'debug', 'export', 'dictionary=', 'books=', 'skip_tests', 'data_dir=', 'time_compiles=',
-                 'linker='])
+                 'linker=', 'leaf_budget='])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -562,6 +566,7 @@ def main():
     data_dir = None
     time_compiles = None
     linker = ''
+    leaf_budget = '170'
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -601,6 +606,11 @@ def main():
             time_compiles = os.path.abspath(a)
         elif o == '--linker':
             linker = a
+        elif o == '--leaf_budget':
+            if not a.isdigit() or int(a) < 1:
+                print('--leaf_budget must be a whole number of at least 1')
+                sys.exit(2)
+            leaf_budget = a
         else:
             assert False, "unhandled option"
 
@@ -636,7 +646,7 @@ def main():
 
     build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs, build_dir,
                       install_dir, atomic_libs, q, debug, dictionary, books, skip_tests, data_dir, export,
-                      linker)
+                      linker, leaf_budget)
 
     exit(0)
 

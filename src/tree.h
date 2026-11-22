@@ -31,15 +31,10 @@ namespace tree
         void (*locations)(int, int const * *, int const * *, int const * *, int const * *, int *);
     };
 
-    // a parent maps each byte of a term to a slot: (index << 2) | kind, where index is a parent for
-    // kind parent, a leaf for kind leaf, and for kind missing (no terms) the leaf whose first term is
-    // where the lookup ends up
-    enum SlotKind : int32_t { parent = 1, leaf = 2, missing = 3 };
-
-    // generated (tree_data.cpp)
+    // generated (tree_data.cpp): the leaves in term order, and each leaf's first term
     extern Leaf const leaves[];
+    extern char const * const first_terms[];
     extern int const leaf_count;
-    extern int32_t const parents[][256];
 
     int count();
 
