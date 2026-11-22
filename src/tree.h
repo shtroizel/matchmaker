@@ -31,7 +31,7 @@ namespace tree
         void (*locations)(int, int const * *, int const * *, int const * *, int const * *, int *);
     };
 
-    // generated (tree_data.cpp): the leaves in term order, and each leaf's first term
+    // generated (tree_data.cpp): the leaves in word order (word_order.h), and each leaf's first term
     extern Leaf const leaves[];
     extern char const * const first_terms[];
     extern int const leaf_count;

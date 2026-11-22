@@ -1,12 +1,12 @@
-// order_today_check <file>: prints the file's lines sorted by matchable::str_lt_str, for comparing with
-// order.py's today rule
+// order_word_check <file>: prints the file's ASCII lines sorted by matchmaker's word order (word_order.h),
+// for comparing with order.py's folded rule
 #include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include <matchable/matchable.h>
+#include <matchmaker/word_order.h>
 
 
 int main(int argc, char ** argv)
@@ -19,8 +19,9 @@ int main(int argc, char ** argv)
     std::ifstream in(argv[1], std::ios::binary);
     std::vector<std::string> lines;
     for (std::string line; std::getline(in, line);)
-        lines.push_back(line);
-    std::sort(lines.begin(), lines.end(), matchable::str_lt_str);
+        if (std::all_of(line.begin(), line.end(), [](char c) { return c >= 32 && c < 127; }))
+            lines.push_back(line);
+    std::sort(lines.begin(), lines.end(), mm_word_less);
     for (auto const & line : lines)
         std::cout << line << "\n";
     return 0;

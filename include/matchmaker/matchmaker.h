@@ -53,6 +53,10 @@ all of matchmaker's functions adhere to the following:
     * dynamic memory allocation is avoided completely
     * all arrays or strings retrieved always exist because they are static!
 
+an "alphabetic index" is a term's position in matchmaker's word order: terms compare with their ASCII
+letters lowercased, then as they are, so a term's case forms sit together, capitals first (Apple, apple,
+apply). lookup is exact; completion ignores case.
+
 complexities below use N for the number of terms in the dictionary. functions taking an alphabetic
 index first find the part of the dictionary holding that index with a binary search, so they are
 O(log N) even though the rest of their work is O(1).
@@ -76,7 +80,7 @@ thats it, have fun!
 int mm_count();
 
 /**
- * retrieve a dictionary index from a string.
+ * retrieve a dictionary index from a string, matching its case exactly.
  * the complexity for this function is O(log N) string comparisons.
  * @param[in] term
  *     string to look up in the dictionary
@@ -370,7 +374,8 @@ void mm_locations(
 );
 
 /**
- * retrieve all terms beginning with a given prefix.
+ * retrieve all terms beginning with a given prefix, in any case: "ab" and "AB" both complete to Abbey,
+ * abbey and ABBA, which sit together in the dictionary.
  * the complexity for this function is O(log N * log K), where K is the number of matching terms.
  *     completing the entire dictionary (when prefix is empty) shortcuts to O(1).
  * @param[in] prefix
@@ -379,7 +384,7 @@ void mm_locations(
  *     index of the first term with the given prefix, or, when length is 0, the index such a term
  *     would have (as mm_lookup() returns). note that this could be mm_count(), which is an invalid index!
  * @param[out] length
- *     number of words with the given prefix
+ *     number of words with the given prefix, in any case
  */
 void mm_complete(char const * prefix, int * start, int * length);
 

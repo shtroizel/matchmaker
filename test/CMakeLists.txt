@@ -37,6 +37,7 @@ set(FIXTURES ${CMAKE_CURRENT_SOURCE_DIR}/fixtures)
 
 include_directories(
     ${MATCHMAKER_ROOT}/matchable/include
+    ${MATCHMAKER_ROOT}/include
     ${MATCHMAKER_ROOT}/data_reader/stage_0/src
     ${MATCHMAKER_ROOT}/src
 )
@@ -327,8 +328,8 @@ set_tests_properties(options_refuse_memory_usage_limit PROPERTIES
 
 
 # order: order.py sorts fixtures/order/words.txt by each rule as fixtures/order/<rule>.txt shows
-# (bytes.txt matches LC_ALL=C sort), its today rule agrees with matchable::str_lt_str, and check passes
-# only sorted lines
+# (bytes.txt matches LC_ALL=C sort), check passes only sorted lines, and matchmaker's word order
+# (word_order.h) sorts the ASCII words as order.py's folded rule does (Unicode folding comes later)
 set(ORDER_FIXTURES ${FIXTURES}/order)
 foreach(rule today bytes folded)
     add_test(
@@ -351,14 +352,14 @@ foreach(rule today bytes folded)
     set_tests_properties(order_sort_${rule} order_check_${rule} PROPERTIES LABELS order)
     set_tests_properties(order_check_${rule}_refuses PROPERTIES LABELS order WILL_FAIL TRUE)
 endforeach()
-add_executable(order_today_check order_today_check.cpp)
-target_compile_options(order_today_check PRIVATE -Wall -Werror -Wextra -fsigned-char)
+add_executable(order_word_check order_word_check.cpp)
+target_compile_options(order_word_check PRIVATE -Wall -Werror -Wextra)
 add_test(
-    NAME order_today_matches_matchable
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py ${ORDER_FIXTURES}/today.txt
-            $<TARGET_FILE:order_today_check> ${ORDER_FIXTURES}/words.txt
+    NAME order_word_matches_folded
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+            ${ORDER_FIXTURES}/folded_ascii.txt $<TARGET_FILE:order_word_check> ${ORDER_FIXTURES}/words.txt
 )
-set_tests_properties(order_today_matches_matchable PROPERTIES LABELS order)
+set_tests_properties(order_word_matches_folded PROPERTIES LABELS order)
 
 
 

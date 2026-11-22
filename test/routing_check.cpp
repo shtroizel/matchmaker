@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include <matchable/matchable.h>
+#include <matchmaker/word_order.h>
 
 #include <tree.h>
 
@@ -88,7 +88,7 @@ namespace
             ++higher.back();
             ret.push_back(higher);
         }
-        std::sort(ret.begin(), ret.end(), matchable::str_lt_str);
+        std::sort(ret.begin(), ret.end(), mm_word_less);
         ret.erase(std::unique(ret.begin(), ret.end()), ret.end());
         return ret;
     }
@@ -111,7 +111,7 @@ int main(int argc, char ** argv)
 
     // the list is in term order, and the generated leaves are its leaves, in its order
     for (size_t i = 1; i < firsts.size(); ++i)
-        if (!matchable::str_lt_str(firsts[i - 1], firsts[i]))
+        if (!mm_word_less(firsts[i - 1], firsts[i]))
             fail("first words out of order: \"" + firsts[i - 1] + "\", \"" + firsts[i] + "\"");
     auto const generated = generated_leaves(argv[2]);
     if (generated.size() != listed.size() || tree::leaf_count != (int) listed.size())
@@ -129,7 +129,7 @@ int main(int argc, char ** argv)
     auto const terms = probes(firsts);
     for (auto const & term : terms)
     {
-        int const after = (int) (std::upper_bound(firsts.begin(), firsts.end(), term, matchable::str_lt_str)
+        int const after = (int) (std::upper_bound(firsts.begin(), firsts.end(), term, mm_word_less)
                                  - firsts.begin());
         int const want = std::max(0, after - 1);
         int const got = tree::lookup(term, nullptr);

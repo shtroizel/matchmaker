@@ -1,15 +1,15 @@
 none:
-    saved 724 leaves, 52246 words, 129447 values: ok
+    saved 706 leaves, 52246 words, 129447 values: ok
     vocabulary 51920, words with parts of speech 7706
     flags acronym=609 compound=186 female_name=203 male_name=439 name=1034 phrase=22374 place=110
     pos A=1564 C=50 D=70 N=5162 P=94 V=1532 h=47 i=630 n=91 p=164 r=58 t=1386 v=539
 reduced:
-    saved 5288 leaves, 388231 words, 923462 values: ok
+    saved 5259 leaves, 388231 words, 923462 values: ok
     vocabulary 51920, words with parts of speech 232111
     flags acronym=6213 compound=77385 female_name=4945 male_name=3897 name=21990 phrase=22374 place=10196
     pos A=50361 C=93 D=103 N=110571 P=161 V=11783 h=34035 i=5136 n=428 p=8451 r=117 t=16253 v=13386
 all:
-    saved 9015 leaves, 661310 words, 1572571 values: ok
+    saved 8978 leaves, 661310 words, 1572571 values: ok
     vocabulary 51920, words with parts of speech 232111
     flags acronym=6213 compound=180336 female_name=4945 male_name=3897 name=21990 phrase=22374 place=10196
     pos A=50361 C=93 D=103 N=110571 P=161 V=11783 h=34035 i=5136 n=428 p=8451 r=117 t=16253 v=13386

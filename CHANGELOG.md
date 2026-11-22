@@ -23,13 +23,22 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   link with lld): a mini build with `--linker=lld`, checked for lld in every library and against
   mini_library
 - `--leaf_budget=<words>` in build_and_install.py (default 170): the most words in a leaf
+- `include/matchmaker/word_order.h`: mm_word_key() and mm_word_less(), matchmaker's word order
 - `-e` installs `include/matchmaker/leaf_types/leaf_list`, each leaf's name and first word in term order,
   so a unit can find the leaf a word belongs in
 - leaf_cuts and generator refusal tests, routing over leaf first words, and `--by-spelling` and
   `--no-checks` in mini_library_check with order tests (test/order.py) for a later sort order change
 
 ### Changed
-- Requires matchable 15.1.0
+- Requires matchable 16.0.0 (unreleased: matchable's byte-order branch), which compares names as unsigned
+  bytes and lets each leaf declare its sort key
+- Words sort in matchmaker's own order instead of matchable's: by the word with its ASCII letters
+  lowercased, then by the word itself, so a word's case forms sit together, capitals first (Apple, apple,
+  apply). Symbols and digits no longer all sort before letters. Every leaf declares the order with
+  MATCHABLE_SORTKEY, and the leaf type headers installed with `-e` carry it too. Alphabetic indexes
+  differ from earlier builds
+- mm_complete() ignores case: "ab" and "AB" both complete to Abbey, abbey and ABBA. Its signature is
+  unchanged. mm_lookup() still matches case exactly
 - Leaves are ranges of the sorted words instead of prefix tree nodes. The stage 0 reader cuts the words
   by content: a leaf ends before a word whose hash is 0 mod 60 once it holds 20 words, and always at the
   budget, so the same words always give the same leaves and an added word usually changes only its own

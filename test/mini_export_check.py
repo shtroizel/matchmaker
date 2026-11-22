@@ -13,10 +13,10 @@ lib_dir = os.path.join(install_dir, 'lib', 'matchmaker')
 os.makedirs(work_dir, exist_ok=True)
 
 
-# the library's order (matchable::str_lt_str): at the first differing byte a non-letter sorts before a
-# letter, otherwise bytes compare as signed char
+# the library's word order (include/matchmaker/word_order.h): the word with its ASCII letters lowercased,
+# then the word itself, both as unsigned bytes
 def term_key(word):
-    return [(65 <= b <= 90 or 97 <= b <= 122, b - 256 if b > 127 else b) for b in word]
+    return (bytes(b + 32 if 65 <= b <= 90 else b for b in word), word)
 
 
 # the leaf whose range holds a word: the last whose first word is not after it

@@ -18,6 +18,7 @@
 #include <vector>
 
 #include <matchable/matchable.h>
+#include <matchmaker/word_order.h>
 
 
 
@@ -128,7 +129,7 @@ namespace
             bool found = false;
             if (mm_lookup(t.c_str(), &found) != i || !found)
                 problem("mm_lookup(mm_at(" + std::to_string(i) + ")) does not find " + t);
-            if (i > 0 && !matchable::str_lt_str(mm_at(i - 1, nullptr), t))
+            if (i > 0 && !mm_word_less(mm_at(i - 1, nullptr), t))
                 problem("terms out of order: " + term(i - 1) + ", " + t);
         }
     }
@@ -215,6 +216,8 @@ namespace
     }
 
 
+    // completion ignores case: the terms whose key (word_order.h) starts with the prefix's key, which sit
+    // together; with none, start is where such a term would go
     void check_completion()
     {
         std::set<std::string> prefixes{""};
@@ -222,26 +225,35 @@ namespace
         {
             std::string const t = term(i);
             for (size_t n = 1; n <= t.size(); ++n)
-                prefixes.insert(t.substr(0, n));
+            {
+                std::string const prefix = t.substr(0, n);
+                std::string upper = prefix;
+                for (char & c : upper)
+                    if (c >= 'a' && c <= 'z')
+                        c = (char) (c - 'a' + 'A');
+                prefixes.insert({prefix, upper, mm_word_key(prefix), prefix + "zz"});
+            }
         }
+        std::vector<std::string> keys;
+        for (int i = 0; i < mm_count(); ++i)
+            keys.push_back(mm_word_key(term(i)));
         for (auto const & prefix : prefixes)
         {
             int start = -1;
             int length = -1;
             mm_complete(prefix.c_str(), &start, &length);
-            int expected_start = -1;
-            int expected_length = 0;
-            for (int i = 0; i < mm_count(); ++i)
-                if (term(i).rfind(prefix, 0) == 0)
-                {
-                    if (expected_start == -1)
-                        expected_start = i;
-                    ++expected_length;
-                }
-            if (start != expected_start || length != expected_length)
+            std::string const key = mm_word_key(prefix);
+            std::vector<int> matches;
+            for (int i = 0; i < (int) keys.size(); ++i)
+                if (keys[i].rfind(key, 0) == 0)
+                    matches.push_back(i);
+            int expected_start = (int) (std::lower_bound(keys.begin(), keys.end(), key) - keys.begin());
+            if (!matches.empty() && matches.back() - matches.front() + 1 != (int) matches.size())
+                problem("terms completing \"" + prefix + "\" are not together");
+            if (start != expected_start || length != (int) matches.size())
                 problem("mm_complete(\"" + prefix + "\") gives " + std::to_string(start) + " +" +
                         std::to_string(length) + ", expected " + std::to_string(expected_start) + " +" +
-                        std::to_string(expected_length));
+                        std::to_string(matches.size()));
         }
     }
 

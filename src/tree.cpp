@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include <matchable/matchable.h>
+#include <matchmaker/word_order.h>
 
 
 
@@ -63,8 +63,7 @@ namespace tree
         {
             int const step = count / 2;
             int const middle = first + step;
-            if (matchable::chars_lt_chars(term.data(), term.size(),
-                                          first_terms[middle], std::strlen(first_terms[middle])))
+            if (mm_word_less(term, first_terms[middle]))
             {
                 count = step;
             }

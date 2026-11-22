@@ -204,7 +204,7 @@ namespace
             }
         );
         std::sort(all.begin(), all.end(),
-                  [](Kept const & l, Kept const & r) { return matchable::str_lt_str(l.term, r.term); });
+                  [](Kept const & l, Kept const & r) { return mm_word_less(l.term, r.term); });
         std::vector<std::string> terms;
         for (auto const & k : all)
             terms.push_back(k.term);
@@ -368,7 +368,7 @@ int main(int argc, char ** argv)
         }
     );
     std::sort(words.begin(), words.end(),
-              [](Word const & l, Word const & r) { return matchable::str_lt_str(l.term, r.term); });
+              [](Word const & l, Word const & r) { return mm_word_less(l.term, r.term); });
     for (auto const & w : words)
         std::cout << "[" << w.term << "] " << w.leaf << " | " << w.line << "\n";
 

@@ -8,6 +8,7 @@
 #include <chrono>
 
 #include <matchable/matchable.h>
+#include <matchmaker/word_order.h>
 
 #include <tree.h>
 
@@ -377,23 +378,35 @@ void mm_complete(char const * prefix, int * start, int * length)
         return;
     }
 
-    int const prefix_len = strlen(prefix);
-    auto matches =
-        [&](int index)
-        {
-            int s_len = 0;
-            char const * s = mm_at(index, &s_len);
-            return s_len >= prefix_len && 0 == memcmp(s, prefix, prefix_len);
-        };
+    // terms are in key order (word_order.h), so the terms whose key starts with the prefix's key sit
+    // together, starting at the first term whose key is not less than it
+    std::string const key = mm_word_key(prefix);
+    auto key_at = [](int index) { return mm_word_key(mm_at(index, nullptr)); };
+    auto matches = [&](int index) { return key_at(index).compare(0, key.size(), key) == 0; };
 
-    int const first = mm_lookup(prefix, nullptr);
     int const count = mm_count();
+    int first = 0;
+    int remaining = count;
+    while (remaining > 0)
+    {
+        int const step = remaining / 2;
+        int const middle = first + step;
+        if (key_at(middle) < key)
+        {
+            first = middle + 1;
+            remaining -= step + 1;
+        }
+        else
+        {
+            remaining = step;
+        }
+    }
     *start = first;
     *length = 0;
     if (first >= count || !matches(first))
         return;
 
-    // terms starting with prefix are contiguous: gallop past the last match, then bisect
+    // gallop past the last match, then bisect
     int good = first;
     int bad = count;
     for (int step = 1; good + step < count; step *= 2)

@@ -42,50 +42,50 @@
 []] _sbr_ | pos= os=0
 []~~] _sbr_ | pos= os=0
 [^] _dach_ | pos= os=0
-[|] _pip_ | pos= os=0
-[~~:] _tld_ _tld_ | pos= os=0
-[~~~] _tld_ _tld_ | pos= os=0
-[~~~1_image.png] _tld_ _tld_ | pos= os=72
 [A] esc_A | pos= os=1
+[a] a _spc_ | pos= os=1
+[abc123] a b c | pos= os=6
+[about] a b o u t _spc_ | pos=Pv os=59
 [AM] esc_A | pos= os=14
+[c] c | pos= os=3
 [Crumbs] esc_C | pos= os=76
+[e] e | pos= os=5
 [Follow] esc_F | pos= os=83
+[h] h | pos= os=8
+[here] h | pos= os=36
+[http] h | pos= os=64
 [Huma] esc_H | pos= os=43
+[is] i | pos= os=28
 [Linked] esc_L | pos= os=55
 [Linked [text] here.] esc_L | pos= os=160 phrase
+[m] m | pos= os=13
+[marks] m | pos= os=62
+[money] m | pos= os=72
 [Night] esc_N | pos= os=58
 [Night.] esc_N | pos= os=58 phrase
 [Noon] esc_N | pos= os=58
 [Noon.] esc_N | pos= os=58 phrase
+[o] o | pos= os=15
 [Oct] esc_O | pos= os=38
+[p] p | pos= os=16
 [PDT] esc_P | pos= os=40
 [PM] esc_P | pos= os=29
 [Presidecy] esc_P | pos= os=104
 [Presidency] esc_P | pos= os=118
 [Q] esc_Q | pos= os=17
-[Where] esc_W | pos= os=59
-[Where is "Huma"? Follow (the money).] esc_W | pos= os=318 phrase
-[a] a _spc_ | pos= os=1
-[abc123] a b c | pos= os=6
-[about] a b o u t _spc_ | pos=Pv os=59
-[c] c | pos= os=3
-[e] e | pos= os=5
-[h] h | pos= os=8
-[here] h | pos= os=36
-[http] h | pos= os=64
-[is] i | pos= os=28
-[m] m | pos= os=13
-[marks] m | pos= os=62
-[money] m | pos= os=72
-[o] o | pos= os=15
-[p] p | pos= os=16
 [shtroizel] s | pos= os=132
 [spot] s | pos= os=70
 [t] t _spc_ | pos= os=20
 [text] t e | pos= os=69
 [the] t h e | pos=D os=33
 [the money] t h e | pos= os=105 phrase
+[Where] esc_W | pos= os=59
+[Where is "Huma"? Follow (the money).] esc_W | pos= os=318 phrase
 [x] x | pos= os=24
+[|] _pip_ | pos= os=0
+[~~:] _tld_ _tld_ | pos= os=0
+[~~~] _tld_ _tld_ | pos= os=0
+[~~~1_image.png] _tld_ _tld_ | pos= os=72
 vocabulary Crumbs:
     [~~:]
     [>>]

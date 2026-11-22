@@ -48,78 +48,78 @@
 []] pos= os=0
 []~~] pos= os=0
 [^] pos= os=0
-[|] pos= os=0
-[~~:] pos= os=0
-[~~~] pos= os=0
-[~~~1_image.png] pos= os=72 at=0.0.6.0
 [A] pos= os=1
-[AAA] pos= os=3 acronym
-[AM] pos= os=14
-[Abbe] pos= os=10 name male_name
-[Abbey] pos= os=35 name female_name
-[About] pos= os=59
-[Abu Dhabi] pos= os=48 place
-[Crumbs] pos= os=76
-[Follow] pos= os=83 at=0.0.5.9
-[Huma] pos= os=43 at=0.0.5.5
-[Linked] pos= os=55 at=0.0.1.0
-[Linked [text] here.] pos= os=160 phrase embedded=[Linked,  , [text],  , here, .] at=0.0.1.0
-[Night] pos= os=58 at=0.2.0.0
-[Night.] pos= os=58 phrase embedded=[Night, .] at=0.2.0.0
-[Noon] pos= os=58 at=0.3.0.0
-[Noon.] pos= os=58 phrase embedded=[Noon, .] at=0.3.0.0
-[Oct] pos= os=38
-[PDT] pos= os=40
-[PM] pos= os=29
-[Presidecy] pos= os=104 syn=[Presidency]
-[Presidency] pos= os=118 syn=[Presidecy]
-[Q] pos= os=17 definition=[A,  , spot] at=0.1.0.1
-[Quebec] pos= os=53 place
-[Shtroizel] pos=Noun; os=132 name
-[T] pos= os=20
-[Thea] pos= os=34 name female_name
-[Theo] pos= os=48 name male_name
-[Where] pos= os=59 at=0.0.5.0
-[Where is "Huma"? Follow (the money).] pos= os=318 phrase embedded=[Where,  , is,  , ", Huma, ", ?,  , Follow,  , (, the money, ), .] at=0.0.5.0
 [a] pos= os=1
 [a-b] pos= os=3
+[AAA] pos= os=3 acronym
+[Abbe] pos= os=10 name male_name
+[Abbey] pos= os=35 name female_name
 [abc123] pos= os=6
+[About] pos= os=59
 [about] pos=Preposition;Adverb; os=59
 [about-face] pos= os=74 compound
 [abouts] pos= os=78
+[Abu Dhabi] pos= os=48 place
+[AM] pos= os=14
 [approximately] pos= os=175
 [around] pos= os=73
 [bark] pos=Noun;Verb _pl_usu participle_pr_;Verb _pl_transitive_pr_; os=32
 [c] pos= os=3
 [crumbles] pos= os=93
+[Crumbs] pos= os=76
 [e] pos= os=5
+[Follow] pos= os=83 at=0.0.5.9
 [h] pos= os=8
 [hello] pos=Interjection; os=52
 [here] pos= os=36 at=0.0.1.6
 [http] pos= os=64
+[Huma] pos= os=43 at=0.0.5.5
 [ice cream] pos= os=57 compound
 [is] pos= os=28 at=0.0.5.2
+[Linked] pos= os=55 at=0.0.1.0
+[Linked [text] here.] pos= os=160 phrase embedded=[Linked,  , [text],  , here, .] at=0.0.1.0
 [m] pos= os=13
 [marks] pos= os=62 at=0.1.0.4
 [money] pos= os=72 at=0.0.5.14
+[Night] pos= os=58 at=0.2.0.0
+[Night.] pos= os=58 phrase embedded=[Night, .] at=0.2.0.0
+[Noon] pos= os=58 at=0.3.0.0
+[Noon.] pos= os=58 phrase embedded=[Noon, .] at=0.3.0.0
 [o] pos= os=15
+[Oct] pos= os=38
 [p] pos= os=16
+[PDT] pos= os=40
+[PM] pos= os=29
+[Presidecy] pos= os=104 syn=[Presidency]
+[Presidency] pos= os=118 syn=[Presidecy]
+[Q] pos= os=17 definition=[A,  , spot] at=0.1.0.1
 [qua] pos= os=39
 [quagga] pos= os=54 syn=[zebra]
+[Quebec] pos= os=53 place
 [quu] pos= os=59
 [quux] pos=Noun; os=83
+[Shtroizel] pos=Noun; os=132 name
 [shtroizel] pos=Noun; os=132 name
 [spot] pos= os=70 at=0.1.0.8
+[T] pos= os=20
 [t] pos= os=20
 [tail] pos= os=42 ant=[the]
 [text] pos= os=69 at=0.0.1.3
 [the] pos=Definite Article; os=33 syn=[thee] ant=[tail]
 [the money] pos= os=105 phrase embedded=[the,  , money] at=0.0.5.12
+[Thea] pos= os=34 name female_name
 [thee] pos= os=38 syn=[the]
+[Theo] pos= os=48 name male_name
+[Where] pos= os=59 at=0.0.5.0
+[Where is "Huma"? Follow (the money).] pos= os=318 phrase embedded=[Where,  , is,  , ", Huma, ", ?,  , Follow,  , (, the money, ), .] at=0.0.5.0
 [x] pos= os=24
 [x y] pos= os=49
 [zebra] pos= os=52 syn=[quagga]
 [zz] pos= os=52
+[|] pos= os=0
+[~~:] pos= os=0
+[~~~] pos= os=0
+[~~~1_image.png] pos= os=72 at=0.0.6.0
 book 0: Crumbs by Q, 4 chapters
   chapter 0: 1 | 2017-Oct-28 13:44:28 PDT,4ch/pol
     0: [>>] [1647]
