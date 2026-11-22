@@ -47,6 +47,7 @@
     X(mm_definition, void, (int, int const * *, int *))                                                   \
     X(mm_locations, void, (int, int const * *, int const * *, int const * *, int const * *, int *))       \
     X(mm_complete, void, (char const *, int *, int *))                                                    \
+    X(mm_lookup_any_case, void, (char const *, int *, int *))                                             \
     X(mm_book_count, int, (void))                                                                         \
     X(mm_book_title, void, (int, int const * *, int *))                                                   \
     X(mm_book_author, void, (int, int const * *, int *))                                                  \
@@ -258,6 +259,39 @@ namespace
     }
 
 
+    // lookup in any case: the terms whose key equals the term's key, which sit together; with none, start
+    // is where such a term would go
+    void check_lookup_any_case()
+    {
+        std::vector<std::string> keys;
+        for (int i = 0; i < mm_count(); ++i)
+            keys.push_back(mm_word_key(term(i)));
+        std::set<std::string> probes{"", "zzzz", "ZZZZ", " "};
+        for (int i = 0; i < mm_count(); ++i)
+        {
+            std::string upper = term(i);
+            for (char & c : upper)
+                if (c >= 'a' && c <= 'z')
+                    c = (char) (c - 'a' + 'A');
+            probes.insert({term(i), upper, keys[i], term(i) + "zz", term(i).substr(1)});
+        }
+        for (auto const & probe : probes)
+        {
+            int start = -1;
+            int length = -1;
+            mm_lookup_any_case(probe.c_str(), &start, &length);
+            std::string const key = mm_word_key(probe);
+            auto const range = std::equal_range(keys.begin(), keys.end(), key);
+            int const expected_start = (int) (range.first - keys.begin());
+            int const expected_end = (int) (range.second - keys.begin());
+            if (start != expected_start || length != expected_end - expected_start)
+                problem("mm_lookup_any_case(\"" + probe + "\") gives " + std::to_string(start) + " +" +
+                        std::to_string(length) + ", expected " + std::to_string(expected_start) + " +" +
+                        std::to_string(expected_end - expected_start));
+        }
+    }
+
+
     // stage 1 records no locations for single characters but Q and q, the articles the, The, an and An, and
     // the Crumbs markup http, >>, ~~~, ~~: and ]~~
     bool has_locations(std::string const & t)
@@ -463,6 +497,7 @@ int main(int argc, char ** argv)
         check_longest();
         check_ordinal_summation();
         check_completion();
+        check_lookup_any_case();
         check_locations();
     }
     print_terms();

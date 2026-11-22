@@ -368,6 +368,48 @@ void mm_locations(
 }
 
 
+namespace
+{
+    std::string key_at(int index)
+    {
+        return mm_word_key(mm_at(index, nullptr));
+    }
+
+
+    // the first index whose key is not before (key_before true for the indexes before it), or mm_count()
+    template<typename KeyBefore>
+    int first_not_before(KeyBefore key_before)
+    {
+        int first = 0;
+        int remaining = mm_count();
+        while (remaining > 0)
+        {
+            int const step = remaining / 2;
+            int const middle = first + step;
+            if (key_before(key_at(middle)))
+            {
+                first = middle + 1;
+                remaining -= step + 1;
+            }
+            else
+            {
+                remaining = step;
+            }
+        }
+        return first;
+    }
+}
+
+
+void mm_lookup_any_case(char const * term, int * start, int * length)
+{
+    // terms are in key order (word_order.h), so a term's case forms sit together
+    std::string const key = mm_word_key(term);
+    *start = first_not_before([&](std::string const & k) { return k < key; });
+    *length = first_not_before([&](std::string const & k) { return k <= key; }) - *start;
+}
+
+
 void mm_complete(char const * prefix, int * start, int * length)
 {
     // shortcut empty prefix to everything
@@ -381,26 +423,10 @@ void mm_complete(char const * prefix, int * start, int * length)
     // terms are in key order (word_order.h), so the terms whose key starts with the prefix's key sit
     // together, starting at the first term whose key is not less than it
     std::string const key = mm_word_key(prefix);
-    auto key_at = [](int index) { return mm_word_key(mm_at(index, nullptr)); };
     auto matches = [&](int index) { return key_at(index).compare(0, key.size(), key) == 0; };
 
     int const count = mm_count();
-    int first = 0;
-    int remaining = count;
-    while (remaining > 0)
-    {
-        int const step = remaining / 2;
-        int const middle = first + step;
-        if (key_at(middle) < key)
-        {
-            first = middle + 1;
-            remaining -= step + 1;
-        }
-        else
-        {
-            remaining = step;
-        }
-    }
+    int const first = first_not_before([&](std::string const & k) { return k < key; });
     *start = first;
     *length = 0;
     if (first >= count || !matches(first))

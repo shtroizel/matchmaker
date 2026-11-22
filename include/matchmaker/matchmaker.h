@@ -95,6 +95,19 @@ int mm_count();
 int mm_lookup(char const * term, bool * found);
 
 /**
+ * retrieve every case form of a term: "apple" finds Apple, apple and APPLE, which sit together.
+ * the complexity for this function is O(log N) string comparisons.
+ * @param[in] term
+ *     string to look up in the dictionary, in any case
+ * @param[out] start
+ *     index of the first case form, or, when length is 0, the index such a form would have.
+ *     note that this could be mm_count(), which is an invalid index!
+ * @param[out] length
+ *     number of case forms of the term in the dictionary
+ */
+void mm_lookup_any_case(char const * term, int * start, int * length);
+
+/**
  * retrieve the null-terminated byte string for a given dictionary index.
  * the length of the string can optionally also be retrieved, saving a call to strlen().
  * the complexity for this function is O(log N).

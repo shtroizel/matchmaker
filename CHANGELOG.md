@@ -24,6 +24,7 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   mini_library
 - `--leaf_budget=<words>` in build_and_install.py (default 170): the most words in a leaf
 - `include/matchmaker/word_order.h`: mm_word_key() and mm_word_less(), matchmaker's word order
+- mm_lookup_any_case(term, start, length) returns every case form of a term as one range
 - `-e` installs `include/matchmaker/leaf_types/leaf_list`, each leaf's name and first word in term order,
   so a unit can find the leaf a word belongs in
 - leaf_cuts and generator refusal tests, routing over leaf first words, and `--by-spelling` and
