@@ -10,9 +10,9 @@ cmake_minimum_required(VERSION 3.16.3)
 #     reader0    the stage 0 data reader, on small fixture data
 #     full_data  the stage 0 data reader on all of data_reader/data (about 45 s; -LE full_data skips it)
 #     mini_build build_and_install.py on the fixture data, then the library it installs, again with -e,
-#                then units of words loaded on top, again with -q, and again with --linker=lld when the
-#                compiler can link with lld (about 15 minutes; build_and_install.py runs every label but
-#                this one before its stage 0 data reader)
+#                then units of words loaded on top, again with -q, again with --linker=lld when the
+#                compiler can link with lld, and stage 1 again with -r -f (about 15 minutes;
+#                build_and_install.py runs every label but this one before its stage 0 data reader)
 #
 # reader0_* tests compare what the reader keeps with test/fixtures/reader0/expected; after a deliberate
 # change, UPDATE_EXPECTED=1 ctest -R reader0_ rewrites those files (review the diff)
@@ -415,6 +415,41 @@ add_test(
             ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
 )
 set_tests_properties(mini_library_by_spelling PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_library)
+
+# mini_rerun: stage 1 again (-r -f) on mini_build's build with the same data, which compiles nothing in the
+# workspace, then mini_rerun_library checks what it installs; it rewrites the install that mini_library
+# reads, so those tests take turns with it
+set(MINI_RERUN_COMPILES ${CMAKE_CURRENT_BINARY_DIR}/mini_rerun_compiles.txt)
+add_test(NAME mini_rerun_compiles_clear COMMAND ${CMAKE_COMMAND} -E rm -f ${MINI_RERUN_COMPILES})
+set_tests_properties(mini_rerun_compiles_clear PROPERTIES LABELS mini_build FIXTURES_SETUP mini_rerun_start)
+add_test(
+    NAME mini_rerun
+    COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -r -f
+            -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA} --leaf_budget=${MINI_LEAF_BUDGET}
+            -b ${MINI_BUILD}/build -i ${MINI_BUILD}/install
+            --time_compiles=${MINI_RERUN_COMPILES}
+)
+set_tests_properties(mini_rerun PROPERTIES
+    LABELS mini_build
+    FIXTURES_REQUIRED "mini_library;mini_rerun_start"
+    FIXTURES_SETUP mini_rerun
+    TIMEOUT 3600
+)
+add_test(
+    NAME mini_rerun_compiles
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_rerun_check.py
+            ${MINI_RERUN_COMPILES} ${MINI_BUILD}/build
+)
+set_tests_properties(mini_rerun_compiles PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_rerun)
+add_test(
+    NAME mini_rerun_library
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+            ${READER0_EXPECTED}/mini_library.txt
+            $<TARGET_FILE:mini_library_check> ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
+)
+set_tests_properties(mini_rerun_library PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_rerun)
+set_tests_properties(mini_library mini_library_by_spelling mini_rerun mini_rerun_library
+    PROPERTIES RESOURCE_LOCK mini_install)
 
 # mini_q: the same build with -q, which installs under the _q names (matchmaker_q), and mini_q_library runs
 # mini_library_check's checks on what it installs

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import hashlib
 import os
 import multiprocessing
 import shutil
@@ -77,7 +78,8 @@ def usage():
     print('                                    * smaller budgets give more, smaller leaves (mini builds)\n')
     print('    --time_compiles=<file>        append "<seconds> <peak RSS KB> <source>" to file per compile')
     print('                                    * covers matchable, the data readers and both stages')
-    print('                                    * applies to build directories configured with it')
+    print('                                    * turning it on or off for a kept build (-r, -l) compiles')
+    print('                                      everything again; changing the file does not')
     print('                                    * Linux and macOS\n')
 
 
@@ -93,6 +95,36 @@ def generator_args(build_dir):
     if os.name == 'nt' or which('ninja') is not None:
         return ['-G', 'Ninja']
     return []
+
+
+
+# the content digest and modification time of each file under root, by path relative to root
+def file_states(root):
+    def state(path):
+        with open(path, 'rb') as f:
+            digest = hashlib.blake2b(f.read()).digest()
+        return digest, os.stat(path).st_mtime_ns
+    paths = [os.path.join(d, n) for d, _, names in os.walk(root) for n in names]
+    with ThreadPoolExecutor() as pool:
+        states = list(pool.map(state, paths))
+    return {os.path.relpath(p, root): st for p, st in zip(paths, states)}
+
+
+
+# gives each file under root that holds what it held before its earlier modification time, so a stage 1
+# that writes its workspace again compiles only the files whose content changed
+def keep_unchanged_times(root, before):
+    for path, (digest, mtime) in file_states(root).items():
+        if path in before and before[path][0] == digest and before[path][1] != mtime:
+            full = os.path.join(root, path)
+            os.utime(full, ns=(os.stat(full).st_atime_ns, before[path][1]))
+
+
+
+# a retained build directory caches the compile launcher, so each configure sets it again (empty without
+# --time_compiles); the log is named in MM_TIME_COMPILES, so a new log keeps the compile commands
+def launcher_args():
+    return ['-DCMAKE_CXX_COMPILER_LAUNCHER=' + os.environ.get('CMAKE_CXX_COMPILER_LAUNCHER', '')]
 
 
 
@@ -343,6 +375,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + stage_0_install_prefix]
     cmake_cmd += generator_args('.')
+    cmake_cmd += launcher_args()
 
     if debug:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
@@ -390,6 +423,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
     os.chdir(matchmaker_root)
 
     stage_1_workspace_dir = build_dir + 'workspace/'
+    stage_1_before = file_states(stage_1_workspace_dir) if os.path.exists(stage_1_workspace_dir) else {}
 
     # always update cmake files
     if os.path.exists(stage_1_workspace_dir):
@@ -488,11 +522,13 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
 
     shutil.copy(stage_0_workspace_dir + 'tree.cmake', stage_1_workspace_dir + 'tree.cmake')
     shutil.copy(stage_0_workspace_dir + 'leaf_list', stage_1_workspace_dir + 'leaf_list')
+    keep_unchanged_times(stage_1_workspace_dir, stage_1_before)
 
     os.chdir(build_dir)
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + abs_install_dir]
     cmake_cmd += generator_args('.')
+    cmake_cmd += launcher_args()
 
     if debug:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
@@ -647,7 +683,8 @@ def main():
             print('--time_compiles works on Linux and macOS')
             sys.exit(2)
         launcher = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'time_compile.py')
-        os.environ['CMAKE_CXX_COMPILER_LAUNCHER'] = ';'.join([sys.executable, launcher, time_compiles])
+        os.environ['CMAKE_CXX_COMPILER_LAUNCHER'] = ';'.join([sys.executable, launcher])
+        os.environ['MM_TIME_COMPILES'] = time_compiles
         print('timing each compile into ' + time_compiles)
 
     build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs, build_dir,
