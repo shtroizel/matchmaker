@@ -35,8 +35,8 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   writes with the same content keep their earlier modification times
 - `--time_compiles=<file>` works with `-r` and `-l`: a kept build logs to the file given, and changing the
   file no longer compiles everything again
-- Requires matchable 16.0.0 (unreleased: matchable's byte-order branch), which compares names as unsigned
-  bytes and lets each leaf declare its sort key
+- Requires matchable 16.0.0 (unreleased: matchable's dev branch at d085397), which compares names as
+  unsigned bytes and lets each leaf declare its sort key
 - Words sort in matchmaker's own order instead of matchable's: by the word with its ASCII letters
   lowercased, then by the word itself, so a word's case forms sit together, capitals first (Apple, apple,
   apply). Symbols and digits no longer all sort before letters. Every leaf declares the order with
