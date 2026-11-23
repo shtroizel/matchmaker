@@ -37,7 +37,7 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   writes with the same content keep their earlier modification times
 - `--time_compiles=<file>` works with `-r` and `-l`: a kept build logs to the file given, and changing the
   file no longer compiles everything again
-- Requires matchable 16.0.0 (unreleased: matchable's names-search branch at 3d59e9d), which compares
+- Requires matchable 16.0.0 (unreleased: matchable's dev branch at 3d59e9d), which compares
   names as unsigned bytes, lets each leaf declare its sort key and lets matchmaker search a leaf's names
   with its own comparison
 - mm_lookup(), mm_lookup_any_case() and mm_complete() search the leaves' first words and then one leaf's
