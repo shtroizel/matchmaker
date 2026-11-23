@@ -47,7 +47,6 @@
     X(mm_definition, void, (int, int const * *, int *))                                                   \
     X(mm_locations, void, (int, int const * *, int const * *, int const * *, int const * *, int *))       \
     X(mm_complete, void, (char const *, int *, int *))                                                    \
-    X(mm_lookup_any_case, void, (char const *, int *, int *))                                             \
     X(mm_book_count, int, (void))                                                                         \
     X(mm_book_title, void, (int, int const * *, int *))                                                   \
     X(mm_book_author, void, (int, int const * *, int *))                                                  \
@@ -60,6 +59,8 @@
 
 #define MM_DECLARE(name, ret, args) ret (*name) args = nullptr;
 MM_FUNCTIONS(MM_DECLARE)
+// needed only by the checks, so --no-checks can dump libraries built before it
+void (*mm_lookup_any_case)(char const *, int *, int *) = nullptr;
 
 
 
@@ -490,6 +491,13 @@ int main(int argc, char ** argv)
         return 2;                                                                                         \
     }
     MM_FUNCTIONS(MM_RESOLVE)
+    mm_lookup_any_case = reinterpret_cast<void (*)(char const *, int *, int *)>(
+        dlsym(library, "mm_lookup_any_case"));
+    if (checks && nullptr == mm_lookup_any_case)
+    {
+        std::cerr << "missing mm_lookup_any_case" << std::endl;
+        return 2;
+    }
 
     if (checks)
     {

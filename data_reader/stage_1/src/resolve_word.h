@@ -4,10 +4,11 @@
 
 #ifdef Q_ONLY
     #include <matchmaker_q/matchmaker.h>
+    #include <matchmaker_q/word_order.h>
 #else
     #include <matchmaker/matchmaker.h>
+    #include <matchmaker/word_order.h>
 #endif
-#include <matchmaker/word_order.h>
 
 
 

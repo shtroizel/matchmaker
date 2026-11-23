@@ -10,9 +10,9 @@ cmake_minimum_required(VERSION 3.16.3)
 #     reader0    the stage 0 data reader, on small fixture data
 #     full_data  the stage 0 data reader on all of data_reader/data (about 45 s; -LE full_data skips it)
 #     mini_build build_and_install.py on the fixture data, then the library it installs, again with -e,
-#                then units of words loaded on top, and again with --linker=lld when the compiler can link
-#                with lld (about 10 minutes; build_and_install.py runs every label but this one before its
-#                stage 0 data reader)
+#                then units of words loaded on top, again with -q, and again with --linker=lld when the
+#                compiler can link with lld (about 15 minutes; build_and_install.py runs every label but
+#                this one before its stage 0 data reader)
 #
 # reader0_* tests compare what the reader keeps with test/fixtures/reader0/expected; after a deliberate
 # change, UPDATE_EXPECTED=1 ctest -R reader0_ rewrites those files (review the diff)
@@ -415,6 +415,22 @@ add_test(
             ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
 )
 set_tests_properties(mini_library_by_spelling PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_library)
+
+# mini_q: the same build with -q, which installs under the _q names (matchmaker_q), and mini_q_library runs
+# mini_library_check's checks on what it installs
+set(MINI_Q ${CMAKE_CURRENT_BINARY_DIR}/mini_q)
+add_test(
+    NAME mini_q
+    COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -q
+            -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA} --leaf_budget=${MINI_LEAF_BUDGET}
+            -b ${MINI_Q}/build -i ${MINI_Q}/install
+)
+set_tests_properties(mini_q PROPERTIES LABELS mini_build FIXTURES_SETUP mini_q TIMEOUT 3600)
+add_test(
+    NAME mini_q_library
+    COMMAND mini_library_check ${MINI_Q}/install/lib/matchmaker_q/libmatchmaker.so
+)
+set_tests_properties(mini_q_library PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_q)
 
 # mini_export: the same build with -e, which exports every symbol and installs a type header per leaf;
 # mini_export_units builds two units of words against that install and loads, unloads and swaps them

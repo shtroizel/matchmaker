@@ -236,7 +236,7 @@ if(EXPORT_ALL)
         math(EXPR length "${end} + ${name_length} - ${begin}")
         string(SUBSTRING "${head}" ${begin} ${length} declaration)
         file(WRITE ${leaf_types}/${leaf_header}
-            "#pragma once\n#include <matchable/matchable.h>\n#include <matchmaker/word_order.h>\n\n"
+            "#pragma once\n#include <matchable/matchable.h>\n#include \"../../word_order.h\"\n\n"
             "${declaration})\n")
     endforeach()
     install(DIRECTORY ${leaf_types}/ DESTINATION ${inc_destination}/leaf_types)
