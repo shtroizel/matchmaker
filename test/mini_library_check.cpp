@@ -1,10 +1,12 @@
-// mini_library_check <libmatchmaker.so>
+// mini_library_check [--by-spelling] [--no-checks] <libmatchmaker.so>
 // Loads a matchmaker library built from small data and checks how its parts agree: every term looks itself
 // up, terms are in strict order, cross-links (synonyms, antonyms, embedded words, definitions) are terms,
 // the longest and ordinal summation tables agree with the terms, every book location holds the term that
 // lists it (a phrase as an ancestor of the word there) and every book word lists its location, and
 // completion finds exactly the terms with each prefix. Prints every term with its properties, then each
-// book, for expect_output.py to compare.
+// book, for expect_output.py to compare. --by-spelling prints the terms, synonyms and antonyms in
+// std::string order instead of the library's, so dumps of libraries that differ only in order compare
+// equal; --no-checks skips the checks, for full-size libraries.
 #include <dlfcn.h>
 
 #include <algorithm>
@@ -62,6 +64,7 @@ MM_FUNCTIONS(MM_DECLARE)
 namespace
 {
     std::vector<std::string> problems;
+    bool by_spelling = false;
 
 
     void problem(std::string const & message)
@@ -298,10 +301,21 @@ namespace
     }
 
 
+    std::vector<int> printed_order(std::vector<int> indexes)
+    {
+        if (by_spelling)
+            std::sort(indexes.begin(), indexes.end(), [](int a, int b) { return term(a) < term(b); });
+        return indexes;
+    }
+
+
     void print_terms()
     {
         std::cout << mm_count() << " terms\n";
+        std::vector<int> all(mm_count());
         for (int i = 0; i < mm_count(); ++i)
+            all[i] = i;
+        for (int i : printed_order(all))
         {
             std::cout << "[" << term(i) << "]";
 
@@ -328,10 +342,10 @@ namespace
             int linked_count = 0;
             mm_synonyms(i, &linked, &linked_count);
             if (linked_count > 0)
-                std::cout << " syn=" << terms(as_vector(linked, linked_count), "synonym", i);
+                std::cout << " syn=" << terms(printed_order(as_vector(linked, linked_count)), "synonym", i);
             mm_antonyms(i, &linked, &linked_count);
             if (linked_count > 0)
-                std::cout << " ant=" << terms(as_vector(linked, linked_count), "antonym", i);
+                std::cout << " ant=" << terms(printed_order(as_vector(linked, linked_count)), "antonym", i);
             mm_embedded(i, &linked, &linked_count);
             if (linked_count > 0)
                 std::cout << " embedded=" << terms(as_vector(linked, linked_count), "embedded word", i);
@@ -401,12 +415,22 @@ namespace
 
 int main(int argc, char ** argv)
 {
-    if (argc != 2)
+    bool checks = true;
+    int arg = 1;
+    for (; arg < argc - 1; ++arg)
+        if (std::string(argv[arg]) == "--by-spelling")
+            by_spelling = true;
+        else if (std::string(argv[arg]) == "--no-checks")
+            checks = false;
+        else
+            break;
+    if (arg != argc - 1)
     {
-        std::cerr << "usage: " << argv[0] << " <libmatchmaker.so>" << std::endl;
+        std::cerr << "usage: " << argv[0] << " [--by-spelling] [--no-checks] <libmatchmaker.so>"
+                  << std::endl;
         return 2;
     }
-    void * library = dlopen(argv[1], RTLD_NOW | RTLD_LOCAL);
+    void * library = dlopen(argv[arg], RTLD_NOW | RTLD_LOCAL);
     if (library == nullptr)
     {
         std::cerr << "dlopen: " << dlerror() << std::endl;
@@ -421,11 +445,14 @@ int main(int argc, char ** argv)
     }
     MM_FUNCTIONS(MM_RESOLVE)
 
-    check_terms();
-    check_longest();
-    check_ordinal_summation();
-    check_completion();
-    check_locations();
+    if (checks)
+    {
+        check_terms();
+        check_longest();
+        check_ordinal_summation();
+        check_completion();
+        check_locations();
+    }
     print_terms();
     print_books();
 

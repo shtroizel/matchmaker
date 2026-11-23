@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 3.16.3)
 #     time_compiles  scripts/time_compile.py, the launcher build_and_install.py --time_compiles runs
 #                each compile through
 #     link       workspace_common's linker choice, link pool estimate and library size check
+#     order      order.py's sort rules on fixtures/order, and its today rule against matchable's
 #     reader0    the stage 0 data reader, on small fixture data
 #     full_data  the stage 0 data reader on all of data_reader/data (about 45 s; -LE full_data skips it)
 #     mini_build build_and_install.py on the fixture data, then the library it installs, again with -e,
@@ -326,6 +327,43 @@ set_tests_properties(options_refuse_memory_usage_limit PROPERTIES
 
 
 
+
+# order: order.py sorts fixtures/order/words.txt by each rule as fixtures/order/<rule>.txt shows
+# (bytes.txt matches LC_ALL=C sort), its today rule agrees with matchable::str_lt_str, and check passes
+# only sorted lines
+set(ORDER_FIXTURES ${FIXTURES}/order)
+foreach(rule today bytes folded)
+    add_test(
+        NAME order_sort_${rule}
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+                ${ORDER_FIXTURES}/${rule}.txt
+                ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/order.py
+                sort ${rule} ${ORDER_FIXTURES}/words.txt
+    )
+    add_test(
+        NAME order_check_${rule}
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/order.py check ${rule}
+                ${ORDER_FIXTURES}/${rule}.txt
+    )
+    add_test(
+        NAME order_check_${rule}_refuses
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/order.py check ${rule}
+                ${ORDER_FIXTURES}/words.txt
+    )
+    set_tests_properties(order_sort_${rule} order_check_${rule} PROPERTIES LABELS order)
+    set_tests_properties(order_check_${rule}_refuses PROPERTIES LABELS order WILL_FAIL TRUE)
+endforeach()
+add_executable(order_today_check order_today_check.cpp)
+target_compile_options(order_today_check PRIVATE -Wall -Werror -Wextra -fsigned-char)
+add_test(
+    NAME order_today_matches_matchable
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py ${ORDER_FIXTURES}/today.txt
+            $<TARGET_FILE:order_today_check> ${ORDER_FIXTURES}/words.txt
+)
+set_tests_properties(order_today_matches_matchable PROPERTIES LABELS order)
+
+
+
 # mini_build: the whole matchmaker build (build_and_install.py, both stages, without these tests) from the
 # fixture data, about 4 minutes; mini_library checks the library it installs and compares a dump of it with
 # expected/mini_library.txt; mini_build_compiles checks the --time_compiles log it writes
@@ -367,6 +405,14 @@ add_test(
             $<TARGET_FILE:mini_library_check> ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
 )
 set_tests_properties(mini_library PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_library)
+add_test(
+    NAME mini_library_by_spelling
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+            ${READER0_EXPECTED}/mini_library_by_spelling.txt
+            $<TARGET_FILE:mini_library_check> --by-spelling
+            ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
+)
+set_tests_properties(mini_library_by_spelling PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_library)
 
 # mini_export: the same build with -e, which exports every symbol and installs a type header per leaf;
 # mini_export_units builds two units of words against that install and loads, unloads and swaps them
