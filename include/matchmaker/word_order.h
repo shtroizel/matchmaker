@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+#include <cstring>
 #include <string>
 
 
@@ -18,11 +20,37 @@ inline std::string mm_word_key(std::string const & word)
 }
 
 
+// compares the keys of two words where they are, without building the keys: negative when l's key is
+// first, 0 when the keys are the same, positive when r's key is first
+inline int mm_word_key_compare(char const * l, size_t l_length, char const * r, size_t r_length)
+{
+    size_t const length = l_length < r_length ? l_length : r_length;
+    for (size_t i = 0; i < length; ++i)
+    {
+        unsigned char lc = (unsigned char) l[i];
+        unsigned char rc = (unsigned char) r[i];
+        if (lc >= 'A' && lc <= 'Z')
+            lc = (unsigned char) (lc - 'A' + 'a');
+        if (rc >= 'A' && rc <= 'Z')
+            rc = (unsigned char) (rc - 'A' + 'a');
+        if (lc != rc)
+            return lc < rc ? -1 : 1;
+    }
+    return l_length < r_length ? -1 : (l_length > r_length ? 1 : 0);
+}
+
+
+// compares two words where they are, by key and then by the words themselves: negative when l is first,
+// 0 when they are the same word, positive when r is first
+inline int mm_word_compare(char const * l, size_t l_length, char const * r, size_t r_length)
+{
+    int const keys = mm_word_key_compare(l, l_length, r, r_length);
+    // the same key means the same length
+    return keys != 0 ? keys : std::memcmp(l, r, l_length);
+}
+
+
 inline bool mm_word_less(std::string const & l, std::string const & r)
 {
-    std::string const l_key = mm_word_key(l);
-    std::string const r_key = mm_word_key(r);
-    if (l_key != r_key)
-        return l_key < r_key;
-    return l < r;
+    return mm_word_compare(l.data(), l.size(), r.data(), r.size()) < 0;
 }

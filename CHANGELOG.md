@@ -23,7 +23,9 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   link with lld): a mini build with `--linker=lld`, checked for lld in every library and against
   mini_library
 - `--leaf_budget=<words>` in build_and_install.py (default 170): the most words in a leaf
-- `include/matchmaker/word_order.h`: mm_word_key() and mm_word_less(), matchmaker's word order
+- `include/matchmaker/word_order.h`: mm_word_key() and mm_word_less(), matchmaker's word order, and
+  mm_word_key_compare() and mm_word_compare(), which compare words where they are
+- mini_library_check fails when mm_lookup(), mm_lookup_any_case(), mm_complete() or mm_at() allocates
 - mm_lookup_any_case(term, start, length) returns every case form of a term as one range
 - `-e` installs `include/matchmaker/leaf_types/leaf_list`, each leaf's name and first word in term order,
   so a unit can find the leaf a word belongs in
@@ -35,8 +37,13 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   writes with the same content keep their earlier modification times
 - `--time_compiles=<file>` works with `-r` and `-l`: a kept build logs to the file given, and changing the
   file no longer compiles everything again
-- Requires matchable 16.0.0 (unreleased: matchable's dev branch at d085397), which compares names as
-  unsigned bytes and lets each leaf declare its sort key
+- Requires matchable 16.0.0 (unreleased: matchable's names-search branch at 3d59e9d), which compares
+  names as unsigned bytes, lets each leaf declare its sort key and lets matchmaker search a leaf's names
+  with its own comparison
+- mm_lookup(), mm_lookup_any_case() and mm_complete() search the leaves' first words and then one leaf's
+  names, comparing words where they are: none of them allocates, and mm_complete() takes O(log N) string
+  comparisons however many terms match. Each leaf gives its names table (mm_names_<leaf>) instead of a
+  lookup function
 - Words sort in matchmaker's own order instead of matchable's: by the word with its ASCII letters
   lowercased, then by the word itself, so a word's case forms sit together, capitals first (Apple, apple,
   apply). Symbols and digits no longer all sort before letters. Every leaf declares the order with

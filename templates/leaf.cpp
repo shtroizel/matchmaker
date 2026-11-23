@@ -78,9 +78,9 @@ std::string const & mm_at_snth(int index)
 }
 
 
-int mm_lookup_snth(std::string const & word, bool * found)
+matchable::VariantNames const & mm_names_snth()
 {
-    return word_snth::variants_by_string_index_of(word, found);
+    return word_snth::Iword_snth::variant_names();
 }
 
 

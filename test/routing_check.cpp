@@ -1,7 +1,7 @@
 // routing_check <leaf list> <tree.cmake>
 // Checks that the generated leaf table (generate_code.py from a stage 0 leaf list, read by src/tree.cpp)
 // sends each term to the last leaf whose first word is not after it: linked with a tree_data.cpp built on
-// stub_leaves.h, so tree::lookup() returns the index of the leaf a term reaches.
+// stub_leaves.h, and tree::leaf_of() gives the leaf a term reaches.
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -132,7 +132,7 @@ int main(int argc, char ** argv)
         int const after = (int) (std::upper_bound(firsts.begin(), firsts.end(), term, mm_word_less)
                                  - firsts.begin());
         int const want = std::max(0, after - 1);
-        int const got = tree::lookup(term, nullptr);
+        int const got = tree::leaf_of(term.data(), term.size());
         if (got != want)
             fail("\"" + term + "\" reaches leaf " + std::to_string(got) + ", expected " +
                  std::to_string(want));

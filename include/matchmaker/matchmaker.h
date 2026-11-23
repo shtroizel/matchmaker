@@ -389,7 +389,7 @@ void mm_locations(
 /**
  * retrieve all terms beginning with a given prefix, in any case: "ab" and "AB" both complete to Abbey,
  * abbey and ABBA, which sit together in the dictionary.
- * the complexity for this function is O(log N * log K), where K is the number of matching terms.
+ * the complexity for this function is O(log N) string comparisons, however many terms match.
  *     completing the entire dictionary (when prefix is empty) shortcuts to O(1).
  * @param[in] prefix
  *     prefix to complete

@@ -2,8 +2,8 @@
 // Loads a matchmaker library built from small data and checks how its parts agree: every term looks itself
 // up, terms are in strict order, cross-links (synonyms, antonyms, embedded words, definitions) are terms,
 // the longest and ordinal summation tables agree with the terms, every book location holds the term that
-// lists it (a phrase as an ancestor of the word there) and every book word lists its location, and
-// completion finds exactly the terms with each prefix. Prints every term with its properties, then each
+// lists it (a phrase as an ancestor of the word there) and every book word lists its location,
+// completion finds exactly the terms with each prefix, and lookups and completion allocate nothing. Prints every term with its properties, then each
 // book, for expect_output.py to compare. --by-spelling prints the terms, synonyms and antonyms in
 // std::string order instead of the library's, so dumps of libraries that differ only in order compare
 // equal; --no-checks skips the checks, for full-size libraries.
@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <set>
 #include <string>
@@ -62,6 +63,25 @@ MM_FUNCTIONS(MM_DECLARE)
 // needed only by the checks, so --no-checks can dump libraries built before it
 void (*mm_lookup_any_case)(char const *, int *, int *) = nullptr;
 
+
+
+// counts every allocation in the process, the library's too: a program's operator new replaces the
+// standard library's everywhere
+static long allocations = 0;
+
+
+void * operator new(std::size_t size)
+{
+    ++allocations;
+    void * const p = std::malloc(size);
+    if (nullptr == p)
+        std::abort();
+    return p;
+}
+
+
+void operator delete(void * p) noexcept { std::free(p); }
+void operator delete(void * p, std::size_t) noexcept { std::free(p); }
 
 
 namespace
@@ -257,6 +277,40 @@ namespace
                         std::to_string(length) + ", expected " + std::to_string(expected_start) + " +" +
                         std::to_string(matches.size()));
         }
+    }
+
+
+    // matchmaker.h promises that no call allocates: finding a term, its case forms and its completions
+    // compare terms where they are
+    void check_no_allocations()
+    {
+        std::vector<std::string> ts;
+        for (int i = 0; i < mm_count(); ++i)
+            ts.push_back(term(i));
+        ts.push_back("a term that is not in any dictionary");
+        size_t longest = 0;
+        for (auto const & t : ts)
+            longest = std::max(longest, t.size());
+        if (longest <= sizeof(std::string))
+            problem("no term is too long for a std::string's own buffer, so allocations would not show");
+
+        long const before = allocations;
+        int sum = 0;
+        for (auto const & t : ts)
+        {
+            bool found = false;
+            int start = 0;
+            int length = 0;
+            sum += mm_lookup(t.c_str(), &found);
+            mm_lookup_any_case(t.c_str(), &start, &length);
+            sum += start + length;
+            mm_complete(t.c_str(), &start, &length);
+            sum += start + length + mm_at(start, &length)[0];
+        }
+        if (allocations != before)
+            problem("mm_lookup, mm_lookup_any_case, mm_complete and mm_at allocated " +
+                    std::to_string(allocations - before) + " times for " + std::to_string(ts.size()) +
+                    " terms (" + std::to_string(sum) + ")");
     }
 
 
@@ -506,6 +560,7 @@ int main(int argc, char ** argv)
         check_ordinal_summation();
         check_completion();
         check_lookup_any_case();
+        check_no_allocations();
         check_locations();
     }
     print_terms();

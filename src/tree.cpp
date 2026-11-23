@@ -48,32 +48,49 @@ namespace tree
     }
 
 
-    int lookup(std::string const & term, bool * found)
+    int first_index(int leaf)
     {
-        if (nullptr != found)
-            *found = false;
+        return offsets()[leaf];
+    }
 
-        if (term.empty())
-            return 0;
 
-        // the last leaf whose first term is not after term, or the first leaf for terms before every leaf
+    int leaf_of(char const * term, size_t length)
+    {
         int first = 0;
-        int count = leaf_count;
-        while (count > 0)
+        int remaining = leaf_count;
+        while (remaining > 0)
         {
-            int const step = count / 2;
+            int const step = remaining / 2;
             int const middle = first + step;
-            if (mm_word_less(term, first_terms[middle]))
+            if (mm_word_compare(term, length, first_terms[middle], std::strlen(first_terms[middle])) < 0)
             {
-                count = step;
+                remaining = step;
             }
             else
             {
                 first = middle + 1;
-                count -= step + 1;
+                remaining -= step + 1;
             }
         }
-        int const leaf = first == 0 ? 0 : first - 1;
-        return leaves[leaf].lookup(term, found) + offsets()[leaf];
+        return first == 0 ? 0 : first - 1;
+    }
+
+
+    int lookup(char const * term, size_t length, bool * found)
+    {
+        if (nullptr != found)
+            *found = false;
+
+        if (length == 0)
+            return 0;
+
+        int const leaf = leaf_of(term, length);
+        ::matchable::VariantNames const & names = leaves[leaf].names();
+        int const position = names.lower_bound_by(
+            [&](char const * name, size_t name_length)
+                { return mm_word_compare(name, name_length, term, length) < 0; });
+        if (nullptr != found)
+            *found = position != names.size() && names.equals(position, term, length);
+        return position + offsets()[leaf];
     }
 }
