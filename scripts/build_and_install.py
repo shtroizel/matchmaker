@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import hashlib
 import os
 import multiprocessing
 import shutil
@@ -22,21 +23,23 @@ def usage():
     print('                                    * relative paths are relative to <build_dir>\n')
     print('    -c  --clang                   build with clang')
     print('                                    * use system compiler by default\n')
-    print('    -r  --retain                  retain previous build')
-    print('                                    * continuation/incremental building')
-    print('                                    * implies \'-l\'\n')
+    print('    -r  --retain                  continue the previous build')
+    print('                                    * stage 0 is skipped when its workspace exists')
+    print('                                    * stage 1 is skipped when its workspace exists, unless -f')
+    print('                                    * compiles continue incrementally\n')
     print('    -l  --retain_leaves           retain most of previous build')
-    print('                                    * parents are rebuilt')
+    print('                                    * the leaf table is regenerated')
     print('                                    * matchmaker interface is rebuilt')
     print('                                    * leaves are left alone')
     print('                                    * skips building of matchable')
     print('                                    * skips building and running of data readers\n')
     print('    -f  --force_stage_1           force stage 1 complete rebuild even when incremental')
-    print('                                    * incremental as having -r or -l options\n')
+    print('                                    * with -r or -l: stage 1\'s data reader is built and run')
+    print('                                      again; with -r its workspace is also recreated\n')
     print('    -j  --jobs                    max jobs')
     print('                                    * default is cpu count [' +                                 \
             str(multiprocessing.cpu_count()) + ']\n')
-    print('    -a, --atomic_libs             instead of multi-libs, each prefix gets its own lib')
+    print('    -a, --atomic_libs             instead of multi-libs, each leaf gets its own lib')
     print('                                    * increases startup time for programs 80x')
     print('                                    * adds \'_atomic\' suffix to build_dir')
     print('                                    * adds \'_atomic\' suffix to library name in install_dir')
@@ -70,9 +73,13 @@ def usage():
     print('                                      as -fuse-ld=<linker>')
     print('                                    * default: the compiler\'s own linker')
     print('                                    * without it, gold when installed\n')
+    print('    --leaf_budget=<words>         the most words in a leaf (default 170)')
+    print('                                    * leaves are cut by content (leaf_cuts.h)')
+    print('                                    * smaller budgets give more, smaller leaves (mini builds)\n')
     print('    --time_compiles=<file>        append "<seconds> <peak RSS KB> <source>" to file per compile')
     print('                                    * covers matchable, the data readers and both stages')
-    print('                                    * applies to build directories configured with it')
+    print('                                    * turning it on or off for a kept build (-r, -l) compiles')
+    print('                                      everything again; changing the file does not')
     print('                                    * Linux and macOS\n')
 
 
@@ -88,6 +95,36 @@ def generator_args(build_dir):
     if os.name == 'nt' or which('ninja') is not None:
         return ['-G', 'Ninja']
     return []
+
+
+
+# the content digest and modification time of each file under root, by path relative to root
+def file_states(root):
+    def state(path):
+        with open(path, 'rb') as f:
+            digest = hashlib.blake2b(f.read()).digest()
+        return digest, os.stat(path).st_mtime_ns
+    paths = [os.path.join(d, n) for d, _, names in os.walk(root) for n in names]
+    with ThreadPoolExecutor() as pool:
+        states = list(pool.map(state, paths))
+    return {os.path.relpath(p, root): st for p, st in zip(paths, states)}
+
+
+
+# gives each file under root that holds what it held before its earlier modification time, so a stage 1
+# that writes its workspace again compiles only the files whose content changed
+def keep_unchanged_times(root, before):
+    for path, (digest, mtime) in file_states(root).items():
+        if path in before and before[path][0] == digest and before[path][1] != mtime:
+            full = os.path.join(root, path)
+            os.utime(full, ns=(os.stat(full).st_atime_ns, before[path][1]))
+
+
+
+# a retained build directory caches the compile launcher, so each configure sets it again (empty without
+# --time_compiles); the log is named in MM_TIME_COMPILES, so a new log keeps the compile commands
+def launcher_args():
+    return ['-DCMAKE_CXX_COMPILER_LAUNCHER=' + os.environ.get('CMAKE_CXX_COMPILER_LAUNCHER', '')]
 
 
 
@@ -118,7 +155,7 @@ def run_tests(matchmaker_root, test_build_dir, jobs, use_clang):
 
 def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
                       build_dir, install_dir, atomic_libs, q, debug, dictionary, books, skip_tests,
-                      data_dir, export, linker):
+                      data_dir, export, linker, leaf_budget):
 
     start_dir = os.getcwd()
 
@@ -290,7 +327,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
 
             run_data_reader_cmd = [data_reader_stage_0, data_reader_stage_0_data, book_vocabulary_dir,
                                    out_dir, matchmaker_root + 'scripts/parent_prefixes.txt', leaf_list,
-                                   dictionary, books]
+                                   dictionary, books, leaf_budget]
             if subprocess.run(run_data_reader_cmd).returncode != 0:
                 print('\ndata_reader_stage_0 failed')
                 build_cmd_as_str = ''
@@ -338,6 +375,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + stage_0_install_prefix]
     cmake_cmd += generator_args('.')
+    cmake_cmd += launcher_args()
 
     if debug:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
@@ -385,6 +423,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
     os.chdir(matchmaker_root)
 
     stage_1_workspace_dir = build_dir + 'workspace/'
+    stage_1_before = file_states(stage_1_workspace_dir) if os.path.exists(stage_1_workspace_dir) else {}
 
     # always update cmake files
     if os.path.exists(stage_1_workspace_dir):
@@ -425,6 +464,10 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
 
         if not retain_leaves or force_stage_1:
             print('building data reader for stage 1 ...\n\n')
+
+            # the stage 1 reader finds matchable in the final install's include directory, where an earlier
+            # build's matchmaker headers would shadow stage 0's; the final install writes them again
+            shutil.rmtree(abs_install_dir + '/include/matchmaker' + ('_q' if q else ''), ignore_errors=True)
 
             # build and install stage 1 data reader
             build_data_reader_cmd = ['data_reader/stage_1/scripts/build_and_install.py']
@@ -478,11 +521,14 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
     print('\n\nMATCHMAKER!\n\n')
 
     shutil.copy(stage_0_workspace_dir + 'tree.cmake', stage_1_workspace_dir + 'tree.cmake')
+    shutil.copy(stage_0_workspace_dir + 'leaf_list', stage_1_workspace_dir + 'leaf_list')
+    keep_unchanged_times(stage_1_workspace_dir, stage_1_before)
 
     os.chdir(build_dir)
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + abs_install_dir]
     cmake_cmd += generator_args('.')
+    cmake_cmd += launcher_args()
 
     if debug:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
@@ -539,7 +585,7 @@ def main():
                 ['help', 'build_dir=', 'install_dir=', 'clang', 'retain', 'retain_leaves',
                  'force_stage_1', 'jobs=', 'atomic_libs', 'q',
                  'debug', 'export', 'dictionary=', 'books=', 'skip_tests', 'data_dir=', 'time_compiles=',
-                 'linker='])
+                 'linker=', 'leaf_budget='])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -562,6 +608,7 @@ def main():
     data_dir = None
     time_compiles = None
     linker = ''
+    leaf_budget = '170'
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -601,6 +648,11 @@ def main():
             time_compiles = os.path.abspath(a)
         elif o == '--linker':
             linker = a
+        elif o == '--leaf_budget':
+            if not a.isdigit() or int(a) < 1:
+                print('--leaf_budget must be a whole number of at least 1')
+                sys.exit(2)
+            leaf_budget = a
         else:
             assert False, "unhandled option"
 
@@ -631,12 +683,13 @@ def main():
             print('--time_compiles works on Linux and macOS')
             sys.exit(2)
         launcher = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'time_compile.py')
-        os.environ['CMAKE_CXX_COMPILER_LAUNCHER'] = ';'.join([sys.executable, launcher, time_compiles])
+        os.environ['CMAKE_CXX_COMPILER_LAUNCHER'] = ';'.join([sys.executable, launcher])
+        os.environ['MM_TIME_COMPILES'] = time_compiles
         print('timing each compile into ' + time_compiles)
 
     build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs, build_dir,
                       install_dir, atomic_libs, q, debug, dictionary, books, skip_tests, data_dir, export,
-                      linker)
+                      linker, leaf_budget)
 
     exit(0)
 

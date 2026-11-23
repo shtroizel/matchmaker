@@ -2,8 +2,8 @@
 // Loads a matchmaker library built from small data and checks how its parts agree: every term looks itself
 // up, terms are in strict order, cross-links (synonyms, antonyms, embedded words, definitions) are terms,
 // the longest and ordinal summation tables agree with the terms, every book location holds the term that
-// lists it (a phrase as an ancestor of the word there) and every book word lists its location, and
-// completion finds exactly the terms with each prefix. Prints every term with its properties, then each
+// lists it (a phrase as an ancestor of the word there) and every book word lists its location,
+// completion finds exactly the terms with each prefix, and lookups and completion allocate nothing. Prints every term with its properties, then each
 // book, for expect_output.py to compare. --by-spelling prints the terms, synonyms and antonyms in
 // std::string order instead of the library's, so dumps of libraries that differ only in order compare
 // equal; --no-checks skips the checks, for full-size libraries.
@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <set>
 #include <string>
@@ -18,6 +19,7 @@
 #include <vector>
 
 #include <matchable/matchable.h>
+#include <matchmaker/word_order.h>
 
 
 
@@ -58,7 +60,28 @@
 
 #define MM_DECLARE(name, ret, args) ret (*name) args = nullptr;
 MM_FUNCTIONS(MM_DECLARE)
+// needed only by the checks, so --no-checks can dump libraries built before it
+void (*mm_lookup_any_case)(char const *, int *, int *) = nullptr;
 
+
+
+// counts every allocation in the process, the library's too: a program's operator new replaces the
+// standard library's everywhere
+static long allocations = 0;
+
+
+void * operator new(std::size_t size)
+{
+    ++allocations;
+    void * const p = std::malloc(size);
+    if (nullptr == p)
+        std::abort();
+    return p;
+}
+
+
+void operator delete(void * p) noexcept { std::free(p); }
+void operator delete(void * p, std::size_t) noexcept { std::free(p); }
 
 
 namespace
@@ -128,7 +151,7 @@ namespace
             bool found = false;
             if (mm_lookup(t.c_str(), &found) != i || !found)
                 problem("mm_lookup(mm_at(" + std::to_string(i) + ")) does not find " + t);
-            if (i > 0 && !matchable::str_lt_str(mm_at(i - 1, nullptr), t))
+            if (i > 0 && !mm_word_less(mm_at(i - 1, nullptr), t))
                 problem("terms out of order: " + term(i - 1) + ", " + t);
         }
     }
@@ -215,6 +238,8 @@ namespace
     }
 
 
+    // completion ignores case: the terms whose key (word_order.h) starts with the prefix's key, which sit
+    // together; with none, start is where such a term would go
     void check_completion()
     {
         std::set<std::string> prefixes{""};
@@ -222,26 +247,102 @@ namespace
         {
             std::string const t = term(i);
             for (size_t n = 1; n <= t.size(); ++n)
-                prefixes.insert(t.substr(0, n));
+            {
+                std::string const prefix = t.substr(0, n);
+                std::string upper = prefix;
+                for (char & c : upper)
+                    if (c >= 'a' && c <= 'z')
+                        c = (char) (c - 'a' + 'A');
+                prefixes.insert({prefix, upper, mm_word_key(prefix), prefix + "zz"});
+            }
         }
+        std::vector<std::string> keys;
+        for (int i = 0; i < mm_count(); ++i)
+            keys.push_back(mm_word_key(term(i)));
         for (auto const & prefix : prefixes)
         {
             int start = -1;
             int length = -1;
             mm_complete(prefix.c_str(), &start, &length);
-            int expected_start = -1;
-            int expected_length = 0;
-            for (int i = 0; i < mm_count(); ++i)
-                if (term(i).rfind(prefix, 0) == 0)
-                {
-                    if (expected_start == -1)
-                        expected_start = i;
-                    ++expected_length;
-                }
-            if (start != expected_start || length != expected_length)
+            std::string const key = mm_word_key(prefix);
+            std::vector<int> matches;
+            for (int i = 0; i < (int) keys.size(); ++i)
+                if (keys[i].rfind(key, 0) == 0)
+                    matches.push_back(i);
+            int expected_start = (int) (std::lower_bound(keys.begin(), keys.end(), key) - keys.begin());
+            if (!matches.empty() && matches.back() - matches.front() + 1 != (int) matches.size())
+                problem("terms completing \"" + prefix + "\" are not together");
+            if (start != expected_start || length != (int) matches.size())
                 problem("mm_complete(\"" + prefix + "\") gives " + std::to_string(start) + " +" +
                         std::to_string(length) + ", expected " + std::to_string(expected_start) + " +" +
-                        std::to_string(expected_length));
+                        std::to_string(matches.size()));
+        }
+    }
+
+
+    // matchmaker.h promises that no call allocates: finding a term, its case forms and its completions
+    // compare terms where they are
+    void check_no_allocations()
+    {
+        std::vector<std::string> ts;
+        for (int i = 0; i < mm_count(); ++i)
+            ts.push_back(term(i));
+        ts.push_back("a term that is not in any dictionary");
+        size_t longest = 0;
+        for (auto const & t : ts)
+            longest = std::max(longest, t.size());
+        if (longest <= sizeof(std::string))
+            problem("no term is too long for a std::string's own buffer, so allocations would not show");
+
+        long const before = allocations;
+        int sum = 0;
+        for (auto const & t : ts)
+        {
+            bool found = false;
+            int start = 0;
+            int length = 0;
+            sum += mm_lookup(t.c_str(), &found);
+            mm_lookup_any_case(t.c_str(), &start, &length);
+            sum += start + length;
+            mm_complete(t.c_str(), &start, &length);
+            sum += start + length + mm_at(start, &length)[0];
+        }
+        if (allocations != before)
+            problem("mm_lookup, mm_lookup_any_case, mm_complete and mm_at allocated " +
+                    std::to_string(allocations - before) + " times for " + std::to_string(ts.size()) +
+                    " terms (" + std::to_string(sum) + ")");
+    }
+
+
+    // lookup in any case: the terms whose key equals the term's key, which sit together; with none, start
+    // is where such a term would go
+    void check_lookup_any_case()
+    {
+        std::vector<std::string> keys;
+        for (int i = 0; i < mm_count(); ++i)
+            keys.push_back(mm_word_key(term(i)));
+        std::set<std::string> probes{"", "zzzz", "ZZZZ", " "};
+        for (int i = 0; i < mm_count(); ++i)
+        {
+            std::string upper = term(i);
+            for (char & c : upper)
+                if (c >= 'a' && c <= 'z')
+                    c = (char) (c - 'a' + 'A');
+            probes.insert({term(i), upper, keys[i], term(i) + "zz", term(i).substr(1)});
+        }
+        for (auto const & probe : probes)
+        {
+            int start = -1;
+            int length = -1;
+            mm_lookup_any_case(probe.c_str(), &start, &length);
+            std::string const key = mm_word_key(probe);
+            auto const range = std::equal_range(keys.begin(), keys.end(), key);
+            int const expected_start = (int) (range.first - keys.begin());
+            int const expected_end = (int) (range.second - keys.begin());
+            if (start != expected_start || length != expected_end - expected_start)
+                problem("mm_lookup_any_case(\"" + probe + "\") gives " + std::to_string(start) + " +" +
+                        std::to_string(length) + ", expected " + std::to_string(expected_start) + " +" +
+                        std::to_string(expected_end - expected_start));
         }
     }
 
@@ -444,6 +545,13 @@ int main(int argc, char ** argv)
         return 2;                                                                                         \
     }
     MM_FUNCTIONS(MM_RESOLVE)
+    mm_lookup_any_case = reinterpret_cast<void (*)(char const *, int *, int *)>(
+        dlsym(library, "mm_lookup_any_case"));
+    if (checks && nullptr == mm_lookup_any_case)
+    {
+        std::cerr << "missing mm_lookup_any_case" << std::endl;
+        return 2;
+    }
 
     if (checks)
     {
@@ -451,6 +559,8 @@ int main(int argc, char ** argv)
         check_longest();
         check_ordinal_summation();
         check_completion();
+        check_lookup_any_case();
+        check_no_allocations();
         check_locations();
     }
     print_terms();

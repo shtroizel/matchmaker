@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16.3)
 
 # matchmaker checks, labeled by the point in the build they check:
-#     generator  scripts/generate_code.py and src/tree.cpp, with no data read
+#     generator  scripts/generate_code.py and src/tree.cpp (the leaf table), with no data read
 #     options    option parsing in the build scripts (-h comes last, so nothing is built)
 #     time_compiles  scripts/time_compile.py, the launcher build_and_install.py --time_compiles runs
 #                each compile through
@@ -10,9 +10,9 @@ cmake_minimum_required(VERSION 3.16.3)
 #     reader0    the stage 0 data reader, on small fixture data
 #     full_data  the stage 0 data reader on all of data_reader/data (about 45 s; -LE full_data skips it)
 #     mini_build build_and_install.py on the fixture data, then the library it installs, again with -e,
-#                then units of words loaded on top, and again with --linker=lld when the compiler can link
-#                with lld (about 10 minutes; build_and_install.py runs every label but this one before its
-#                stage 0 data reader)
+#                then units of words loaded on top, again with -q, again with --linker=lld when the
+#                compiler can link with lld, and stage 1 again with -r -f (about 15 minutes;
+#                build_and_install.py runs every label but this one before its stage 0 data reader)
 #
 # reader0_* tests compare what the reader keeps with test/fixtures/reader0/expected; after a deliberate
 # change, UPDATE_EXPECTED=1 ctest -R reader0_ rewrites those files (review the diff)
@@ -37,6 +37,7 @@ set(FIXTURES ${CMAKE_CURRENT_SOURCE_DIR}/fixtures)
 
 include_directories(
     ${MATCHMAKER_ROOT}/matchable/include
+    ${MATCHMAKER_ROOT}/include
     ${MATCHMAKER_ROOT}/data_reader/stage_0/src
     ${MATCHMAKER_ROOT}/src
 )
@@ -47,32 +48,15 @@ add_executable(sparse_leaf_list sparse_leaf_list.cpp)
 target_compile_options(sparse_leaf_list PRIVATE -Wall -Werror -Wextra)
 
 
-# routing_<name>: the tree generate_code.py makes from <parents> (all leaves, or "sparse": those
-# sparse_leaf_list names) must send every term to the leaf the stage 0 reader puts it in
-function(add_routing_test name parents leaves)
+# routing_<name>: the leaf table generate_code.py makes from a stage 0 leaf list must send every term to the
+# last leaf whose first word is not after it
+function(add_routing_test name leaf_list)
     set(workspace ${CMAKE_CURRENT_BINARY_DIR}/tree_${name})
-    set(generate_args -p -w ${workspace} -t ${parents})
-    set(check_args ${parents} ${workspace}/tree.cmake)
-    set(depends ${parents} ${GENERATE_CODE})
-    if (leaves STREQUAL "sparse")
-        set(leaf_list ${workspace}/leaf_list)
-        add_custom_command(
-            OUTPUT ${leaf_list}
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${workspace}
-            COMMAND sparse_leaf_list ${parents} > ${leaf_list}
-            DEPENDS sparse_leaf_list ${parents}
-            VERBATIM
-        )
-        list(APPEND generate_args -l ${leaf_list})
-        list(APPEND check_args ${leaf_list})
-        list(APPEND depends ${leaf_list})
-    endif()
-
     add_custom_command(
         OUTPUT ${workspace}/generated_src/tree_data.cpp ${workspace}/tree.cmake
         COMMAND ${CMAKE_COMMAND} -E make_directory ${workspace}/generated_src
-        COMMAND ${Python3_EXECUTABLE} ${GENERATE_CODE} ${generate_args}
-        DEPENDS ${depends}
+        COMMAND ${Python3_EXECUTABLE} ${GENERATE_CODE} -p -w ${workspace} -l ${leaf_list}
+        DEPENDS ${leaf_list} ${GENERATE_CODE}
         VERBATIM
     )
 
@@ -86,17 +70,14 @@ function(add_routing_test name parents leaves)
         COMPILE_OPTIONS "-include;${CMAKE_CURRENT_SOURCE_DIR}/stub_leaves.h"
     )
 
-    add_test(NAME routing_${name} COMMAND routing_${name} ${check_args})
+    add_test(NAME routing_${name} COMMAND routing_${name} ${leaf_list} ${workspace}/tree.cmake)
     set_tests_properties(routing_${name} PROPERTIES LABELS "generator;reader0")
 endfunction()
 
-add_routing_test(small ${FIXTURES}/parents_small.txt all)
-add_routing_test(small_sparse ${FIXTURES}/parents_small.txt sparse)
-add_routing_test(full ${MATCHMAKER_ROOT}/scripts/parent_prefixes.txt all)
-add_routing_test(full_sparse ${MATCHMAKER_ROOT}/scripts/parent_prefixes.txt sparse)
+add_routing_test(small ${FIXTURES}/leaf_list_small.txt)
 
 
-# generate_code.py refuses bad input with a message naming the problem
+# generate_code.py refuses bad leaf lists with a message naming the problem
 function(add_generator_refusal_test name expected)
     add_test(
         NAME generator_refuses_${name}
@@ -109,18 +90,28 @@ function(add_generator_refusal_test name expected)
     )
 endfunction()
 
-add_generator_refusal_test(too_deep "parent prefix deeper than 5" -t ${FIXTURES}/parents_too_deep.txt)
-add_generator_refusal_test(bad_symbol "unknown symbol \"xyz\"" -t ${FIXTURES}/parents_bad_symbol.txt)
-add_generator_refusal_test(orphan "parent prefix \"a b\" lacks parent \"a\""
-    -t ${FIXTURES}/parents_orphan.txt
+add_generator_refusal_test(no_list "a leaf list is required")
+add_generator_refusal_test(empty "no leaves" -l ${FIXTURES}/leaf_list_empty.txt)
+add_generator_refusal_test(no_word "line 2: expected a leaf name and its first word"
+    -l ${FIXTURES}/leaf_list_no_word.txt
 )
-add_generator_refusal_test(not_a_leaf "1 leaves are not leaves of the tree"
-    -t ${FIXTURES}/parents_small.txt -l ${FIXTURES}/leaf_list_not_a_leaf.txt
+add_generator_refusal_test(bad_name "line 2: leaf name \"bad-name\" is not letters, digits and underscores"
+    -l ${FIXTURES}/leaf_list_bad_name.txt
+)
+add_generator_refusal_test(twice "line 2: leaf name \"l00\" appears twice"
+    -l ${FIXTURES}/leaf_list_twice.txt
 )
 
 
-# the stage 0 reader refuses the parent prefix files generate_code.py refuses (read through the reader's
-# routing::parent_of_line by sparse_leaf_list)
+# leaf_cuts: the stage 0 reader's leaf cut rule and leaf names
+add_executable(leaf_cuts_check leaf_cuts_check.cpp)
+target_compile_options(leaf_cuts_check PRIVATE -Wall -Werror -Wextra)
+add_test(NAME leaf_cuts COMMAND leaf_cuts_check)
+set_tests_properties(leaf_cuts PROPERTIES LABELS reader0)
+
+
+# the stage 0 reader refuses bad parent prefix files, which still sort words into buckets while it reads
+# (read through the reader's routing::parent_of_line by sparse_leaf_list)
 function(add_reader_refusal_test name expected parents)
     add_test(NAME reader_refuses_${name} COMMAND sparse_leaf_list ${parents})
     set_tests_properties(reader_refuses_${name} PROPERTIES
@@ -236,7 +227,7 @@ set(BUILD_AND_INSTALL ${MATCHMAKER_ROOT}/scripts/build_and_install.py)
 add_test(
     NAME options_long_values
     COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --jobs=2 --build_dir=b --install_dir=i --debug
-            --time_compiles=t --linker=lld -h
+            --time_compiles=t --linker=lld --leaf_budget=10 -h
 )
 add_test(
     NAME options_long_values_stage_0
@@ -265,6 +256,14 @@ add_test(
 set_tests_properties(options_linker_needs_name PROPERTIES
     LABELS options
     PASS_REGULAR_EXPRESSION "^option --linker requires argument"
+)
+add_test(
+    NAME options_leaf_budget_needs_number
+    COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --leaf_budget=ten -h
+)
+set_tests_properties(options_leaf_budget_needs_number PROPERTIES
+    LABELS options
+    PASS_REGULAR_EXPRESSION "^--leaf_budget must be a whole number of at least 1"
 )
 
 # link: the linker choice and the pool that keeps leaf library links within the machine's memory, a linker
@@ -329,8 +328,8 @@ set_tests_properties(options_refuse_memory_usage_limit PROPERTIES
 
 
 # order: order.py sorts fixtures/order/words.txt by each rule as fixtures/order/<rule>.txt shows
-# (bytes.txt matches LC_ALL=C sort), its today rule agrees with matchable::str_lt_str, and check passes
-# only sorted lines
+# (bytes.txt matches LC_ALL=C sort), check passes only sorted lines, and matchmaker's word order
+# (word_order.h) sorts the ASCII words as order.py's folded rule does (Unicode folding comes later)
 set(ORDER_FIXTURES ${FIXTURES}/order)
 foreach(rule today bytes folded)
     add_test(
@@ -353,14 +352,14 @@ foreach(rule today bytes folded)
     set_tests_properties(order_sort_${rule} order_check_${rule} PROPERTIES LABELS order)
     set_tests_properties(order_check_${rule}_refuses PROPERTIES LABELS order WILL_FAIL TRUE)
 endforeach()
-add_executable(order_today_check order_today_check.cpp)
-target_compile_options(order_today_check PRIVATE -Wall -Werror -Wextra -fsigned-char)
+add_executable(order_word_check order_word_check.cpp)
+target_compile_options(order_word_check PRIVATE -Wall -Werror -Wextra)
 add_test(
-    NAME order_today_matches_matchable
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py ${ORDER_FIXTURES}/today.txt
-            $<TARGET_FILE:order_today_check> ${ORDER_FIXTURES}/words.txt
+    NAME order_word_matches_folded
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+            ${ORDER_FIXTURES}/folded_ascii.txt $<TARGET_FILE:order_word_check> ${ORDER_FIXTURES}/words.txt
 )
-set_tests_properties(order_today_matches_matchable PROPERTIES LABELS order)
+set_tests_properties(order_word_matches_folded PROPERTIES LABELS order)
 
 
 
@@ -368,6 +367,8 @@ set_tests_properties(order_today_matches_matchable PROPERTIES LABELS order)
 # fixture data, about 4 minutes; mini_library checks the library it installs and compares a dump of it with
 # expected/mini_library.txt; mini_build_compiles checks the --time_compiles log it writes
 set(MINI_BUILD ${CMAKE_CURRENT_BINARY_DIR}/mini_build)
+# a small budget, so the fixture words fill several leaves and routing between them is exercised
+set(MINI_LEAF_BUDGET 10)
 set(MINI_BUILD_COMPILES ${CMAKE_CURRENT_BINARY_DIR}/mini_build_compiles.txt)
 include(ProcessorCount)
 ProcessorCount(MINI_BUILD_JOBS)
@@ -379,7 +380,8 @@ set_tests_properties(mini_build_compiles_clear PROPERTIES LABELS mini_build FIXT
 add_test(
     NAME mini_build
     COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -j ${MINI_BUILD_JOBS}
-            --data_dir=${READER0_DATA} -b ${MINI_BUILD}/build -i ${MINI_BUILD}/install
+            --data_dir=${READER0_DATA} --leaf_budget=${MINI_LEAF_BUDGET}
+            -b ${MINI_BUILD}/build -i ${MINI_BUILD}/install
             --time_compiles=${MINI_BUILD_COMPILES}
 )
 set_tests_properties(mini_build PROPERTIES
@@ -414,6 +416,57 @@ add_test(
 )
 set_tests_properties(mini_library_by_spelling PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_library)
 
+# mini_rerun: stage 1 again (-r -f) on mini_build's build with the same data, which compiles nothing in the
+# workspace, then mini_rerun_library checks what it installs; it rewrites the install that mini_library
+# reads, so those tests take turns with it
+set(MINI_RERUN_COMPILES ${CMAKE_CURRENT_BINARY_DIR}/mini_rerun_compiles.txt)
+add_test(NAME mini_rerun_compiles_clear COMMAND ${CMAKE_COMMAND} -E rm -f ${MINI_RERUN_COMPILES})
+set_tests_properties(mini_rerun_compiles_clear PROPERTIES LABELS mini_build FIXTURES_SETUP mini_rerun_start)
+add_test(
+    NAME mini_rerun
+    COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -r -f
+            -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA} --leaf_budget=${MINI_LEAF_BUDGET}
+            -b ${MINI_BUILD}/build -i ${MINI_BUILD}/install
+            --time_compiles=${MINI_RERUN_COMPILES}
+)
+set_tests_properties(mini_rerun PROPERTIES
+    LABELS mini_build
+    FIXTURES_REQUIRED "mini_library;mini_rerun_start"
+    FIXTURES_SETUP mini_rerun
+    TIMEOUT 3600
+)
+add_test(
+    NAME mini_rerun_compiles
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_rerun_check.py
+            ${MINI_RERUN_COMPILES} ${MINI_BUILD}/build
+)
+set_tests_properties(mini_rerun_compiles PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_rerun)
+add_test(
+    NAME mini_rerun_library
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+            ${READER0_EXPECTED}/mini_library.txt
+            $<TARGET_FILE:mini_library_check> ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
+)
+set_tests_properties(mini_rerun_library PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_rerun)
+set_tests_properties(mini_library mini_library_by_spelling mini_rerun mini_rerun_library
+    PROPERTIES RESOURCE_LOCK mini_install)
+
+# mini_q: the same build with -q, which installs under the _q names (matchmaker_q), and mini_q_library runs
+# mini_library_check's checks on what it installs
+set(MINI_Q ${CMAKE_CURRENT_BINARY_DIR}/mini_q)
+add_test(
+    NAME mini_q
+    COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -q
+            -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA} --leaf_budget=${MINI_LEAF_BUDGET}
+            -b ${MINI_Q}/build -i ${MINI_Q}/install
+)
+set_tests_properties(mini_q PROPERTIES LABELS mini_build FIXTURES_SETUP mini_q TIMEOUT 3600)
+add_test(
+    NAME mini_q_library
+    COMMAND mini_library_check ${MINI_Q}/install/lib/matchmaker_q/libmatchmaker.so
+)
+set_tests_properties(mini_q_library PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_q)
+
 # mini_export: the same build with -e, which exports every symbol and installs a type header per leaf;
 # mini_export_units builds two units of words against that install and loads, unloads and swaps them
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -427,7 +480,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         NAME mini_export
         COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -e
                 ${MINI_EXPORT_CLANG} -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA}
-                -b ${MINI_EXPORT}/build -i ${MINI_EXPORT}/install
+                --leaf_budget=${MINI_LEAF_BUDGET} -b ${MINI_EXPORT}/build -i ${MINI_EXPORT}/install
     )
     set_tests_properties(mini_export PROPERTIES LABELS mini_build FIXTURES_SETUP mini_export TIMEOUT 3600)
     add_test(
@@ -454,7 +507,7 @@ if (LINKS_WITH_LLD AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
         NAME mini_lld
         COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s --linker=lld
                 ${MINI_LLD_CLANG} -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA}
-                -b ${MINI_LLD}/build -i ${MINI_LLD}/install
+                --leaf_budget=${MINI_LEAF_BUDGET} -b ${MINI_LLD}/build -i ${MINI_LLD}/install
     )
     set_tests_properties(mini_lld PROPERTIES LABELS mini_build FIXTURES_SETUP mini_lld TIMEOUT 3600)
     add_test(

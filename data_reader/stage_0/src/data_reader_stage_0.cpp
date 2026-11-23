@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <iostream>
@@ -30,6 +31,8 @@
 #include <read_keys.h>
 #include <save_matchables.h>
 
+#include <cstdlib>
+
 
 
 void print_usage();
@@ -38,7 +41,7 @@ void print_usage();
 
 int main(int argc, char ** argv)
 {
-    if (argc < 6 || argc > 8)
+    if (argc < 6 || argc > 9)
     {
         std::cout << "invalid usage!" << std::endl;
         return 2;
@@ -62,11 +65,22 @@ int main(int argc, char ** argv)
     }
     std::cout << "dictionary usage: " << Stage0Data::dictionary_mode() << std::endl;
 
-    if (!select_books(argc == 8 ? argv[7] : "all"))
+    if (!select_books(argc >= 8 ? argv[7] : "all"))
     {
         print_usage();
         return 2;
     }
+    if (argc == 9)
+    {
+        Stage0Data::leaf_budget() = std::atoi(argv[8]);
+        if (Stage0Data::leaf_budget() < 1)
+        {
+            print_usage();
+            return 2;
+        }
+    }
+    std::cout << "leaf budget: " << Stage0Data::leaf_budget() << std::endl;
+
     std::cout << "books:";
     for (auto const & book : selected_books().currently_set())
         std::cout << " " << book;
@@ -108,17 +122,18 @@ int main(int argc, char ** argv)
 
 void print_usage()
 {
-    std::cout << "program expects 5 to 7 arguments:\n"
+    std::cout << "program expects 5 to 8 arguments:\n"
               << "    [1]  data directory\n"
               << "    [2]  book vocabulary directory\n"
               << "    [3]  output directory\n"
-              << "    [4]  parent prefix filename (scripts/parent_prefixes.txt)\n"
-              << "    [5]  leaf list filename (written: the leaves with words)\n"
+              << "    [4]  parent prefix filename (scripts/parent_prefixes.txt): buckets while reading\n"
+              << "    [5]  leaf list filename (written: each leaf's name and first word)\n"
               << "    [6]  dictionary usage (optional, defaults to all), one of:";
     for (auto v : dictionary_usage::variants_by_string())
         std::cout << " " << v;
     std::cout << "\n    [7]  books (optional, defaults to all), all or a comma separated list of:";
     for (auto v : Buch::variants_by_index())
         std::cout << " " << v;
+    std::cout << "\n    [8]  leaf budget (optional, defaults to 170), the most words in a leaf";
     std::cout << std::endl;
 }

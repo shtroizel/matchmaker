@@ -11,6 +11,7 @@
 #endif
 
 #include "Stage1Data.h"
+#include "resolve_word.h"
 
 
 
@@ -148,15 +149,12 @@ bool read_51155(SerialTask::Type task)
                 if (ch == ' ' || ch == '_' || ch == '.' || ch == 10 || ch == 13)
                     break;
 
-                if (ch >= 'A' && ch <= 'Z')
-                    ch += 32;
-
                 update_word_status(status, ch);
                 term += (char) ch;
             }
 
-            term_as_index = mm_lookup(term.c_str(), &found);
-            if (term.empty() || status.is_set(word_status::has_other_symbols::grab()) || !found)
+            found = resolve_lower_first(term, term, term_as_index);
+            if (status.is_set(word_status::has_other_symbols::grab()) || !found)
                 cur_key = "-1";
             else if (!std::binary_search(Stage1Data::nil.as_mutable_key_words().begin(),
                                          Stage1Data::nil.as_mutable_key_words().end(),
@@ -182,18 +180,16 @@ bool read_51155(SerialTask::Type task)
                     if (ch == ' ' || ch == '.' || ch == ',' || ch == 10 || ch == 13)
                         break;
 
-                    if (ch >= 'A' && ch <= 'Z')
-                        ch += 32;
-
                     update_word_status(status, ch);
                     term += (char) ch;
                 }
 
-                term_as_index = mm_lookup(term.c_str(), &found);
+                if (term.empty())
+                    continue;
+                found = resolve_lower_first(term, term, term_as_index);
 
                 // maybe add word
                 if (
-                    term.size() > 0 &&
                     found &&
                     !std::binary_search(Stage1Data::nil.as_mutable_key_words().begin(),
                                         Stage1Data::nil.as_mutable_key_words().end(),

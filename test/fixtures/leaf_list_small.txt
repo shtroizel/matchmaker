@@ -1,0 +1,14 @@
+l00  
+l01 !
+l02 0
+l03 1a
+l04 [x
+l05 A
+l06 a
+l07 a b
+l08 Ab
+l09 ab
+l10 b~
+l11 Z
+l12 z
+l13 {

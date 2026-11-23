@@ -5,6 +5,7 @@
 #include <string>
 
 #include <matchable/MatchableMaker.h>
+#include <matchmaker/word_order.h>
 
 #include <Stage0Data.h>
 #include <routing.h>
@@ -43,7 +44,7 @@ Prefix & Prefix::operator=(Prefix && other)
 
 bool Prefix::operator<(Prefix const & other) const
 {
-    return matchable::str_lt_str(str, other.str);
+    return mm_word_less(str, other.str);
 }
 
 

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-# time_compile.py <log> <compiler command>...
+# MM_TIME_COMPILES=<log> time_compile.py <compiler command>...
 # Compiler launcher behind build_and_install.py --time_compiles: runs the command, then appends
 # "<seconds> <peak RSS KB> <source>" to <log>. Peak RSS covers the compiler and the processes it waits for.
+# The log comes from the environment, so the compile commands stay the same when it changes.
 
 import os
 import resource
@@ -9,8 +10,8 @@ import subprocess
 import sys
 import time
 
-log = sys.argv[1]
-command = sys.argv[2:]
+log = os.environ['MM_TIME_COMPILES']
+command = sys.argv[1:]
 
 source = command[-1]
 for flag, value in zip(command, command[1:]):

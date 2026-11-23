@@ -47,6 +47,6 @@ inline std::vector<std::string> all_leaves(std::set<std::string> const & parents
         for (int c = 32; c <= 126; ++c)
             if (parents.count(parent + (char) c) == 0)
                 leaves.push_back(parent + (char) c);
-    std::sort(leaves.begin(), leaves.end(), matchable::str_lt_str);
+    std::sort(leaves.begin(), leaves.end());
     return leaves;
 }

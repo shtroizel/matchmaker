@@ -22,9 +22,44 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
 - link_refuses_unknown and options_linker_needs_name tests, and mini_lld tests (when the compiler can
   link with lld): a mini build with `--linker=lld`, checked for lld in every library and against
   mini_library
+- `--leaf_budget=<words>` in build_and_install.py (default 170): the most words in a leaf
+- `include/matchmaker/word_order.h`: mm_word_key() and mm_word_less(), matchmaker's word order, and
+  mm_word_key_compare() and mm_word_compare(), which compare words where they are
+- mini_library_check fails when mm_lookup(), mm_lookup_any_case(), mm_complete() or mm_at() allocates
+- mm_lookup_any_case(term, start, length) returns every case form of a term as one range
+- `-e` installs `include/matchmaker/leaf_types/leaf_list`, each leaf's name and first word in term order,
+  so a unit can find the leaf a word belongs in
+- leaf_cuts and generator refusal tests, routing over leaf first words, and `--by-spelling` and
+  `--no-checks` in mini_library_check with order tests (test/order.py) for a later sort order change
 
 ### Changed
-- Requires matchable 15.1.0
+- Running stage 1 again (`-r -f`) compiles only the generated files whose content changed: files it
+  writes with the same content keep their earlier modification times
+- `--time_compiles=<file>` works with `-r` and `-l`: a kept build logs to the file given, and changing the
+  file no longer compiles everything again
+- Requires matchable 16.0.0 (unreleased: matchable's dev branch at 3d59e9d), which compares
+  names as unsigned bytes, lets each leaf declare its sort key and lets matchmaker search a leaf's names
+  with its own comparison
+- mm_lookup(), mm_lookup_any_case() and mm_complete() search the leaves' first words and then one leaf's
+  names, comparing words where they are: none of them allocates, and mm_complete() takes O(log N) string
+  comparisons however many terms match. Each leaf gives its names table (mm_names_<leaf>) instead of a
+  lookup function
+- Words sort in matchmaker's own order instead of matchable's: by the word with its ASCII letters
+  lowercased, then by the word itself, so a word's case forms sit together, capitals first (Apple, apple,
+  apply). Symbols and digits no longer all sort before letters. Every leaf declares the order with
+  MATCHABLE_SORTKEY, and the leaf type headers installed with `-e` carry it too. Alphabetic indexes
+  differ from earlier builds
+- mm_complete() ignores case: "ab" and "AB" both complete to Abbey, abbey and ABBA. Its signature is
+  unchanged. mm_lookup() still matches case exactly
+- The thesaurus readers resolve a word's case with one rule: its exact spelling when the dictionary has
+  it, otherwise its only case form, otherwise it is skipped. 51155, a scanned book with stray capitals,
+  is read in lower case first, so a proper noun with no lower case form, such as Croesus, keeps its synonyms
+- Leaves are ranges of the sorted words instead of prefix tree nodes. The stage 0 reader cuts the words
+  by content: a leaf ends before a word whose hash is 0 mod 60 once it holds 20 words, and always at the
+  budget, so the same words always give the same leaves and an added word usually changes only its own
+  leaf. Leaves are named by up to 4 bytes of their first word and 12 hex digits of its hash, and lookups
+  binary search the leaves' first words. The reader still sorts words into the parent prefix buckets while
+  reading. Term indexes and mm_* answers are unchanged
 - The leaves go into 4 libraries instead of 16 (`LEAFLIB_COUNT`); each holds about a quarter of a
   complete build
 - Every library links with gold where it is available (except on sparc64), the leaf libraries too; gold is

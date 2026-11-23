@@ -26,8 +26,8 @@ failures = []
 def compile_with_launcher(source):
     obj = source + '.o'
     direct = subprocess.run([compiler, '-c', source, '-o', obj], stderr=subprocess.DEVNULL).returncode
-    timed = subprocess.run([sys.executable, launcher, log, compiler, '-c', source, '-o', obj],
-                           stderr=subprocess.PIPE)
+    timed = subprocess.run([sys.executable, launcher, compiler, '-c', source, '-o', obj],
+                           stderr=subprocess.PIPE, env=dict(os.environ, MM_TIME_COMPILES=log))
     if timed.returncode != direct:
         failures.append('%s: exit code %d through the launcher, %d without'
                         % (source, timed.returncode, direct))

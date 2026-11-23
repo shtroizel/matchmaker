@@ -106,6 +106,7 @@ macro(add_lib_finalization lib_name)
         matchmaker_${lib_name}
         PRIVATE
         generated_include
+        ${MATCHMAKER_ROOT}/include
         INTERFACE
         $<BUILD_INTERFACE:${MATCHMAKER_ROOT}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/generated_include>
@@ -170,6 +171,7 @@ target_include_directories(
     matchmaker
     PRIVATE
     ${MATCHMAKER_ROOT}/src
+    ${MATCHMAKER_ROOT}/include
     ${MATCHMAKER_ROOT}/data_reader/stage_0/include
 )
 foreach(lib ${lib_list})
@@ -210,7 +212,9 @@ install(
 
 
 # with EXPORT_ALL, a header per leaf holding only its type, without words or values, for units of words to
-# compile against: leaf_types/<path>.h mirrors generated_matchables/<path>.h
+# compile against: leaf_types/<name>/<name>.h mirrors generated_matchables/<name>/<name>.h, and
+# leaf_types/leaf_list names each leaf and its first word, in term order, so a unit can find the leaf a
+# word belongs in
 if(EXPORT_ALL)
     set(generated_matchables ${CMAKE_CURRENT_SOURCE_DIR}/generated_include/matchmaker/generated_matchables)
     set(leaf_types ${CMAKE_CURRENT_BINARY_DIR}/leaf_types)
@@ -219,7 +223,10 @@ if(EXPORT_ALL)
     foreach(leaf_header ${leaf_headers})
         get_filename_component(prefix ${leaf_header} NAME_WE)
         file(READ ${generated_matchables}/${leaf_header} head LIMIT 65536)
-        string(FIND "${head}" "\nPROPERTYx" begin)
+        string(FIND "${head}" "\nMATCHABLE_SORTKEY(word_${prefix}," begin)
+        if(begin EQUAL -1)
+            string(FIND "${head}" "\nPROPERTYx" begin)
+        endif()
         string(FIND "${head}" ", word_${prefix}" end)
         if(begin EQUAL -1 OR end EQUAL -1 OR end LESS begin)
             message(FATAL_ERROR "no declaration of word_${prefix} in ${leaf_header}")
@@ -229,9 +236,11 @@ if(EXPORT_ALL)
         math(EXPR length "${end} + ${name_length} - ${begin}")
         string(SUBSTRING "${head}" ${begin} ${length} declaration)
         file(WRITE ${leaf_types}/${leaf_header}
-            "#pragma once\n#include <matchable/matchable.h>\n\n${declaration})\n")
+            "#pragma once\n#include <matchable/matchable.h>\n#include \"../../word_order.h\"\n\n"
+            "${declaration})\n")
     endforeach()
     install(DIRECTORY ${leaf_types}/ DESTINATION ${inc_destination}/leaf_types)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/leaf_list DESTINATION ${inc_destination}/leaf_types)
 endif()
 
 

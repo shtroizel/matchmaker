@@ -14,6 +14,7 @@ include_directories(
     ${matchable_DIR}/../../../include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../common
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../include
 )
 
 ##### install extracted data #####

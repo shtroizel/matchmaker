@@ -15,6 +15,7 @@ matchable with by_index required for stage 0 reader
 
 #include <matchmaker/data_reader_common.h>
 #include <matchmaker/parts_of_speech.h>
+#include <matchmaker/word_order.h>
 
 #include <Prefix.h>
 #include <SerialTask.h>
@@ -48,6 +49,8 @@ namespace Stage0Data
     std::string & output_dir();
     std::string & parents_filename();
     std::string & leaves_filename();
+    // the most words in a leaf (leaf_cuts.h)
+    int & leaf_budget();
 
     dictionary_usage::Type & dictionary_mode();
     bool adds_words(SerialTask::Type task);
@@ -63,7 +66,7 @@ namespace Stage0Data
     {
         bool operator()(std::string const & l, std::string const & r) const
         {
-            return matchable::str_lt_str(l, r);
+            return mm_word_less(l, r);
         }
     };
 

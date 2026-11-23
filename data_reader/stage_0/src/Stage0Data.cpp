@@ -14,6 +14,7 @@ namespace Stage0Data
     std::string & output_dir() { static std::string s; return s; }
     std::string & parents_filename() { static std::string s; return s; }
     std::string & leaves_filename() { static std::string s; return s; }
+    int & leaf_budget() { static int budget{170}; return budget; }
 
     dictionary_usage::Type & dictionary_mode() { static dictionary_usage::Type mode; return mode; }
 

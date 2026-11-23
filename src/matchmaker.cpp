@@ -1,5 +1,6 @@
 #include <matchmaker/matchmaker.h>
 
+#include <algorithm>
 #include <array>
 #include <cstring>
 #include <functional>
@@ -8,6 +9,7 @@
 #include <chrono>
 
 #include <matchable/matchable.h>
+#include <matchmaker/word_order.h>
 
 #include <tree.h>
 
@@ -30,7 +32,7 @@ int mm_count()
 
 int mm_lookup(char const * term, bool * found)
 {
-    return tree::lookup(term, found);
+    return tree::lookup(term, strlen(term), found);
 }
 
 
@@ -367,53 +369,41 @@ void mm_locations(
 }
 
 
+void mm_lookup_any_case(char const * term, int * start, int * length)
+{
+    // terms are in key order (word_order.h), so a term's case forms sit together
+    size_t const term_length = strlen(term);
+    *start = tree::first_not_before(
+        [&](char const * t, size_t t_length)
+            { return mm_word_key_compare(t, t_length, term, term_length) < 0; });
+    *length = tree::first_not_before(
+        [&](char const * t, size_t t_length)
+            { return mm_word_key_compare(t, t_length, term, term_length) <= 0; }) - *start;
+}
+
+
 void mm_complete(char const * prefix, int * start, int * length)
 {
     // shortcut empty prefix to everything
-    if (0 == strlen(prefix))
+    size_t const prefix_length = strlen(prefix);
+    if (0 == prefix_length)
     {
         *start = 0;
         *length = mm_count();
         return;
     }
 
-    int const prefix_len = strlen(prefix);
-    auto matches =
-        [&](int index)
+    // terms are in key order (word_order.h), so the terms whose key starts with the prefix's key sit
+    // together: from the first term whose key is not before the prefix's, to the first term whose key,
+    // cut to the prefix's length, is after it
+    *start = tree::first_not_before(
+        [&](char const * t, size_t t_length)
+            { return mm_word_key_compare(t, t_length, prefix, prefix_length) < 0; });
+    *length = tree::first_not_before(
+        [&](char const * t, size_t t_length)
         {
-            int s_len = 0;
-            char const * s = mm_at(index, &s_len);
-            return s_len >= prefix_len && 0 == memcmp(s, prefix, prefix_len);
-        };
-
-    int const first = mm_lookup(prefix, nullptr);
-    int const count = mm_count();
-    *start = first;
-    *length = 0;
-    if (first >= count || !matches(first))
-        return;
-
-    // terms starting with prefix are contiguous: gallop past the last match, then bisect
-    int good = first;
-    int bad = count;
-    for (int step = 1; good + step < count; step *= 2)
-    {
-        if (!matches(good + step))
-        {
-            bad = good + step;
-            break;
-        }
-        good += step;
-    }
-    while (bad - good > 1)
-    {
-        int const mid = good + (bad - good) / 2;
-        if (matches(mid))
-            good = mid;
-        else
-            bad = mid;
-    }
-    *length = bad - first;
+            return mm_word_key_compare(t, std::min(t_length, prefix_length), prefix, prefix_length) <= 0;
+        }) - *start;
 }
 
 

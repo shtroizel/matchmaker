@@ -1,6 +1,9 @@
 #include <tree.h>
 
 #include <algorithm>
+#include <cstring>
+
+#include <matchmaker/word_order.h>
 
 
 
@@ -45,36 +48,49 @@ namespace tree
     }
 
 
-    int lookup(std::string const & term, bool * found)
+    int first_index(int leaf)
+    {
+        return offsets()[leaf];
+    }
+
+
+    int leaf_of(char const * term, size_t length)
+    {
+        int first = 0;
+        int remaining = leaf_count;
+        while (remaining > 0)
+        {
+            int const step = remaining / 2;
+            int const middle = first + step;
+            if (mm_word_compare(term, length, first_terms[middle], std::strlen(first_terms[middle])) < 0)
+            {
+                remaining = step;
+            }
+            else
+            {
+                first = middle + 1;
+                remaining -= step + 1;
+            }
+        }
+        return first == 0 ? 0 : first - 1;
+    }
+
+
+    int lookup(char const * term, size_t length, bool * found)
     {
         if (nullptr != found)
             *found = false;
 
-        if (term.empty())
+        if (length == 0)
             return 0;
 
-        int node{0};
-        for (size_t depth = 0; ; ++depth)
-        {
-            // terms that end before reaching a leaf sort first, with space
-            unsigned char const byte = depth < term.size() ? (unsigned char) term[depth] : ' ';
-            int32_t const slot = parents[node][byte];
-            int const index = slot >> 2;
-            switch (slot & 3)
-            {
-                case parent:
-                    node = index;
-                    break;
-
-                case leaf:
-                    return leaves[index].lookup(term, found) + offsets()[index];
-
-                case missing:
-                    return offsets()[index];
-
-                default:
-                    return 0;
-            }
-        }
+        int const leaf = leaf_of(term, length);
+        ::matchable::VariantNames const & names = leaves[leaf].names();
+        int const position = names.lower_bound_by(
+            [&](char const * name, size_t name_length)
+                { return mm_word_compare(name, name_length, term, length) < 0; });
+        if (nullptr != found)
+            *found = position != names.size() && names.equals(position, term, length);
+        return position + offsets()[leaf];
     }
 }
