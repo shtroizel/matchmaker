@@ -153,7 +153,7 @@ bool read_51155(SerialTask::Type task)
                 term += (char) ch;
             }
 
-            found = resolve_line_start(term, term, term_as_index);
+            found = resolve_lower_first(term, term, term_as_index);
             if (status.is_set(word_status::has_other_symbols::grab()) || !found)
                 cur_key = "-1";
             else if (!std::binary_search(Stage1Data::nil.as_mutable_key_words().begin(),
@@ -163,7 +163,6 @@ bool read_51155(SerialTask::Type task)
         }
         else if (syn || ant)
         {
-            bool line_start = true;
             while (ch != '.')
             {
                 term.clear();
@@ -187,9 +186,7 @@ bool read_51155(SerialTask::Type task)
 
                 if (term.empty())
                     continue;
-                found = line_start ? resolve_line_start(term, term, term_as_index)
-                                   : resolve_word(term, term, term_as_index);
-                line_start = false;
+                found = resolve_lower_first(term, term, term_as_index);
 
                 // maybe add word
                 if (

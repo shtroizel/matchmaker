@@ -37,10 +37,10 @@ inline bool resolve_word(std::string const & word, std::string & spelling, int &
 }
 
 
-// the 51155 thesaurus capitalizes the first word of each KEY, SYN and ANT line as typography, so that word
-// means its lower case form, or, when the dictionary lacks that, its only case form
-// (experiments/case_51155_2026-11-22)
-inline bool resolve_line_start(std::string const & word, std::string & spelling, int & index)
+// the 51155 thesaurus is a scanned book that capitalizes words as typography at the start of its lines and
+// at random within them, so its words mean their lower case form, or, when the dictionary lacks that,
+// their only case form (experiments/case_51155_2026-11-22)
+inline bool resolve_lower_first(std::string const & word, std::string & spelling, int & index)
 {
     return resolve_word(mm_word_key(word), spelling, index);
 }

@@ -41,9 +41,8 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
 - mm_complete() ignores case: "ab" and "AB" both complete to Abbey, abbey and ABBA. Its signature is
   unchanged. mm_lookup() still matches case exactly
 - The thesaurus readers resolve a word's case with one rule: its exact spelling when the dictionary has
-  it, otherwise its only case form, otherwise it is skipped. The 51155 reader no longer lowercases every
-  word, so proper nouns keep their synonyms; only the first word of each KEY, SYN and ANT line, which 51155
-  capitalizes as typography, is read in lower case first
+  it, otherwise its only case form, otherwise it is skipped. 51155, a scanned book with stray capitals,
+  is read in lower case first, so a proper noun with no lower case form, such as Croesus, keeps its synonyms
 - Leaves are ranges of the sorted words instead of prefix tree nodes. The stage 0 reader cuts the words
   by content: a leaf ends before a word whose hash is 0 mod 60 once it holds 20 words, and always at the
   budget, so the same words always give the same leaves and an added word usually changes only its own
