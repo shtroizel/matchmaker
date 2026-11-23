@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-# mini_export_check.py <c++ compiler> <compiler id> <install dir> <work dir>
+# mini_export_check.py <c++ compiler> <compiler id> <install dir> <work dir> [<toolchain dir>]
 # Builds test/mini_export/check.cpp and both versions of test/mini_export/unit.cpp against a matchmaker
 # install made with build_and_install.py -e, using the type header it installs for the leaf that holds
-# Abzz1 to Abzz3 (found in the installed leaf_list), then runs the check with the two units.
+# Abzz1 to Abzz3 (found in the installed leaf_list), then runs the check with the two units. With a
+# toolchain dir, the pinned toolchain that built the install builds them, with libc++ linked in.
+import glob
 import os
 import subprocess
 import sys
 
 cxx, cxx_id, install_dir, work_dir = sys.argv[1:5]
+toolchain = sys.argv[5] if len(sys.argv) > 5 else ''
 src_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'mini_export')
 lib_dir = os.path.join(install_dir, 'lib', 'matchmaker')
 os.makedirs(work_dir, exist_ok=True)
@@ -36,6 +39,15 @@ if any(leaf_of(w, leaves) != leaf for w in (b'Abzz2', b'Abzz3')):
 common = [cxx, '-std=c++20', '-O2', '-Wall', '-Werror', '-Wextra', '-DMATCHABLE_OMIT_BY_INDEX',
           '-DLEAF=word_' + leaf, '-DLEAF_TYPE_HEADER=<matchmaker/leaf_types/%s/%s.h>' % (leaf, leaf),
           '-I' + os.path.join(install_dir, 'include')]
+link = []
+if toolchain:
+    common[0] = os.path.join(toolchain, 'bin', 'clang++')
+    common.append('-stdlib=libc++')
+    cxx_id = 'Clang'
+    link = ['-fuse-ld=lld', '-nostdlib++']
+    for name in ('c++', 'c++abi', 'unwind'):
+        link += glob.glob(os.path.join(toolchain, 'lib', '**', 'lib%s.a' % name), recursive=True)[:1]
+    link.append('-lpthread')
 if cxx_id == 'GNU':
     common.append('-Wno-dangling-reference')
 
@@ -48,7 +60,7 @@ units = []
 for version in (1, 2):
     unit = os.path.join(work_dir, 'unit_%d.so' % version)
     cmd = common + unit_flags + ['-DUNIT_VERSION=%d' % version, os.path.join(src_dir, 'unit.cpp'),
-                                 '-o', unit]
+                                 '-o', unit] + link
     if subprocess.run(cmd).returncode != 0:
         print('building unit %d failed' % version)
         sys.exit(1)
@@ -57,7 +69,7 @@ for version in (1, 2):
 # the check exports its symbols too, so it shares one registry with the library and the units
 check = os.path.join(work_dir, 'mini_export_check')
 cmd = common + [os.path.join(src_dir, 'check.cpp'), '-o', check, '-rdynamic', '-L' + lib_dir,
-                '-lmatchmaker', '-Wl,-rpath,' + lib_dir, '-ldl']
+                '-lmatchmaker', '-Wl,-rpath,' + lib_dir, '-ldl'] + link
 if subprocess.run(cmd).returncode != 0:
     print('building mini_export_check failed')
     sys.exit(1)

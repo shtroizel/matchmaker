@@ -100,6 +100,16 @@ scripts/build_and_install.py
 scripts/build_and_install.py -b build_2020-12-08 -i ../install_2020-12-08
 ```
 
+### example: building with the pinned toolchain
+```
+scripts/build_and_install.py --toolchain=<LLVM install>
+```
+`--toolchain` builds matchable, the data readers and both stages with the clang, lld and libc++ of one
+LLVM install (pinned: LLVM 23.1.6, built with clang, lld, libcxx, libcxxabi and libunwind). libc++ is
+linked into each library, so the install needs no C++ runtime beside it and loads into programs built with
+any compiler. The tests build with the system compiler; with `-DMM_TOOLCHAIN=<LLVM install>` (or
+`MM_TOOLCHAIN` in the environment) their mini builds use the toolchain. Needs cmake 3.21 or newer
+
 ### example: loading units of words at run time
 ```
 scripts/build_and_install.py -e

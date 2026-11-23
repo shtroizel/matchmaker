@@ -8,6 +8,13 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
 ## [Unreleased]
 
 ### Added
+- `--toolchain=<LLVM install>` in build_and_install.py builds matchable, the data readers and both
+  stages with the pinned toolchain: the clang, lld and libc++ of one LLVM install
+  (workspace_common/pinned_toolchain.cmake). libc++, libc++abi and libunwind are linked into each library,
+  so an install loads into programs built with any compiler. The tests keep the system compiler
+- `MM_TOOLCHAIN` for the tests (CMake option or environment): every mini build uses the pinned toolchain,
+  mini_toolchain checks that it compiled and linked each library, and mini_export_units builds its units
+  with it
 - `-e` (`--export`) in build_and_install.py exports every symbol and installs a type header per leaf in
   `include/matchmaker/leaf_types/`, so units of words compiled with MATCHABLE_UNLOADABLE can be loaded and
   unloaded at run time. Programs start slower with it

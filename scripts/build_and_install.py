@@ -23,6 +23,13 @@ def usage():
     print('                                    * relative paths are relative to <build_dir>\n')
     print('    -c  --clang                   build with clang')
     print('                                    * use system compiler by default\n')
+    print('    --toolchain=<dir>             build with the pinned toolchain in an LLVM install')
+    print('                                    * its clang, lld and libc++ build matchable, the data')
+    print('                                      readers and both stages')
+    print('                                    * libc++ is linked into each library, so the install loads')
+    print('                                      into programs built with any compiler')
+    print('                                    * the tests still build with the system compiler')
+    print('                                    * needs cmake 3.21 or newer\n')
     print('    -r  --retain                  continue the previous build')
     print('                                    * stage 0 is skipped when its workspace exists')
     print('                                    * stage 1 is skipped when its workspace exists, unless -f')
@@ -128,8 +135,24 @@ def launcher_args():
 
 
 
+# cmake reads its toolchain file from the environment, so matchable's and the data readers' build scripts
+# configure with the pinned toolchain too
+def use_toolchain(toolchain):
+    os.environ['MM_TOOLCHAIN'] = toolchain
+    os.environ['CMAKE_TOOLCHAIN_FILE'] = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), '..', 'workspace_common', 'pinned_toolchain.cmake')
+
+
+
+def cmake_version():
+    words = subprocess.run(['cmake', '--version'], stdout=subprocess.PIPE).stdout.decode().split()
+    return tuple(int(n) for n in words[2].split('-')[0].split('.')[:2])
+
+
+
 def run_tests(matchmaker_root, test_build_dir, jobs, use_clang):
     print('\n\nbuild and run the matchmaker tests:\n\n')
+    env = {k: v for k, v in os.environ.items() if k != 'CMAKE_TOOLCHAIN_FILE'}
     cmake_cmd = ['cmake', '-S', matchmaker_root + 'test', '-B', test_build_dir,
                  '-DCMAKE_BUILD_TYPE=Release']
     cmake_cmd += generator_args(test_build_dir)
@@ -142,11 +165,11 @@ def run_tests(matchmaker_root, test_build_dir, jobs, use_clang):
         cmake_cmd.append('-DCMAKE_C_COMPILER=' + clang_c)
         cmake_cmd.append('-DCMAKE_CXX_COMPILER=' + clang_cxx)
     for cmd in [cmake_cmd, ['cmake', '--build', test_build_dir, '-j' + jobs]]:
-        if subprocess.run(cmd).returncode != 0:
+        if subprocess.run(cmd, env=env).returncode != 0:
             print('building the tests failed')
             return False
     ctest_cmd = ['ctest', '--output-on-failure', '-j' + jobs, '-LE', 'mini_build']
-    if subprocess.run(ctest_cmd, cwd=test_build_dir).returncode != 0:
+    if subprocess.run(ctest_cmd, cwd=test_build_dir, env=env).returncode != 0:
         print('\ntests failed (skip them with -s)')
         return False
     return True
@@ -585,7 +608,7 @@ def main():
                 ['help', 'build_dir=', 'install_dir=', 'clang', 'retain', 'retain_leaves',
                  'force_stage_1', 'jobs=', 'atomic_libs', 'q',
                  'debug', 'export', 'dictionary=', 'books=', 'skip_tests', 'data_dir=', 'time_compiles=',
-                 'linker=', 'leaf_budget='])
+                 'linker=', 'leaf_budget=', 'toolchain='])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -609,6 +632,7 @@ def main():
     time_compiles = None
     linker = ''
     leaf_budget = '170'
+    toolchain = None
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -653,6 +677,8 @@ def main():
                 print('--leaf_budget must be a whole number of at least 1')
                 sys.exit(2)
             leaf_budget = a
+        elif o == '--toolchain':
+            toolchain = os.path.abspath(a)
         else:
             assert False, "unhandled option"
 
@@ -677,6 +703,21 @@ def main():
         sys.exit(2)
     if books is None:
         books = 'Crumbs' if q else 'all'
+
+    if toolchain is not None:
+        if use_clang:
+            print('--toolchain brings its own compiler and can\'t be combined with -c')
+            sys.exit(2)
+        if not os.path.exists(os.path.join(toolchain, 'bin', 'clang++')):
+            print('--toolchain must name an LLVM install: no bin/clang++ in ' + toolchain)
+            sys.exit(2)
+        if cmake_version() < (3, 21):
+            print('--toolchain needs cmake 3.21 or newer')
+            sys.exit(2)
+        use_toolchain(toolchain)
+        if linker == '':
+            linker = 'lld'
+        print('building with the pinned toolchain in ' + toolchain)
 
     if time_compiles is not None:
         if os.name == 'nt':
