@@ -131,10 +131,10 @@ list(PREPEND matchmaker_srcs
     ${MATCHMAKER_ROOT}/src/arrays.cpp
 )
 
-# the stage 1 reader's arrays are embedded from generated_src/arrays
+# the stage 1 reader's arrays are included from generated_src/arrays
 if(NOT STAGE0)
     set_source_files_properties(${MATCHMAKER_ROOT}/src/arrays.cpp PROPERTIES
-        COMPILE_OPTIONS "--embed-dir=${CMAKE_CURRENT_SOURCE_DIR}/generated_src;-Wno-c23-extensions"
+        INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/generated_src
     )
 endif()
 

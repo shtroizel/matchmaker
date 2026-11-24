@@ -4,7 +4,7 @@
 
 
 
-// data the stage 1 reader writes as plain arrays of int, one file each, embedded in the library; every
+// data the stage 1 reader writes as plain arrays of int, one file each, compiled into the library; every
 // array is empty in a stage 0 library
 namespace arrays
 {

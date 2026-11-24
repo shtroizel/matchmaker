@@ -3,13 +3,14 @@
 #ifdef STAGE0
 std::span<int const> const arrays::MM_ARRAY{};
 #else
-// aligned for the ints the reader wrote
-alignas(int) static unsigned char const MM_CAT(MM_ARRAY, _bytes)[] = {
-#embed MM_STR(arrays/MM_ARRAY.i32) if_empty(0)
+// the 0 comes first so that an empty file still leaves an array
+static int const MM_CAT(MM_ARRAY, _values)[] = {
+    0,
+#include MM_STR(arrays/MM_ARRAY.inc)
 };
 std::span<int const> const arrays::MM_ARRAY{
-    reinterpret_cast<int const *>(MM_CAT(MM_ARRAY, _bytes)),
-    sizeof(MM_CAT(MM_ARRAY, _bytes)) / sizeof(int)
+    MM_CAT(MM_ARRAY, _values) + 1,
+    sizeof(MM_CAT(MM_ARRAY, _values)) / sizeof(int) - 1
 };
 #endif
 

@@ -10,14 +10,15 @@
 
 
 
-// writes one of the arrays the library embeds, as plain ints
+// writes one of the arrays the library compiles in: its ints as text, each followed by a comma
 inline bool write_array(std::string const & name, std::vector<int> const & values)
 {
     std::filesystem::path const dir{Stage1Data::nil.as_workspace_dir() + "/generated_src/arrays"};
     std::filesystem::create_directories(dir);
-    std::filesystem::path const path{dir / (name + ".i32")};
-    std::ofstream f{path, std::ios::binary};
-    f.write(reinterpret_cast<char const *>(values.data()), values.size() * sizeof(int));
+    std::filesystem::path const path{dir / (name + ".inc")};
+    std::ofstream f{path};
+    for (int value : values)
+        f << value << ",\n";
     f.close();
     if (!f)
     {
