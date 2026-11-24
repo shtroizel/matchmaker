@@ -123,15 +123,15 @@
 book 0: Crumbs by Q, 4 chapters
   chapter 0: 1 | 2017-Oct-28 13:44:28 PDT,4ch/pol
     0: [>>] [1647]
-    1: [Linked]r<Linked [text] here.@0> [ ]r<Linked [text] here.@1> [[]r<[text]@0> [text]r<[text]@1> []]r<[text]@2> [ ]r<Linked [text] here.@3> [here]r<Linked [text] here.@4> [.]r<Linked [text] here.@5>
+    1: [Linked]r<Linked [text] here.@0> [ ]r<Linked [text] here.@1> [[]r<[text]@0<Linked [text] here.> [text]r<[text]@1<Linked [text] here.> []]r<[text]@2<Linked [text] here.> [ ]r<Linked [text] here.@3> [here]r<Linked [text] here.@4> [.]r<Linked [text] here.@5>
     2: [>>]r [99]r
     3:
     4:
-    5: [Where]<Where is "Huma"? Follow (the money).@0> [ ]<Where is "Huma"? Follow (the money).@1> [is]<Where is "Huma"? Follow (the money).@2> [ ]<Where is "Huma"? Follow (the money).@3> ["]<Where is "Huma"? Follow (the money).@4> [Huma]<Where is "Huma"? Follow (the money).@5> ["]<Where is "Huma"? Follow (the money).@6> [?]<Where is "Huma"? Follow (the money).@7> [ ]<Where is "Huma"? Follow (the money).@8> [Follow]<Where is "Huma"? Follow (the money).@9> [ ]<Where is "Huma"? Follow (the money).@10> [(]<Where is "Huma"? Follow (the money).@11> [the]<the money@0> [ ]<the money@1> [money]<the money@2> [)]<Where is "Huma"? Follow (the money).@13> [.]<Where is "Huma"? Follow (the money).@14>
+    5: [Where]<Where is "Huma"? Follow (the money).@0> [ ]<Where is "Huma"? Follow (the money).@1> [is]<Where is "Huma"? Follow (the money).@2> [ ]<Where is "Huma"? Follow (the money).@3> ["]<Where is "Huma"? Follow (the money).@4> [Huma]<Where is "Huma"? Follow (the money).@5> ["]<Where is "Huma"? Follow (the money).@6> [?]<Where is "Huma"? Follow (the money).@7> [ ]<Where is "Huma"? Follow (the money).@8> [Follow]<Where is "Huma"? Follow (the money).@9> [ ]<Where is "Huma"? Follow (the money).@10> [(]<Where is "Huma"? Follow (the money).@11> [the]<the money@0<Where is "Huma"? Follow (the money).> [ ]<the money@1<Where is "Huma"? Follow (the money).> [money]<the money@2<Where is "Huma"? Follow (the money).> [)]<Where is "Huma"? Follow (the money).@13> [.]<Where is "Huma"? Follow (the money).@14>
     6: [~~~1_image.png]
     7: [http] [:] [/] [/] [e] [x] [.] [c] [o] [m] [/] [a]
   chapter 1: 2 | 2017-Oct-28 23:15:48 PDT,8ch/qresearch abc123
-    0: [[]<[Q]@0> [Q]<[Q]@1> []]<[Q]@2> [ ]<[Q] marks/the spot.@1> [marks]<[Q] marks/the spot.@2> [/]<[Q] marks/the spot.@3> [the]<[Q] marks/the spot.@4> [ ]<[Q] marks/the spot.@5> [spot]<[Q] marks/the spot.@6> [.]<[Q] marks/the spot.@7>
+    0: [[]<[Q]@0<[Q] marks/the spot.> [Q]<[Q]@1<[Q] marks/the spot.> []]<[Q]@2<[Q] marks/the spot.> [ ]<[Q] marks/the spot.@1> [marks]<[Q] marks/the spot.@2> [/]<[Q] marks/the spot.@3> [the]<[Q] marks/the spot.@4> [ ]<[Q] marks/the spot.@5> [spot]<[Q] marks/the spot.@6> [.]<[Q] marks/the spot.@7>
   chapter 2: 3 | 2017-Oct-29 00:05:00 PDT,8ch/qresearch
     0: [Night]<Night.@0> [.]<Night.@1>
   chapter 3: 4 | 2017-Oct-29 12:30:00 PDT,8ch/qresearch

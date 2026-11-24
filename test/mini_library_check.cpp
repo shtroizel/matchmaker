@@ -503,7 +503,12 @@ namespace
                         if (referenced)
                             std::cout << "r";
                         if (ancestor_count > 0 && ancestors[0] != -1)
-                            std::cout << "<" << term(ancestors[0]) << "@" << within << ">";
+                        {
+                            std::cout << "<" << term(ancestors[0]) << "@" << within;
+                            for (int a = 1; a < ancestor_count; ++a)
+                                std::cout << "<" << term(ancestors[a]);
+                            std::cout << ">";
+                        }
                     }
                     std::cout << "\n";
                 }
