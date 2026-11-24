@@ -56,7 +56,6 @@ void Prefix::initialize(std::string const & prefix)
     maker->grab(matchable_name)->add_property("int8_t", "pos");
     maker->grab(matchable_name)->add_property("int", "syn");
     maker->grab(matchable_name)->add_property("int", "ant");
-    maker->grab(matchable_name)->add_property("int", "by_longest_index");
     maker->grab(matchable_name)->add_property("int", "ordinal_summation");
     maker->grab(matchable_name)->add_property("int", "embedded");
     maker->grab(matchable_name)->add_property("int", "definition");

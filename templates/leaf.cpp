@@ -49,20 +49,6 @@ int mm_count_snth()
 }
 
 
-int mm_as_longest_snth(int index)
-{
-    if (index < 0 || index >= mm_count_snth())
-    {
-        std::cout << "mm_as_longest_snth(" << index << ") out of bounds with mm_count_snth() of: "
-                  << mm_count_snth() << std::endl;
-        static std::string const empty_str;
-        return 0;
-    }
-
-    return word_snth::from_by_string_index_as_ref(index).as_by_longest_index();
-}
-
-
 std::string const & mm_at_snth(int index)
 {
     if (index < 0 || index >= mm_count_snth())

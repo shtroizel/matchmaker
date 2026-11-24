@@ -132,7 +132,18 @@ foreach(book_src ${book_srcs})
 endforeach()
 
 # except for these
-list(PREPEND matchmaker_srcs ${MATCHMAKER_ROOT}/src/matchmaker.cpp ${MATCHMAKER_ROOT}/src/tree.cpp)
+list(PREPEND matchmaker_srcs
+    ${MATCHMAKER_ROOT}/src/matchmaker.cpp
+    ${MATCHMAKER_ROOT}/src/tree.cpp
+    ${MATCHMAKER_ROOT}/src/arrays.cpp
+)
+
+# the stage 1 reader's arrays are embedded from generated_src/arrays
+if(NOT STAGE0)
+    set_source_files_properties(${MATCHMAKER_ROOT}/src/arrays.cpp PROPERTIES
+        COMPILE_OPTIONS "--embed-dir=${CMAKE_CURRENT_SOURCE_DIR}/generated_src;-Wno-c23-extensions"
+    )
+endif()
 
 if(ATOMIC_LIBS)
     foreach(prefix ${prefix_list})

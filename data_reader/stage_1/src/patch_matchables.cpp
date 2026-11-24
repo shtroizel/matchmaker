@@ -109,8 +109,6 @@ bool patch_matchable_header(
 {
     // aliases
     SynAntTable const & contents_SynAnt = Stage1Data::nil.as_syn_ant_table();
-    std::vector<int> const & by_longest = Stage1Data::nil.as_by_longest();
-    std::map<int, std::pair<int, int>> const & longest_offsets = Stage1Data::nil.as_longest_offsets();
     IndexTable const & embedded_words = Stage1Data::nil.as_embedded_words();
     IndexTable const & defs = Stage1Data::nil.as_definitions();
     IndexTable const & book_indexes = Stage1Data::nil.as_book_indexes();
@@ -167,30 +165,6 @@ bool patch_matchable_header(
                     }
                     m->set_propertyvect(v.variant_name, "syn", syn_vect);
                     m->set_propertyvect(v.variant_name, "ant", ant_vect);
-
-                    {
-                        std::pair<int, int> const & window = longest_offsets.at(existing_word.size());
-
-                        int lower = window.first;
-                        int upper = window.second + 1;
-                        int mid{0};
-
-                        while (lower < upper)
-                        {
-                            mid = lower + (upper - lower) / 2;
-
-                            if (existing_word == std::string(mm_at(by_longest[mid], nullptr)))
-                            {
-                                m->set_property(v.variant_name, "by_longest_index", std::to_string(mid));
-                                break;
-                            }
-
-                            if (existing_word < std::string(mm_at(by_longest[mid], nullptr)))
-                                upper = mid;
-                            else
-                                lower = mid;
-                        }
-                    }
 
                     bool found = false;
                     int const existing_word_index = mm_lookup(existing_word.c_str(), &found);

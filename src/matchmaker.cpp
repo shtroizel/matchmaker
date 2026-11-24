@@ -11,11 +11,11 @@
 #include <matchable/matchable.h>
 #include <matchmaker/word_order.h>
 
+#include <arrays.h>
 #include <tree.h>
 
 
 #include <matchmaker/parts_of_speech.h>
-#include <matchmaker/longest_words.h>
 #include <matchmaker/ordinal_summation.h>
 
 
@@ -59,47 +59,38 @@ char const * mm_at(int index, int * length)
 
 int mm_as_longest(int index)
 {
-    if (index < 0 || index >= mm_count())
+    if (index < 0 || index >= (int) arrays::as_longest.size())
         return -1;
 
-    int index_in_leaf;
-    tree::Leaf const & leaf = tree::leaf_at(index, &index_in_leaf);
-
-    return leaf.as_longest(index_in_leaf);
+    return arrays::as_longest[index];
 }
 
 
 int mm_from_longest(int length_index)
 {
-    if (length_index < 0 || length_index >= mm_count())
+    if (length_index < 0 || length_index >= (int) arrays::from_longest.size())
         return -1;
 
-    return LONGEST_WORDS[length_index];
+    return arrays::from_longest[length_index];
 }
 
 
 void mm_lengths(int const * * lengths, int * count)
 {
-    static std::vector<int> const v = []()
-                                      {
-                                          std::vector<int> v;
-                                          for (auto const & [l, o] : LONGEST_WORDS_OFFSETS)
-                                              v.push_back(l);
-                                          return v;
-                                      }();
-    *lengths = v.data();
-    *count = v.size();
+    *lengths = arrays::lengths.data();
+    *count = (int) arrays::lengths.size();
 }
 
 
 bool mm_length_location(int length, int * index, int * count)
 {
-    auto iter = LONGEST_WORDS_OFFSETS.find(length);
-    if (iter == LONGEST_WORDS_OFFSETS.end())
+    auto const iter = std::lower_bound(arrays::lengths.begin(), arrays::lengths.end(), length);
+    if (iter == arrays::lengths.end() || *iter != length)
         return false;
 
-    *index = iter->second.first;
-    *count = iter->second.second - iter->second.first + 1;
+    auto const i = iter - arrays::lengths.begin();
+    *index = arrays::length_firsts[i];
+    *count = arrays::length_counts[i];
     return true;
 }
 

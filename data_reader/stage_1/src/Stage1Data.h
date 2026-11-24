@@ -56,10 +56,9 @@ MATCHABLE(
 using SynAntTable = std::map<std::string, SynAnt>;
 using IndexTable = std::vector<std::vector<int>>;
 using UsedInBookTable = std::vector<Buch::Flags>;
-using LongestOffsetsMap = std::map<int, std::pair<int, int>>;
 using KeyWords = std::vector<int>;
 
-PROPERTYx16_MATCHABLE(
+PROPERTYx15_MATCHABLE(
     std::string, workspace_dir,
     std::string, data_dir,
     std::string, template_dir,
@@ -68,7 +67,6 @@ PROPERTYx16_MATCHABLE(
     IndexTable, definitions,
     UsedInBookTable, used_in_book,
     std::vector<int>, by_longest,
-    LongestOffsetsMap, longest_offsets,
     std::vector<Book>, books,
     IndexTable, book_indexes,
     IndexTable, chapter_indexes,

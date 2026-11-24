@@ -123,7 +123,7 @@ char const * mm_at(int index, int * length);
 /**
  * matchmaker also provides its dictionary in an alternative sorting order (longest terms first).
  * use this function to retrieve a "length index" from an "alphabetic index".
- * the complexity for this function is O(log N).
+ * the complexity for this function is O(1).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @returns

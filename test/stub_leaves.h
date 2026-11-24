@@ -17,6 +17,6 @@ namespace stub
 #undef MM_LEAF
 #define MM_LEAF(n)                                                                                         \
     tree::Leaf{                                                                                            \
-        &stub::count, nullptr, nullptr, nullptr,       nullptr, nullptr, nullptr, nullptr, nullptr,        \
+        &stub::count, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,                       \
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr           \
     }

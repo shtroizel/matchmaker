@@ -368,13 +368,6 @@ def build_and_install(retain, retain_leaves, force_stage_1, jobs,
             exit(1)
 
 
-        # create longest_words.h for stage 0
-        stage_0_longest_word_file = stage_0_workspace_dir + 'generated_include/matchmaker/longest_words.h'
-        with open(stage_0_longest_word_file, 'w') as f:
-            f.write('#pragma once\n#include<vector>\n#include<map>\n')
-            f.write('inline std::vector<int> const LONGEST_WORDS{0};\n')
-            f.write('inline std::map<int, std::pair<int, int>> const LONGEST_WORDS_OFFSETS;\n\n')
-
         # create ordinal_summation.h for stage 0
         stage_0_ord_sum_file = stage_0_workspace_dir + 'generated_include/matchmaker/ordinal_summation.h'
         with open(stage_0_ord_sum_file, 'w') as f:
