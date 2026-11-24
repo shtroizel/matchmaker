@@ -111,10 +111,6 @@ bool patch_matchable_header(
     SynAntTable const & contents_SynAnt = Stage1Data::nil.as_syn_ant_table();
     IndexTable const & embedded_words = Stage1Data::nil.as_embedded_words();
     IndexTable const & defs = Stage1Data::nil.as_definitions();
-    IndexTable const & book_indexes = Stage1Data::nil.as_book_indexes();
-    IndexTable const & chapter_indexes = Stage1Data::nil.as_chapter_indexes();
-    IndexTable const & paragraph_indexes = Stage1Data::nil.as_paragraph_indexes();
-    IndexTable const & word_indexes = Stage1Data::nil.as_word_indexes();
     UsedInBookTable const & used_in_book = Stage1Data::nil.as_used_in_book();
 
     for (auto const & matchable_header : matchable_headers)
@@ -187,34 +183,6 @@ bool patch_matchable_header(
                         for (int i : defs[existing_word_index])
                             def_vect.push_back(std::to_string(i));
                         m->set_propertyvect(v.variant_name, "definition", def_vect);
-                    }
-
-                    {
-                        std::vector<std::string> book_index_vect;
-                        for (int i : book_indexes[existing_word_index])
-                            book_index_vect.push_back(std::to_string(i));
-                        m->set_propertyvect(v.variant_name, "book_index", book_index_vect);
-                    }
-
-                    {
-                        std::vector<std::string> chapter_index_vect;
-                        for (int i : chapter_indexes[existing_word_index])
-                            chapter_index_vect.push_back(std::to_string(i));
-                        m->set_propertyvect(v.variant_name, "chapter_index", chapter_index_vect);
-                    }
-
-                    {
-                        std::vector<std::string> paragraph_index_vect;
-                        for (int i : paragraph_indexes[existing_word_index])
-                            paragraph_index_vect.push_back(std::to_string(i));
-                        m->set_propertyvect(v.variant_name, "paragraph_index", paragraph_index_vect);
-                    }
-
-                    {
-                        std::vector<std::string> word_index_vect;
-                        for (int i : word_indexes[existing_word_index])
-                            word_index_vect.push_back(std::to_string(i));
-                        m->set_propertyvect(v.variant_name, "word_index", word_index_vect);
                     }
 
                     {

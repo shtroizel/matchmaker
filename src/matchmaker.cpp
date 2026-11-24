@@ -336,7 +336,7 @@ void mm_locations(
     int * count
 )
 {
-    if (index < 0 || index >= mm_count())
+    if (index < 0 || index + 1 >= (int) arrays::location_starts.size())
     {
         *book_indexes = nullptr;
         *chapter_indexes = nullptr;
@@ -346,17 +346,12 @@ void mm_locations(
         return;
     }
 
-    int index_in_leaf;
-    tree::Leaf const & leaf = tree::leaf_at(index, &index_in_leaf);
-
-    leaf.locations(
-        index_in_leaf,
-        book_indexes,
-        chapter_indexes,
-        paragraph_indexes,
-        word_indexes,
-        count
-    );
+    int const start = arrays::location_starts[index];
+    *book_indexes = arrays::location_books.data() + start;
+    *chapter_indexes = arrays::location_chapters.data() + start;
+    *paragraph_indexes = arrays::location_paragraphs.data() + start;
+    *word_indexes = arrays::location_words.data() + start;
+    *count = arrays::location_starts[index + 1] - start;
 }
 
 

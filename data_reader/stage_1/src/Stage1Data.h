@@ -58,7 +58,7 @@ using IndexTable = std::vector<std::vector<int>>;
 using UsedInBookTable = std::vector<Buch::Flags>;
 using KeyWords = std::vector<int>;
 
-PROPERTYx15_MATCHABLE(
+PROPERTYx11_MATCHABLE(
     std::string, workspace_dir,
     std::string, data_dir,
     std::string, template_dir,
@@ -68,10 +68,6 @@ PROPERTYx15_MATCHABLE(
     UsedInBookTable, used_in_book,
     std::vector<int>, by_longest,
     std::vector<Book>, books,
-    IndexTable, book_indexes,
-    IndexTable, chapter_indexes,
-    IndexTable, paragraph_indexes,
-    IndexTable, word_indexes,
     KeyWords, key_words,
     int, thread_count,
 

@@ -59,10 +59,6 @@ void Prefix::initialize(std::string const & prefix)
     maker->grab(matchable_name)->add_property("int", "ordinal_summation");
     maker->grab(matchable_name)->add_property("int", "embedded");
     maker->grab(matchable_name)->add_property("int", "definition");
-    maker->grab(matchable_name)->add_property("int", "book_index");
-    maker->grab(matchable_name)->add_property("int", "chapter_index");
-    maker->grab(matchable_name)->add_property("int", "paragraph_index");
-    maker->grab(matchable_name)->add_property("int", "word_index");
 
     // "word_attribute" properties
     {

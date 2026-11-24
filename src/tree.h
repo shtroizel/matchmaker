@@ -31,7 +31,6 @@ namespace tree
         std::vector<int> const & (*antonyms)(int);
         std::vector<int> const & (*embedded)(int);
         std::vector<int> const & (*definition)(int);
-        void (*locations)(int, int const * *, int const * *, int const * *, int const * *, int *);
     };
 
     // generated (tree_data.cpp): the leaves in word order (word_order.h), and each leaf's first term
@@ -102,8 +101,7 @@ namespace tree
     std::vector<int> const & mm_synonyms_##n(int);                                                         \
     std::vector<int> const & mm_antonyms_##n(int);                                                         \
     std::vector<int> const & mm_embedded_##n(int);                                                         \
-    std::vector<int> const & mm_definition_##n(int);                                                       \
-    void mm_locations_##n(int, int const * *, int const * *, int const * *, int const * *, int *);
+    std::vector<int> const & mm_definition_##n(int);
 
 #define MM_LEAF(n)                                                                                         \
     tree::Leaf{                                                                                            \
@@ -111,5 +109,5 @@ namespace tree
         &mm_flagged_parts_of_speech_##n, &mm_is_name_##n, &mm_is_male_name_##n, &mm_is_female_name_##n,    \
         &mm_is_place_##n, &mm_is_compound_##n, &mm_is_acronym_##n, &mm_is_phrase_##n,                      \
         &mm_is_used_in_book_##n, &mm_synonyms_##n, &mm_antonyms_##n, &mm_embedded_##n,                     \
-        &mm_definition_##n, &mm_locations_##n                                                              \
+        &mm_definition_##n                                                                                 \
     }

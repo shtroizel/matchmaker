@@ -13,16 +13,17 @@
 #endif
 
 #include "Stage1Data.h"
+#include "write_array.h"
 
 
 
 bool record_word_locations(SerialTask::Type task)
 {
     std::vector<Book> const & books = Stage1Data::nil.as_books();
-    IndexTable & book_indexes = Stage1Data::nil.as_mutable_book_indexes();
-    IndexTable & chapter_indexes = Stage1Data::nil.as_mutable_chapter_indexes();
-    IndexTable & paragraph_indexes = Stage1Data::nil.as_mutable_paragraph_indexes();
-    IndexTable & word_indexes = Stage1Data::nil.as_mutable_word_indexes();
+    IndexTable book_indexes(mm_count());
+    IndexTable chapter_indexes(mm_count());
+    IndexTable paragraph_indexes(mm_count());
+    IndexTable word_indexes(mm_count());
 
     {
         int location_count{0};
@@ -106,5 +107,26 @@ bool record_word_locations(SerialTask::Type task)
         }
     }
 
-    return true;
+    // each term's locations side by side, with where each term's begin
+    std::vector<int> starts;
+    std::vector<int> all_books;
+    std::vector<int> all_chapters;
+    std::vector<int> all_paragraphs;
+    std::vector<int> all_words;
+    for (int term = 0; term < mm_count(); ++term)
+    {
+        starts.push_back((int) all_books.size());
+        all_books.insert(all_books.end(), book_indexes[term].begin(), book_indexes[term].end());
+        all_chapters.insert(all_chapters.end(), chapter_indexes[term].begin(), chapter_indexes[term].end());
+        all_paragraphs.insert(all_paragraphs.end(),
+                              paragraph_indexes[term].begin(), paragraph_indexes[term].end());
+        all_words.insert(all_words.end(), word_indexes[term].begin(), word_indexes[term].end());
+    }
+    starts.push_back((int) all_books.size());
+
+    return write_array("location_starts", starts) &&
+           write_array("location_books", all_books) &&
+           write_array("location_chapters", all_chapters) &&
+           write_array("location_paragraphs", all_paragraphs) &&
+           write_array("location_words", all_words);
 }

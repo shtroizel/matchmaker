@@ -21,3 +21,13 @@ static_assert(sizeof(int) == 4);
 #include "array.inc"
 #define MM_ARRAY length_counts
 #include "array.inc"
+#define MM_ARRAY location_starts
+#include "array.inc"
+#define MM_ARRAY location_books
+#include "array.inc"
+#define MM_ARRAY location_chapters
+#include "array.inc"
+#define MM_ARRAY location_paragraphs
+#include "array.inc"
+#define MM_ARRAY location_words
+#include "array.inc"

@@ -19,4 +19,12 @@ namespace arrays
     extern std::span<int const> const lengths;
     extern std::span<int const> const length_firsts;
     extern std::span<int const> const length_counts;
+
+    // each term's locations in the books: the term at alphabetic index i has those from location_starts[i]
+    // up to location_starts[i + 1] in the four arrays below
+    extern std::span<int const> const location_starts;
+    extern std::span<int const> const location_books;
+    extern std::span<int const> const location_chapters;
+    extern std::span<int const> const location_paragraphs;
+    extern std::span<int const> const location_words;
 }

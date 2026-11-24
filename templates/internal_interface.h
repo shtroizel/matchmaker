@@ -60,11 +60,3 @@ std::vector<int> const & mm_synonyms_snth(int index);
 std::vector<int> const & mm_antonyms_snth(int index);
 std::vector<int> const & mm_embedded_snth(int index);
 std::vector<int> const & mm_definition_snth(int index);
-void mm_locations_snth(
-    int index,
-    int const * * book_indexes,
-    int const * * chapter_indexes,
-    int const * * paragraph_indexes,
-    int const * * word_indexes,
-    int * count
-);

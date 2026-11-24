@@ -361,7 +361,7 @@ void mm_definition(int index, int const * * definition, int * count);
  * dictionary index used here as input. a phrase's location is where the phrase starts: there mm_word()
  * returns the phrase's first word, with the phrase among that word's ancestors (not always the first
  * ancestor, since phrases can be nested).
- * the complexity for this function is O(log N).
+ * the complexity for this function is O(1).
  * @param[in] index
  *     alphabetic dictionary index
  * @param[out] book_indexes
