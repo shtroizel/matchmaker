@@ -12,11 +12,12 @@ cmake_minimum_required(VERSION 3.16.3)
 #     toolchain  option parsing and the source check in build_toolchain.py (nothing is built)
 #     mini_build build_and_install.py on the fixture data, then the library it installs, again with -e,
 #                then units of words loaded on top, again with -q, again with -S (the system
-#                compiler), and stage 1 again with -r -f (about 10 minutes; build_and_install.py runs
-#                every label but this one before its stage 0 data reader). The pinned toolchain builds
-#                the others, and these tests build with this compiler. The toolchain is the one in
-#                -DMM_TOOLCHAIN=<LLVM install> (or MM_TOOLCHAIN in the environment), else
-#                build_toolchain.py's, which the first run builds (about 7 CPU hours, once per user)
+#                compiler), and stage 1 again with -r -f, on the same data and on moved book text
+#                (about 10 minutes; build_and_install.py runs every label but this one before its
+#                stage 0 data reader). The pinned toolchain builds the others, and these tests build
+#                with this compiler. The toolchain is the one in -DMM_TOOLCHAIN=<LLVM install> (or
+#                MM_TOOLCHAIN in the environment), else build_toolchain.py's, which the first run
+#                builds (about 7 CPU hours, once per user)
 #
 # reader0_* tests compare what the reader keeps with test/fixtures/reader0/expected; after a deliberate
 # change, UPDATE_EXPECTED=1 ctest -R reader0_ rewrites those files (review the diff)
@@ -552,6 +553,72 @@ add_test(
 )
 set_tests_properties(mini_rerun_library PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_rerun)
 set_tests_properties(mini_library mini_library_by_spelling mini_rerun mini_rerun_library
+    PROPERTIES RESOURCE_LOCK mini_install)
+
+# mini_moved: stage 1 again (-r -f) on the same build, with the text of two posts trading places. No leaf
+# holds a location, so mini_moved_compiles finds the arrays compiled again and nothing of the workspace,
+# and mini_moved_library finds the text where it now is. mini_moved_back runs stage 1 on the fixture data
+# again (timing compiles too, which keeps the build's compile commands) and mini_moved_back_library checks
+# that the first library is back; the tests that read the install run before all of these
+set(MINI_MOVED_DATA ${CMAKE_CURRENT_BINARY_DIR}/mini_moved_data)
+set(MINI_MOVED_COMPILES ${CMAKE_CURRENT_BINARY_DIR}/mini_moved_compiles.txt)
+add_test(
+    NAME mini_moved_data
+    COMMAND ${CMAKE_COMMAND} -DDATA=${READER0_DATA} -DOUT=${MINI_MOVED_DATA}
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/moved_text_data.cmake
+)
+add_test(NAME mini_moved_compiles_clear COMMAND ${CMAKE_COMMAND} -E rm -f ${MINI_MOVED_COMPILES})
+set_tests_properties(mini_moved_data mini_moved_compiles_clear PROPERTIES
+    LABELS mini_build FIXTURES_SETUP mini_moved_start
+)
+add_test(
+    NAME mini_moved
+    COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -r -f
+            ${MINI_TOOLCHAIN} -j ${MINI_BUILD_JOBS} --data_dir=${MINI_MOVED_DATA}
+            --leaf_budget=${MINI_LEAF_BUDGET}
+            -b ${MINI_BUILD}/build -i ${MINI_BUILD}/install
+            --time_compiles=${MINI_MOVED_COMPILES}
+)
+set_tests_properties(mini_moved PROPERTIES
+    LABELS mini_build
+    FIXTURES_REQUIRED "mini_library;mini_moved_start"
+    FIXTURES_SETUP mini_moved
+    DEPENDS "mini_library;mini_library_by_spelling;mini_rerun;mini_rerun_library"
+    TIMEOUT 3600
+)
+add_test(
+    NAME mini_moved_compiles
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_rerun_check.py
+            ${MINI_MOVED_COMPILES} ${MINI_BUILD}/build moved_text
+)
+add_test(
+    NAME mini_moved_library
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+            ${READER0_EXPECTED}/mini_library_moved_text.txt
+            $<TARGET_FILE:mini_library_check> ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
+)
+set_tests_properties(mini_moved_compiles mini_moved_library PROPERTIES
+    LABELS mini_build FIXTURES_REQUIRED mini_moved
+)
+add_test(
+    NAME mini_moved_back
+    COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -r -f
+            ${MINI_TOOLCHAIN} -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA}
+            --leaf_budget=${MINI_LEAF_BUDGET}
+            -b ${MINI_BUILD}/build -i ${MINI_BUILD}/install
+            --time_compiles=${MINI_MOVED_COMPILES}
+)
+set_tests_properties(mini_moved_back PROPERTIES
+    LABELS mini_build FIXTURES_CLEANUP mini_moved FIXTURES_SETUP mini_moved_back TIMEOUT 3600
+)
+add_test(
+    NAME mini_moved_back_library
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+            ${READER0_EXPECTED}/mini_library.txt
+            $<TARGET_FILE:mini_library_check> ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
+)
+set_tests_properties(mini_moved_back_library PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_moved_back)
+set_tests_properties(mini_moved mini_moved_library mini_moved_back mini_moved_back_library
     PROPERTIES RESOURCE_LOCK mini_install)
 
 # mini_q: the same build with -q, which installs under the _q names (matchmaker_q), and mini_q_library runs
