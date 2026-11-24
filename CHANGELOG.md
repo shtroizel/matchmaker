@@ -79,6 +79,7 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   and mold need less memory than gold
 
 ### Removed
+- The README's supported systems list, until builds with the pinned toolchain are tested on them
 - `-c` (`--clang`) in build_and_install.py: the pinned toolchain builds every library
 
 ## [4.1.0] - 2026-11-19

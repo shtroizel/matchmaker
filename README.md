@@ -34,11 +34,6 @@ matchmaker is a C library of compiled english-language words, phrases and books<
 * matchmaker.h is where to go to learn about all the cool matchmaker functions<br>
 https://github.com/shtroizel/matchmaker/blob/master/include/matchmaker/matchmaker.h <br>
 
-## supported systems
-* gentoo on sparc64<br>
-* artix on amd64<br>
-* matchmaker might build on other linuxes or other linux-like operating systems.<br>
-
 ## dependencies
 the matchmaker library relies only on standard C/C++ libraries for its implementation<br>
 for building however, matchmaker requires cmake (3.21 or newer), ninja, python and a C++ compiler that
