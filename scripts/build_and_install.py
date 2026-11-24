@@ -11,6 +11,8 @@ import getopt
 from concurrent.futures import ThreadPoolExecutor
 from shutil import which
 
+import build_toolchain
+
 
 def usage():
     print('options for building matchmaker:\n')
@@ -21,15 +23,14 @@ def usage():
     print('    -i  --install_dir             install directory')
     print('                                    * default is <matchmaker root>/install')
     print('                                    * relative paths are relative to <build_dir>\n')
-    print('    -c  --clang                   build with clang')
-    print('                                    * use system compiler by default\n')
-    print('    --toolchain=<dir>             build with the pinned toolchain in an LLVM install')
+    print('    --toolchain=<dir>             the LLVM install holding the pinned toolchain')
+    print('                                    * default: build_toolchain.py\'s, built first when it')
+    print('                                      isn\'t there yet (once per user, about 7 CPU hours)')
     print('                                    * its clang, lld and libc++ build matchable, the data')
     print('                                      readers and both stages')
     print('                                    * libc++ is linked into each library, so the install loads')
     print('                                      into programs built with any compiler')
-    print('                                    * the tests still build with the system compiler')
-    print('                                    * needs cmake 3.21 or newer\n')
+    print('                                    * the tests build with the system compiler\n')
     print('    -r  --retain                  continue the previous build')
     print('                                    * stage 0 is skipped when its workspace exists')
     print('                                    * stage 1 is skipped when its workspace exists, unless -f')
@@ -79,7 +80,7 @@ def usage():
     print('                                    * gold, lld, mold, or another name the compiler takes')
     print('                                      as -fuse-ld=<linker>')
     print('                                    * default: the compiler\'s own linker')
-    print('                                    * without it, gold when installed\n')
+    print('                                    * without it, the toolchain\'s lld\n')
     print('    --leaf_budget=<words>         the most words in a leaf (default 170)')
     print('                                    * leaves are cut by content (leaf_cuts.h)')
     print('                                    * smaller budgets give more, smaller leaves (mini builds)\n')
@@ -150,20 +151,12 @@ def cmake_version():
 
 
 
-def run_tests(matchmaker_root, test_build_dir, jobs, use_clang):
+def run_tests(matchmaker_root, test_build_dir, jobs):
     print('\n\nbuild and run the matchmaker tests:\n\n')
     env = {k: v for k, v in os.environ.items() if k != 'CMAKE_TOOLCHAIN_FILE'}
     cmake_cmd = ['cmake', '-S', matchmaker_root + 'test', '-B', test_build_dir,
                  '-DCMAKE_BUILD_TYPE=Release']
     cmake_cmd += generator_args(test_build_dir)
-    if use_clang:
-        clang_c = which('clang')
-        clang_cxx = which('clang++')
-        if clang_c is None or clang_cxx is None:
-            print('search for clang compiler failed')
-            return False
-        cmake_cmd.append('-DCMAKE_C_COMPILER=' + clang_c)
-        cmake_cmd.append('-DCMAKE_CXX_COMPILER=' + clang_cxx)
     for cmd in [cmake_cmd, ['cmake', '--build', test_build_dir, '-j' + jobs]]:
         if subprocess.run(cmd, env=env).returncode != 0:
             print('building the tests failed')
@@ -176,7 +169,7 @@ def run_tests(matchmaker_root, test_build_dir, jobs, use_clang):
 
 
 
-def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
+def build_and_install(retain, retain_leaves, force_stage_1, jobs,
                       build_dir, install_dir, atomic_libs, q, debug, dictionary, books, skip_tests,
                       data_dir, export, linker, leaf_budget):
 
@@ -267,7 +260,7 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
                         stage_0_workspace_dir + 'config.cmake.in')
 
         if not retain_leaves and not skip_tests:
-            if not run_tests(matchmaker_root, stage_0_build_dir + 'test_build', jobs, use_clang):
+            if not run_tests(matchmaker_root, stage_0_build_dir + 'test_build', jobs):
                 os.chdir(start_dir)
                 exit(1)
 
@@ -282,8 +275,6 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
             build_matchable_cmd = ['matchable/scripts/build_and_install.py']
             build_matchable_cmd.append('-j' + jobs)
             build_matchable_cmd.append('-l')
-            if use_clang:
-                build_matchable_cmd.append('-c')
             build_matchable_cmd.append('-b')
             build_matchable_cmd.append(stage_0_matchable_build_dir)
             build_matchable_cmd.append('-i')
@@ -298,8 +289,6 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
             build_matchable_cmd = ['matchable/scripts/build_and_install.py']
             build_matchable_cmd.append('-j' + jobs)
             build_matchable_cmd.append('-l')
-            if use_clang:
-                build_matchable_cmd.append('-c')
             build_matchable_cmd.append('-b')
             build_matchable_cmd.append(stage_1_matchable_build_dir)
             build_matchable_cmd.append('-i')
@@ -319,8 +308,6 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
             build_data_reader_cmd.append(stage_0_data_reader_install_dir)
             build_data_reader_cmd.append('-m')
             build_data_reader_cmd.append(stage_0_install_prefix + '/lib/matchable/cmake')
-            if use_clang:
-                build_data_reader_cmd.append('-c')
             if debug:
                 build_data_reader_cmd.append('-d')
             if subprocess.run(build_data_reader_cmd).returncode != 0:
@@ -415,15 +402,6 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
     cmake_cmd.append('-DSTAGE0=ON')
     cmake_cmd.append('-DMM_LINKER=' + linker)
 
-    if use_clang:
-        clang_c = which('clang')
-        clang_cxx = which('clang++')
-        if clang_c is None or clang_cxx is None:
-            print('search for clang compiler failed')
-            exit(1)
-        cmake_cmd.append('-DCMAKE_C_COMPILER=' + clang_c)
-        cmake_cmd.append('-DCMAKE_CXX_COMPILER=' + clang_cxx)
-
     cmake_cmd.append('-Dmatchable_DIR=' + stage_0_install_prefix + '/lib/matchable/cmake')
     cmake_cmd.append(stage_0_workspace_dir)
 
@@ -503,8 +481,6 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
             build_data_reader_cmd.append(abs_install_dir + '/lib/matchable/cmake')
             build_data_reader_cmd.append('-s')
             build_data_reader_cmd.append(stage_0_install_prefix + '/lib/matchmaker' + suffix + '/cmake')
-            if use_clang:
-                build_data_reader_cmd.append('-c')
             if subprocess.run(build_data_reader_cmd).returncode != 0:
                 print('\ndata_reader_stage_1 failed to build')
                 cmd_as_str = ''
@@ -569,15 +545,6 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
     cmake_cmd.append('-DEXPORT_ALL=' + ('ON' if export else 'OFF'))
     cmake_cmd.append('-DMM_LINKER=' + linker)
 
-    if use_clang:
-        clang_c = which('clang')
-        clang_cxx = which('clang++')
-        if clang_c is None or clang_cxx is None:
-            print('search for clang compiler failed')
-            exit(1)
-        cmake_cmd.append('-DCMAKE_C_COMPILER=' + clang_c)
-        cmake_cmd.append('-DCMAKE_CXX_COMPILER=' + clang_cxx)
-
     cmake_cmd.append('-Dmatchable_DIR=' + abs_install_dir + '/lib/matchable/cmake')
     cmake_cmd.append(stage_1_workspace_dir)
 
@@ -604,8 +571,8 @@ def build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs,
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hb:i:crlfj:aqdes',
-                ['help', 'build_dir=', 'install_dir=', 'clang', 'retain', 'retain_leaves',
+        opts, args = getopt.getopt(sys.argv[1:], 'hb:i:rlfj:aqdes',
+                ['help', 'build_dir=', 'install_dir=', 'retain', 'retain_leaves',
                  'force_stage_1', 'jobs=', 'atomic_libs', 'q',
                  'debug', 'export', 'dictionary=', 'books=', 'skip_tests', 'data_dir=', 'time_compiles=',
                  'linker=', 'leaf_budget=', 'toolchain='])
@@ -614,7 +581,6 @@ def main():
         usage()
         sys.exit(2)
 
-    use_clang = False
     retain = False
     retain_leaves = False
     force_stage_1 = False
@@ -638,8 +604,6 @@ def main():
         if o in ('-h', '--help'):
             usage()
             sys.exit()
-        elif o in ('-c', '--clang'):
-            use_clang = True
         elif o in ('-r', '--retain'):
             retain = True
         elif o in ('-l', '--retain_leaves'):
@@ -704,20 +668,23 @@ def main():
     if books is None:
         books = 'Crumbs' if q else 'all'
 
-    if toolchain is not None:
-        if use_clang:
-            print('--toolchain brings its own compiler and can\'t be combined with -c')
-            sys.exit(2)
-        if not os.path.exists(os.path.join(toolchain, 'bin', 'clang++')):
-            print('--toolchain must name an LLVM install: no bin/clang++ in ' + toolchain)
-            sys.exit(2)
-        if cmake_version() < (3, 21):
-            print('--toolchain needs cmake 3.21 or newer')
-            sys.exit(2)
-        use_toolchain(toolchain)
-        if linker == '':
-            linker = 'lld'
-        print('building with the pinned toolchain in ' + toolchain)
+    if not jobs.isdigit() or int(jobs) < 1:
+        print('--jobs must be a whole number of at least 1')
+        sys.exit(2)
+    if toolchain is not None and not os.path.exists(os.path.join(toolchain, 'bin', 'clang++')):
+        print('--toolchain must name an LLVM install: no bin/clang++ in ' + toolchain)
+        sys.exit(2)
+    if cmake_version() < (3, 21):
+        print('matchmaker builds need cmake 3.21 or newer')
+        sys.exit(2)
+    if toolchain is None:
+        toolchain = build_toolchain.ensure(jobs)
+        if toolchain is None:
+            sys.exit(1)
+    use_toolchain(toolchain)
+    if linker == '':
+        linker = 'lld'
+    print('building with the pinned toolchain in ' + toolchain)
 
     if time_compiles is not None:
         if os.name == 'nt':
@@ -728,7 +695,7 @@ def main():
         os.environ['MM_TIME_COMPILES'] = time_compiles
         print('timing each compile into ' + time_compiles)
 
-    build_and_install(use_clang, retain, retain_leaves, force_stage_1, jobs, build_dir,
+    build_and_install(retain, retain_leaves, force_stage_1, jobs, build_dir,
                       install_dir, atomic_libs, q, debug, dictionary, books, skip_tests, data_dir, export,
                       linker, leaf_budget)
 

@@ -9,12 +9,14 @@ cmake_minimum_required(VERSION 3.16.3)
 #     order      order.py's sort rules on fixtures/order, and its today rule against matchable's
 #     reader0    the stage 0 data reader, on small fixture data
 #     full_data  the stage 0 data reader on all of data_reader/data (about 45 s; -LE full_data skips it)
+#     toolchain  option parsing and the source check in build_toolchain.py (nothing is built)
 #     mini_build build_and_install.py on the fixture data, then the library it installs, again with -e,
-#                then units of words loaded on top, again with -q, again with --linker=lld when the
-#                compiler can link with lld, and stage 1 again with -r -f (about 15 minutes;
-#                build_and_install.py runs every label but this one before its stage 0 data reader);
-#                with -DMM_TOOLCHAIN=<LLVM install> (or MM_TOOLCHAIN in the environment) the pinned
-#                toolchain builds them all, and these tests still build with this compiler
+#                then units of words loaded on top, again with -q, and stage 1 again with -r -f (about
+#                10 minutes; build_and_install.py runs every label but this one before its stage 0 data
+#                reader). The pinned toolchain builds them all, and these tests build with this
+#                compiler. The toolchain is the one in -DMM_TOOLCHAIN=<LLVM install> (or MM_TOOLCHAIN in
+#                the environment), else build_toolchain.py's, which the first run builds (about 7 CPU
+#                hours, once per user)
 #
 # reader0_* tests compare what the reader keeps with test/fixtures/reader0/expected; after a deliberate
 # change, UPDATE_EXPECTED=1 ctest -R reader0_ rewrites those files (review the diff)
@@ -284,13 +286,49 @@ set_tests_properties(options_toolchain_needs_compiler PROPERTIES
     LABELS options
     PASS_REGULAR_EXPRESSION "^--toolchain must name an LLVM install: no bin/clang\\+\\+ in "
 )
-add_test(
-    NAME options_toolchain_refuses_clang
-    COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --toolchain=t -c
-)
-set_tests_properties(options_toolchain_refuses_clang PROPERTIES
+add_test(NAME options_refuse_c COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} -c -h)
+set_tests_properties(options_refuse_c PROPERTIES
     LABELS options
-    PASS_REGULAR_EXPRESSION "^--toolchain brings its own compiler and can't be combined with -c"
+    PASS_REGULAR_EXPRESSION "^option -c not recognized"
+)
+add_test(
+    NAME options_jobs_needs_number
+    COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --jobs=many
+)
+set_tests_properties(options_jobs_needs_number PROPERTIES
+    LABELS options
+    PASS_REGULAR_EXPRESSION "^--jobs must be a whole number of at least 1"
+)
+
+# toolchain: build_toolchain.py names its directory under the cache directory, and refuses a source
+# release that isn't the pinned one before building anything
+set(BUILD_TOOLCHAIN ${MATCHMAKER_ROOT}/scripts/build_toolchain.py)
+set(TOOLCHAIN_CACHE ${CMAKE_CURRENT_BINARY_DIR}/toolchain_cache)
+add_test(
+    NAME toolchain_long_values
+    COMMAND ${Python3_EXECUTABLE} ${BUILD_TOOLCHAIN} --jobs=2 --tarball=t --print_dir -h
+)
+add_test(NAME toolchain_print_dir COMMAND ${Python3_EXECUTABLE} ${BUILD_TOOLCHAIN} -p)
+add_test(
+    NAME toolchain_tarball_needs_file
+    COMMAND ${Python3_EXECUTABLE} ${BUILD_TOOLCHAIN} --tarball=${CMAKE_CURRENT_BINARY_DIR}/no_such_file
+)
+add_test(
+    NAME toolchain_refuses_other_source
+    COMMAND ${Python3_EXECUTABLE} ${BUILD_TOOLCHAIN} --tarball=${CMAKE_CURRENT_LIST_FILE}
+)
+set_tests_properties(toolchain_long_values toolchain_print_dir toolchain_tarball_needs_file
+    toolchain_refuses_other_source
+    PROPERTIES LABELS toolchain ENVIRONMENT MM_TOOLCHAIN_CACHE=${TOOLCHAIN_CACHE}
+)
+set_tests_properties(toolchain_print_dir PROPERTIES
+    PASS_REGULAR_EXPRESSION "^${TOOLCHAIN_CACHE}/llvm-[0-9.]+-[0-9a-f]+\n$"
+)
+set_tests_properties(toolchain_tarball_needs_file PROPERTIES
+    PASS_REGULAR_EXPRESSION "^--tarball must name the LLVM source release: no "
+)
+set_tests_properties(toolchain_refuses_other_source PROPERTIES
+    PASS_REGULAR_EXPRESSION "CMakeLists.txt is not the pinned LLVM release"
 )
 
 # link: the linker choice and the pool that keeps leaf library links within the machine's memory, a linker
@@ -394,15 +432,24 @@ set_tests_properties(order_word_matches_folded PROPERTIES LABELS order)
 # fixture data, about 4 minutes; mini_library checks the library it installs and compares a dump of it with
 # expected/mini_library.txt; mini_build_compiles checks the --time_compiles log it writes
 set(MINI_BUILD ${CMAKE_CURRENT_BINARY_DIR}/mini_build)
-# the pinned toolchain builds every mini build when MM_TOOLCHAIN names its LLVM install
+# the pinned toolchain builds every mini build: the one MM_TOOLCHAIN names, else build_toolchain.py's,
+# which mini_toolchain_ready builds first when it isn't there yet
 set(MM_TOOLCHAIN "$ENV{MM_TOOLCHAIN}" CACHE PATH "LLVM install holding the pinned toolchain")
-set(MINI_TOOLCHAIN "")
 if (MM_TOOLCHAIN)
-    set(MINI_TOOLCHAIN --toolchain=${MM_TOOLCHAIN})
-    message(STATUS "mini builds use the pinned toolchain in ${MM_TOOLCHAIN}")
+    set(MINI_TOOLCHAIN_DIR ${MM_TOOLCHAIN})
+    add_test(NAME mini_toolchain_ready COMMAND ${CMAKE_COMMAND} -E md5sum ${MM_TOOLCHAIN}/bin/clang++)
 else()
-    message(STATUS "mini builds use the system compiler (no MM_TOOLCHAIN)")
+    execute_process(
+        COMMAND ${Python3_EXECUTABLE} ${BUILD_TOOLCHAIN} -p
+        OUTPUT_VARIABLE MINI_TOOLCHAIN_DIR OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY
+    )
+    add_test(NAME mini_toolchain_ready COMMAND ${Python3_EXECUTABLE} ${BUILD_TOOLCHAIN})
 endif()
+message(STATUS "mini builds use the pinned toolchain in ${MINI_TOOLCHAIN_DIR}")
+set(MINI_TOOLCHAIN --toolchain=${MINI_TOOLCHAIN_DIR})
+set_tests_properties(mini_toolchain_ready PROPERTIES
+    LABELS mini_build FIXTURES_SETUP mini_toolchain TIMEOUT 43200
+)
 # a small budget, so the fixture words fill several leaves and routing between them is exercised
 set(MINI_LEAF_BUDGET 10)
 set(MINI_BUILD_COMPILES ${CMAKE_CURRENT_BINARY_DIR}/mini_build_compiles.txt)
@@ -423,7 +470,7 @@ add_test(
 )
 set_tests_properties(mini_build PROPERTIES
     LABELS mini_build
-    FIXTURES_REQUIRED mini_build_start
+    FIXTURES_REQUIRED "mini_build_start;mini_toolchain"
     FIXTURES_SETUP mini_library
     TIMEOUT 3600
 )
@@ -454,16 +501,14 @@ add_test(
 set_tests_properties(mini_library_by_spelling PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_library)
 
 # mini_toolchain: the pinned toolchain built everything mini_build installed
-if (MM_TOOLCHAIN)
-    add_test(
-        NAME mini_toolchain
-        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/toolchain_check.py ${MM_TOOLCHAIN}
-                ${MINI_BUILD}/install/lib/matchmaker
-    )
-    set_tests_properties(mini_toolchain PROPERTIES
-        LABELS mini_build FIXTURES_REQUIRED mini_library RESOURCE_LOCK mini_install
-    )
-endif()
+add_test(
+    NAME mini_toolchain
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/toolchain_check.py ${MINI_TOOLCHAIN_DIR}
+            ${MINI_BUILD}/install/lib/matchmaker
+)
+set_tests_properties(mini_toolchain PROPERTIES
+    LABELS mini_build FIXTURES_REQUIRED mini_library RESOURCE_LOCK mini_install
+)
 
 # mini_rerun: stage 1 again (-r -f) on mini_build's build with the same data, which compiles nothing in the
 # workspace, then mini_rerun_library checks what it installs; it rewrites the install that mini_library
@@ -511,7 +556,9 @@ add_test(
             --leaf_budget=${MINI_LEAF_BUDGET}
             -b ${MINI_Q}/build -i ${MINI_Q}/install
 )
-set_tests_properties(mini_q PROPERTIES LABELS mini_build FIXTURES_SETUP mini_q TIMEOUT 3600)
+set_tests_properties(mini_q PROPERTIES
+    LABELS mini_build FIXTURES_REQUIRED mini_toolchain FIXTURES_SETUP mini_q TIMEOUT 3600
+)
 add_test(
     NAME mini_q_library
     COMMAND mini_library_check ${MINI_Q}/install/lib/matchmaker_q/libmatchmaker.so
@@ -519,66 +566,23 @@ add_test(
 set_tests_properties(mini_q_library PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_q)
 
 # mini_export: the same build with -e, which exports every symbol and installs a type header per leaf;
-# mini_export_units builds two units of words against that install and loads, unloads and swaps them
+# mini_export_units builds two units of words against that install with the toolchain that built it, and
+# loads, unloads and swaps them
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(MINI_EXPORT ${CMAKE_CURRENT_BINARY_DIR}/mini_export)
-    # the units and the library are compiled with one compiler: the pinned toolchain's, else this one
-    set(MINI_EXPORT_CLANG "")
-    if (MM_TOOLCHAIN)
-        set(MINI_EXPORT_CLANG ${MINI_TOOLCHAIN})
-    elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(MINI_EXPORT_CLANG -c)
-    endif()
     add_test(
         NAME mini_export
         COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -e
-                ${MINI_EXPORT_CLANG} -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA}
+                ${MINI_TOOLCHAIN} -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA}
                 --leaf_budget=${MINI_LEAF_BUDGET} -b ${MINI_EXPORT}/build -i ${MINI_EXPORT}/install
     )
-    set_tests_properties(mini_export PROPERTIES LABELS mini_build FIXTURES_SETUP mini_export TIMEOUT 3600)
+    set_tests_properties(mini_export PROPERTIES
+        LABELS mini_build FIXTURES_REQUIRED mini_toolchain FIXTURES_SETUP mini_export TIMEOUT 3600
+    )
     add_test(
         NAME mini_export_units
-        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_export_check.py ${CMAKE_CXX_COMPILER}
-                ${CMAKE_CXX_COMPILER_ID} ${MINI_EXPORT}/install ${MINI_EXPORT}/units ${MM_TOOLCHAIN}
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_export_check.py
+                ${MINI_TOOLCHAIN_DIR} ${MINI_EXPORT}/install ${MINI_EXPORT}/units
     )
     set_tests_properties(mini_export_units PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_export)
-endif()
-
-# mini_lld: the same build with --linker=lld, when this compiler can link with lld; mini_lld_linker checks
-# that lld linked every library, and mini_lld_library that the library matches mini_library
-include(CheckCXXSourceCompiles)
-set(CMAKE_REQUIRED_LINK_OPTIONS -fuse-ld=lld)
-check_cxx_source_compiles("int main() { return 0; }" LINKS_WITH_LLD)
-unset(CMAKE_REQUIRED_LINK_OPTIONS)
-if ((LINKS_WITH_LLD OR MM_TOOLCHAIN) AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(MINI_LLD ${CMAKE_CURRENT_BINARY_DIR}/mini_lld)
-    set(MINI_LLD_CLANG "")
-    if (MM_TOOLCHAIN)
-        set(MINI_LLD_CLANG ${MINI_TOOLCHAIN})
-    elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(MINI_LLD_CLANG -c)
-    endif()
-    add_test(
-        NAME mini_lld
-        COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s --linker=lld
-                ${MINI_LLD_CLANG} -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA}
-                --leaf_budget=${MINI_LEAF_BUDGET} -b ${MINI_LLD}/build -i ${MINI_LLD}/install
-    )
-    set_tests_properties(mini_lld PROPERTIES LABELS mini_build FIXTURES_SETUP mini_lld TIMEOUT 3600)
-    add_test(
-        NAME mini_lld_linker
-        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/linker_comment_check.py LLD
-                ${MINI_LLD}/install/lib/matchmaker
-    )
-    add_test(
-        NAME mini_lld_library
-        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
-                ${READER0_EXPECTED}/mini_library.txt
-                $<TARGET_FILE:mini_library_check> ${MINI_LLD}/install/lib/matchmaker/libmatchmaker.so
-    )
-    set_tests_properties(mini_lld_linker mini_lld_library PROPERTIES
-        LABELS mini_build FIXTURES_REQUIRED mini_lld
-    )
-else()
-    message(STATUS "mini_lld skipped: ${CMAKE_CXX_COMPILER} can't link with -fuse-ld=lld")
 endif()

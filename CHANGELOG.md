@@ -8,13 +8,12 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
 ## [Unreleased]
 
 ### Added
-- `--toolchain=<LLVM install>` in build_and_install.py builds matchable, the data readers and both
-  stages with the pinned toolchain: the clang, lld and libc++ of one LLVM install
-  (workspace_common/pinned_toolchain.cmake). libc++, libc++abi and libunwind are linked into each library,
-  so an install loads into programs built with any compiler. The tests keep the system compiler
-- `MM_TOOLCHAIN` for the tests (CMake option or environment): every mini build uses the pinned toolchain,
-  mini_toolchain checks that it compiled and linked each library, and mini_export_units builds its units
-  with it
+- scripts/build_toolchain.py builds the pinned toolchain, LLVM 23.1.6 (clang, lld, the LLVM libraries,
+  libc++, libc++abi and libunwind), once per user into `~/.cache/matchmaker/toolchain/`: it downloads the
+  source release (or takes `--tarball`), checks its sha256 and builds it with the system compiler
+- `--toolchain=<LLVM install>` in build_and_install.py names another install of the pinned toolchain
+- toolchain tests for build_toolchain.py, and mini_toolchain, which checks that the toolchain compiled and
+  linked each library of a mini build
 - `-e` (`--export`) in build_and_install.py exports every symbol and installs a type header per leaf in
   `include/matchmaker/leaf_types/`, so units of words compiled with MATCHABLE_UNLOADABLE can be loaded and
   unloaded at run time. Programs start slower with it
@@ -25,10 +24,8 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
 - link tests: the link pool calculation and the library size warning
 - `--linker=<linker>` in build_and_install.py (`MM_LINKER` in CMake) picks the linker for every library:
   gold, lld, mold, `default` for the compiler's own, or another name the compiler takes as `-fuse-ld=`.
-  The configure stops when the compiler can't link with it. Without it, gold is used when installed
-- link_refuses_unknown and options_linker_needs_name tests, and mini_lld tests (when the compiler can
-  link with lld): a mini build with `--linker=lld`, checked for lld in every library and against
-  mini_library
+  The configure stops when the compiler can't link with it
+- link_refuses_unknown and options_linker_needs_name tests
 - `--leaf_budget=<words>` in build_and_install.py (default 170): the most words in a leaf
 - `include/matchmaker/word_order.h`: mm_word_key() and mm_word_less(), matchmaker's word order, and
   mm_word_key_compare() and mm_word_compare(), which compare words where they are
@@ -40,6 +37,11 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   `--no-checks` in mini_library_check with order tests (test/order.py) for a later sort order change
 
 ### Changed
+- Every build uses the pinned toolchain for matchable, the data readers and both stages, building it
+  first when it isn't there yet. libc++, libc++abi and libunwind are linked into each library, so an
+  install loads into programs built with any compiler. Libraries link with lld unless `--linker` names
+  another. Builds need cmake 3.21 or newer and ninja. The tests keep the system compiler, and
+  mini_export_units builds its units with the toolchain
 - Running stage 1 again (`-r -f`) compiles only the generated files whose content changed: files it
   writes with the same content keep their earlier modification times
 - `--time_compiles=<file>` works with `-r` and `-l`: a kept build logs to the file given, and changing the
@@ -76,8 +78,8 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   headers. A build directory keeps the generator it was made with. The estimate follows the linker: lld
   and mold need less memory than gold
 
-### Fixed
-- The `--clang` help no longer says the clang build is broken; it builds and passes the mini build checks
+### Removed
+- `-c` (`--clang`) in build_and_install.py: the pinned toolchain builds every library
 
 ## [4.1.0] - 2026-11-19
 
