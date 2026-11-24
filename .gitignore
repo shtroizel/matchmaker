@@ -1,7 +1,8 @@
 */*/*.kdev4
-build*
-install*
+/build*
+/install*
 data_reader/stage_0/build_mm*
 data_reader/stage_0/install_mm*
 data_reader/stage_1/build_mm*
 data_reader/stage_1/install_mm*
+__pycache__/
