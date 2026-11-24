@@ -324,72 +324,6 @@ void mm_definition(int index, int const * * definition, int * count)
 }
 
 
-void mm_locations(
-    int index,
-    int const * * book_indexes,
-    int const * * chapter_indexes,
-    int const * * paragraph_indexes,
-    int const * * word_indexes,
-    int * count
-)
-{
-    if (index < 0 || index + 1 >= (int) arrays::location_starts.size())
-    {
-        *book_indexes = nullptr;
-        *chapter_indexes = nullptr;
-        *paragraph_indexes = nullptr;
-        *word_indexes = nullptr;
-        *count = 0;
-        return;
-    }
-
-    int const start = arrays::location_starts[index];
-    *book_indexes = arrays::location_books.data() + start;
-    *chapter_indexes = arrays::location_chapters.data() + start;
-    *paragraph_indexes = arrays::location_paragraphs.data() + start;
-    *word_indexes = arrays::location_words.data() + start;
-    *count = arrays::location_starts[index + 1] - start;
-}
-
-
-void mm_lookup_any_case(char const * term, int * start, int * length)
-{
-    // terms are in key order (word_order.h), so a term's case forms sit together
-    size_t const term_length = strlen(term);
-    *start = tree::first_not_before(
-        [&](char const * t, size_t t_length)
-            { return mm_word_key_compare(t, t_length, term, term_length) < 0; });
-    *length = tree::first_not_before(
-        [&](char const * t, size_t t_length)
-            { return mm_word_key_compare(t, t_length, term, term_length) <= 0; }) - *start;
-}
-
-
-void mm_complete(char const * prefix, int * start, int * length)
-{
-    // shortcut empty prefix to everything
-    size_t const prefix_length = strlen(prefix);
-    if (0 == prefix_length)
-    {
-        *start = 0;
-        *length = mm_count();
-        return;
-    }
-
-    // terms are in key order (word_order.h), so the terms whose key starts with the prefix's key sit
-    // together: from the first term whose key is not before the prefix's, to the first term whose key,
-    // cut to the prefix's length, is after it
-    *start = tree::first_not_before(
-        [&](char const * t, size_t t_length)
-            { return mm_word_key_compare(t, t_length, prefix, prefix_length) < 0; });
-    *length = tree::first_not_before(
-        [&](char const * t, size_t t_length)
-        {
-            return mm_word_key_compare(t, std::min(t_length, prefix_length), prefix, prefix_length) <= 0;
-        }) - *start;
-}
-
-
 namespace
 {
     // how many ranges an array of starts holds: entry i is where range i begins and entry i + 1 where it
@@ -445,6 +379,72 @@ namespace
         *terms = arrays::headings.data() + starts[index];
         *count = starts[index + 1] - starts[index];
     }
+}
+
+
+void mm_locations(
+    int index,
+    int const * * book_indexes,
+    int const * * chapter_indexes,
+    int const * * paragraph_indexes,
+    int const * * word_indexes,
+    int * count
+)
+{
+    if (index < 0 || index >= range_count(arrays::location_starts))
+    {
+        *book_indexes = nullptr;
+        *chapter_indexes = nullptr;
+        *paragraph_indexes = nullptr;
+        *word_indexes = nullptr;
+        *count = 0;
+        return;
+    }
+
+    int const start = arrays::location_starts[index];
+    *book_indexes = arrays::location_books.data() + start;
+    *chapter_indexes = arrays::location_chapters.data() + start;
+    *paragraph_indexes = arrays::location_paragraphs.data() + start;
+    *word_indexes = arrays::location_words.data() + start;
+    *count = arrays::location_starts[index + 1] - start;
+}
+
+
+void mm_lookup_any_case(char const * term, int * start, int * length)
+{
+    // terms are in key order (word_order.h), so a term's case forms sit together
+    size_t const term_length = strlen(term);
+    *start = tree::first_not_before(
+        [&](char const * t, size_t t_length)
+            { return mm_word_key_compare(t, t_length, term, term_length) < 0; });
+    *length = tree::first_not_before(
+        [&](char const * t, size_t t_length)
+            { return mm_word_key_compare(t, t_length, term, term_length) <= 0; }) - *start;
+}
+
+
+void mm_complete(char const * prefix, int * start, int * length)
+{
+    // shortcut empty prefix to everything
+    size_t const prefix_length = strlen(prefix);
+    if (0 == prefix_length)
+    {
+        *start = 0;
+        *length = mm_count();
+        return;
+    }
+
+    // terms are in key order (word_order.h), so the terms whose key starts with the prefix's key sit
+    // together: from the first term whose key is not before the prefix's, to the first term whose key,
+    // cut to the prefix's length, is after it
+    *start = tree::first_not_before(
+        [&](char const * t, size_t t_length)
+            { return mm_word_key_compare(t, t_length, prefix, prefix_length) < 0; });
+    *length = tree::first_not_before(
+        [&](char const * t, size_t t_length)
+        {
+            return mm_word_key_compare(t, std::min(t_length, prefix_length), prefix, prefix_length) <= 0;
+        }) - *start;
 }
 
 

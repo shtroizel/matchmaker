@@ -10,6 +10,7 @@
 #include <dlfcn.h>
 
 #include <algorithm>
+#include <climits>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
@@ -407,6 +408,80 @@ namespace
     }
 
 
+    // indexes just outside each range, the next range's first index among them, give the empty answer
+    void check_out_of_range()
+    {
+        auto const outside = [](int count)
+        { return std::vector<int>{-1, count, INT_MAX, INT_MIN}; };
+        auto const empty = [](int const * values, int count) { return nullptr == values && 0 == count; };
+        int const books = mm_book_count();
+
+        for (int i : outside(mm_count()))
+        {
+            if (mm_as_longest(i) != -1)
+                problem("mm_as_longest(" + std::to_string(i) + ") is not -1");
+            if (mm_from_longest(i) != -1)
+                problem("mm_from_longest(" + std::to_string(i) + ") is not -1");
+            int const * b = &i;
+            int const * c = &i;
+            int const * p = &i;
+            int const * w = &i;
+            int count = -1;
+            mm_locations(i, &b, &c, &p, &w, &count);
+            if (!empty(b, count) || c != nullptr || p != nullptr || w != nullptr)
+                problem("mm_locations(" + std::to_string(i) + ") is not empty");
+        }
+
+        for (int b : outside(books))
+        {
+            int const * title = &b;
+            int count = -1;
+            mm_book_title(b, &title, &count);
+            if (!empty(title, count))
+                problem("mm_book_title(" + std::to_string(b) + ") is not empty");
+            int const * author = &b;
+            count = -1;
+            mm_book_author(b, &author, &count);
+            if (!empty(author, count))
+                problem("mm_book_author(" + std::to_string(b) + ") is not empty");
+            if (mm_chapter_count(b) != 0)
+                problem("mm_chapter_count(" + std::to_string(b) + ") is not 0");
+        }
+
+        for (int b = 0; b < books; ++b)
+        {
+            for (int c : outside(mm_chapter_count(b)))
+            {
+                std::string const at = std::to_string(b) + ", " + std::to_string(c);
+                int const * title = &c;
+                int count = -1;
+                mm_chapter_title(b, c, &title, &count);
+                if (!empty(title, count))
+                    problem("mm_chapter_title(" + at + ") is not empty");
+                int const * subtitle = &c;
+                count = -1;
+                mm_chapter_subtitle(b, c, &subtitle, &count);
+                if (!empty(subtitle, count))
+                    problem("mm_chapter_subtitle(" + at + ") is not empty");
+                if (mm_paragraph_count(b, c) != 0)
+                    problem("mm_paragraph_count(" + at + ") is not 0");
+            }
+            for (int c = 0; c < mm_chapter_count(b); ++c)
+            {
+                for (int p : outside(mm_paragraph_count(b, c)))
+                    if (mm_word_count(b, c, p) != 0)
+                        problem("mm_word_count(" + std::to_string(b) + ", " + std::to_string(c) + ", " +
+                                std::to_string(p) + ") is not 0");
+                for (int p = 0; p < mm_paragraph_count(b, c); ++p)
+                    for (int w : outside(mm_word_count(b, c, p)))
+                        if (mm_word(b, c, p, w, nullptr, nullptr, nullptr, nullptr) != -1)
+                            problem("mm_word(" + std::to_string(b) + ", " + std::to_string(c) + ", " +
+                                    std::to_string(p) + ", " + std::to_string(w) + ") is not -1");
+            }
+        }
+    }
+
+
     std::vector<int> printed_order(std::vector<int> indexes)
     {
         if (by_spelling)
@@ -575,6 +650,7 @@ int main(int argc, char ** argv)
         check_lookup_any_case();
         check_no_allocations();
         check_locations();
+        check_out_of_range();
     }
     print_terms();
     print_books();
