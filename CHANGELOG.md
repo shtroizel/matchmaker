@@ -12,6 +12,9 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   libc++, libc++abi and libunwind), once per user into `~/.cache/matchmaker/toolchain/`: it downloads the
   source release (or takes `--tarball`), checks its sha256 and builds it with the system compiler
 - `--toolchain=<LLVM install>` in build_and_install.py names another install of the pinned toolchain
+- `-S` (`--system_compiler`) in build_and_install.py builds with the system compiler in place of the
+  toolchain, linking with gold when it is installed; mini_system tests check its library against
+  mini_library
 - toolchain tests for build_toolchain.py, and mini_toolchain, which checks that the toolchain compiled and
   linked each library of a mini build
 - `-e` (`--export`) in build_and_install.py exports every symbol and installs a type header per leaf in
@@ -37,10 +40,10 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   `--no-checks` in mini_library_check with order tests (test/order.py) for a later sort order change
 
 ### Changed
-- Every build uses the pinned toolchain for matchable, the data readers and both stages, building it
-  first when it isn't there yet. libc++, libc++abi and libunwind are linked into each library, so an
+- Builds use the pinned toolchain for matchable, the data readers and both stages unless `-S` is given,
+  building it first when it isn't there yet. libc++, libc++abi and libunwind are linked into each library, so an
   install loads into programs built with any compiler. Libraries link with lld unless `--linker` names
-  another. Builds need cmake 3.21 or newer and ninja. The tests keep the system compiler, and
+  another. Toolchain builds need cmake 3.21 or newer and ninja. The tests keep the system compiler, and
   mini_export_units builds its units with the toolchain
 - Running stage 1 again (`-r -f`) compiles only the generated files whose content changed: files it
   writes with the same content keep their earlier modification times
@@ -80,7 +83,8 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
 
 ### Removed
 - The README's supported systems list, until builds with the pinned toolchain are tested on them
-- `-c` (`--clang`) in build_and_install.py: the pinned toolchain builds every library
+- `-c` (`--clang`) in build_and_install.py: the pinned toolchain builds every library by default, and
+  `-S` with `CC` and `CXX` in the environment picks a system compiler
 
 ## [4.1.0] - 2026-11-19
 

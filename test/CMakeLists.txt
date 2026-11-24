@@ -11,12 +11,12 @@ cmake_minimum_required(VERSION 3.16.3)
 #     full_data  the stage 0 data reader on all of data_reader/data (about 45 s; -LE full_data skips it)
 #     toolchain  option parsing and the source check in build_toolchain.py (nothing is built)
 #     mini_build build_and_install.py on the fixture data, then the library it installs, again with -e,
-#                then units of words loaded on top, again with -q, and stage 1 again with -r -f (about
-#                10 minutes; build_and_install.py runs every label but this one before its stage 0 data
-#                reader). The pinned toolchain builds them all, and these tests build with this
-#                compiler. The toolchain is the one in -DMM_TOOLCHAIN=<LLVM install> (or MM_TOOLCHAIN in
-#                the environment), else build_toolchain.py's, which the first run builds (about 7 CPU
-#                hours, once per user)
+#                then units of words loaded on top, again with -q, again with -S (the system
+#                compiler), and stage 1 again with -r -f (about 10 minutes; build_and_install.py runs
+#                every label but this one before its stage 0 data reader). The pinned toolchain builds
+#                the others, and these tests build with this compiler. The toolchain is the one in
+#                -DMM_TOOLCHAIN=<LLVM install> (or MM_TOOLCHAIN in the environment), else
+#                build_toolchain.py's, which the first run builds (about 7 CPU hours, once per user)
 #
 # reader0_* tests compare what the reader keeps with test/fixtures/reader0/expected; after a deliberate
 # change, UPDATE_EXPECTED=1 ctest -R reader0_ rewrites those files (review the diff)
@@ -231,7 +231,7 @@ set(BUILD_AND_INSTALL ${MATCHMAKER_ROOT}/scripts/build_and_install.py)
 add_test(
     NAME options_long_values
     COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --jobs=2 --build_dir=b --install_dir=i --debug
-            --time_compiles=t --linker=lld --leaf_budget=10 --toolchain=t -h
+            --time_compiles=t --linker=lld --leaf_budget=10 --toolchain=t --system_compiler -h
 )
 add_test(
     NAME options_long_values_stage_0
@@ -290,6 +290,14 @@ add_test(NAME options_refuse_c COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL
 set_tests_properties(options_refuse_c PROPERTIES
     LABELS options
     PASS_REGULAR_EXPRESSION "^option -c not recognized"
+)
+add_test(
+    NAME options_toolchain_refuses_system
+    COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --toolchain=t -S
+)
+set_tests_properties(options_toolchain_refuses_system PROPERTIES
+    LABELS options
+    PASS_REGULAR_EXPRESSION "^--toolchain names the pinned toolchain and can't be combined with -S"
 )
 add_test(
     NAME options_jobs_needs_number
@@ -564,6 +572,33 @@ add_test(
     COMMAND mini_library_check ${MINI_Q}/install/lib/matchmaker_q/libmatchmaker.so
 )
 set_tests_properties(mini_q_library PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_q)
+
+# mini_system: the same build with -S, the system compiler in place of the toolchain; mini_system_library
+# checks that its library matches mini_library, and mini_system_compiler that the toolchain check tells
+# the two apart
+set(MINI_SYSTEM ${CMAKE_CURRENT_BINARY_DIR}/mini_system)
+add_test(
+    NAME mini_system
+    COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -S
+            -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA} --leaf_budget=${MINI_LEAF_BUDGET}
+            -b ${MINI_SYSTEM}/build -i ${MINI_SYSTEM}/install
+)
+set_tests_properties(mini_system PROPERTIES LABELS mini_build FIXTURES_SETUP mini_system TIMEOUT 3600)
+add_test(
+    NAME mini_system_library
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+            ${READER0_EXPECTED}/mini_library.txt
+            $<TARGET_FILE:mini_library_check> ${MINI_SYSTEM}/install/lib/matchmaker/libmatchmaker.so
+)
+add_test(
+    NAME mini_system_compiler
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/toolchain_check.py ${MINI_TOOLCHAIN_DIR}
+            ${MINI_SYSTEM}/install/lib/matchmaker
+)
+set_tests_properties(mini_system_library PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_system)
+set_tests_properties(mini_system_compiler PROPERTIES
+    LABELS mini_build FIXTURES_REQUIRED "mini_system;mini_toolchain" WILL_FAIL TRUE
+)
 
 # mini_export: the same build with -e, which exports every symbol and installs a type header per leaf;
 # mini_export_units builds two units of words against that install with the toolchain that built it, and

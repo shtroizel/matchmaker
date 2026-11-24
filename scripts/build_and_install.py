@@ -31,6 +31,9 @@ def usage():
     print('                                    * libc++ is linked into each library, so the install loads')
     print('                                      into programs built with any compiler')
     print('                                    * the tests build with the system compiler\n')
+    print('    -S, --system_compiler         build with the system compiler in place of the toolchain')
+    print('                                    * cmake\'s choice, which CC and CXX in the environment set')
+    print('                                    * links with gold when installed, unless --linker\n')
     print('    -r  --retain                  continue the previous build')
     print('                                    * stage 0 is skipped when its workspace exists')
     print('                                    * stage 1 is skipped when its workspace exists, unless -f')
@@ -80,7 +83,8 @@ def usage():
     print('                                    * gold, lld, mold, or another name the compiler takes')
     print('                                      as -fuse-ld=<linker>')
     print('                                    * default: the compiler\'s own linker')
-    print('                                    * without it, the toolchain\'s lld\n')
+    print('                                    * without it, the toolchain\'s lld')
+    print('                                    * with -S and without it, gold when installed\n')
     print('    --leaf_budget=<words>         the most words in a leaf (default 170)')
     print('                                    * leaves are cut by content (leaf_cuts.h)')
     print('                                    * smaller budgets give more, smaller leaves (mini builds)\n')
@@ -571,11 +575,11 @@ def build_and_install(retain, retain_leaves, force_stage_1, jobs,
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hb:i:rlfj:aqdes',
+        opts, args = getopt.getopt(sys.argv[1:], 'hb:i:rlfj:aqdesS',
                 ['help', 'build_dir=', 'install_dir=', 'retain', 'retain_leaves',
                  'force_stage_1', 'jobs=', 'atomic_libs', 'q',
                  'debug', 'export', 'dictionary=', 'books=', 'skip_tests', 'data_dir=', 'time_compiles=',
-                 'linker=', 'leaf_budget=', 'toolchain='])
+                 'linker=', 'leaf_budget=', 'toolchain=', 'system_compiler'])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -599,6 +603,7 @@ def main():
     linker = ''
     leaf_budget = '170'
     toolchain = None
+    system_compiler = False
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -643,6 +648,8 @@ def main():
             leaf_budget = a
         elif o == '--toolchain':
             toolchain = os.path.abspath(a)
+        elif o in ('-S', '--system_compiler'):
+            system_compiler = True
         else:
             assert False, "unhandled option"
 
@@ -671,20 +678,26 @@ def main():
     if not jobs.isdigit() or int(jobs) < 1:
         print('--jobs must be a whole number of at least 1')
         sys.exit(2)
-    if toolchain is not None and not os.path.exists(os.path.join(toolchain, 'bin', 'clang++')):
-        print('--toolchain must name an LLVM install: no bin/clang++ in ' + toolchain)
-        sys.exit(2)
-    if cmake_version() < (3, 21):
-        print('matchmaker builds need cmake 3.21 or newer')
-        sys.exit(2)
-    if toolchain is None:
-        toolchain = build_toolchain.ensure(jobs)
+    if system_compiler:
+        if toolchain is not None:
+            print('--toolchain names the pinned toolchain and can\'t be combined with -S')
+            sys.exit(2)
+        print('building with the system compiler')
+    else:
+        if toolchain is not None and not os.path.exists(os.path.join(toolchain, 'bin', 'clang++')):
+            print('--toolchain must name an LLVM install: no bin/clang++ in ' + toolchain)
+            sys.exit(2)
+        if cmake_version() < (3, 21):
+            print('building with the pinned toolchain needs cmake 3.21 or newer (-S: the system compiler)')
+            sys.exit(2)
         if toolchain is None:
-            sys.exit(1)
-    use_toolchain(toolchain)
-    if linker == '':
-        linker = 'lld'
-    print('building with the pinned toolchain in ' + toolchain)
+            toolchain = build_toolchain.ensure(jobs)
+            if toolchain is None:
+                sys.exit(1)
+        use_toolchain(toolchain)
+        if linker == '':
+            linker = 'lld'
+        print('building with the pinned toolchain in ' + toolchain)
 
     if time_compiles is not None:
         if os.name == 'nt':

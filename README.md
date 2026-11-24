@@ -38,11 +38,12 @@ https://github.com/shtroizel/matchmaker/blob/master/include/matchmaker/matchmake
 the matchmaker library relies only on standard C/C++ libraries for its implementation<br>
 for building however, matchmaker requires cmake (3.21 or newer), ninja, python and a C++ compiler that
 can build LLVM; the first build needs the network or a downloaded LLVM source release (see the pinned
-toolchain below)<br>
+toolchain below). build_and_install.py -S skips the toolchain and builds with the system compiler<br>
 with ninja installed, builds use it and link only as many leaf libraries at once as fit in half of the
 machine's memory (a complete build's links need about 10 GB each with gold, 9 GB with lld, 7 GB with mold
 and 14 GB with GNU ld)<br>
-builds link with the toolchain's lld; build_and_install.py --linker=gold (or mold) picks another<br>
+builds link with the toolchain's lld (with -S, gold when it is installed); build_and_install.py
+--linker=gold (or lld, mold, or default for the compiler's own) picks another<br>
 
 ## clone and initialize
 * remember to initialize submodules before building
@@ -108,7 +109,8 @@ scripts/build_and_install.py --toolchain=<LLVM install>     # use another instal
 ```
 `MM_TOOLCHAIN_CACHE` in the environment names another parent directory. The toolchain builds matchable,
 the data readers and both stages. libc++ is linked into each library, so the install needs no C++ runtime
-beside it and loads into programs built with any compiler. The tests build with the system compiler
+beside it and loads into programs built with any compiler. The tests build with the system compiler.
+`scripts/build_and_install.py -S` builds with the system compiler in place of the toolchain
 
 ### example: loading units of words at run time
 ```
@@ -119,7 +121,8 @@ scripts/build_and_install.py -e
 order. A word belongs in the last leaf whose first word is not after it. A unit of words grows that leaf
 with GROW_MATCHABLE and is compiled with:
 * `-DMATCHABLE_UNLOADABLE -DMATCHABLE_OMIT_BY_INDEX -fPIC -shared` and the leaf's type header
-* the pinned toolchain that built the library, with `-stdlib=libc++`
+* the compiler the library was built with: the pinned toolchain with `-stdlib=libc++`, or with `-S` the
+  system compiler (`-fno-gnu-unique` with GCC, so dlclose unloads it)
 
 The program that loads units links matchmaker and exports its own symbols (`-rdynamic`), so the library,
 the program and every unit share one copy of each leaf. Unloading a unit removes its words. Programs start
