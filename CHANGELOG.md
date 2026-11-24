@@ -82,11 +82,11 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   at once as fit in half of the machine's memory, estimated from the size of each library's generated
   headers. A build directory keeps the generator it was made with. The estimate follows the linker: lld
   and mold need less memory than gold
-- The longest order, book locations and book text are plain arrays of int: the stage 1 reader writes
-  them into the workspace (`generated_src/arrays`) as text and libmatchmaker compiles them in. The leaves
-  no longer hold a longest-order index or book locations, so moved book text compiles no leaf, and books
-  are no longer C++ generated from templates. mm_as_longest() and mm_locations() are O(1). The mm_*
-  answers are unchanged
+- The longest order, book locations, book text and which books use each term are plain arrays of int:
+  the stage 1 reader writes them into the workspace (`generated_src/arrays`) as text and libmatchmaker
+  compiles them in. The leaves no longer hold a longest-order index, book locations or book flags, so
+  moved book text compiles no leaf, and books are no longer C++ generated from templates.
+  mm_as_longest(), mm_locations() and mm_is_used_in_book() are O(1). The mm_* answers are unchanged
 
 ### Removed
 - The README's supported systems list, until builds with the pinned toolchain are tested on them

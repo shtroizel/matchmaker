@@ -55,16 +55,14 @@ MATCHABLE(
 
 using SynAntTable = std::map<std::string, SynAnt>;
 using IndexTable = std::vector<std::vector<int>>;
-using UsedInBookTable = std::vector<Buch::Flags>;
 using KeyWords = std::vector<int>;
 
-PROPERTYx10_MATCHABLE(
+PROPERTYx9_MATCHABLE(
     std::string, workspace_dir,
     std::string, data_dir,
     SynAntTable, syn_ant_table,
     IndexTable, embedded_words,
     IndexTable, definitions,
-    UsedInBookTable, used_in_book,
     std::vector<int>, by_longest,
     std::vector<Book>, books,
     KeyWords, key_words,

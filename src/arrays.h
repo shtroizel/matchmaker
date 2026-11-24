@@ -28,6 +28,10 @@ namespace arrays
     extern std::span<int const> const location_paragraphs;
     extern std::span<int const> const location_words;
 
+    // for each book one bit per term, in ints of 32, set when the book uses the term: a book's ints follow
+    // the book before it, and the term at alphabetic index i is bit i % 32 of the book's int i / 32
+    extern std::span<int const> const used_in_book;
+
     // chapters, paragraphs and words are numbered through all books: a book's chapters run from
     // book_chapter_starts[b] up to book_chapter_starts[b + 1], a chapter's paragraphs and a paragraph's
     // words likewise

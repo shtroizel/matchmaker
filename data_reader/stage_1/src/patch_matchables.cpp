@@ -111,7 +111,6 @@ bool patch_matchable_header(
     SynAntTable const & contents_SynAnt = Stage1Data::nil.as_syn_ant_table();
     IndexTable const & embedded_words = Stage1Data::nil.as_embedded_words();
     IndexTable const & defs = Stage1Data::nil.as_definitions();
-    UsedInBookTable const & used_in_book = Stage1Data::nil.as_used_in_book();
 
     for (auto const & matchable_header : matchable_headers)
     {
@@ -183,25 +182,6 @@ bool patch_matchable_header(
                         for (int i : defs[existing_word_index])
                             def_vect.push_back(std::to_string(i));
                         m->set_propertyvect(v.variant_name, "definition", def_vect);
-                    }
-
-                    {
-                        bool in_at_least_one_book{false};
-                        std::vector<std::string> used_in_book_vect;
-                        for (auto const & book : selected_books().currently_set())
-                        {
-                            if (used_in_book[existing_word_index].is_set(book))
-                            {
-                                in_at_least_one_book = true;
-                                used_in_book_vect.push_back("1");
-                            }
-                            else
-                            {
-                                used_in_book_vect.push_back("0");
-                            }
-                        }
-                        if (in_at_least_one_book)
-                            m->set_propertyvect(v.variant_name, "is_used_in_book", used_in_book_vect);
                     }
                 }
 

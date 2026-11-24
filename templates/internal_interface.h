@@ -55,7 +55,6 @@ bool mm_is_place_snth(int index);
 bool mm_is_compound_snth(int index);
 bool mm_is_acronym_snth(int index);
 bool mm_is_phrase_snth(int index);
-bool mm_is_used_in_book_snth(int book_index, int index);
 std::vector<int> const & mm_synonyms_snth(int index);
 std::vector<int> const & mm_antonyms_snth(int index);
 std::vector<int> const & mm_embedded_snth(int index);

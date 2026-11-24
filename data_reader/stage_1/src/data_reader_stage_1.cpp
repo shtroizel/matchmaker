@@ -46,13 +46,11 @@ int main(int argc, char ** argv)
         std::cout << " " << book;
     std::cout << "\n" << std::endl;
 
-    Stage1Data::nil.as_mutable_used_in_book().reserve(mm_count());
     Stage1Data::nil.as_mutable_by_longest().reserve(mm_count());
     Stage1Data::nil.as_mutable_embedded_words().reserve(mm_count());
     Stage1Data::nil.as_mutable_definitions().reserve(mm_count());
     for (int i = 0; i < mm_count(); ++i)
     {
-        Stage1Data::nil.as_mutable_used_in_book().push_back(Buch::Flags{});
         Stage1Data::nil.as_mutable_embedded_words().push_back(std::vector<int>());
         Stage1Data::nil.as_mutable_definitions().push_back(std::vector<int>());
     }

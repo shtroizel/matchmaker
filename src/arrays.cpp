@@ -51,3 +51,5 @@
 #include "array.inc"
 #define MM_ARRAY chapter_subtitle_starts
 #include "array.inc"
+#define MM_ARRAY used_in_book
+#include "array.inc"

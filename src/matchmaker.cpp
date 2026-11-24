@@ -243,10 +243,12 @@ bool mm_is_used_in_book(int book_index, int index)
     if (book_index < 0 || book_index >= mm_book_count() || index < 0 || index >= mm_count())
         return false;
 
-    int index_in_leaf;
-    tree::Leaf const & leaf = tree::leaf_at(index, &index_in_leaf);
+    size_t const ints_per_book = ((size_t) mm_count() + 31) / 32;
+    size_t const entry = book_index * ints_per_book + index / 32;
+    if (entry >= arrays::used_in_book.size())
+        return false;
 
-    return leaf.is_used_in_book(book_index, index_in_leaf) != 0;
+    return ((unsigned) arrays::used_in_book[entry] >> (index % 32) & 1u) != 0;
 }
 
 

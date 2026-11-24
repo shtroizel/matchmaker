@@ -294,7 +294,7 @@ bool mm_is_phrase(int index);
 
 /**
  * discover whether a given term is used in a given book
- * the complexity for this function is O(log N).
+ * the complexity for this function is O(1).
  * @param[in] book_index
  *     index of a book in the library
  * @param[in] index

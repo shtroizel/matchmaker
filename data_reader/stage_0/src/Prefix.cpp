@@ -76,7 +76,6 @@ void Prefix::initialize(std::string const & prefix)
         add_bool_prop(Stage0Data::word_attribute::compound::grab().as_string());
         add_bool_prop(Stage0Data::word_attribute::acronym::grab().as_string());
         add_bool_prop(Stage0Data::word_attribute::phrase::grab().as_string());
-        add_bool_prop("used_in_book");
     }
 }
 

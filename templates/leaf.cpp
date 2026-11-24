@@ -187,31 +187,6 @@ bool mm_is_phrase_snth(int index)
 }
 
 
-bool mm_is_used_in_book_snth(int book_index, int index)
-{
-    if (book_index < 0 || index < 0 || index >= mm_count_snth())
-    {
-        std::cout << "mm_used_in_book_snth(" << book_index << ", " << index << ") out of bounds with..."
-                     "\n        mm_count_snth(): " << mm_count_snth() << std::endl;
-        return false;
-    }
-
-    auto const & book_vect =
-        word_snth::from_by_string_index_as_ref(index).as_is_used_in_book_vect();
-    if (0 == book_vect.size())
-        return false;
-
-    if (book_index >= (int) book_vect.size())
-    {
-        std::cout << "mm_used_in_book_snth() --> unexpected book_vect.size() of: "
-                  << book_vect.size() << std::endl;
-        return false;
-    }
-
-    return book_vect[book_index];
-}
-
-
 std::vector<int> const & mm_synonyms_snth(int index)
 {
     static std::vector<int> const empty{};

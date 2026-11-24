@@ -26,7 +26,6 @@ namespace tree
         bool (*is_compound)(int);
         bool (*is_acronym)(int);
         bool (*is_phrase)(int);
-        bool (*is_used_in_book)(int, int);
         std::vector<int> const & (*synonyms)(int);
         std::vector<int> const & (*antonyms)(int);
         std::vector<int> const & (*embedded)(int);
@@ -97,7 +96,6 @@ namespace tree
     bool mm_is_compound_##n(int);                                                                          \
     bool mm_is_acronym_##n(int);                                                                           \
     bool mm_is_phrase_##n(int);                                                                            \
-    bool mm_is_used_in_book_##n(int, int);                                                                 \
     std::vector<int> const & mm_synonyms_##n(int);                                                         \
     std::vector<int> const & mm_antonyms_##n(int);                                                         \
     std::vector<int> const & mm_embedded_##n(int);                                                         \
@@ -108,6 +106,5 @@ namespace tree
         &mm_count_##n, &mm_at_##n, &mm_names_##n, &mm_ordinal_summation_##n,                               \
         &mm_flagged_parts_of_speech_##n, &mm_is_name_##n, &mm_is_male_name_##n, &mm_is_female_name_##n,    \
         &mm_is_place_##n, &mm_is_compound_##n, &mm_is_acronym_##n, &mm_is_phrase_##n,                      \
-        &mm_is_used_in_book_##n, &mm_synonyms_##n, &mm_antonyms_##n, &mm_embedded_##n,                     \
-        &mm_definition_##n                                                                                 \
+        &mm_synonyms_##n, &mm_antonyms_##n, &mm_embedded_##n, &mm_definition_##n                           \
     }
