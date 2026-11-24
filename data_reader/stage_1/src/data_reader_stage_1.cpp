@@ -21,7 +21,7 @@ void print_usage();
 
 int main(int argc, char ** argv)
 {
-    if (argc < 4 || argc > 6)
+    if (argc < 3 || argc > 5)
     {
         print_usage();
         return 2;
@@ -31,13 +31,12 @@ int main(int argc, char ** argv)
 
     Stage1Data::nil.as_mutable_data_dir() = argv[1];
     Stage1Data::nil.as_mutable_workspace_dir() = argv[2];
-    Stage1Data::nil.as_mutable_template_dir() = argv[3];
-    int thread_count = argc >= 5 ? std::atoi(argv[4]) : (int) std::thread::hardware_concurrency();
+    int thread_count = argc >= 4 ? std::atoi(argv[3]) : (int) std::thread::hardware_concurrency();
     if (thread_count < 1)
         thread_count = 1;
     Stage1Data::nil.as_mutable_thread_count() = thread_count;
 
-    if (!select_books(argc == 6 ? argv[5] : "all"))
+    if (!select_books(argc == 5 ? argv[4] : "all"))
     {
         print_usage();
         return 2;
@@ -94,12 +93,11 @@ int main(int argc, char ** argv)
 
 void print_usage()
 {
-    std::cout << "program expects 3 to 5 arguments:\n"
+    std::cout << "program expects 2 to 4 arguments:\n"
               << "    [1]  data directory\n"
               << "    [2]  stage 1 workspace directory\n"
-              << "    [3]  template directory\n"
-              << "    [4]  thread count (optional, defaults to the number of hardware threads)\n"
-              << "    [5]  books (optional, defaults to all), all or a comma separated list of:";
+              << "    [3]  thread count (optional, defaults to the number of hardware threads)\n"
+              << "    [4]  books (optional, defaults to all), all or a comma separated list of:";
     for (auto v : Buch::variants_by_index())
         std::cout << " " << v;
     std::cout << std::endl;

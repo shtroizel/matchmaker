@@ -58,10 +58,9 @@ using IndexTable = std::vector<std::vector<int>>;
 using UsedInBookTable = std::vector<Buch::Flags>;
 using KeyWords = std::vector<int>;
 
-PROPERTYx11_MATCHABLE(
+PROPERTYx10_MATCHABLE(
     std::string, workspace_dir,
     std::string, data_dir,
-    std::string, template_dir,
     SynAntTable, syn_ant_table,
     IndexTable, embedded_words,
     IndexTable, definitions,

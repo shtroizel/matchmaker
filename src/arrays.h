@@ -27,4 +27,27 @@ namespace arrays
     extern std::span<int const> const location_chapters;
     extern std::span<int const> const location_paragraphs;
     extern std::span<int const> const location_words;
+
+    // chapters, paragraphs and words are numbered through all books: a book's chapters run from
+    // book_chapter_starts[b] up to book_chapter_starts[b + 1], a chapter's paragraphs and a paragraph's
+    // words likewise
+    extern std::span<int const> const book_chapter_starts;
+    extern std::span<int const> const chapter_paragraph_starts;
+    extern std::span<int const> const paragraph_word_starts;
+
+    // each word of the books' text as an alphabetic index, with the phrases around it from the closest
+    // out (text_ancestors, from text_ancestor_starts[w] up to text_ancestor_starts[w + 1]), its place
+    // within the closest, and 1 when it is outside the main body of text
+    extern std::span<int const> const text_words;
+    extern std::span<int const> const text_ancestor_starts;
+    extern std::span<int const> const text_ancestors;
+    extern std::span<int const> const text_within_first_ancestor;
+    extern std::span<int const> const text_referenced;
+
+    // the terms of every title, author and subtitle, with where each book's and each chapter's begin
+    extern std::span<int const> const headings;
+    extern std::span<int const> const book_title_starts;
+    extern std::span<int const> const book_author_starts;
+    extern std::span<int const> const chapter_title_starts;
+    extern std::span<int const> const chapter_subtitle_starts;
 }

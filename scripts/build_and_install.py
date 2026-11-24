@@ -443,13 +443,8 @@ def build_and_install(retain, retain_leaves, force_stage_1, jobs,
                         stage_1_workspace_dir + 'config.cmake.in')
 
             shutil.copytree(stage_0_workspace_dir + 'generated_src', stage_1_workspace_dir + 'generated_src')
-            if not os.path.exists(stage_1_workspace_dir + 'generated_src/books'):
-                os.makedirs(stage_1_workspace_dir + 'generated_src/books')
-            shutil.copy(matchmaker_root + 'workspace_common/BookWord.h',
-                        stage_1_workspace_dir + 'generated_src/books/BookWord.h')
             shutil.copytree(stage_0_workspace_dir + 'book_vocabulary', stage_1_workspace_dir + 'book_vocabulary')
             os.makedirs(stage_1_workspace_dir + 'generated_include/matchmaker')
-            os.makedirs(stage_1_workspace_dir + 'generated_include/matchmaker/books')
             shutil.copytree(stage_0_workspace_dir + 'generated_include/matchmaker/generated_symbols',
                             stage_1_workspace_dir + 'generated_include/matchmaker/generated_symbols')
 
@@ -493,13 +488,11 @@ def build_and_install(retain, retain_leaves, force_stage_1, jobs,
             # run stage 1 data reader to create matchables for stage 1
             dr_stage_1_install_dir = stage_1_data_reader_install_dir
             dr_stage_1_binary = dr_stage_1_install_dir + '/bin/data_reader_stage_1'
-            template_dir = matchmaker_root + '/templates'
             dr_stage_1_data = dr_stage_1_install_dir + '/share/matchmaker/data_reader_stage_1/data'
             if data_dir is not None:
                 dr_stage_1_data = data_dir
 
-            run_dr_stage_1_cmd = [dr_stage_1_binary, dr_stage_1_data, stage_1_workspace_dir, template_dir,
-                                  jobs, books]
+            run_dr_stage_1_cmd = [dr_stage_1_binary, dr_stage_1_data, stage_1_workspace_dir, jobs, books]
             if subprocess.run(run_dr_stage_1_cmd).returncode != 0:
                 print('\ndata_reader_stage_1 failed')
                 build_cmd_as_str = ''

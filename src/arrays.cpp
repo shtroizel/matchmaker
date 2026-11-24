@@ -31,3 +31,29 @@ static_assert(sizeof(int) == 4);
 #include "array.inc"
 #define MM_ARRAY location_words
 #include "array.inc"
+#define MM_ARRAY book_chapter_starts
+#include "array.inc"
+#define MM_ARRAY chapter_paragraph_starts
+#include "array.inc"
+#define MM_ARRAY paragraph_word_starts
+#include "array.inc"
+#define MM_ARRAY text_words
+#include "array.inc"
+#define MM_ARRAY text_ancestor_starts
+#include "array.inc"
+#define MM_ARRAY text_ancestors
+#include "array.inc"
+#define MM_ARRAY text_within_first_ancestor
+#include "array.inc"
+#define MM_ARRAY text_referenced
+#include "array.inc"
+#define MM_ARRAY headings
+#include "array.inc"
+#define MM_ARRAY book_title_starts
+#include "array.inc"
+#define MM_ARRAY book_author_starts
+#include "array.inc"
+#define MM_ARRAY chapter_title_starts
+#include "array.inc"
+#define MM_ARRAY chapter_subtitle_starts
+#include "array.inc"

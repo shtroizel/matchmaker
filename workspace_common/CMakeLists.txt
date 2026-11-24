@@ -125,13 +125,6 @@ endmacro()
 # defines matchmaker_srcs (the tree tables) and prefix_list (leaves)
 include(${CMAKE_CURRENT_SOURCE_DIR}/tree.cmake)
 
-# books first
-file(GLOB book_srcs "generated_src/books/*.cpp")
-foreach(book_src ${book_srcs})
-    list(PREPEND matchmaker_srcs ${book_src})
-endforeach()
-
-# except for these
 list(PREPEND matchmaker_srcs
     ${MATCHMAKER_ROOT}/src/matchmaker.cpp
     ${MATCHMAKER_ROOT}/src/tree.cpp
