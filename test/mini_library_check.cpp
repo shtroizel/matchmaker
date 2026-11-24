@@ -358,8 +358,8 @@ namespace
     }
 
 
-    // every location a term lists holds that term (or a phrase starting there), and every book word that
-    // has locations lists its own
+    // every location a term lists holds that term (or a phrase starting there), every book word that has
+    // locations lists its own, and a book uses each word of its text
     void check_locations()
     {
         std::set<std::tuple<int, int, int, int, int>> listed;
@@ -398,7 +398,12 @@ namespace
                         if (should != (listed.count({b, c, p, w, i}) == 1))
                             problem("book word " + term(i) + (should ? " does not list" : " lists") +
                                     " its location");
+                        if (!mm_is_used_in_book(b, i))
+                            problem("book " + std::to_string(b) + " does not use its word " + term(i));
                     }
+        if (mm_is_used_in_book(-1, 0) || mm_is_used_in_book(mm_book_count(), 0) ||
+                mm_is_used_in_book(0, -1) || mm_is_used_in_book(0, mm_count()))
+            problem("a book or a term out of range is reported as used");
     }
 
 
@@ -438,6 +443,9 @@ namespace
             if (mm_is_compound(i)) std::cout << " compound";
             if (mm_is_acronym(i)) std::cout << " acronym";
             if (mm_is_phrase(i)) std::cout << " phrase";
+            for (int book = 0; book < mm_book_count(); ++book)
+                if (mm_is_used_in_book(book, i))
+                    std::cout << " book" << book;
 
             int const * linked = nullptr;
             int linked_count = 0;
