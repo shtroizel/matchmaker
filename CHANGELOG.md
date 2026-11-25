@@ -38,7 +38,7 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   so a unit can find the leaf a word belongs in
 - leaf_cuts and generator refusal tests, routing over leaf first words, and `--by-spelling` and
   `--no-checks` in mini_library_check with order tests (test/order.py) for a later sort order change
-- mini_moved tests: stage 1 run again on a mini build with book text moved compiles only the embedded
+- mini_moved tests: stage 1 run again on a mini build with book text moved compiles only the generated
   arrays, the library shows the text where it now is, and the fixture data brings the first library back
 
 ### Changed
