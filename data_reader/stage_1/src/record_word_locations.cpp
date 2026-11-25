@@ -13,7 +13,6 @@
     #include <matchmaker/matchmaker.h>
 #endif
 
-#include "array_cuts.h"
 #include "Stage1Data.h"
 #include "write_array.h"
 
@@ -109,33 +108,19 @@ bool record_word_locations(SerialTask::Type task)
         }
     }
 
-    // blocks of 1 << shift terms: a block begins with where in it each of its terms' locations begin, and
-    // one entry more for where the last term's end; a term's locations are its books, then its chapters,
-    // its paragraphs and its words
+    // a term's locations are its books, then its chapters, its paragraphs and its words
     std::vector<int> term_ints;
     term_ints.reserve(mm_count());
     for (int term = 0; term < mm_count(); ++term)
-        term_ints.push_back(1 + 4 * (int) book_indexes[term].size());
-    int const shift = array_cuts::group_shift(term_ints, 1, Stage1Data::nil.as_array_budget());
+        term_ints.push_back(4 * (int) book_indexes[term].size());
 
-    std::vector<std::vector<int>> blocks;
-    for (int first = 0; first < mm_count(); first += 1 << shift)
-    {
-        int const end = std::min(mm_count(), first + (1 << shift));
-        std::vector<int> block;
-        int start = end - first + 1;
-        for (int term = first; term < end; ++term)
+    return write_term_blocks(
+        "locations", "location_shift", term_ints,
+        [&](int term, std::vector<int> & block)
         {
-            block.push_back(start);
-            start += 4 * (int) book_indexes[term].size();
-        }
-        block.push_back(start);
-        for (int term = first; term < end; ++term)
             for (IndexTable const * indexes :
                      {&book_indexes, &chapter_indexes, &paragraph_indexes, &word_indexes})
                 block.insert(block.end(), (*indexes)[term].begin(), (*indexes)[term].end());
-        blocks.push_back(std::move(block));
-    }
-
-    return write_array("location_shift", {shift}) && write_units("locations", blocks);
+        }
+    );
 }

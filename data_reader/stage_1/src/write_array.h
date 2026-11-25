@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "array_cuts.h"
 #include "Stage1Data.h"
 
 
@@ -68,6 +69,46 @@ inline bool write_units(std::string const & name, std::vector<std::vector<int>> 
         return false;
     }
     return true;
+}
+
+
+// writes the ints kept per term in blocks of 1 << shift terms, the largest shift that keeps a block within
+// the array budget, and the shift as the array shift_name. A block begins with where in it each of its
+// terms' ints begin, and one entry more for where the last term's end. term_ints says how many ints each
+// term has, and append(term, block) adds them to the block
+template<typename Append>
+bool write_term_blocks(
+    std::string const & name,
+    std::string const & shift_name,
+    std::vector<int> const & term_ints,
+    Append const & append
+)
+{
+    std::vector<int> item_ints;
+    item_ints.reserve(term_ints.size());
+    for (int ints : term_ints)
+        item_ints.push_back(1 + ints);
+    int const shift = array_cuts::group_shift(item_ints, 1, Stage1Data::nil.as_array_budget());
+
+    int const term_count = (int) term_ints.size();
+    std::vector<std::vector<int>> blocks;
+    for (int first = 0; first < term_count; first += 1 << shift)
+    {
+        int const end = std::min(term_count, first + (1 << shift));
+        std::vector<int> block;
+        int start = end - first + 1;
+        for (int term = first; term < end; ++term)
+        {
+            block.push_back(start);
+            start += term_ints[term];
+        }
+        block.push_back(start);
+        for (int term = first; term < end; ++term)
+            append(term, block);
+        blocks.push_back(std::move(block));
+    }
+
+    return write_array(shift_name, {shift}) && write_units(name, blocks);
 }
 
 
