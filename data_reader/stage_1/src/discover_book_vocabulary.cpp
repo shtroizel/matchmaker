@@ -13,6 +13,7 @@
 
 #include "discover_book_vocabulary.h"
 
+#include "array_cuts.h"
 #include "Stage1Data.h"
 #include "write_array.h"
 
@@ -66,7 +67,8 @@ bool discover_book_vocabulary(SerialTask::Type task)
     as_ints.reserve(used_in_book.size());
     for (uint32_t bits : used_in_book)
         as_ints.push_back(static_cast<int>(bits));
-    return write_array("used_in_book", as_ints);
+    return write_units("used_in_book", as_ints,
+                       array_cuts::unit_shift(Stage1Data::nil.as_array_budget()));
 }
 
 

@@ -52,21 +52,31 @@ char const * mm_at(int index, int * length)
 }
 
 
+namespace
+{
+    // the entry of an array that is compiled in units
+    int unit_entry(std::span<int const * const> units, size_t entry)
+    {
+        return units[entry >> arrays::unit_shift][entry & ((size_t{1} << arrays::unit_shift) - 1)];
+    }
+}
+
+
 int mm_as_longest(int index)
 {
-    if (index < 0 || index >= (int) arrays::as_longest.size())
+    if (index < 0 || index >= mm_count() || arrays::as_longest.empty())
         return -1;
 
-    return arrays::as_longest[index];
+    return unit_entry(arrays::as_longest, index);
 }
 
 
 int mm_from_longest(int length_index)
 {
-    if (length_index < 0 || length_index >= (int) arrays::from_longest.size())
+    if (length_index < 0 || length_index >= mm_count() || arrays::from_longest.empty())
         return -1;
 
-    return arrays::from_longest[length_index];
+    return unit_entry(arrays::from_longest, length_index);
 }
 
 
@@ -245,10 +255,10 @@ bool mm_is_used_in_book(int book_index, int index)
 
     size_t const ints_per_book = ((size_t) mm_count() + 31) / 32;
     size_t const entry = book_index * ints_per_book + index / 32;
-    if (entry >= arrays::used_in_book.size())
+    if (entry >> arrays::unit_shift >= arrays::used_in_book.size())
         return false;
 
-    return ((unsigned) arrays::used_in_book[entry] >> (index % 32) & 1u) != 0;
+    return ((unsigned) unit_entry(arrays::used_in_book, entry) >> (index % 32) & 1u) != 0;
 }
 
 
@@ -334,39 +344,6 @@ namespace
     }
 
 
-    // the place of range's entry at index within starts, or -1 when the range has no such entry
-    int entry_at(std::span<int const> starts, int range, int index)
-    {
-        if (range < 0 || range >= range_count(starts))
-            return -1;
-        if (index < 0 || index >= starts[range + 1] - starts[range])
-            return -1;
-
-        return starts[range] + index;
-    }
-
-
-    // places among all books' chapters, paragraphs and words, or -1
-    int chapter_at(int book_index, int chapter_index)
-    {
-        return entry_at(arrays::book_chapter_starts, book_index, chapter_index);
-    }
-
-
-    int paragraph_at(int book_index, int chapter_index, int paragraph_index)
-    {
-        return entry_at(arrays::chapter_paragraph_starts,
-                        chapter_at(book_index, chapter_index), paragraph_index);
-    }
-
-
-    int word_at(int book_index, int chapter_index, int paragraph_index, int word_index)
-    {
-        return entry_at(arrays::paragraph_word_starts,
-                        paragraph_at(book_index, chapter_index, paragraph_index), word_index);
-    }
-
-
     void heading(std::span<int const> starts, int index, int const * * terms, int * count)
     {
         if (index < 0 || index >= range_count(starts))
@@ -378,6 +355,59 @@ namespace
 
         *terms = arrays::headings.data() + starts[index];
         *count = starts[index + 1] - starts[index];
+    }
+
+
+    // the group of chapters that holds a book's chapter, with the chapter's place in it, or nullptr
+    int const * chapter_group(int book_index, int chapter_index, int * chapter)
+    {
+        if (chapter_index < 0 || chapter_index >= mm_chapter_count(book_index))
+            return nullptr;
+
+        int const shift = arrays::book_groups[2 * book_index + 1];
+        *chapter = chapter_index & ((1 << shift) - 1);
+        return arrays::chapters[arrays::book_groups[2 * book_index] + (chapter_index >> shift)];
+    }
+
+
+    int const * part(int const * group, int which)
+    {
+        return group + group[which];
+    }
+
+
+    // the place of range's entry at index within starts, or -1 when the range has no such entry
+    int entry_at(int const * starts, int range, int index)
+    {
+        if (index < 0 || index >= starts[range + 1] - starts[range])
+            return -1;
+
+        return starts[range] + index;
+    }
+
+
+    // the place of a chapter's paragraph among its group's paragraphs, or -1
+    int paragraph_at(int const * group, int chapter, int paragraph_index)
+    {
+        return entry_at(part(group, arrays::chapter_part::paragraph_starts), chapter, paragraph_index);
+    }
+
+
+    // a chapter's title (which 0) or subtitle (which 1)
+    void chapter_heading(int book_index, int chapter_index, int which, int const * * terms, int * count)
+    {
+        int chapter;
+        int const * const group = chapter_group(book_index, chapter_index, &chapter);
+        if (nullptr == group)
+        {
+            *terms = nullptr;
+            *count = 0;
+            return;
+        }
+
+        int const * const starts = part(group, arrays::chapter_part::heading_starts) + 2 * chapter + which;
+        *terms = part(group, arrays::chapter_part::headings) + starts[0];
+        *count = starts[1] - starts[0];
     }
 }
 
@@ -391,7 +421,7 @@ void mm_locations(
     int * count
 )
 {
-    if (index < 0 || index >= range_count(arrays::location_starts))
+    if (index < 0 || index >= mm_count() || arrays::locations.empty())
     {
         *book_indexes = nullptr;
         *chapter_indexes = nullptr;
@@ -401,12 +431,13 @@ void mm_locations(
         return;
     }
 
-    int const start = arrays::location_starts[index];
-    *book_indexes = arrays::location_books.data() + start;
-    *chapter_indexes = arrays::location_chapters.data() + start;
-    *paragraph_indexes = arrays::location_paragraphs.data() + start;
-    *word_indexes = arrays::location_words.data() + start;
-    *count = arrays::location_starts[index + 1] - start;
+    int const * const block = arrays::locations[index >> arrays::location_shift];
+    int const * const starts = block + (index & ((1 << arrays::location_shift) - 1));
+    *count = (starts[1] - starts[0]) / 4;
+    *book_indexes = block + starts[0];
+    *chapter_indexes = *book_indexes + *count;
+    *paragraph_indexes = *chapter_indexes + *count;
+    *word_indexes = *paragraph_indexes + *count;
 }
 
 
@@ -477,35 +508,42 @@ int mm_chapter_count(int book_index)
 
 void mm_chapter_title(int book_index, int chapter_index, int const * * chapter_title, int * word_count)
 {
-    heading(arrays::chapter_title_starts, chapter_at(book_index, chapter_index), chapter_title, word_count);
+    chapter_heading(book_index, chapter_index, 0, chapter_title, word_count);
 }
 
 
 void mm_chapter_subtitle(int book_index, int chapter_index,
                          int const * * chapter_subtitle, int * word_count)
 {
-    heading(arrays::chapter_subtitle_starts, chapter_at(book_index, chapter_index),
-            chapter_subtitle, word_count);
+    chapter_heading(book_index, chapter_index, 1, chapter_subtitle, word_count);
 }
 
 
 int mm_paragraph_count(int book_index, int chapter_index)
 {
-    int const chapter = chapter_at(book_index, chapter_index);
-    if (chapter == -1)
+    int chapter;
+    int const * const group = chapter_group(book_index, chapter_index, &chapter);
+    if (nullptr == group)
         return 0;
 
-    return arrays::chapter_paragraph_starts[chapter + 1] - arrays::chapter_paragraph_starts[chapter];
+    int const * const starts = part(group, arrays::chapter_part::paragraph_starts);
+    return starts[chapter + 1] - starts[chapter];
 }
 
 
 int mm_word_count(int book_index, int chapter_index, int paragraph_index)
 {
-    int const paragraph = paragraph_at(book_index, chapter_index, paragraph_index);
+    int chapter;
+    int const * const group = chapter_group(book_index, chapter_index, &chapter);
+    if (nullptr == group)
+        return 0;
+
+    int const paragraph = paragraph_at(group, chapter, paragraph_index);
     if (paragraph == -1)
         return 0;
 
-    return arrays::paragraph_word_starts[paragraph + 1] - arrays::paragraph_word_starts[paragraph];
+    int const * const starts = part(group, arrays::chapter_part::word_starts);
+    return starts[paragraph + 1] - starts[paragraph];
 }
 
 
@@ -520,21 +558,31 @@ int mm_word(
     bool * referenced
 )
 {
-    int const word = word_at(book_index, chapter_index, paragraph_index, word_index);
+    int chapter;
+    int const * const group = chapter_group(book_index, chapter_index, &chapter);
+    if (nullptr == group)
+        return -1;
+
+    int const paragraph = paragraph_at(group, chapter, paragraph_index);
+    if (paragraph == -1)
+        return -1;
+
+    int const word = entry_at(part(group, arrays::chapter_part::word_starts), paragraph, word_index);
     if (word == -1)
         return -1;
 
     if (nullptr != ancestors && nullptr != ancestor_count)
     {
-        *ancestors = arrays::text_ancestors.data() + arrays::text_ancestor_starts[word];
-        *ancestor_count = arrays::text_ancestor_starts[word + 1] - arrays::text_ancestor_starts[word];
+        int const * const starts = part(group, arrays::chapter_part::ancestor_starts) + word;
+        *ancestors = part(group, arrays::chapter_part::ancestors) + starts[0];
+        *ancestor_count = starts[1] - starts[0];
     }
 
     if (nullptr != index_within_first_ancestor)
-        *index_within_first_ancestor = arrays::text_within_first_ancestor[word];
+        *index_within_first_ancestor = part(group, arrays::chapter_part::within_first_ancestor)[word];
 
     if (nullptr != referenced)
-        *referenced = arrays::text_referenced[word] != 0;
+        *referenced = part(group, arrays::chapter_part::referenced)[word] != 0;
 
-    return arrays::text_words[word];
+    return part(group, arrays::chapter_part::words)[word];
 }

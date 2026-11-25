@@ -14,6 +14,7 @@
 
 #include <matchmaker/data_reader_common.h>
 
+#include "array_cuts.h"
 #include "Stage1Data.h"
 #include "write_array.h"
 
@@ -86,8 +87,9 @@ bool calculate_longest_words(SerialTask::Type task)
     std::reverse(length_firsts.begin(), length_firsts.end());
     std::reverse(length_counts.begin(), length_counts.end());
 
-    return write_array("from_longest", by_longest) &&
-           write_array("as_longest", as_longest) &&
+    int const unit_shift = array_cuts::unit_shift(Stage1Data::nil.as_array_budget());
+    return write_units("from_longest", by_longest, unit_shift) &&
+           write_units("as_longest", as_longest, unit_shift) &&
            write_array("lengths", lengths) &&
            write_array("length_firsts", length_firsts) &&
            write_array("length_counts", length_counts);

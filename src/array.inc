@@ -1,4 +1,4 @@
-// defines the array named by MM_ARRAY from the stage 1 reader's file of that name
+// defines the array named by MM_ARRAY, which the stage 1 reader writes whole, from its file of that name
 
 #ifdef STAGE0
 std::span<int const> const arrays::MM_ARRAY{};

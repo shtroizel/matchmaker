@@ -131,11 +131,15 @@ list(PREPEND matchmaker_srcs
     ${MATCHMAKER_ROOT}/src/arrays.cpp
 )
 
-# the stage 1 reader's arrays are included from generated_src/arrays
+# the stage 1 reader's arrays are in generated_src/arrays: the ones it writes whole and the lists of the
+# others' units are included, and each unit is a source of its own
 if(NOT STAGE0)
     set_source_files_properties(${MATCHMAKER_ROOT}/src/arrays.cpp PROPERTIES
         INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/generated_src
     )
+    file(GLOB array_units ${CMAKE_CURRENT_SOURCE_DIR}/generated_src/arrays/*.cpp)
+    list(SORT array_units)
+    list(APPEND matchmaker_srcs ${array_units})
 endif()
 
 if(ATOMIC_LIBS)
