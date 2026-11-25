@@ -125,14 +125,22 @@ endmacro()
 # defines matchmaker_srcs (the tree tables) and prefix_list (leaves)
 include(${CMAKE_CURRENT_SOURCE_DIR}/tree.cmake)
 
-# books first
-file(GLOB book_srcs "generated_src/books/*.cpp")
-foreach(book_src ${book_srcs})
-    list(PREPEND matchmaker_srcs ${book_src})
-endforeach()
+list(PREPEND matchmaker_srcs
+    ${MATCHMAKER_ROOT}/src/matchmaker.cpp
+    ${MATCHMAKER_ROOT}/src/tree.cpp
+    ${MATCHMAKER_ROOT}/src/arrays.cpp
+)
 
-# except for these
-list(PREPEND matchmaker_srcs ${MATCHMAKER_ROOT}/src/matchmaker.cpp ${MATCHMAKER_ROOT}/src/tree.cpp)
+# the stage 1 reader's arrays are in generated_src/arrays: the ones it writes whole and the lists of the
+# others' units are included, and each unit is a source of its own
+if(NOT STAGE0)
+    set_source_files_properties(${MATCHMAKER_ROOT}/src/arrays.cpp PROPERTIES
+        INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/generated_src
+    )
+    file(GLOB array_units ${CMAKE_CURRENT_SOURCE_DIR}/generated_src/arrays/*.cpp)
+    list(SORT array_units)
+    list(APPEND matchmaker_srcs ${array_units})
+endif()
 
 if(ATOMIC_LIBS)
     foreach(prefix ${prefix_list})

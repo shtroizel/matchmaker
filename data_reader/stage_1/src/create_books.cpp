@@ -1,46 +1,97 @@
 #include "create_books.h"
 
-#include <cstdio>
-#include <iostream>
-#include <string>
+#include <algorithm>
+#include <cstdint>
 #include <vector>
 
 #ifdef Q_ONLY
-#include <matchmaker_q/matchmaker.h>
+    #include <matchmaker_q/matchmaker.h>
 #else
-#include <matchmaker/matchmaker.h>
+    #include <matchmaker/matchmaker.h>
 #endif
 
+#include "array_cuts.h"
 #include "Stage1Data.h"
+#include "write_array.h"
 
 
 
-// The functions (code) for books are separated from the "content" (data structures) used
-// by the implementation. All of these files though are just code and must be generated either
-// by using a "template" (not to be confused with c++ templates) or in the case of "content" files
-// by creating them here from scratch...
+namespace
+{
+    // the ints a group of chapters holds besides its chapters': where each of its 9 parts begins, and the
+    // entry that ends each of its 4 arrays of starts
+    int const group_ints{13};
 
 
-// "books content" describes the books available within the library
-void create_books_content_and_get_book_identifiers(std::vector<std::string> & book_identifiers);
-
-// "book content" describes the chapters available for a single book
-void create_book_content(int book_index, std::string const & book_identifier);
-
-// "chapter content" provides the vectors that store the data
-void create_chapter_content(int book_index, std::string const & book_identifier, int chapter_index);
-
-void create_file_from_template(
-    std::string const & template_file,
-    std::string const & destination_file,
-    std::string const & book_identifier,
-    int chapter_index
-);
-
-void replace(std::string & data, std::string search_pattern, std::string replacement);
+    int chapter_ints(Chapter const & chapter)
+    {
+        int ints = 3 + (int) (chapter.paragraphs.size() + chapter.title.size() + chapter.subtitle.size());
+        for (std::vector<BookWord> const & paragraph : chapter.paragraphs)
+        {
+            ints += 4 * (int) paragraph.size();
+            for (BookWord const & bw : paragraph)
+                ints += (int) bw.ancestors.size();
+        }
+        return ints;
+    }
 
 
+    // a book's chapters from first up to end as the library compiles them: where each part begins, then
+    // the parts. Paragraphs, words, ancestors and headings are numbered from the group's first, each level
+    // saying where the next level's begin
+    std::vector<int> chapter_group(Book const & book, size_t first, size_t end)
+    {
+        std::vector<int> paragraph_starts;
+        std::vector<int> word_starts;
+        std::vector<int> words;
+        std::vector<int> ancestor_starts;
+        std::vector<int> ancestors;
+        std::vector<int> within_first_ancestor;
+        std::vector<int> referenced;
+        std::vector<int> heading_starts;
+        std::vector<int> headings;
+        for (size_t c = first; c < end; ++c)
+        {
+            Chapter const & chapter = book.chapters[c];
+            paragraph_starts.push_back((int) word_starts.size());
+            for (std::vector<BookWord> const & paragraph : chapter.paragraphs)
+            {
+                word_starts.push_back((int) words.size());
+                for (BookWord const & bw : paragraph)
+                {
+                    words.push_back(bw.word);
+                    ancestor_starts.push_back((int) ancestors.size());
+                    ancestors.insert(ancestors.end(), bw.ancestors.begin(), bw.ancestors.end());
+                    within_first_ancestor.push_back(bw.index_within_first_ancestor);
+                    referenced.push_back(bw.referenced ? 1 : 0);
+                }
+            }
+            heading_starts.push_back((int) headings.size());
+            headings.insert(headings.end(), chapter.title.begin(), chapter.title.end());
+            heading_starts.push_back((int) headings.size());
+            headings.insert(headings.end(), chapter.subtitle.begin(), chapter.subtitle.end());
+        }
+        paragraph_starts.push_back((int) word_starts.size());
+        word_starts.push_back((int) words.size());
+        ancestor_starts.push_back((int) ancestors.size());
+        heading_starts.push_back((int) headings.size());
 
+        std::vector<std::vector<int> const *> const parts{
+            &paragraph_starts, &word_starts, &words, &ancestor_starts, &ancestors, &within_first_ancestor,
+            &referenced, &heading_starts, &headings
+        };
+        std::vector<int> group;
+        int start = (int) parts.size();
+        for (std::vector<int> const * part : parts)
+        {
+            group.push_back(start);
+            start += (int) part->size();
+        }
+        for (std::vector<int> const * part : parts)
+            group.insert(group.end(), part->begin(), part->end());
+        return group;
+    }
+}
 
 
 
@@ -57,508 +108,82 @@ bool create_books(SerialTask::Type task)
         task.set_progress(0);
     }
 
-    std::vector<std::string> book_identifiers;
-    create_books_content_and_get_book_identifiers(book_identifiers);
-
-    // create code for each book
-    for (size_t b_i = 0; b_i < book_identifiers.size(); ++b_i)
+    // a book's chapters are cut into groups of 1 << shift chapters, the shift its own: book_groups holds
+    // each book's first group and its shift
+    std::vector<int> book_chapter_starts;
+    std::vector<int> book_groups;
+    std::vector<std::vector<int>> groups;
+    int chapter_count{0};
+    for (Book const & book : books)
     {
-        std::string const & book_identifier = book_identifiers[b_i];
+        book_chapter_starts.push_back(chapter_count);
+        chapter_count += (int) book.chapters.size();
 
-        // create book header file
+        std::vector<int> ints;
+        for (Chapter const & chapter : book.chapters)
+            ints.push_back(chapter_ints(chapter));
+        int const shift = array_cuts::group_shift(ints, group_ints, Stage1Data::nil.as_array_budget());
+
+        book_groups.push_back((int) groups.size());
+        book_groups.push_back(shift);
+        for (size_t first = 0; first < book.chapters.size(); first += size_t{1} << shift)
         {
-            std::string const header_template = Stage1Data::nil.as_template_dir() + "/book.h";
-            std::string const header_destination = Stage1Data::nil.as_workspace_dir() +
-                        "/generated_include/matchmaker/books/" + book_identifier + ".h";
-            create_file_from_template(header_template, header_destination, book_identifier, -1);
-        }
-
-        // create book source file
-        {
-            std::string const source_template = Stage1Data::nil.as_template_dir() + "/book.cpp";
-            std::string const source_destination = Stage1Data::nil.as_workspace_dir() +
-                        "/generated_src/books/" + book_identifier + ".cpp";
-            create_file_from_template(source_template, source_destination, book_identifier, -1);
-        }
-
-        // create book content file
-        create_book_content(b_i, book_identifier);
-
-        for (size_t ch_i = 0; ch_i < books[b_i].chapters.size(); ++ch_i)
-        {
-            std::string const ch_i_as_string = std::to_string(ch_i);
-
-            // create chapter header file
+            size_t const end = std::min(book.chapters.size(), first + (size_t{1} << shift));
+            groups.push_back(chapter_group(book, first, end));
+            for (size_t c = first; c < end; ++c)
             {
-                std::string const header_template = Stage1Data::nil.as_template_dir() + "/chapter.h";
-                std::string const header_destination = Stage1Data::nil.as_workspace_dir() +
-                            "/generated_include/matchmaker/books/" + book_identifier +
-                            "_chapter_" + ch_i_as_string + ".h";
-                create_file_from_template(header_template, header_destination, book_identifier, ch_i);
+                ++task.as_mutable_progress();
+                SerialTask::check_progress(task);
             }
-
-            {
-                // create chapter source file
-                std::string const source_template = Stage1Data::nil.as_template_dir() + "/chapter.cpp";
-                std::string const source_destination = Stage1Data::nil.as_workspace_dir() +
-                            "/generated_src/books/" + book_identifier + "_chapter_" + ch_i_as_string + ".cpp";
-                create_file_from_template(source_template, source_destination, book_identifier, ch_i);
-            }
-
-            // create chapter content file
-            create_chapter_content(b_i, book_identifier, ch_i);
-
-            ++task.as_mutable_progress();
-            SerialTask::check_progress(task);
         }
     }
+    book_chapter_starts.push_back(chapter_count);
 
-    return true;
-}
-
-
-void create_books_content_and_get_book_identifiers(std::vector<std::string> & book_identifiers)
-{
-    book_identifiers.clear();
-    std::vector<Book> const & books = Stage1Data::nil.as_books();
-    std::string const & BOOKS_CONTENT = Stage1Data::nil.as_workspace_dir() +
-                                       "/generated_include/matchmaker/books/books_content.h";
-    FILE * f = fopen(BOOKS_CONTENT.c_str(), "w");
-    if (nullptr == f)
+    // every book's title and author in one array, each kind with where its entries begin
+    std::vector<int> headings;
+    std::vector<int> book_title_starts;
+    std::vector<int> book_author_starts;
+    for (Book const & book : books)
     {
-        std::cout << "failed to open " << BOOKS_CONTENT << std::endl;
-        abort();
+        book_title_starts.push_back((int) headings.size());
+        headings.insert(headings.end(), book.title.begin(), book.title.end());
     }
-
-    if (fputs("#include <array>\n", f) == EOF) abort();
-    if (fputs("#include <functional>\n\n", f) == EOF) abort();
-
-    // get book identifiers and write book includes
+    book_title_starts.push_back((int) headings.size());
+    for (Book const & book : books)
     {
-        bool ok{false};
-        int space = mm_lookup(" ", &ok);
-        if (!ok)
-        {
-            std::cout << "\nfailed to lookup space (' ')!" << std::endl;
-            abort();
-        }
-        for (Book const & b : books)
-        {
-            std::string book_identifier;
-            for (auto t : b.title)
-            {
-                if (t == space)
-                    book_identifier += "_";
-                else
-                    book_identifier += mm_at(t, nullptr);
-            }
-            book_identifiers.push_back(book_identifier);
-            if (fputs("#include <matchmaker/books/", f) == EOF) abort();
-            if (fputs(book_identifier.c_str(), f) == EOF) abort();
-            if (fputs(".h>\n", f) == EOF) abort();
-        }
+        book_author_starts.push_back((int) headings.size());
+        headings.insert(headings.end(), book.author.begin(), book.author.end());
     }
-    if (fputs("\n\n\n", f) == EOF) abort();
+    book_author_starts.push_back((int) headings.size());
 
-    if (fputs("constexpr int const BOOK_COUNT{", f) == EOF) abort();
+    // a book uses the terms of its vocabulary, and every word of its text with each phrase around it
+    std::vector<uint32_t> & used_in_book = Stage1Data::nil.as_mutable_used_in_book();
+    size_t const ints_per_book = ((size_t) mm_count() + 31) / 32;
+    used_in_book.resize(std::max(used_in_book.size(), books.size() * ints_per_book), 0);
+    for (size_t b = 0; b < books.size(); ++b)
     {
-        std::string book_count_as_string = std::to_string(books.size());
-        if (fputs(book_count_as_string.c_str(), f) == EOF) abort();
-        if (fputs("};\n\n\n\n", f) == EOF) abort();
+        auto const use =
+            [&](int term) { used_in_book[b * ints_per_book + term / 32] |= uint32_t{1} << (term % 32); };
+        for (Chapter const & chapter : books[b].chapters)
+            for (std::vector<BookWord> const & paragraph : chapter.paragraphs)
+                for (BookWord const & bw : paragraph)
+                {
+                    use(bw.word);
+                    for (int ancestor : bw.ancestors)
+                        use(ancestor);
+                }
     }
+    std::vector<int> used_ints;
+    used_ints.reserve(used_in_book.size());
+    for (uint32_t bits : used_in_book)
+        used_ints.push_back(static_cast<int>(bits));
 
-
-    // book title funcs
-    if (fputs("std::array<std::function<void (int const * *, int *)>, BOOK_COUNT> book_title_funcs\n", f) == EOF) abort();
-    if (fputs("{\n", f) == EOF) abort();
-    for (std::string const & bi : book_identifiers)
-    {
-        if (fputs("    &mm_", f) == EOF) abort();
-        if (fputs(bi.c_str(), f) == EOF) abort();
-        if (fputs("_title,\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n\n", f) == EOF) abort();
-
-
-    // book author funcs
-    if (fputs("std::array<std::function<void (int const * *, int *)>, BOOK_COUNT> book_author_funcs\n", f) == EOF) abort();
-    if (fputs("{\n", f) == EOF) abort();
-    for (std::string const & bi : book_identifiers)
-    {
-        if (fputs("    &mm_", f) == EOF) abort();
-        if (fputs(bi.c_str(), f) == EOF) abort();
-        if (fputs("_author,\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n\n", f) == EOF) abort();
-
-
-    // chapter count funcs
-    if (fputs("std::array<std::function<int ()>, BOOK_COUNT> chapter_count_funcs\n", f) == EOF) abort();
-    if (fputs("{\n", f) == EOF) abort();
-    for (std::string const & bi : book_identifiers)
-    {
-        if (fputs("    &mm_", f) == EOF) abort();
-        if (fputs(bi.c_str(), f) == EOF) abort();
-        if (fputs("_chapter_count,\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n\n", f) == EOF) abort();
-
-
-    // chapter title funcs
-    if (fputs("std::array<std::function<void (int, int const * *, int *)>, BOOK_COUNT> chapter_title_funcs\n", f) == EOF) abort();
-    if (fputs("{\n", f) == EOF) abort();
-    for (std::string const & bi : book_identifiers)
-    {
-        if (fputs("    &mm_", f) == EOF) abort();
-        if (fputs(bi.c_str(), f) == EOF) abort();
-        if (fputs("_chapter_title,\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n\n", f) == EOF) abort();
-
-
-    // chapter subtitle funcs
-    if (fputs("std::array<std::function<void (int, int const * *, int *)>, BOOK_COUNT> chapter_subtitle_funcs\n", f) == EOF) abort();
-    if (fputs("{\n", f) == EOF) abort();
-    for (std::string const & bi : book_identifiers)
-    {
-        if (fputs("    &mm_", f) == EOF) abort();
-        if (fputs(bi.c_str(), f) == EOF) abort();
-        if (fputs("_chapter_subtitle,\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n\n", f) == EOF) abort();
-
-
-    // paragraph count funcs
-    if (fputs("std::array<std::function<int (int)>, BOOK_COUNT> paragraph_count_funcs\n", f) == EOF) abort();
-    if (fputs("{\n", f) == EOF) abort();
-    for (std::string const & bi : book_identifiers)
-    {
-        if (fputs("    &mm_", f) == EOF) abort();
-        if (fputs(bi.c_str(), f) == EOF) abort();
-        if (fputs("_paragraph_count,\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n\n", f) == EOF) abort();
-
-
-    // word count funcs
-    if (fputs("std::array<std::function<int (int, int)>, BOOK_COUNT> word_count_funcs\n", f) == EOF) abort();
-    if (fputs("{\n", f) == EOF) abort();
-    for (std::string const & bi : book_identifiers)
-    {
-        if (fputs("    &mm_", f) == EOF) abort();
-        if (fputs(bi.c_str(), f) == EOF) abort();
-        if (fputs("_word_count,\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n", f) == EOF) abort();
-
-
-    // word funcs
-    if (fputs("std::array<std::function<int (int, int, int, int const * *, int *, int *, bool *)>, "
-              "BOOK_COUNT> word_funcs\n", f) == EOF) abort();
-    if (fputs("{\n", f) == EOF) abort();
-    for (std::string const & bi : book_identifiers)
-    {
-        if (fputs("    &mm_", f) == EOF) abort();
-        if (fputs(bi.c_str(), f) == EOF) abort();
-        if (fputs("_word,\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n\n", f) == EOF) abort();
-
-    fclose(f);
-}
-
-
-void create_book_content(int book_index, std::string const & book_identifier)
-{
-    std::vector<Book> const & books = Stage1Data::nil.as_books();
-    std::string const & BOOK_CONTENT = Stage1Data::nil.as_workspace_dir() +
-            "/generated_src/books/" + book_identifier + "_content.h";
-
-    FILE * f = fopen(BOOK_CONTENT.c_str(), "w");
-    if (nullptr == f)
-    {
-        std::cout << "failed to open " << BOOK_CONTENT << std::endl;
-        abort();
-    }
-
-    // write includes
-    if (fputs("#pragma once\n\n", f) == EOF) abort();
-    if (fputs("#include <array>\n", f) == EOF) abort();
-    if (fputs("#include <functional>\n", f) == EOF) abort();
-    if (fputs("#include <vector>\n\n", f) == EOF) abort();
-    for (size_t ch_i = 0; ch_i < books[book_index].chapters.size(); ++ch_i)
-    {
-        if (fputs("#include <matchmaker/books/", f) == EOF) abort();
-        if (fputs(book_identifier.c_str(), f) == EOF) abort();
-        if (fputs("_chapter_", f) == EOF) abort();
-        std::string ch_i_as_string = std::to_string(ch_i);
-        if (fputs(ch_i_as_string.c_str(), f) == EOF) abort();
-        if (fputs(".h>\n", f) == EOF) abort();
-    }
-
-    // write chapter count constant
-    if (fputs("\n\n\n", f) == EOF) abort();
-    if (fputs("constexpr int const ", f) == EOF) abort();
-    if (fputs(book_identifier.c_str(), f) == EOF) abort();
-    if (fputs("_CHAPTER_COUNT{", f) == EOF) abort();
-    std::string const chapter_count_as_string = std::to_string(books[book_index].chapters.size());
-    if (fputs(chapter_count_as_string.c_str(), f) == EOF) abort();
-    if (fputs("};\n\n\n\n", f) == EOF) abort();
-
-    // write title data
-    if (fputs("std::vector<int> ", f) == EOF) abort();
-    if (fputs(book_identifier.c_str(), f) == EOF) abort();
-    if (fputs("_book_title\n{\n", f) == EOF) abort();
-    for (int t : books[book_index].title)
-    {
-        if (fputs("    ", f) == EOF) abort();
-        std::string t_as_string = std::to_string(t);
-        if (fputs(t_as_string.c_str(), f) == EOF) abort();
-        if (fputs(",\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n\n", f) == EOF) abort();
-
-    // write author data
-    if (fputs("std::vector<int> ", f) == EOF) abort();
-    if (fputs(book_identifier.c_str(), f) == EOF) abort();
-    if (fputs("_book_author\n{\n", f) == EOF) abort();
-    for (int a : books[book_index].author)
-    {
-        if (fputs("    ", f) == EOF) abort();
-        std::string a_as_string = std::to_string(a);
-        if (fputs(a_as_string.c_str(), f) == EOF) abort();
-        if (fputs(",\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n\n\n", f) == EOF) abort();
-
-
-    // write chapter title funcs
-    if (fputs("std::array<std::function<void (int const * *, int *)>, ", f) == EOF) abort();
-    if (fputs(book_identifier.c_str(), f) == EOF) abort();
-    if (fputs("_CHAPTER_COUNT> Crumbs_chapter_title_funcs\n{\n", f) == EOF) abort();
-    for (size_t ch_i = 0; ch_i < books[book_index].chapters.size(); ++ch_i)
-    {
-        if (fputs("    &mm_", f) == EOF) abort();
-        if (fputs(book_identifier.c_str(), f) == EOF) abort();
-        if (fputs("_chapter_", f) == EOF) abort();
-        std::string ch_i_as_string = std::to_string(ch_i);
-        if (fputs(ch_i_as_string.c_str(), f) == EOF) abort();
-        if (fputs("_title,\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n\n", f) == EOF) abort();
-
-    // write chapter subtitle funcs
-    if (fputs("std::array<std::function<void (int const * *, int *)>, ", f) == EOF) abort();
-    if (fputs(book_identifier.c_str(), f) == EOF) abort();
-    if (fputs("_CHAPTER_COUNT> Crumbs_chapter_subtitle_funcs\n{\n", f) == EOF) abort();
-    for (size_t ch_i = 0; ch_i < books[book_index].chapters.size(); ++ch_i)
-    {
-        if (fputs("    &mm_", f) == EOF) abort();
-        if (fputs(book_identifier.c_str(), f) == EOF) abort();
-        if (fputs("_chapter_", f) == EOF) abort();
-        std::string ch_i_as_string = std::to_string(ch_i);
-        if (fputs(ch_i_as_string.c_str(), f) == EOF) abort();
-        if (fputs("_subtitle,\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n\n", f) == EOF) abort();
-
-    // write paragraph count funcs
-    if (fputs("std::array<std::function<int ()>, ", f) == EOF) abort();
-    if (fputs(book_identifier.c_str(), f) == EOF) abort();
-    if (fputs("_CHAPTER_COUNT> Crumbs_paragraph_count_funcs\n{\n", f) == EOF) abort();
-    for (size_t ch_i = 0; ch_i < books[book_index].chapters.size(); ++ch_i)
-    {
-        if (fputs("    &mm_", f) == EOF) abort();
-        if (fputs(book_identifier.c_str(), f) == EOF) abort();
-        if (fputs("_chapter_", f) == EOF) abort();
-        std::string ch_i_as_string = std::to_string(ch_i);
-        if (fputs(ch_i_as_string.c_str(), f) == EOF) abort();
-        if (fputs("_paragraph_count,\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n\n", f) == EOF) abort();
-
-    // write word count funcs
-    if (fputs("std::array<std::function<int (int)>, ", f) == EOF) abort();
-    if (fputs(book_identifier.c_str(), f) == EOF) abort();
-    if (fputs("_CHAPTER_COUNT> Crumbs_word_count_funcs\n{\n", f) == EOF) abort();
-    for (size_t ch_i = 0; ch_i < books[book_index].chapters.size(); ++ch_i)
-    {
-        if (fputs("    &mm_", f) == EOF) abort();
-        if (fputs(book_identifier.c_str(), f) == EOF) abort();
-        if (fputs("_chapter_", f) == EOF) abort();
-        std::string ch_i_as_string = std::to_string(ch_i);
-        if (fputs(ch_i_as_string.c_str(), f) == EOF) abort();
-        if (fputs("_word_count,\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n\n", f) == EOF) abort();
-
-    // write word funcs
-    if (fputs("std::array<std::function<int (int, int, int const * *, int *, int *, bool *)>, ", f) == EOF) abort();
-    if (fputs(book_identifier.c_str(), f) == EOF) abort();
-    if (fputs("_CHAPTER_COUNT> Crumbs_word_funcs\n{\n", f) == EOF) abort();
-    for (size_t ch_i = 0; ch_i < books[book_index].chapters.size(); ++ch_i)
-    {
-        if (fputs("    &mm_", f) == EOF) abort();
-        if (fputs(book_identifier.c_str(), f) == EOF) abort();
-        if (fputs("_chapter_", f) == EOF) abort();
-        std::string ch_i_as_string = std::to_string(ch_i);
-        if (fputs(ch_i_as_string.c_str(), f) == EOF) abort();
-        if (fputs("_word,\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n", f) == EOF) abort();
-
-    fclose(f);
-}
-
-
-void create_chapter_content(int book_index, std::string const & book_identifier, int chapter_index)
-{
-    std::vector<Book> const & books = Stage1Data::nil.as_books();
-    std::string const chapter_index_as_string = std::to_string(chapter_index);
-    std::string const & chapter_content = Stage1Data::nil.as_workspace_dir() +
-            "/generated_src/books/" + book_identifier + "_chapter_" + chapter_index_as_string + "_content.h";
-
-    FILE * f = fopen(chapter_content.c_str(), "w");
-    if (nullptr == f)
-    {
-        std::cout << "failed to open " << chapter_content << std::endl;
-        abort();
-    }
-
-    // includes
-    if (fputs("#pragma once\n\n", f) == EOF) abort();
-    if (fputs("#include <vector>\n\n", f) == EOF) abort();
-    if (fputs("#include \"BookWord.h\"\n\n\n\n", f) == EOF) abort();
-
-    // title
-    if (fputs("std::vector<int> ", f) == EOF) abort();
-    if (fputs(book_identifier.c_str(), f) == EOF) abort();
-    if (fputs("_chapter_", f) == EOF) abort();
-    if (fputs(chapter_index_as_string.c_str(), f) == EOF) abort();
-    if (fputs("_title\n{\n", f) == EOF) abort();
-    for (int t : books[book_index].chapters[chapter_index].title)
-    {
-        std::string t_as_string = std::to_string(t);
-        if (fputs("    ", f) == EOF) abort();
-        if (fputs(t_as_string.c_str(), f) == EOF) abort();
-        if (fputs(",\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n\n", f) == EOF) abort();
-
-    // subtitle
-    if (fputs("std::vector<int> ", f) == EOF) abort();
-    if (fputs(book_identifier.c_str(), f) == EOF) abort();
-    if (fputs("_chapter_", f) == EOF) abort();
-    if (fputs(chapter_index_as_string.c_str(), f) == EOF) abort();
-    if (fputs("_subtitle\n{\n", f) == EOF) abort();
-    for (int st : books[book_index].chapters[chapter_index].subtitle)
-    {
-        std::string st_as_string = std::to_string(st);
-        if (fputs("    ", f) == EOF) abort();
-        if (fputs(st_as_string.c_str(), f) == EOF) abort();
-        if (fputs(",\n", f) == EOF) abort();
-    }
-    if (fputs("};\n\n\n", f) == EOF) abort();
-
-    // paragraphs
-    if (fputs("std::vector<std::vector<BookWord>> const ", f) == EOF) abort();
-    if (fputs(book_identifier.c_str(), f) == EOF) abort();
-    if (fputs("_chapter_", f) == EOF) abort();
-    if (fputs(chapter_index_as_string.c_str(), f) == EOF) abort();
-    if (fputs("_paragraphs\n{\n", f) == EOF) abort();
-    for (auto const & paragraph : books[book_index].chapters[chapter_index].paragraphs)
-    {
-        if (fputs("    {\n", f) == EOF) abort();
-        for (auto const & bw : paragraph)
-        {
-            if (fputs("        { ", f) == EOF) abort();
-            std::string const word_as_string = std::to_string(bw.word);
-            if (fputs(word_as_string.c_str(), f) == EOF) abort();
-            if (fputs(", { ", f) == EOF) abort();
-            for (int ancestor : bw.ancestors)
-            {
-                std::string ancestor_as_string = std::to_string(ancestor);
-                if (fputs(ancestor_as_string.c_str(), f) == EOF) abort();
-                if (fputs(", ", f) == EOF) abort();
-            }
-            if (fputs("}, ", f) == EOF) abort();
-            std::string const iwfa_as_string = std::to_string(bw.index_within_first_ancestor);
-            if (fputs(iwfa_as_string.c_str(), f) == EOF) abort();
-            if (fputs(", ", f) == EOF) abort();
-            if (bw.referenced)
-            {
-                if (fputs("true", f) == EOF) abort();
-            }
-            else
-            {
-                if (fputs("false", f) == EOF) abort();
-            }
-            if (fputs(" },\n", f) == EOF) abort();
-        }
-        if (fputs("    },\n", f) == EOF) abort();
-    }
-    if (fputs("};\n", f) == EOF) abort();
-
-    fclose(f);
-}
-
-
-void create_file_from_template(
-    std::string const & template_file,
-    std::string const & destination_file,
-    std::string const & book_identifier,
-    int chapter_index
-)
-{
-    std::string template_file_content;
-    {
-        FILE * f = fopen(template_file.c_str(), "r");
-        if (nullptr == f)
-        {
-            std::cout << "failed to open " << template_file << std::endl;
-            abort();
-        }
-
-        int ch;
-        while ((ch = fgetc(f)) != EOF)
-            template_file_content += (char) ch;
-
-        fclose(f);
-    }
-
-    replace(template_file_content, "aoeu", book_identifier);
-
-    if (chapter_index != -1)
-    {
-        std::string const chapter_index_as_string = std::to_string(chapter_index);
-        replace(template_file_content, "snth", chapter_index_as_string);
-    }
-
-    {
-        FILE * f = fopen(destination_file.c_str(), "w");
-        if (nullptr == f)
-        {
-            std::cout << "failed to open " << destination_file << std::endl;
-            abort();
-        }
-
-        if (fputs(template_file_content.c_str(), f) == EOF)
-        {
-            std::cout << "failed to write content to " << destination_file << std::endl;
-            abort();
-        }
-
-        fclose(f);
-    }
-}
-
-
-void replace(std::string & data, std::string search_pattern, std::string replacement)
-{
-    size_t position = data.find(search_pattern);
-    while( position != std::string::npos)
-    {
-        data.replace(position, search_pattern.size(), replacement);
-        position = data.find(search_pattern, position + replacement.size());
-    }
+    return write_array("book_chapter_starts", book_chapter_starts) &&
+           write_array("book_groups", book_groups) &&
+           write_units("chapters", groups) &&
+           write_units("used_in_book", used_ints,
+                       array_cuts::unit_shift(Stage1Data::nil.as_array_budget())) &&
+           write_array("headings", headings) &&
+           write_array("book_title_starts", book_title_starts) &&
+           write_array("book_author_starts", book_author_starts);
 }

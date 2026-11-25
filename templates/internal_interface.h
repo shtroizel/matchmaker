@@ -46,7 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int mm_count_snth();
 std::string const & mm_at_snth(int index);
 int mm_lookup_snth(std::string const & word, bool * found);
-int mm_as_longest_snth(int index);
 int mm_ordinal_summation_snth(int index);
 std::vector<int8_t> const & mm_flagged_parts_of_speech_snth(int index);
 bool mm_is_name_snth(int index);
@@ -56,16 +55,7 @@ bool mm_is_place_snth(int index);
 bool mm_is_compound_snth(int index);
 bool mm_is_acronym_snth(int index);
 bool mm_is_phrase_snth(int index);
-bool mm_is_used_in_book_snth(int book_index, int index);
 std::vector<int> const & mm_synonyms_snth(int index);
 std::vector<int> const & mm_antonyms_snth(int index);
 std::vector<int> const & mm_embedded_snth(int index);
 std::vector<int> const & mm_definition_snth(int index);
-void mm_locations_snth(
-    int index,
-    int const * * book_indexes,
-    int const * * chapter_indexes,
-    int const * * paragraph_indexes,
-    int const * * word_indexes,
-    int * count
-);

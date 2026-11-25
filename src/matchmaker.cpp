@@ -11,17 +11,12 @@
 #include <matchable/matchable.h>
 #include <matchmaker/word_order.h>
 
+#include <arrays.h>
 #include <tree.h>
 
 
 #include <matchmaker/parts_of_speech.h>
-#include <matchmaker/longest_words.h>
 #include <matchmaker/ordinal_summation.h>
-
-
-#ifndef STAGE0
-#include <matchmaker/books/books_content.h>
-#endif
 
 
 int mm_count()
@@ -57,49 +52,50 @@ char const * mm_at(int index, int * length)
 }
 
 
+namespace
+{
+    // the entry of an array that is compiled in units
+    int unit_entry(std::span<int const * const> units, size_t entry)
+    {
+        return units[entry >> arrays::unit_shift][entry & ((size_t{1} << arrays::unit_shift) - 1)];
+    }
+}
+
+
 int mm_as_longest(int index)
 {
-    if (index < 0 || index >= mm_count())
+    if (index < 0 || index >= mm_count() || arrays::as_longest.empty())
         return -1;
 
-    int index_in_leaf;
-    tree::Leaf const & leaf = tree::leaf_at(index, &index_in_leaf);
-
-    return leaf.as_longest(index_in_leaf);
+    return unit_entry(arrays::as_longest, index);
 }
 
 
 int mm_from_longest(int length_index)
 {
-    if (length_index < 0 || length_index >= mm_count())
+    if (length_index < 0 || length_index >= mm_count() || arrays::from_longest.empty())
         return -1;
 
-    return LONGEST_WORDS[length_index];
+    return unit_entry(arrays::from_longest, length_index);
 }
 
 
 void mm_lengths(int const * * lengths, int * count)
 {
-    static std::vector<int> const v = []()
-                                      {
-                                          std::vector<int> v;
-                                          for (auto const & [l, o] : LONGEST_WORDS_OFFSETS)
-                                              v.push_back(l);
-                                          return v;
-                                      }();
-    *lengths = v.data();
-    *count = v.size();
+    *lengths = arrays::lengths.data();
+    *count = (int) arrays::lengths.size();
 }
 
 
 bool mm_length_location(int length, int * index, int * count)
 {
-    auto iter = LONGEST_WORDS_OFFSETS.find(length);
-    if (iter == LONGEST_WORDS_OFFSETS.end())
+    auto const iter = std::lower_bound(arrays::lengths.begin(), arrays::lengths.end(), length);
+    if (iter == arrays::lengths.end() || *iter != length)
         return false;
 
-    *index = iter->second.first;
-    *count = iter->second.second - iter->second.first + 1;
+    auto const i = iter - arrays::lengths.begin();
+    *index = arrays::length_firsts[i];
+    *count = arrays::length_counts[i];
     return true;
 }
 
@@ -257,10 +253,12 @@ bool mm_is_used_in_book(int book_index, int index)
     if (book_index < 0 || book_index >= mm_book_count() || index < 0 || index >= mm_count())
         return false;
 
-    int index_in_leaf;
-    tree::Leaf const & leaf = tree::leaf_at(index, &index_in_leaf);
+    size_t const ints_per_book = ((size_t) mm_count() + 31) / 32;
+    size_t const entry = book_index * ints_per_book + index / 32;
+    if (entry >> arrays::unit_shift >= arrays::used_in_book.size())
+        return false;
 
-    return leaf.is_used_in_book(book_index, index_in_leaf) != 0;
+    return ((unsigned) unit_entry(arrays::used_in_book, entry) >> (index % 32) & 1u) != 0;
 }
 
 
@@ -336,6 +334,84 @@ void mm_definition(int index, int const * * definition, int * count)
 }
 
 
+namespace
+{
+    // how many ranges an array of starts holds: entry i is where range i begins and entry i + 1 where it
+    // ends
+    int range_count(std::span<int const> starts)
+    {
+        return starts.empty() ? 0 : (int) starts.size() - 1;
+    }
+
+
+    void heading(std::span<int const> starts, int index, int const * * terms, int * count)
+    {
+        if (index < 0 || index >= range_count(starts))
+        {
+            *terms = nullptr;
+            *count = 0;
+            return;
+        }
+
+        *terms = arrays::headings.data() + starts[index];
+        *count = starts[index + 1] - starts[index];
+    }
+
+
+    // the group of chapters that holds a book's chapter, with the chapter's place in it, or nullptr
+    int const * chapter_group(int book_index, int chapter_index, int * chapter)
+    {
+        if (chapter_index < 0 || chapter_index >= mm_chapter_count(book_index))
+            return nullptr;
+
+        int const shift = arrays::book_groups[2 * book_index + 1];
+        *chapter = chapter_index & ((1 << shift) - 1);
+        return arrays::chapters[arrays::book_groups[2 * book_index] + (chapter_index >> shift)];
+    }
+
+
+    int const * part(int const * group, int which)
+    {
+        return group + group[which];
+    }
+
+
+    // the place of range's entry at index within starts, or -1 when the range has no such entry
+    int entry_at(int const * starts, int range, int index)
+    {
+        if (index < 0 || index >= starts[range + 1] - starts[range])
+            return -1;
+
+        return starts[range] + index;
+    }
+
+
+    // the place of a chapter's paragraph among its group's paragraphs, or -1
+    int paragraph_at(int const * group, int chapter, int paragraph_index)
+    {
+        return entry_at(part(group, arrays::chapter_part::paragraph_starts), chapter, paragraph_index);
+    }
+
+
+    // a chapter's title (which 0) or subtitle (which 1)
+    void chapter_heading(int book_index, int chapter_index, int which, int const * * terms, int * count)
+    {
+        int chapter;
+        int const * const group = chapter_group(book_index, chapter_index, &chapter);
+        if (nullptr == group)
+        {
+            *terms = nullptr;
+            *count = 0;
+            return;
+        }
+
+        int const * const starts = part(group, arrays::chapter_part::heading_starts) + 2 * chapter + which;
+        *terms = part(group, arrays::chapter_part::headings) + starts[0];
+        *count = starts[1] - starts[0];
+    }
+}
+
+
 void mm_locations(
     int index,
     int const * * book_indexes,
@@ -345,7 +421,7 @@ void mm_locations(
     int * count
 )
 {
-    if (index < 0 || index >= mm_count())
+    if (index < 0 || index >= mm_count() || arrays::locations.empty())
     {
         *book_indexes = nullptr;
         *chapter_indexes = nullptr;
@@ -355,17 +431,13 @@ void mm_locations(
         return;
     }
 
-    int index_in_leaf;
-    tree::Leaf const & leaf = tree::leaf_at(index, &index_in_leaf);
-
-    leaf.locations(
-        index_in_leaf,
-        book_indexes,
-        chapter_indexes,
-        paragraph_indexes,
-        word_indexes,
-        count
-    );
+    int const * const block = arrays::locations[index >> arrays::location_shift];
+    int const * const starts = block + (index & ((1 << arrays::location_shift) - 1));
+    *count = (starts[1] - starts[0]) / 4;
+    *book_indexes = block + starts[0];
+    *chapter_indexes = *book_indexes + *count;
+    *paragraph_indexes = *chapter_indexes + *count;
+    *word_indexes = *paragraph_indexes + *count;
 }
 
 
@@ -409,140 +481,69 @@ void mm_complete(char const * prefix, int * start, int * length)
 
 int mm_book_count()
 {
-#ifdef STAGE0
-    return 0;
-#else
-    return BOOK_COUNT;
-#endif
+    return range_count(arrays::book_chapter_starts);
 }
 
 
 void mm_book_title(int book_index, int const * * book_title, int * word_count)
 {
-#ifdef STAGE0
-    (void) book_index;
-    (void) book_title;
-    (void) word_count;
-#else
-    if (book_index < 0 || book_index >= BOOK_COUNT)
-    {
-        *book_title = nullptr;
-        *word_count = 0;
-        return;
-    }
-
-    book_title_funcs[book_index](book_title, word_count);
-#endif
+    heading(arrays::book_title_starts, book_index, book_title, word_count);
 }
 
 
 void mm_book_author(int book_index, int const * * book_author, int * word_count)
 {
-#ifdef STAGE0
-    (void) book_index;
-    (void) book_author;
-    (void) word_count;
-#else
-    if (book_index < 0 || book_index >= BOOK_COUNT)
-    {
-        *book_author = nullptr;
-        *word_count = 0;
-        return;
-    }
-
-    book_author_funcs[book_index](book_author, word_count);
-#endif
+    heading(arrays::book_author_starts, book_index, book_author, word_count);
 }
 
 
 int mm_chapter_count(int book_index)
 {
-#ifdef STAGE0
-    (void) book_index;
-    return 0;
-#else
-    if (book_index < 0 || book_index >= BOOK_COUNT)
+    if (book_index < 0 || book_index >= mm_book_count())
         return 0;
 
-    return chapter_count_funcs[book_index]();
-#endif
+    return arrays::book_chapter_starts[book_index + 1] - arrays::book_chapter_starts[book_index];
 }
 
 
 void mm_chapter_title(int book_index, int chapter_index, int const * * chapter_title, int * word_count)
 {
-#ifdef STAGE0
-    (void) book_index;
-    (void) chapter_index;
-    (void) chapter_title;
-    (void) word_count;
-#else
-    if (book_index < 0 || book_index >= BOOK_COUNT ||
-            chapter_index < 0 || chapter_index >= mm_chapter_count(book_index))
-    {
-        *chapter_title = nullptr;
-        *word_count = 0;
-        return;
-    }
-
-    chapter_title_funcs[book_index](chapter_index, chapter_title, word_count);
-#endif
+    chapter_heading(book_index, chapter_index, 0, chapter_title, word_count);
 }
 
 
 void mm_chapter_subtitle(int book_index, int chapter_index,
                          int const * * chapter_subtitle, int * word_count)
 {
-#ifdef STAGE0
-    (void) book_index;
-    (void) chapter_index;
-    (void) chapter_subtitle;
-    (void) word_count;
-#else
-    if (book_index < 0 || book_index >= BOOK_COUNT ||
-            chapter_index < 0 || chapter_index >= mm_chapter_count(book_index))
-    {
-        *chapter_subtitle = nullptr;
-        *word_count = 0;
-        return;
-    }
-
-    chapter_subtitle_funcs[book_index](chapter_index, chapter_subtitle, word_count);
-#endif
+    chapter_heading(book_index, chapter_index, 1, chapter_subtitle, word_count);
 }
 
 
 int mm_paragraph_count(int book_index, int chapter_index)
 {
-#ifdef STAGE0
-    (void) book_index;
-    (void) chapter_index;
-    return 0;
-#else
-    if (book_index < 0 || book_index >= BOOK_COUNT ||
-            chapter_index < 0 || chapter_index >= mm_chapter_count(book_index))
+    int chapter;
+    int const * const group = chapter_group(book_index, chapter_index, &chapter);
+    if (nullptr == group)
         return 0;
 
-    return paragraph_count_funcs[book_index](chapter_index);
-#endif
+    int const * const starts = part(group, arrays::chapter_part::paragraph_starts);
+    return starts[chapter + 1] - starts[chapter];
 }
 
 
 int mm_word_count(int book_index, int chapter_index, int paragraph_index)
 {
-#ifdef STAGE0
-    (void) book_index;
-    (void) chapter_index;
-    (void) paragraph_index;
-    return 0;
-#else
-    if (book_index < 0 || book_index >= BOOK_COUNT ||
-            chapter_index < 0 || chapter_index >= mm_chapter_count(book_index) ||
-            paragraph_index < 0 || paragraph_index >= mm_paragraph_count(book_index, chapter_index))
+    int chapter;
+    int const * const group = chapter_group(book_index, chapter_index, &chapter);
+    if (nullptr == group)
         return 0;
 
-    return word_count_funcs[book_index](chapter_index, paragraph_index);
-#endif
+    int const paragraph = paragraph_at(group, chapter, paragraph_index);
+    if (paragraph == -1)
+        return 0;
+
+    int const * const starts = part(group, arrays::chapter_part::word_starts);
+    return starts[paragraph + 1] - starts[paragraph];
 }
 
 
@@ -557,29 +558,31 @@ int mm_word(
     bool * referenced
 )
 {
-#ifdef STAGE0
-    (void) book_index;
-    (void) chapter_index;
-    (void) paragraph_index;
-    (void) word_index;
-    (void) ancestors;
-    (void) ancestor_count;
-    (void) index_within_first_ancestor;
-    (void) referenced;
-    return 0;
-#else
-    if (book_index < 0 || book_index >= BOOK_COUNT ||
-            chapter_index < 0 || chapter_index >= mm_chapter_count(book_index) ||
-            paragraph_index < 0 || paragraph_index >= mm_paragraph_count(book_index, chapter_index) ||
-            word_index < 0 || word_index >= mm_word_count(book_index, chapter_index, paragraph_index))
+    int chapter;
+    int const * const group = chapter_group(book_index, chapter_index, &chapter);
+    if (nullptr == group)
         return -1;
 
-    return word_funcs[book_index](chapter_index,
-                                  paragraph_index,
-                                  word_index,
-                                  ancestors,
-                                  ancestor_count,
-                                  index_within_first_ancestor,
-                                  referenced);
-#endif
+    int const paragraph = paragraph_at(group, chapter, paragraph_index);
+    if (paragraph == -1)
+        return -1;
+
+    int const word = entry_at(part(group, arrays::chapter_part::word_starts), paragraph, word_index);
+    if (word == -1)
+        return -1;
+
+    if (nullptr != ancestors && nullptr != ancestor_count)
+    {
+        int const * const starts = part(group, arrays::chapter_part::ancestor_starts) + word;
+        *ancestors = part(group, arrays::chapter_part::ancestors) + starts[0];
+        *ancestor_count = starts[1] - starts[0];
+    }
+
+    if (nullptr != index_within_first_ancestor)
+        *index_within_first_ancestor = part(group, arrays::chapter_part::within_first_ancestor)[word];
+
+    if (nullptr != referenced)
+        *referenced = part(group, arrays::chapter_part::referenced)[word] != 0;
+
+    return part(group, arrays::chapter_part::words)[word];
 }

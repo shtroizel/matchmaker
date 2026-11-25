@@ -1,15 +1,17 @@
-// mini_library_check [--by-spelling] [--no-checks] <libmatchmaker.so>
+// mini_library_check [--by-spelling] [--no-checks] [--check=<name>] <libmatchmaker.so>
 // Loads a matchmaker library built from small data and checks how its parts agree: every term looks itself
 // up, terms are in strict order, cross-links (synonyms, antonyms, embedded words, definitions) are terms,
 // the longest and ordinal summation tables agree with the terms, every book location holds the term that
-// lists it (a phrase as an ancestor of the word there) and every book word lists its location,
-// completion finds exactly the terms with each prefix, and lookups and completion allocate nothing. Prints every term with its properties, then each
-// book, for expect_output.py to compare. --by-spelling prints the terms, synonyms and antonyms in
-// std::string order instead of the library's, so dumps of libraries that differ only in order compare
-// equal; --no-checks skips the checks, for full-size libraries.
+// lists it (a phrase as an ancestor of the word there) and every book word lists its location, completion
+// finds exactly the terms with each prefix, and lookups and completion allocate nothing. Each check
+// reports its problem count on standard error. Prints every term with its properties, then each book, for
+// expect_output.py to compare. --by-spelling prints the terms, synonyms and antonyms in std::string order
+// instead of the library's, so dumps of libraries that differ only in order compare equal. For full-size
+// libraries, --no-checks skips the checks and --check=<name> runs the one named, such as locations.
 #include <dlfcn.h>
 
 #include <algorithm>
+#include <climits>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
@@ -358,8 +360,8 @@ namespace
     }
 
 
-    // every location a term lists holds that term (or a phrase starting there), and every book word that
-    // has locations lists its own
+    // every location a term lists holds that term (or a phrase starting there), every book word that has
+    // locations lists its own, and a book uses each word of its text and each phrase around one
     void check_locations()
     {
         std::set<std::tuple<int, int, int, int, int>> listed;
@@ -393,13 +395,117 @@ namespace
                 for (int p = 0; p < mm_paragraph_count(b, c); ++p)
                     for (int w = 0; w < mm_word_count(b, c, p); ++w)
                     {
-                        int const i = mm_word(b, c, p, w, nullptr, nullptr, nullptr, nullptr);
+                        int const * ancestors = nullptr;
+                        int ancestor_count = 0;
+                        int const i = mm_word(b, c, p, w, &ancestors, &ancestor_count, nullptr, nullptr);
                         bool const should = has_locations(term(i));
                         if (should != (listed.count({b, c, p, w, i}) == 1))
                             problem("book word " + term(i) + (should ? " does not list" : " lists") +
                                     " its location");
+                        if (!mm_is_used_in_book(b, i))
+                            problem("book " + std::to_string(b) + " does not use its word " + term(i));
+                        for (int phrase : as_vector(ancestors, ancestor_count))
+                            if (!mm_is_used_in_book(b, phrase))
+                                problem("book " + std::to_string(b) + " does not use the phrase " +
+                                        term(phrase) + " around its word " + term(i));
                     }
+        if (mm_is_used_in_book(-1, 0) || mm_is_used_in_book(mm_book_count(), 0) ||
+                mm_is_used_in_book(0, -1) || mm_is_used_in_book(0, mm_count()))
+            problem("a book or a term out of range is reported as used");
     }
+
+
+    // indexes just outside each range, the next range's first index among them, give the empty answer
+    void check_out_of_range()
+    {
+        auto const outside = [](int count)
+        { return std::vector<int>{-1, count, INT_MAX, INT_MIN}; };
+        auto const empty = [](int const * values, int count) { return nullptr == values && 0 == count; };
+        int const books = mm_book_count();
+
+        for (int i : outside(mm_count()))
+        {
+            if (mm_as_longest(i) != -1)
+                problem("mm_as_longest(" + std::to_string(i) + ") is not -1");
+            if (mm_from_longest(i) != -1)
+                problem("mm_from_longest(" + std::to_string(i) + ") is not -1");
+            int const * b = &i;
+            int const * c = &i;
+            int const * p = &i;
+            int const * w = &i;
+            int count = -1;
+            mm_locations(i, &b, &c, &p, &w, &count);
+            if (!empty(b, count) || c != nullptr || p != nullptr || w != nullptr)
+                problem("mm_locations(" + std::to_string(i) + ") is not empty");
+        }
+
+        for (int b : outside(books))
+        {
+            int const * title = &b;
+            int count = -1;
+            mm_book_title(b, &title, &count);
+            if (!empty(title, count))
+                problem("mm_book_title(" + std::to_string(b) + ") is not empty");
+            int const * author = &b;
+            count = -1;
+            mm_book_author(b, &author, &count);
+            if (!empty(author, count))
+                problem("mm_book_author(" + std::to_string(b) + ") is not empty");
+            if (mm_chapter_count(b) != 0)
+                problem("mm_chapter_count(" + std::to_string(b) + ") is not 0");
+        }
+
+        for (int b = 0; b < books; ++b)
+        {
+            for (int c : outside(mm_chapter_count(b)))
+            {
+                std::string const at = std::to_string(b) + ", " + std::to_string(c);
+                int const * title = &c;
+                int count = -1;
+                mm_chapter_title(b, c, &title, &count);
+                if (!empty(title, count))
+                    problem("mm_chapter_title(" + at + ") is not empty");
+                int const * subtitle = &c;
+                count = -1;
+                mm_chapter_subtitle(b, c, &subtitle, &count);
+                if (!empty(subtitle, count))
+                    problem("mm_chapter_subtitle(" + at + ") is not empty");
+                if (mm_paragraph_count(b, c) != 0)
+                    problem("mm_paragraph_count(" + at + ") is not 0");
+            }
+            for (int c = 0; c < mm_chapter_count(b); ++c)
+            {
+                for (int p : outside(mm_paragraph_count(b, c)))
+                    if (mm_word_count(b, c, p) != 0)
+                        problem("mm_word_count(" + std::to_string(b) + ", " + std::to_string(c) + ", " +
+                                std::to_string(p) + ") is not 0");
+                for (int p = 0; p < mm_paragraph_count(b, c); ++p)
+                    for (int w : outside(mm_word_count(b, c, p)))
+                        if (mm_word(b, c, p, w, nullptr, nullptr, nullptr, nullptr) != -1)
+                            problem("mm_word(" + std::to_string(b) + ", " + std::to_string(c) + ", " +
+                                    std::to_string(p) + ", " + std::to_string(w) + ") is not -1");
+            }
+        }
+    }
+
+
+    struct Check
+    {
+        char const * name;
+        void (*run)();
+    };
+
+
+    Check const all_checks[] = {
+        {"terms", check_terms},
+        {"longest", check_longest},
+        {"ordinal_summation", check_ordinal_summation},
+        {"completion", check_completion},
+        {"lookup_any_case", check_lookup_any_case},
+        {"no_allocations", check_no_allocations},
+        {"locations", check_locations},
+        {"out_of_range", check_out_of_range},
+    };
 
 
     std::vector<int> printed_order(std::vector<int> indexes)
@@ -438,6 +544,9 @@ namespace
             if (mm_is_compound(i)) std::cout << " compound";
             if (mm_is_acronym(i)) std::cout << " acronym";
             if (mm_is_phrase(i)) std::cout << " phrase";
+            for (int book = 0; book < mm_book_count(); ++book)
+                if (mm_is_used_in_book(book, i))
+                    std::cout << " book" << book;
 
             int const * linked = nullptr;
             int linked_count = 0;
@@ -503,7 +612,12 @@ namespace
                         if (referenced)
                             std::cout << "r";
                         if (ancestor_count > 0 && ancestors[0] != -1)
-                            std::cout << "<" << term(ancestors[0]) << "@" << within << ">";
+                        {
+                            std::cout << "<" << term(ancestors[0]) << "@" << within;
+                            for (int a = 1; a < ancestor_count; ++a)
+                                std::cout << "<" << term(ancestors[a]);
+                            std::cout << ">";
+                        }
                     }
                     std::cout << "\n";
                 }
@@ -517,18 +631,29 @@ namespace
 int main(int argc, char ** argv)
 {
     bool checks = true;
+    char const * only = nullptr;
     int arg = 1;
     for (; arg < argc - 1; ++arg)
         if (std::string(argv[arg]) == "--by-spelling")
             by_spelling = true;
         else if (std::string(argv[arg]) == "--no-checks")
             checks = false;
+        else if (std::string(argv[arg]).rfind("--check=", 0) == 0)
+            only = argv[arg] + 8;
         else
             break;
-    if (arg != argc - 1)
+    bool known = nullptr == only;
+    for (auto const & check : all_checks)
+        known = known || std::string(check.name) == only;
+    if (arg != argc - 1 || !known)
     {
-        std::cerr << "usage: " << argv[0] << " [--by-spelling] [--no-checks] <libmatchmaker.so>"
-                  << std::endl;
+        if (!known)
+            std::cerr << "no check is named " << only << std::endl;
+        std::cerr << "usage: " << argv[0]
+                  << " [--by-spelling] [--no-checks] [--check=<name>] <libmatchmaker.so>\nchecks:";
+        for (auto const & check : all_checks)
+            std::cerr << " " << check.name;
+        std::cerr << std::endl;
         return 2;
     }
     void * library = dlopen(argv[arg], RTLD_NOW | RTLD_LOCAL);
@@ -554,15 +679,14 @@ int main(int argc, char ** argv)
     }
 
     if (checks)
-    {
-        check_terms();
-        check_longest();
-        check_ordinal_summation();
-        check_completion();
-        check_lookup_any_case();
-        check_no_allocations();
-        check_locations();
-    }
+        for (auto const & check : all_checks)
+            if (nullptr == only || std::string(check.name) == only)
+            {
+                size_t const before = problems.size();
+                check.run();
+                std::cerr << "check " << check.name << ": " << problems.size() - before << " problems"
+                          << std::endl;
+            }
     print_terms();
     print_books();
 

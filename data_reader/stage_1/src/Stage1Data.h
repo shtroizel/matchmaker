@@ -7,9 +7,11 @@ matchable with by_index required for stage 1 reader
 #endif
 #include <matchable/matchable.h>
 
+#include <cstdint>
 #include <deque>
 #include <functional>
 #include <map>
+#include <vector>
 
 #include <matchmaker/data_reader_common.h>
 
@@ -55,27 +57,20 @@ MATCHABLE(
 
 using SynAntTable = std::map<std::string, SynAnt>;
 using IndexTable = std::vector<std::vector<int>>;
-using UsedInBookTable = std::vector<Buch::Flags>;
-using LongestOffsetsMap = std::map<int, std::pair<int, int>>;
 using KeyWords = std::vector<int>;
 
-PROPERTYx16_MATCHABLE(
+PROPERTYx11_MATCHABLE(
     std::string, workspace_dir,
     std::string, data_dir,
-    std::string, template_dir,
     SynAntTable, syn_ant_table,
     IndexTable, embedded_words,
     IndexTable, definitions,
-    UsedInBookTable, used_in_book,
     std::vector<int>, by_longest,
-    LongestOffsetsMap, longest_offsets,
     std::vector<Book>, books,
-    IndexTable, book_indexes,
-    IndexTable, chapter_indexes,
-    IndexTable, paragraph_indexes,
-    IndexTable, word_indexes,
+    std::vector<uint32_t>, used_in_book,
     KeyWords, key_words,
     int, thread_count,
+    int, array_budget,
 
     Stage1Data
 )

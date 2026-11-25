@@ -56,14 +56,9 @@ void Prefix::initialize(std::string const & prefix)
     maker->grab(matchable_name)->add_property("int8_t", "pos");
     maker->grab(matchable_name)->add_property("int", "syn");
     maker->grab(matchable_name)->add_property("int", "ant");
-    maker->grab(matchable_name)->add_property("int", "by_longest_index");
     maker->grab(matchable_name)->add_property("int", "ordinal_summation");
     maker->grab(matchable_name)->add_property("int", "embedded");
     maker->grab(matchable_name)->add_property("int", "definition");
-    maker->grab(matchable_name)->add_property("int", "book_index");
-    maker->grab(matchable_name)->add_property("int", "chapter_index");
-    maker->grab(matchable_name)->add_property("int", "paragraph_index");
-    maker->grab(matchable_name)->add_property("int", "word_index");
 
     // "word_attribute" properties
     {
@@ -81,7 +76,6 @@ void Prefix::initialize(std::string const & prefix)
         add_bool_prop(Stage0Data::word_attribute::compound::grab().as_string());
         add_bool_prop(Stage0Data::word_attribute::acronym::grab().as_string());
         add_bool_prop(Stage0Data::word_attribute::phrase::grab().as_string());
-        add_bool_prop("used_in_book");
     }
 }
 

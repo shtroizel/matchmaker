@@ -109,15 +109,8 @@ bool patch_matchable_header(
 {
     // aliases
     SynAntTable const & contents_SynAnt = Stage1Data::nil.as_syn_ant_table();
-    std::vector<int> const & by_longest = Stage1Data::nil.as_by_longest();
-    std::map<int, std::pair<int, int>> const & longest_offsets = Stage1Data::nil.as_longest_offsets();
     IndexTable const & embedded_words = Stage1Data::nil.as_embedded_words();
     IndexTable const & defs = Stage1Data::nil.as_definitions();
-    IndexTable const & book_indexes = Stage1Data::nil.as_book_indexes();
-    IndexTable const & chapter_indexes = Stage1Data::nil.as_chapter_indexes();
-    IndexTable const & paragraph_indexes = Stage1Data::nil.as_paragraph_indexes();
-    IndexTable const & word_indexes = Stage1Data::nil.as_word_indexes();
-    UsedInBookTable const & used_in_book = Stage1Data::nil.as_used_in_book();
 
     for (auto const & matchable_header : matchable_headers)
     {
@@ -168,30 +161,6 @@ bool patch_matchable_header(
                     m->set_propertyvect(v.variant_name, "syn", syn_vect);
                     m->set_propertyvect(v.variant_name, "ant", ant_vect);
 
-                    {
-                        std::pair<int, int> const & window = longest_offsets.at(existing_word.size());
-
-                        int lower = window.first;
-                        int upper = window.second + 1;
-                        int mid{0};
-
-                        while (lower < upper)
-                        {
-                            mid = lower + (upper - lower) / 2;
-
-                            if (existing_word == std::string(mm_at(by_longest[mid], nullptr)))
-                            {
-                                m->set_property(v.variant_name, "by_longest_index", std::to_string(mid));
-                                break;
-                            }
-
-                            if (existing_word < std::string(mm_at(by_longest[mid], nullptr)))
-                                upper = mid;
-                            else
-                                lower = mid;
-                        }
-                    }
-
                     bool found = false;
                     int const existing_word_index = mm_lookup(existing_word.c_str(), &found);
                     if (!found)
@@ -213,53 +182,6 @@ bool patch_matchable_header(
                         for (int i : defs[existing_word_index])
                             def_vect.push_back(std::to_string(i));
                         m->set_propertyvect(v.variant_name, "definition", def_vect);
-                    }
-
-                    {
-                        std::vector<std::string> book_index_vect;
-                        for (int i : book_indexes[existing_word_index])
-                            book_index_vect.push_back(std::to_string(i));
-                        m->set_propertyvect(v.variant_name, "book_index", book_index_vect);
-                    }
-
-                    {
-                        std::vector<std::string> chapter_index_vect;
-                        for (int i : chapter_indexes[existing_word_index])
-                            chapter_index_vect.push_back(std::to_string(i));
-                        m->set_propertyvect(v.variant_name, "chapter_index", chapter_index_vect);
-                    }
-
-                    {
-                        std::vector<std::string> paragraph_index_vect;
-                        for (int i : paragraph_indexes[existing_word_index])
-                            paragraph_index_vect.push_back(std::to_string(i));
-                        m->set_propertyvect(v.variant_name, "paragraph_index", paragraph_index_vect);
-                    }
-
-                    {
-                        std::vector<std::string> word_index_vect;
-                        for (int i : word_indexes[existing_word_index])
-                            word_index_vect.push_back(std::to_string(i));
-                        m->set_propertyvect(v.variant_name, "word_index", word_index_vect);
-                    }
-
-                    {
-                        bool in_at_least_one_book{false};
-                        std::vector<std::string> used_in_book_vect;
-                        for (auto const & book : selected_books().currently_set())
-                        {
-                            if (used_in_book[existing_word_index].is_set(book))
-                            {
-                                in_at_least_one_book = true;
-                                used_in_book_vect.push_back("1");
-                            }
-                            else
-                            {
-                                used_in_book_vect.push_back("0");
-                            }
-                        }
-                        if (in_at_least_one_book)
-                            m->set_propertyvect(v.variant_name, "is_used_in_book", used_in_book_vect);
                     }
                 }
 

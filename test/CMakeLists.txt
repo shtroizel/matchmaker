@@ -8,15 +8,18 @@ cmake_minimum_required(VERSION 3.16.3)
 #     link       workspace_common's linker choice, link pool estimate and library size check
 #     order      order.py's sort rules on fixtures/order, and its today rule against matchable's
 #     reader0    the stage 0 data reader, on small fixture data
+#     reader1    the stage 1 data reader's rules for cutting the generated arrays into compiled files
 #     full_data  the stage 0 data reader on all of data_reader/data (about 45 s; -LE full_data skips it)
 #     toolchain  option parsing and the source check in build_toolchain.py (nothing is built)
 #     mini_build build_and_install.py on the fixture data, then the library it installs, again with -e,
 #                then units of words loaded on top, again with -q, again with -S (the system
-#                compiler), and stage 1 again with -r -f (about 10 minutes; build_and_install.py runs
-#                every label but this one before its stage 0 data reader). The pinned toolchain builds
-#                the others, and these tests build with this compiler. The toolchain is the one in
-#                -DMM_TOOLCHAIN=<LLVM install> (or MM_TOOLCHAIN in the environment), else
-#                build_toolchain.py's, which the first run builds (about 7 CPU hours, once per user)
+#                compiler), and stage 1 again with -r -f, on the same data, on moved book text and
+#                with another array budget
+#                (about 10 minutes; build_and_install.py runs every label but this one before its
+#                stage 0 data reader). The pinned toolchain builds the others, and these tests build
+#                with this compiler. The toolchain is the one in -DMM_TOOLCHAIN=<LLVM install> (or
+#                MM_TOOLCHAIN in the environment), else build_toolchain.py's, which the first run
+#                builds (about 7 CPU hours, once per user)
 #
 # reader0_* tests compare what the reader keeps with test/fixtures/reader0/expected; after a deliberate
 # change, UPDATE_EXPECTED=1 ctest -R reader0_ rewrites those files (review the diff)
@@ -112,6 +115,14 @@ add_executable(leaf_cuts_check leaf_cuts_check.cpp)
 target_compile_options(leaf_cuts_check PRIVATE -Wall -Werror -Wextra)
 add_test(NAME leaf_cuts COMMAND leaf_cuts_check)
 set_tests_properties(leaf_cuts PROPERTIES LABELS reader0)
+
+
+# array_cuts: the stage 1 reader's rule for cutting the generated arrays into units and groups
+add_executable(array_cuts_check array_cuts_check.cpp)
+target_include_directories(array_cuts_check PRIVATE ${MATCHMAKER_ROOT}/data_reader/stage_1/src)
+target_compile_options(array_cuts_check PRIVATE -Wall -Werror -Wextra)
+add_test(NAME array_cuts COMMAND array_cuts_check)
+set_tests_properties(array_cuts PROPERTIES LABELS reader1)
 
 
 # the stage 0 reader refuses bad parent prefix files, which still sort words into buckets while it reads
@@ -231,7 +242,8 @@ set(BUILD_AND_INSTALL ${MATCHMAKER_ROOT}/scripts/build_and_install.py)
 add_test(
     NAME options_long_values
     COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --jobs=2 --build_dir=b --install_dir=i --debug
-            --time_compiles=t --linker=lld --leaf_budget=10 --toolchain=t --system_compiler -h
+            --time_compiles=t --linker=lld --leaf_budget=10 --array_budget=100 --toolchain=t
+            --system_compiler -h
 )
 add_test(
     NAME options_long_values_stage_0
@@ -268,6 +280,15 @@ add_test(
 set_tests_properties(options_leaf_budget_needs_number PROPERTIES
     LABELS options
     PASS_REGULAR_EXPRESSION "^--leaf_budget must be a whole number of at least 1"
+)
+
+add_test(
+    NAME options_array_budget_needs_number
+    COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --array_budget=0 -h
+)
+set_tests_properties(options_array_budget_needs_number PROPERTIES
+    LABELS options
+    PASS_REGULAR_EXPRESSION "^--array_budget must be a whole number of at least 1"
 )
 
 add_test(
@@ -460,6 +481,9 @@ set_tests_properties(mini_toolchain_ready PROPERTIES
 )
 # a small budget, so the fixture words fill several leaves and routing between them is exercised
 set(MINI_LEAF_BUDGET 10)
+# so few ints per compiled file of the generated arrays that the fixture's are cut as finely as they can
+# be: units of 2 entries, a block of locations per term and a group per chapter
+set(MINI_ARRAY_BUDGET 3)
 set(MINI_BUILD_COMPILES ${CMAKE_CURRENT_BINARY_DIR}/mini_build_compiles.txt)
 include(ProcessorCount)
 ProcessorCount(MINI_BUILD_JOBS)
@@ -473,6 +497,7 @@ add_test(
     COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -j ${MINI_BUILD_JOBS}
             ${MINI_TOOLCHAIN}
             --data_dir=${READER0_DATA} --leaf_budget=${MINI_LEAF_BUDGET}
+            --array_budget=${MINI_ARRAY_BUDGET}
             -b ${MINI_BUILD}/build -i ${MINI_BUILD}/install
             --time_compiles=${MINI_BUILD_COMPILES}
 )
@@ -507,6 +532,41 @@ add_test(
             ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
 )
 set_tests_properties(mini_library_by_spelling PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_library)
+# mini_library_one_check: --check=locations runs the locations check alone; mini_library_unknown_check: a
+# name that belongs to no check is refused with the names that do
+set(MINI_OTHER_CHECKS
+    "terms|longest|ordinal_summation|completion|lookup_any_case|no_allocations|out_of_range"
+)
+add_test(
+    NAME mini_library_one_check
+    COMMAND mini_library_check --check=locations ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
+)
+set_tests_properties(mini_library_one_check PROPERTIES
+    LABELS mini_build FIXTURES_REQUIRED mini_library RESOURCE_LOCK mini_install
+    PASS_REGULAR_EXPRESSION "check locations: 0 problems"
+    FAIL_REGULAR_EXPRESSION "check (${MINI_OTHER_CHECKS}): "
+)
+add_test(
+    NAME mini_library_unknown_check
+    COMMAND mini_library_check --check=spelling ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
+)
+set_tests_properties(mini_library_unknown_check PROPERTIES
+    LABELS options
+    PASS_REGULAR_EXPRESSION
+        "^no check is named spelling\n.*\nchecks: terms longest .* locations out_of_range\n$"
+)
+
+# mini_array_units: stage 1 cut the generated arrays of mini_build within the array budget, into the units
+# the tests of the cut rely on
+add_test(
+    NAME mini_array_units
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_array_units_check.py
+            ${MINI_BUILD}/build ${MINI_ARRAY_BUDGET}
+            as_longest=63 from_longest=63 used_in_book=2 locations=126 chapters=5
+)
+set_tests_properties(mini_array_units PROPERTIES
+    LABELS mini_build FIXTURES_REQUIRED mini_library RESOURCE_LOCK mini_install
+)
 
 # mini_toolchain: the pinned toolchain built everything mini_build installed
 add_test(
@@ -528,7 +588,7 @@ add_test(
     NAME mini_rerun
     COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -r -f
             ${MINI_TOOLCHAIN} -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA}
-            --leaf_budget=${MINI_LEAF_BUDGET}
+            --leaf_budget=${MINI_LEAF_BUDGET} --array_budget=${MINI_ARRAY_BUDGET}
             -b ${MINI_BUILD}/build -i ${MINI_BUILD}/install
             --time_compiles=${MINI_RERUN_COMPILES}
 )
@@ -553,6 +613,123 @@ add_test(
 set_tests_properties(mini_rerun_library PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_rerun)
 set_tests_properties(mini_library mini_library_by_spelling mini_rerun mini_rerun_library
     PROPERTIES RESOURCE_LOCK mini_install)
+
+# mini_moved: stage 1 again (-r -f) on the same build, with the text of two posts trading places. No leaf
+# holds a location, so mini_moved_compiles finds only the units of the arrays that hold the two posts and
+# their terms' locations compiled again, and mini_moved_library finds the text where it now is.
+# mini_moved_back runs stage 1 on the fixture data again (timing compiles too, which keeps the build's
+# compile commands) and mini_moved_back_library checks that the first library is back; the tests that read
+# the install run before all of these
+set(MINI_MOVED_DATA ${CMAKE_CURRENT_BINARY_DIR}/mini_moved_data)
+set(MINI_MOVED_COMPILES ${CMAKE_CURRENT_BINARY_DIR}/mini_moved_compiles.txt)
+add_test(
+    NAME mini_moved_data
+    COMMAND ${CMAKE_COMMAND} -DDATA=${READER0_DATA} -DOUT=${MINI_MOVED_DATA}
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/moved_text_data.cmake
+)
+add_test(NAME mini_moved_compiles_clear COMMAND ${CMAKE_COMMAND} -E rm -f ${MINI_MOVED_COMPILES})
+set_tests_properties(mini_moved_data mini_moved_compiles_clear PROPERTIES
+    LABELS mini_build FIXTURES_SETUP mini_moved_start
+)
+add_test(
+    NAME mini_moved
+    COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -r -f
+            ${MINI_TOOLCHAIN} -j ${MINI_BUILD_JOBS} --data_dir=${MINI_MOVED_DATA}
+            --leaf_budget=${MINI_LEAF_BUDGET} --array_budget=${MINI_ARRAY_BUDGET}
+            -b ${MINI_BUILD}/build -i ${MINI_BUILD}/install
+            --time_compiles=${MINI_MOVED_COMPILES}
+)
+set_tests_properties(mini_moved PROPERTIES
+    LABELS mini_build
+    FIXTURES_REQUIRED "mini_library;mini_moved_start"
+    FIXTURES_SETUP mini_moved
+    DEPENDS "mini_library;mini_library_by_spelling;mini_array_units;mini_rerun;mini_rerun_library"
+    TIMEOUT 3600
+)
+add_test(
+    NAME mini_moved_compiles
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_rerun_check.py
+            ${MINI_MOVED_COMPILES} ${MINI_BUILD}/build moved_text
+)
+add_test(
+    NAME mini_moved_library
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+            ${READER0_EXPECTED}/mini_library_moved_text.txt
+            $<TARGET_FILE:mini_library_check> ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
+)
+set_tests_properties(mini_moved_compiles mini_moved_library PROPERTIES
+    LABELS mini_build FIXTURES_REQUIRED mini_moved
+)
+add_test(
+    NAME mini_moved_back
+    COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -r -f
+            ${MINI_TOOLCHAIN} -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA}
+            --leaf_budget=${MINI_LEAF_BUDGET} --array_budget=${MINI_ARRAY_BUDGET}
+            -b ${MINI_BUILD}/build -i ${MINI_BUILD}/install
+            --time_compiles=${MINI_MOVED_COMPILES}
+)
+set_tests_properties(mini_moved_back PROPERTIES
+    LABELS mini_build FIXTURES_CLEANUP mini_moved FIXTURES_SETUP mini_moved_back TIMEOUT 3600
+)
+add_test(
+    NAME mini_moved_back_library
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+            ${READER0_EXPECTED}/mini_library.txt
+            $<TARGET_FILE:mini_library_check> ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
+)
+set_tests_properties(mini_moved_back_library PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_moved_back)
+set_tests_properties(mini_moved mini_moved_library mini_moved_back mini_moved_back_library
+    PROPERTIES RESOURCE_LOCK mini_install)
+
+# mini_recut: stage 1 again (-r -f) on the same build and data with a larger array budget, which puts the
+# chapters two to a group, every term's locations in one block and each other array in one unit.
+# mini_recut_units checks the cut, mini_recut_compiles that the units and the tables were compiled again
+# and no leaf, and mini_recut_library that the library answers as before. It runs after every test of the
+# first cut and leaves the build cut this way
+set(MINI_RECUT_BUDGET 350)
+set(MINI_RECUT_COMPILES ${CMAKE_CURRENT_BINARY_DIR}/mini_recut_compiles.txt)
+add_test(NAME mini_recut_compiles_clear COMMAND ${CMAKE_COMMAND} -E rm -f ${MINI_RECUT_COMPILES})
+set_tests_properties(mini_recut_compiles_clear PROPERTIES LABELS mini_build FIXTURES_SETUP mini_recut_start)
+add_test(
+    NAME mini_recut
+    COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -r -f
+            ${MINI_TOOLCHAIN} -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA}
+            --leaf_budget=${MINI_LEAF_BUDGET} --array_budget=${MINI_RECUT_BUDGET}
+            -b ${MINI_BUILD}/build -i ${MINI_BUILD}/install
+            --time_compiles=${MINI_RECUT_COMPILES}
+)
+set_tests_properties(mini_recut PROPERTIES
+    LABELS mini_build
+    FIXTURES_REQUIRED "mini_library;mini_recut_start"
+    FIXTURES_SETUP mini_recut
+    TIMEOUT 3600
+)
+set_property(TEST mini_recut APPEND PROPERTY DEPENDS
+    mini_library mini_library_by_spelling mini_library_one_check mini_array_units mini_toolchain
+    mini_rerun mini_rerun_compiles mini_rerun_library
+    mini_moved mini_moved_compiles mini_moved_library mini_moved_back mini_moved_back_library
+)
+add_test(
+    NAME mini_recut_units
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_array_units_check.py
+            ${MINI_BUILD}/build ${MINI_RECUT_BUDGET}
+            as_longest=1 from_longest=1 used_in_book=1 locations=1 chapters=3
+)
+add_test(
+    NAME mini_recut_compiles
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_rerun_check.py
+            ${MINI_RECUT_COMPILES} ${MINI_BUILD}/build recut
+)
+add_test(
+    NAME mini_recut_library
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+            ${READER0_EXPECTED}/mini_library.txt
+            $<TARGET_FILE:mini_library_check> ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
+)
+set_tests_properties(mini_recut_units mini_recut_compiles mini_recut_library PROPERTIES
+    LABELS mini_build FIXTURES_REQUIRED mini_recut
+)
+set_tests_properties(mini_recut mini_recut_units mini_recut_library PROPERTIES RESOURCE_LOCK mini_install)
 
 # mini_q: the same build with -q, which installs under the _q names (matchmaker_q), and mini_q_library runs
 # mini_library_check's checks on what it installs

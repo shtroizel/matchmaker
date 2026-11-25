@@ -38,6 +38,21 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   so a unit can find the leaf a word belongs in
 - leaf_cuts and generator refusal tests, routing over leaf first words, and `--by-spelling` and
   `--no-checks` in mini_library_check with order tests (test/order.py) for a later sort order change
+- mini_moved tests: stage 1 run again on a mini build with book text moved compiles only the files of the
+  generated arrays that hold the moved posts and their terms' locations, the library shows the text where
+  it now is, and the fixture data brings the first library back
+- `--check=<name>` in mini_library_check runs the one check named, so a check that finishes on a full-size
+  library can run there alone; each check reports its problem count on standard error, and
+  mini_library_one_check and mini_library_unknown_check test the option
+- `--array_budget=<ints>` in build_and_install.py (default 1000000): the most ints in a compiled file of
+  the generated arrays. The stage 1 reader cuts its arrays to fit, so each file compiles within bounded
+  memory however many books there are. Arrays read an entry at a time come in units of a power of two of
+  entries, locations in blocks of a power of two of terms, and a book's chapters in groups of a power of
+  two of chapters that the book's own sizes decide; a term or a chapter over the budget gets a file to
+  itself
+- array_cuts tests for the cut rule, mini_array_units for the cut of a mini build, and mini_recut tests:
+  stage 1 run again with another budget compiles the generated arrays again and no leaf, and the library
+  answers as before
 
 ### Changed
 - Builds use the pinned toolchain for matchable, the data readers and both stages unless `-S` is given,
@@ -80,11 +95,26 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   at once as fit in half of the machine's memory, estimated from the size of each library's generated
   headers. A build directory keeps the generator it was made with. The estimate follows the linker: lld
   and mold need less memory than gold
+- The longest order, book locations, book text and which books use each term are plain arrays of int:
+  the stage 1 reader writes them into the workspace (`generated_src/arrays`) as text and libmatchmaker
+  compiles them in. The leaves no longer hold a longest-order index, book locations or book flags, so
+  moved book text compiles no leaf, and books are no longer C++ generated from templates. The large
+  arrays are compiled in several files (`--array_budget`), and a lookup finds its file with a shift.
+  mm_as_longest(), mm_locations() and mm_is_used_in_book() are O(1). The mm_* answers are unchanged
 
 ### Removed
 - The README's supported systems list, until builds with the pinned toolchain are tested on them
 - `-c` (`--clang`) in build_and_install.py: the pinned toolchain builds every library by default, and
   `-S` with `CC` and `CXX` in the environment picks a system compiler
+
+### Fixed
+- The stage 1 reader read one element before the start of its longest order while finding the terms of
+  each length
+- mm_is_used_in_book() is true for every word of a book's text and every phrase around one. It answered
+  from the stage 0 reader's vocabulary alone, so a term could have locations in a book that didn't use
+  it: a word inside a longer token, such as bark in "4bark", or a dictionary phrase such as ice cream. The
+  vocabulary's marks stay, so no term loses one. The fixture has a post with both, and the locations
+  check of mini_library_check expects a book to use each phrase around its words
 
 ## [4.1.0] - 2026-11-19
 

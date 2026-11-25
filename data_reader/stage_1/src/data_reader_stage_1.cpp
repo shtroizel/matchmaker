@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <filesystem>
 #include <iostream>
 #include <thread>
 
@@ -8,8 +9,10 @@
     #include <matchmaker/matchmaker.h>
 #endif
 
+#include "array_cuts.h"
 #include "Stage1Data.h"
 #include "SerialTask.h"
+#include "write_array.h"
 
 
 
@@ -21,7 +24,7 @@ void print_usage();
 
 int main(int argc, char ** argv)
 {
-    if (argc < 4 || argc > 6)
+    if (argc < 3 || argc > 6)
     {
         print_usage();
         return 2;
@@ -31,13 +34,12 @@ int main(int argc, char ** argv)
 
     Stage1Data::nil.as_mutable_data_dir() = argv[1];
     Stage1Data::nil.as_mutable_workspace_dir() = argv[2];
-    Stage1Data::nil.as_mutable_template_dir() = argv[3];
-    int thread_count = argc >= 5 ? std::atoi(argv[4]) : (int) std::thread::hardware_concurrency();
+    int thread_count = argc >= 4 ? std::atoi(argv[3]) : (int) std::thread::hardware_concurrency();
     if (thread_count < 1)
         thread_count = 1;
     Stage1Data::nil.as_mutable_thread_count() = thread_count;
 
-    if (!select_books(argc == 6 ? argv[5] : "all"))
+    if (!select_books(argc >= 5 ? argv[4] : "all"))
     {
         print_usage();
         return 2;
@@ -47,23 +49,26 @@ int main(int argc, char ** argv)
         std::cout << " " << book;
     std::cout << "\n" << std::endl;
 
-    Stage1Data::nil.as_mutable_used_in_book().reserve(mm_count());
+    int const array_budget = argc == 6 ? std::atoi(argv[5]) : 1000000;
+    if (array_budget < 1)
+    {
+        print_usage();
+        return 2;
+    }
+    Stage1Data::nil.as_mutable_array_budget() = array_budget;
+
+    // every task writes its arrays anew, so no unit of an earlier cut stays behind
+    std::filesystem::remove_all(arrays_dir());
+    if (!write_array("unit_shift", {array_cuts::unit_shift(array_budget)}))
+        return 1;
+
     Stage1Data::nil.as_mutable_by_longest().reserve(mm_count());
     Stage1Data::nil.as_mutable_embedded_words().reserve(mm_count());
     Stage1Data::nil.as_mutable_definitions().reserve(mm_count());
-    Stage1Data::nil.as_mutable_book_indexes().reserve(mm_count());
-    Stage1Data::nil.as_mutable_chapter_indexes().reserve(mm_count());
-    Stage1Data::nil.as_mutable_paragraph_indexes().reserve(mm_count());
-    Stage1Data::nil.as_mutable_word_indexes().reserve(mm_count());
     for (int i = 0; i < mm_count(); ++i)
     {
-        Stage1Data::nil.as_mutable_used_in_book().push_back(Buch::Flags{});
         Stage1Data::nil.as_mutable_embedded_words().push_back(std::vector<int>());
         Stage1Data::nil.as_mutable_definitions().push_back(std::vector<int>());
-        Stage1Data::nil.as_mutable_book_indexes().push_back(std::vector<int>());
-        Stage1Data::nil.as_mutable_chapter_indexes().push_back(std::vector<int>());
-        Stage1Data::nil.as_mutable_paragraph_indexes().push_back(std::vector<int>());
-        Stage1Data::nil.as_mutable_word_indexes().push_back(std::vector<int>());
     }
 
     SerialTask::Flags tasks;
@@ -102,13 +107,13 @@ int main(int argc, char ** argv)
 
 void print_usage()
 {
-    std::cout << "program expects 3 to 5 arguments:\n"
+    std::cout << "program expects 2 to 5 arguments:\n"
               << "    [1]  data directory\n"
               << "    [2]  stage 1 workspace directory\n"
-              << "    [3]  template directory\n"
-              << "    [4]  thread count (optional, defaults to the number of hardware threads)\n"
-              << "    [5]  books (optional, defaults to all), all or a comma separated list of:";
+              << "    [3]  thread count (optional, defaults to the number of hardware threads)\n"
+              << "    [4]  books (optional, defaults to all), all or a comma separated list of:";
     for (auto v : Buch::variants_by_index())
         std::cout << " " << v;
-    std::cout << std::endl;
+    std::cout << "\n    [5]  array budget (optional, defaults to 1000000), the most ints in a compiled file"
+              << " of the generated arrays, at least 1" << std::endl;
 }

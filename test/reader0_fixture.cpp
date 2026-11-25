@@ -99,7 +99,7 @@ namespace
     }
 
 
-    // a saved leaf header: the variant names it declares (PROPERTYx19_MATCHABLE, GROW_MATCHABLE) and each
+    // a saved leaf header: the variant names it declares (PROPERTYx<n>_MATCHABLE, GROW_MATCHABLE) and each
     // property value it sets (MATCHABLE_VARIANT_PROPERTY_VALUE and _VALUES, keyed by variant and property,
     // "[]" marking a vector property); statements may span lines
     struct SavedLeaf
@@ -127,11 +127,11 @@ namespace
                 size_t const close = text.find(')', open);
                 std::vector<std::string> const args =
                     split_arguments(text.substr(open + 1, close - open - 1));
-                if (macro == "PROPERTYx19_MATCHABLE")
+                if (macro.starts_with("PROPERTYx") && macro.ends_with("_MATCHABLE"))
                 {
                     auto const name = std::find(args.begin(), args.end(), matchable_name);
                     if (name == args.end())
-                        leaf.problems.push_back("PROPERTYx19_MATCHABLE without " + matchable_name);
+                        leaf.problems.push_back(macro + " without " + matchable_name);
                     else
                         leaf.variants.insert(leaf.variants.end(), name + 1, args.end());
                 }

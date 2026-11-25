@@ -27,7 +27,10 @@
 [4] esc_4 | pos= os=0
 [44] esc_4 | pos= os=0
 [48] esc_4 | pos= os=0
+[4bark] esc_4 | pos= os=32
+[4bark ice cream.] esc_4 | pos= os=89 phrase
 [4ch/pol] esc_4 | pos= os=54
+[5] esc_5 | pos= os=0
 [8ch/qresearch] esc_8 | pos= os=105
 [99] esc_9 | pos= os=0
 [:] _cln_ | pos= os=0
@@ -46,6 +49,7 @@
 [abc123] a b c | pos= os=6
 [AM] esc_A | pos= os=14
 [c] c | pos= os=3
+[cream] c | pos= os=40
 [Crumbs] esc_C | pos= os=76
 [e] e | pos= os=5
 [Follow] esc_F | pos= os=83
@@ -53,6 +57,7 @@
 [here] h | pos= os=36
 [http] h | pos= os=64
 [Huma] esc_H | pos= os=43
+[ice] i | pos= os=17
 [is] i | pos= os=28
 [Linked] esc_L | pos= os=55
 [Linked [text] here.] esc_L | pos= os=160 phrase
@@ -164,4 +169,9 @@ vocabulary Crumbs:
     [30]
     [Noon.]
     [Noon]
+    [5]
+    [4bark ice cream.]
+    [4bark]
+    [ice]
+    [cream]
     [Crumbs]

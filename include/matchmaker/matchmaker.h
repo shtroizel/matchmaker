@@ -123,7 +123,7 @@ char const * mm_at(int index, int * length);
 /**
  * matchmaker also provides its dictionary in an alternative sorting order (longest terms first).
  * use this function to retrieve a "length index" from an "alphabetic index".
- * the complexity for this function is O(log N).
+ * the complexity for this function is O(1).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @returns
@@ -294,7 +294,7 @@ bool mm_is_phrase(int index);
 
 /**
  * discover whether a given term is used in a given book
- * the complexity for this function is O(log N).
+ * the complexity for this function is O(1).
  * @param[in] book_index
  *     index of a book in the library
  * @param[in] index
@@ -361,7 +361,7 @@ void mm_definition(int index, int const * * definition, int * count);
  * dictionary index used here as input. a phrase's location is where the phrase starts: there mm_word()
  * returns the phrase's first word, with the phrase among that word's ancestors (not always the first
  * ancestor, since phrases can be nested).
- * the complexity for this function is O(log N).
+ * the complexity for this function is O(1).
  * @param[in] index
  *     alphabetic dictionary index
  * @param[out] book_indexes

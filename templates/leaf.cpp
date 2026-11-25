@@ -49,20 +49,6 @@ int mm_count_snth()
 }
 
 
-int mm_as_longest_snth(int index)
-{
-    if (index < 0 || index >= mm_count_snth())
-    {
-        std::cout << "mm_as_longest_snth(" << index << ") out of bounds with mm_count_snth() of: "
-                  << mm_count_snth() << std::endl;
-        static std::string const empty_str;
-        return 0;
-    }
-
-    return word_snth::from_by_string_index_as_ref(index).as_by_longest_index();
-}
-
-
 std::string const & mm_at_snth(int index)
 {
     if (index < 0 || index >= mm_count_snth())
@@ -201,31 +187,6 @@ bool mm_is_phrase_snth(int index)
 }
 
 
-bool mm_is_used_in_book_snth(int book_index, int index)
-{
-    if (book_index < 0 || index < 0 || index >= mm_count_snth())
-    {
-        std::cout << "mm_used_in_book_snth(" << book_index << ", " << index << ") out of bounds with..."
-                     "\n        mm_count_snth(): " << mm_count_snth() << std::endl;
-        return false;
-    }
-
-    auto const & book_vect =
-        word_snth::from_by_string_index_as_ref(index).as_is_used_in_book_vect();
-    if (0 == book_vect.size())
-        return false;
-
-    if (book_index >= (int) book_vect.size())
-    {
-        std::cout << "mm_used_in_book_snth() --> unexpected book_vect.size() of: "
-                  << book_vect.size() << std::endl;
-        return false;
-    }
-
-    return book_vect[book_index];
-}
-
-
 std::vector<int> const & mm_synonyms_snth(int index)
 {
     static std::vector<int> const empty{};
@@ -275,48 +236,4 @@ std::vector<int> const & mm_definition_snth(int index)
         return empty;
     }
     return word_snth::from_by_string_index_as_ref(index).as_definition_vect();
-}
-
-
-void mm_locations_snth(
-    int index,
-    int const * * book_indexes,
-    int const * * chapter_indexes,
-    int const * * paragraph_indexes,
-    int const * * word_indexes,
-    int * count
-)
-{
-    if (index < 0 || index >= mm_count_snth())
-    {
-        std::cout << "mm_locations_snth(" << index << ") out of bounds with mm_count_snth() of: "
-                  << mm_count_snth() << std::endl;
-        *book_indexes = nullptr;
-        *chapter_indexes = nullptr;
-        *paragraph_indexes = nullptr;
-        *word_indexes = nullptr;
-        *count = 0;
-        return;
-    }
-
-    auto const & w = word_snth::from_by_string_index_as_ref(index);
-    *count = (int) w.as_book_index_vect().size();
-    if (*count == (int) w.as_chapter_index_vect().size() &&
-            *count == (int) w.as_paragraph_index_vect().size() &&
-            *count == (int) w.as_word_index_vect().size())
-    {
-        *book_indexes = w.as_book_index_vect().data();
-        *chapter_indexes = w.as_chapter_index_vect().data();
-        *paragraph_indexes = w.as_paragraph_index_vect().data();
-        *word_indexes = w.as_word_index_vect().data();
-    }
-    else
-    {
-        std::cout << "mm_locations_snth(" << index << ") --> location data inconsistent!" << std::endl;
-        *book_indexes = nullptr;
-        *chapter_indexes = nullptr;
-        *paragraph_indexes = nullptr;
-        *word_indexes = nullptr;
-        *count = 0;
-    }
 }
