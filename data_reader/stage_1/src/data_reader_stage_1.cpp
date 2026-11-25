@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
+#include <string>
 #include <thread>
 
 #ifdef Q_ONLY
@@ -24,7 +25,7 @@ void print_usage();
 
 int main(int argc, char ** argv)
 {
-    if (argc < 3 || argc > 6)
+    if (argc < 3 || argc > 7)
     {
         print_usage();
         return 2;
@@ -49,13 +50,21 @@ int main(int argc, char ** argv)
         std::cout << " " << book;
     std::cout << "\n" << std::endl;
 
-    int const array_budget = argc == 6 ? std::atoi(argv[5]) : 1000000;
+    int const array_budget = argc >= 6 ? std::atoi(argv[5]) : 1000000;
     if (array_budget < 1)
     {
         print_usage();
         return 2;
     }
     Stage1Data::nil.as_mutable_array_budget() = array_budget;
+
+    std::string const relation_ranks{argc == 7 ? argv[6] : "at_load"};
+    if (relation_ranks != "at_load" && relation_ranks != "generated")
+    {
+        print_usage();
+        return 2;
+    }
+    Stage1Data::nil.as_mutable_generated_relations() = relation_ranks == "generated";
 
     // every task writes its arrays anew, so no unit of an earlier cut stays behind
     std::filesystem::remove_all(arrays_dir());
@@ -107,7 +116,7 @@ int main(int argc, char ** argv)
 
 void print_usage()
 {
-    std::cout << "program expects 2 to 5 arguments:\n"
+    std::cout << "program expects 2 to 6 arguments:\n"
               << "    [1]  data directory\n"
               << "    [2]  stage 1 workspace directory\n"
               << "    [3]  thread count (optional, defaults to the number of hardware threads)\n"
@@ -115,5 +124,7 @@ void print_usage()
     for (auto v : Buch::variants_by_index())
         std::cout << " " << v;
     std::cout << "\n    [5]  array budget (optional, defaults to 1000000), the most ints in a compiled file"
-              << " of the generated arrays, at least 1" << std::endl;
+              << " of the generated arrays, at least 1\n"
+              << "    [6]  relation ranks (optional, defaults to at_load): generated also writes each"
+              << " term's synonyms, antonyms, embedded terms and definition as arrays" << std::endl;
 }

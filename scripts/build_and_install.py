@@ -93,6 +93,15 @@ def usage():
     print('                                    * the stage 1 reader cuts its arrays to fit, so each file')
     print('                                      compiles within bounded memory however many books')
     print('                                    * smaller budgets give more, smaller files (mini builds)\n')
+    print('    --relation_ranks=<form>       where the indexes of each term\'s synonyms, antonyms,')
+    print('                                    embedded terms and definition come from; leaves hold them')
+    print('                                    as references to words either way')
+    print('                                    * at_load: from the references, all of them the first time')
+    print('                                      one is asked for (default)')
+    print('                                    * generated: from arrays the stage 1 reader writes,')
+    print('                                      compiled like its other arrays')
+    print('                                    * -r -f changes a kept build from one to the other without')
+    print('                                      compiling a leaf\n')
     print('    --time_compiles=<file>        append "<seconds> <peak RSS KB> <source>" to file per compile')
     print('                                    * covers matchable, the data readers and both stages')
     print('                                    * turning it on or off for a kept build (-r, -l) compiles')
@@ -180,7 +189,7 @@ def run_tests(matchmaker_root, test_build_dir, jobs):
 
 def build_and_install(retain, retain_leaves, force_stage_1, jobs,
                       build_dir, install_dir, atomic_libs, q, debug, dictionary, books, skip_tests,
-                      data_dir, export, linker, leaf_budget, array_budget):
+                      data_dir, export, linker, leaf_budget, array_budget, relation_ranks):
 
     start_dir = os.getcwd()
 
@@ -501,7 +510,7 @@ def build_and_install(retain, retain_leaves, force_stage_1, jobs,
             shutil.copy(stage_0_workspace_dir + 'leaf_list', stage_1_workspace_dir + 'leaf_list')
 
             run_dr_stage_1_cmd = [dr_stage_1_binary, dr_stage_1_data, stage_1_workspace_dir, jobs, books,
-                                  array_budget]
+                                  array_budget, relation_ranks]
             if subprocess.run(run_dr_stage_1_cmd).returncode != 0:
                 print('\ndata_reader_stage_1 failed')
                 build_cmd_as_str = ''
@@ -543,6 +552,7 @@ def build_and_install(retain, retain_leaves, force_stage_1, jobs,
 
     cmake_cmd.append('-DEXPORT_ALL=' + ('ON' if export else 'OFF'))
     cmake_cmd.append('-DMM_LINKER=' + linker)
+    cmake_cmd.append('-DMM_RELATION_RANKS=' + relation_ranks)
 
     cmake_cmd.append('-Dmatchable_DIR=' + abs_install_dir + '/lib/matchable/cmake')
     cmake_cmd.append(stage_1_workspace_dir)
@@ -574,7 +584,8 @@ def main():
                 ['help', 'build_dir=', 'install_dir=', 'retain', 'retain_leaves',
                  'force_stage_1', 'jobs=', 'atomic_libs', 'q',
                  'debug', 'export', 'dictionary=', 'books=', 'skip_tests', 'data_dir=', 'time_compiles=',
-                 'linker=', 'leaf_budget=', 'array_budget=', 'toolchain=', 'system_compiler'])
+                 'linker=', 'leaf_budget=', 'array_budget=', 'toolchain=', 'system_compiler',
+                 'relation_ranks='])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -598,6 +609,7 @@ def main():
     linker = ''
     leaf_budget = '170'
     array_budget = '1000000'
+    relation_ranks = 'at_load'
     toolchain = None
     system_compiler = False
 
@@ -647,6 +659,11 @@ def main():
                 print('--array_budget must be a whole number of at least 1')
                 sys.exit(2)
             array_budget = a
+        elif o == '--relation_ranks':
+            if a not in ('at_load', 'generated'):
+                print('--relation_ranks must be one of: at_load, generated')
+                sys.exit(2)
+            relation_ranks = a
         elif o == '--toolchain':
             toolchain = os.path.abspath(a)
         elif o in ('-S', '--system_compiler'):
@@ -711,7 +728,7 @@ def main():
 
     build_and_install(retain, retain_leaves, force_stage_1, jobs, build_dir,
                       install_dir, atomic_libs, q, debug, dictionary, books, skip_tests, data_dir, export,
-                      linker, leaf_budget, array_budget)
+                      linker, leaf_budget, array_budget, relation_ranks)
 
     exit(0)
 

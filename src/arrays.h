@@ -31,6 +31,18 @@ namespace arrays
     extern int const location_shift;
     extern std::span<int const * const> const locations;
 
+    // with MM_GENERATED_RELATIONS, each term's synonyms, antonyms, embedded terms and definition as
+    // alphabetic indexes, each kind compiled in blocks of 1 << its shift terms. A block begins with where
+    // in it each of its terms' list begins, and one entry more for where the last term's ends
+    extern int const synonyms_shift;
+    extern int const antonyms_shift;
+    extern int const embedded_shift;
+    extern int const definitions_shift;
+    extern std::span<int const * const> const synonyms;
+    extern std::span<int const * const> const antonyms;
+    extern std::span<int const * const> const embedded;
+    extern std::span<int const * const> const definitions;
+
     // chapters are numbered through all books: a book's run from book_chapter_starts[b] up to
     // book_chapter_starts[b + 1]
     extern std::span<int const> const book_chapter_starts;

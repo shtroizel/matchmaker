@@ -33,6 +33,30 @@
 #define MM_UNITS chapters
 #include "units.inc"
 
+#ifdef MM_GENERATED_RELATIONS
+#define MM_UNITS synonyms
+#include "units.inc"
+#define MM_UNITS antonyms
+#include "units.inc"
+#define MM_UNITS embedded
+#include "units.inc"
+#define MM_UNITS definitions
+#include "units.inc"
+
+int const arrays::synonyms_shift{
+#include "arrays/synonyms_shift.inc"
+};
+int const arrays::antonyms_shift{
+#include "arrays/antonyms_shift.inc"
+};
+int const arrays::embedded_shift{
+#include "arrays/embedded_shift.inc"
+};
+int const arrays::definitions_shift{
+#include "arrays/definitions_shift.inc"
+};
+#endif
+
 #ifdef STAGE0
 int const arrays::unit_shift{0};
 int const arrays::location_shift{0};

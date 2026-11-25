@@ -4,7 +4,7 @@
 
 // each term's links to other terms as alphabetic indexes. The leaves hold them as references to words,
 // which stay as they are when other words come and go. The indexes come from those references, all of
-// them when the first is asked for
+// them when the first is asked for, or with MM_GENERATED_RELATIONS from arrays the stage 1 reader wrote
 namespace relations
 {
     enum Kind

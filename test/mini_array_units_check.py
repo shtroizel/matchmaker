@@ -4,7 +4,9 @@
 # each kind's list names exactly its unit files, numbered from 0; as_longest, from_longest and
 # used_in_book come in units of the largest power of two of entries within the budget; a block of locations
 # or a group of chapters is over the budget only when it holds one term or one chapter; and each kind has
-# the number of units given, so the fixture stays cut the way the other tests rely on.
+# the number of units given, so the fixture stays cut the way the other tests rely on. The kinds of link
+# (synonyms, antonyms, embedded, definitions) are generated only with --relation_ranks=generated: given a
+# number of units they must be there, in blocks cut like those of locations, and otherwise absent.
 
 import os
 import re
@@ -48,6 +50,20 @@ for block, size in enumerate(units('locations')):
     if size > budget and location_shift != 0:
         failures.append('locations_%d holds %d ints in blocks of %d terms'
                         % (block, size, 1 << location_shift))
+
+for kind in ('synonyms', 'antonyms', 'embedded', 'definitions'):
+    generated = os.path.exists(os.path.join(arrays, kind + '.inc'))
+    if kind not in expected:
+        if generated:
+            failures.append(kind + ' was generated')
+        continue
+    if not generated:
+        failures.append(kind + ' was not generated')
+        continue
+    shift = ints(kind + '_shift.inc')[0]
+    for block, size in enumerate(units(kind)):
+        if size > budget and shift != 0:
+            failures.append('%s_%d holds %d ints in blocks of %d terms' % (kind, block, size, 1 << shift))
 
 book_groups = ints('book_groups.inc')
 sizes = units('chapters')

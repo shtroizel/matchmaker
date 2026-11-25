@@ -16,8 +16,9 @@ cmake_minimum_required(VERSION 3.16.3)
 #     mini_build build_and_install.py on the fixture data, then the library it installs, again with -e,
 #                then units of words loaded on top, again with -q, again with -S (the system
 #                compiler), again with one more dictionary word, and stage 1 again with -r -f, on the
-#                same data, on moved book text and with another array budget
-#                (about 13 minutes; build_and_install.py runs every label but this one before its
+#                same data, on moved book text, with --relation_ranks=generated and with another
+#                array budget
+#                (about 15 minutes; build_and_install.py runs every label but this one before its
 #                stage 0 data reader). The pinned toolchain builds the others, and these tests build
 #                with this compiler. The toolchain is the one in -DMM_TOOLCHAIN=<LLVM install> (or
 #                MM_TOOLCHAIN in the environment), else build_toolchain.py's, which the first run
@@ -87,7 +88,8 @@ add_routing_test(small ${FIXTURES}/leaf_list_small.txt)
 
 
 # relations_at_load: the leaves generate_code.py makes for fixtures/relations refer to words of their own
-# and of each other, and the library turns the references into alphabetic indexes
+# and of each other, and the library turns the references into alphabetic indexes. relations_generated:
+# the library reads the same indexes from arrays laid out as the stage 1 reader writes them
 set(RELATIONS_WORKSPACE ${CMAKE_CURRENT_BINARY_DIR}/relations_workspace)
 set(relations_srcs ${RELATIONS_WORKSPACE}/generated_src/tree_data.cpp)
 foreach(leaf la lb lc)
@@ -115,7 +117,11 @@ target_include_directories(relations_check PRIVATE
 target_compile_definitions(relations_check PRIVATE MATCHABLE_OMIT_BY_INDEX)
 target_compile_options(relations_check PRIVATE -Wall -Werror -Wextra)
 add_test(NAME relations_at_load COMMAND relations_check)
-set_tests_properties(relations_at_load PROPERTIES LABELS generator)
+add_executable(relations_generated_check relations_check.cpp ${MATCHMAKER_ROOT}/src/relations.cpp)
+target_compile_definitions(relations_generated_check PRIVATE MM_GENERATED_RELATIONS)
+target_compile_options(relations_generated_check PRIVATE -Wall -Werror -Wextra)
+add_test(NAME relations_generated COMMAND relations_generated_check)
+set_tests_properties(relations_at_load relations_generated PROPERTIES LABELS generator)
 
 
 # generate_code.py refuses bad leaf lists with a message naming the problem
@@ -277,7 +283,7 @@ add_test(
     NAME options_long_values
     COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --jobs=2 --build_dir=b --install_dir=i --debug
             --time_compiles=t --linker=lld --leaf_budget=10 --array_budget=100 --toolchain=t
-            --system_compiler -h
+            --relation_ranks=generated --system_compiler -h
 )
 add_test(
     NAME options_long_values_stage_0
@@ -323,6 +329,15 @@ add_test(
 set_tests_properties(options_array_budget_needs_number PROPERTIES
     LABELS options
     PASS_REGULAR_EXPRESSION "^--array_budget must be a whole number of at least 1"
+)
+
+add_test(
+    NAME options_relation_ranks_needs_form
+    COMMAND ${Python3_EXECUTABLE} ${BUILD_AND_INSTALL} --relation_ranks=sometimes -h
+)
+set_tests_properties(options_relation_ranks_needs_form PROPERTIES
+    LABELS options
+    PASS_REGULAR_EXPRESSION "^--relation_ranks must be one of: at_load, generated"
 )
 
 add_test(
@@ -789,11 +804,62 @@ set(MINI_FIRST_BUILD_TESTS
     mini_added_leaves
 )
 
+# mini_generated: stage 1 again (-r -f) on mini_build's build and data with --relation_ranks=generated:
+# the stage 1 reader also writes each term's links as arrays of alphabetic indexes, which the library
+# reads in place of the leaves' references. mini_generated_units checks how they are cut (a block per
+# term with this budget), mini_generated_compiles that their blocks and the tables were compiled and no
+# leaf, and mini_generated_library that the library answers as before. It runs after every test of the
+# first build and leaves the build in this form
+set(MINI_GENERATED_COMPILES ${CMAKE_CURRENT_BINARY_DIR}/mini_generated_compiles.txt)
+add_test(NAME mini_generated_compiles_clear COMMAND ${CMAKE_COMMAND} -E rm -f ${MINI_GENERATED_COMPILES})
+set_tests_properties(mini_generated_compiles_clear PROPERTIES
+    LABELS mini_build FIXTURES_SETUP mini_generated_start
+)
+add_test(
+    NAME mini_generated
+    COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -r -f
+            ${MINI_TOOLCHAIN} -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA}
+            --leaf_budget=${MINI_LEAF_BUDGET} --array_budget=${MINI_ARRAY_BUDGET}
+            --relation_ranks=generated
+            -b ${MINI_BUILD}/build -i ${MINI_BUILD}/install
+            --time_compiles=${MINI_GENERATED_COMPILES}
+)
+set_tests_properties(mini_generated PROPERTIES
+    LABELS mini_build
+    FIXTURES_REQUIRED "mini_library;mini_generated_start"
+    FIXTURES_SETUP mini_generated
+    TIMEOUT 3600
+)
+set_property(TEST mini_generated APPEND PROPERTY DEPENDS ${MINI_FIRST_BUILD_TESTS})
+add_test(
+    NAME mini_generated_units
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_array_units_check.py
+            ${MINI_BUILD}/build ${MINI_ARRAY_BUDGET}
+            as_longest=63 from_longest=63 used_in_book=2 locations=126 chapters=5
+            synonyms=126 antonyms=126 embedded=126 definitions=126
+)
+add_test(
+    NAME mini_generated_compiles
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_rerun_check.py
+            ${MINI_GENERATED_COMPILES} ${MINI_BUILD}/build generated
+)
+add_test(
+    NAME mini_generated_library
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+            ${READER0_EXPECTED}/mini_library.txt
+            $<TARGET_FILE:mini_library_check> ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
+)
+set_tests_properties(mini_generated_units mini_generated_compiles mini_generated_library PROPERTIES
+    LABELS mini_build FIXTURES_REQUIRED mini_generated
+)
+set_tests_properties(mini_generated mini_generated_units mini_generated_library
+    PROPERTIES RESOURCE_LOCK mini_install)
+
 # mini_recut: stage 1 again (-r -f) on the same build and data with a larger array budget, which puts the
-# chapters two to a group, every term's locations in one block and each other array in one unit.
-# mini_recut_units checks the cut, mini_recut_compiles that the units and the tables were compiled again
-# and no leaf, and mini_recut_library that the library answers as before. It runs after every test of the
-# first cut and leaves the build cut this way
+# chapters two to a group, every term's locations and links in one block each and each other array in one
+# unit. mini_recut_units checks the cut, mini_recut_compiles that the units and the tables were compiled
+# again and no leaf, and mini_recut_library that the library answers as before. It runs after every test
+# of the first cut and leaves the build cut this way
 set(MINI_RECUT_BUDGET 350)
 set(MINI_RECUT_COMPILES ${CMAKE_CURRENT_BINARY_DIR}/mini_recut_compiles.txt)
 add_test(NAME mini_recut_compiles_clear COMMAND ${CMAKE_COMMAND} -E rm -f ${MINI_RECUT_COMPILES})
@@ -803,6 +869,7 @@ add_test(
     COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s -r -f
             ${MINI_TOOLCHAIN} -j ${MINI_BUILD_JOBS} --data_dir=${READER0_DATA}
             --leaf_budget=${MINI_LEAF_BUDGET} --array_budget=${MINI_RECUT_BUDGET}
+            --relation_ranks=generated
             -b ${MINI_BUILD}/build -i ${MINI_BUILD}/install
             --time_compiles=${MINI_RECUT_COMPILES}
 )
@@ -814,12 +881,14 @@ set_tests_properties(mini_recut PROPERTIES
 )
 set_property(TEST mini_recut APPEND PROPERTY DEPENDS
     ${MINI_FIRST_BUILD_TESTS}
+    mini_generated mini_generated_units mini_generated_compiles mini_generated_library
 )
 add_test(
     NAME mini_recut_units
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_array_units_check.py
             ${MINI_BUILD}/build ${MINI_RECUT_BUDGET}
             as_longest=1 from_longest=1 used_in_book=1 locations=1 chapters=3
+            synonyms=1 antonyms=1 embedded=1 definitions=1
 )
 add_test(
     NAME mini_recut_compiles

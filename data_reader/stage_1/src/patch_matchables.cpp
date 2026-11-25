@@ -22,6 +22,7 @@
 #endif
 
 #include "Stage1Data.h"
+#include "write_array.h"
 
 
 
@@ -52,10 +53,19 @@ struct Word
 };
 
 
+// each term's synonyms and antonyms as alphabetic indexes
+struct Links
+{
+    IndexTable synonyms;
+    IndexTable antonyms;
+};
+
+
 bool patch_matchable_header(
     SerialTask::Type task,
     std::vector<HeaderEntry> const & matchable_headers,
-    Leaves const & leaves
+    Leaves const & leaves,
+    Links & links
 );
 
 
@@ -124,6 +134,20 @@ static std::vector<std::string> references(
 }
 
 
+static bool write_relation(std::string const & name, IndexTable const & lists)
+{
+    std::vector<int> term_ints;
+    term_ints.reserve(lists.size());
+    for (auto const & list : lists)
+        term_ints.push_back((int) list.size());
+    return write_term_blocks(
+        name, name + "_shift", term_ints,
+        [&](int term, std::vector<int> & block)
+            { block.insert(block.end(), lists[term].begin(), lists[term].end()); }
+    );
+}
+
+
 bool patch_matchables(SerialTask::Type task)
 {
     std::string const STAGE_1_MATCHABLES_DIR{
@@ -166,6 +190,9 @@ bool patch_matchables(SerialTask::Type task)
             i = 0;
     }
 
+    // each thread fills the entries of the terms in its own headers
+    Links links{IndexTable(mm_count()), IndexTable(mm_count())};
+
     // los gehts
     std::vector<std::thread> threads;
     std::atomic<bool> all_ok{true};
@@ -174,7 +201,7 @@ bool patch_matchables(SerialTask::Type task)
             std::thread(
                 [&]()
                 {
-                    if (all_ok && !patch_matchable_header(task, deal, leaves))
+                    if (all_ok && !patch_matchable_header(task, deal, leaves, links))
                         all_ok = false;
                 }
             )
@@ -182,7 +209,16 @@ bool patch_matchables(SerialTask::Type task)
     for (auto & t : threads)
         t.join();
 
-    return all_ok;
+    if (!all_ok)
+        return false;
+
+    if (!Stage1Data::nil.as_generated_relations())
+        return true;
+
+    return write_relation("synonyms", links.synonyms) &&
+           write_relation("antonyms", links.antonyms) &&
+           write_relation("embedded", Stage1Data::nil.as_embedded_words()) &&
+           write_relation("definitions", Stage1Data::nil.as_definitions());
 }
 
 
@@ -190,7 +226,8 @@ bool patch_matchables(SerialTask::Type task)
 bool patch_matchable_header(
     SerialTask::Type task,
     std::vector<HeaderEntry> const & matchable_headers,
-    Leaves const & leaves
+    Leaves const & leaves,
+    Links & links
 )
 {
     // aliases
@@ -240,8 +277,8 @@ bool patch_matchable_header(
                 }
 
                 // gather synonyms and antonynms
-                std::vector<int> syn;
-                std::vector<int> ant;
+                std::vector<int> & syn = links.synonyms[existing_word_index];
+                std::vector<int> & ant = links.antonyms[existing_word_index];
                 auto contents_SynAnt_iter = contents_SynAnt.find(existing_word);
                 if (contents_SynAnt_iter != contents_SynAnt.end())
                 {

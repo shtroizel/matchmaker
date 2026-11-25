@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-# mini_rerun_check.py <log> <build dir> [moved_text | recut]
+# mini_rerun_check.py <log> <build dir> [moved_text | recut | generated]
 # Checks the --time_compiles log of a build that ran stage 1 again (-r -f) on mini_build's build: the stage
 # 1 reader was compiled and timed into this log, and no leaf was compiled again. With the same data stage
 # 1 writes the same files, so nothing the library embeds is compiled again either. With moved_text the
 # data has the text of two posts at other locations: their groups of chapters and the blocks holding
 # their terms' locations are compiled again, and not the first post's group, the blocks of other terms,
 # the arrays the text leaves alone or the tables. With recut the budget differs, so the units and the
-# tables are compiled again.
+# tables are compiled again. With generated the build changed to --relation_ranks=generated on the same
+# data: the blocks of each kind of link and the tables are compiled, and no unit of the other arrays.
 
 import os
 import re
@@ -53,6 +54,16 @@ if mode == 'recut':
         failures.append('no unit was compiled again')
     if not tables:
         failures.append('the tables were not compiled again')
+if mode == 'generated':
+    relations = ('synonyms', 'antonyms', 'embedded', 'definitions')
+    for kind in relations:
+        if not compiled(kind):
+            failures.append('no block of ' + kind + ' was compiled')
+    if not tables:
+        failures.append('the tables were not compiled again')
+    for s in units:
+        if not any(s in compiled(kind) for kind in relations):
+            failures.append('compiled again: ' + s)
 
 for failure in failures:
     print(failure)

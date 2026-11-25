@@ -21,6 +21,11 @@ option(ATOMIC_LIBS "builds a library for every prefix" OFF)
 option(q "suffix lib & inc destination with _q" OFF)
 option(STAGE0 "build stage 0" OFF)
 option(EXPORT_ALL "export every symbol and install a type header per leaf, for loading units of words" OFF)
+set(MM_RELATION_RANKS at_load CACHE STRING
+    "at_load: indexes of linked terms come from the leaves' references; generated: from stage 1's arrays")
+if(NOT MM_RELATION_RANKS MATCHES "^(at_load|generated)$")
+    message(FATAL_ERROR "MM_RELATION_RANKS must be at_load or generated, not '${MM_RELATION_RANKS}'")
+endif()
 
 set(LEAFLIB_COUNT 4)
 
@@ -137,12 +142,24 @@ list(PREPEND matchmaker_srcs
 )
 
 # the stage 1 reader's arrays are in generated_src/arrays: the ones it writes whole and the lists of the
-# others' units are included, and each unit is a source of its own
+# others' units are included, and each unit is a source of its own. The arrays of each term's links are
+# part of the library only with MM_RELATION_RANKS=generated
+set(relation_arrays "/(synonyms|antonyms|embedded|definitions)_[0-9]+\\.cpp$")
+set(generated_relations OFF)
 if(NOT STAGE0)
     set_source_files_properties(${MATCHMAKER_ROOT}/src/arrays.cpp PROPERTIES
         INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/generated_src
     )
     file(GLOB array_units ${CMAKE_CURRENT_SOURCE_DIR}/generated_src/arrays/*.cpp)
+    if(MM_RELATION_RANKS STREQUAL "generated")
+        if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/generated_src/arrays/synonyms.inc)
+            message(FATAL_ERROR "MM_RELATION_RANKS=generated needs the arrays the stage 1 reader writes "
+                                "when it is run with generated (build_and_install.py -f)")
+        endif()
+        set(generated_relations ON)
+    else()
+        list(FILTER array_units EXCLUDE REGEX "${relation_arrays}")
+    endif()
     list(SORT array_units)
     list(APPEND matchmaker_srcs ${array_units})
 endif()
@@ -187,6 +204,10 @@ target_include_directories(
     ${MATCHMAKER_ROOT}/include
     ${MATCHMAKER_ROOT}/data_reader/stage_0/include
 )
+if(generated_relations)
+    set_property(SOURCE ${MATCHMAKER_ROOT}/src/arrays.cpp ${MATCHMAKER_ROOT}/src/relations.cpp
+        APPEND PROPERTY COMPILE_DEFINITIONS MM_GENERATED_RELATIONS)
+endif()
 foreach(lib ${lib_list})
     target_link_libraries(matchmaker ${lib})
 endforeach()

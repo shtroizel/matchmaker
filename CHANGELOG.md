@@ -53,10 +53,16 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
 - array_cuts tests for the cut rule, mini_array_units for the cut of a mini build, and mini_recut tests:
   stage 1 run again with another budget compiles the generated arrays again and no leaf, and the library
   answers as before
+- `--relation_ranks=<at_load|generated>` in build_and_install.py (`MM_RELATION_RANKS` in CMake) chooses
+  where the alphabetic indexes of each term's synonyms, antonyms, embedded terms and definition come
+  from. `at_load` (default) computes them from the leaves' references to words, all of them the first
+  time one is asked for. `generated` has the stage 1 reader write them as arrays too, in blocks of terms
+  cut like locations, which libmatchmaker compiles in and reads. The leaves are the same either way, so
+  `-r -f` changes a kept build from one to the other without compiling a leaf
 - relations_at_load test for the indexes computed from references, mini_added tests (a mini build from
   the fixture data with one more word has the same header for every leaf but the word's own, and every
-  link on the terms where they now are), mini_exports for what the libraries export, and leaf_type for
-  the type header `-e` installs
+  link on the terms where they now are), mini_generated tests for the generated form, mini_exports for
+  what the libraries export, and leaf_type for the type header `-e` installs
 
 ### Changed
 - Leaves hold each word's synonyms, antonyms, embedded terms and definition as references to words
@@ -67,7 +73,7 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   functions, and a leaf declares the words of other leaves it refers to with MATCHABLE_EXTERN_VARIANTS.
   The mm_* answers are unchanged
 - mm_synonyms(), mm_antonyms(), mm_embedded() and mm_definition() are O(1): they read one table per kind
-  of link, indexed by term, which the first of these calls builds from the leaves' references
+  of link, indexed by term. With `--relation_ranks=at_load` the first of these calls builds the tables
 - Builds use the pinned toolchain for matchable, the data readers and both stages unless `-S` is given,
   building it first when it isn't there yet. libc++, libc++abi and libunwind are linked into each library, so an
   install loads into programs built with any compiler. Libraries link with lld unless `--linker` names

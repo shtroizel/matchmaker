@@ -59,7 +59,7 @@ using SynAntTable = std::map<std::string, SynAnt>;
 using IndexTable = std::vector<std::vector<int>>;
 using KeyWords = std::vector<int>;
 
-PROPERTYx11_MATCHABLE(
+PROPERTYx12_MATCHABLE(
     std::string, workspace_dir,
     std::string, data_dir,
     SynAntTable, syn_ant_table,
@@ -71,6 +71,7 @@ PROPERTYx11_MATCHABLE(
     KeyWords, key_words,
     int, thread_count,
     int, array_budget,
+    int8_t, generated_relations,
 
     Stage1Data
 )

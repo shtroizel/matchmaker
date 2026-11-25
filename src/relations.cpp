@@ -1,5 +1,30 @@
 #include <relations.h>
 
+#ifdef MM_GENERATED_RELATIONS
+
+#include <arrays.h>
+
+
+
+void relations::get(Kind kind, int index, int const * * terms, int * count)
+{
+    static std::span<int const * const> const * const blocks[kind_count] = {
+        &arrays::synonyms, &arrays::antonyms, &arrays::embedded, &arrays::definitions
+    };
+    static int const * const shifts[kind_count] = {
+        &arrays::synonyms_shift, &arrays::antonyms_shift, &arrays::embedded_shift,
+        &arrays::definitions_shift
+    };
+
+    int const shift = *shifts[kind];
+    int const * const block = (*blocks[kind])[index >> shift];
+    int const * const starts = block + (index & ((1 << shift) - 1));
+    *terms = block + starts[0];
+    *count = starts[1] - starts[0];
+}
+
+#else
+
 #include <array>
 #include <unordered_map>
 #include <vector>
@@ -71,3 +96,5 @@ void relations::get(Kind kind, int index, int const * * terms, int * count)
     *terms = l.terms.data() + l.starts[index];
     *count = l.starts[index + 1] - l.starts[index];
 }
+
+#endif
