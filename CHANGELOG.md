@@ -110,6 +110,11 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
 ### Fixed
 - The stage 1 reader read one element before the start of its longest order while finding the terms of
   each length
+- mm_is_used_in_book() is true for every word of a book's text and every phrase around one. It answered
+  from the stage 0 reader's vocabulary alone, so a term could have locations in a book that didn't use
+  it: a word inside a longer token, such as bark in "4bark", or a dictionary phrase such as ice cream. The
+  vocabulary's marks stay, so no term loses one. The fixture has a post with both, and the locations
+  check of mini_library_check expects a book to use each phrase around its words
 
 ## [4.1.0] - 2026-11-19
 

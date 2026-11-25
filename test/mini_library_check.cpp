@@ -361,7 +361,7 @@ namespace
 
 
     // every location a term lists holds that term (or a phrase starting there), every book word that has
-    // locations lists its own, and a book uses each word of its text
+    // locations lists its own, and a book uses each word of its text and each phrase around one
     void check_locations()
     {
         std::set<std::tuple<int, int, int, int, int>> listed;
@@ -395,13 +395,19 @@ namespace
                 for (int p = 0; p < mm_paragraph_count(b, c); ++p)
                     for (int w = 0; w < mm_word_count(b, c, p); ++w)
                     {
-                        int const i = mm_word(b, c, p, w, nullptr, nullptr, nullptr, nullptr);
+                        int const * ancestors = nullptr;
+                        int ancestor_count = 0;
+                        int const i = mm_word(b, c, p, w, &ancestors, &ancestor_count, nullptr, nullptr);
                         bool const should = has_locations(term(i));
                         if (should != (listed.count({b, c, p, w, i}) == 1))
                             problem("book word " + term(i) + (should ? " does not list" : " lists") +
                                     " its location");
                         if (!mm_is_used_in_book(b, i))
                             problem("book " + std::to_string(b) + " does not use its word " + term(i));
+                        for (int phrase : as_vector(ancestors, ancestor_count))
+                            if (!mm_is_used_in_book(b, phrase))
+                                problem("book " + std::to_string(b) + " does not use the phrase " +
+                                        term(phrase) + " around its word " + term(i));
                     }
         if (mm_is_used_in_book(-1, 0) || mm_is_used_in_book(mm_book_count(), 0) ||
                 mm_is_used_in_book(0, -1) || mm_is_used_in_book(0, mm_count()))

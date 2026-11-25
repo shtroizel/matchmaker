@@ -13,9 +13,7 @@
 
 #include "discover_book_vocabulary.h"
 
-#include "array_cuts.h"
 #include "Stage1Data.h"
-#include "write_array.h"
 
 
 
@@ -33,9 +31,11 @@ bool discover_book_vocabulary(SerialTask::Type task)
     task.set_progress(0);
     task.set_goal(0);
 
-    // for each selected book one bit per term, in ints of 32, set when the book uses the term
+    // for each selected book one bit per term, in ints of 32, set when the book uses the term: here the
+    // terms of its vocabulary, and the words and phrases of its text once the books are created
     size_t const ints_per_book = ((size_t) mm_count() + 31) / 32;
-    std::vector<uint32_t> used_in_book(selected_books().currently_set().size() * ints_per_book, 0);
+    std::vector<uint32_t> & used_in_book = Stage1Data::nil.as_mutable_used_in_book();
+    used_in_book.assign(selected_books().currently_set().size() * ints_per_book, 0);
 
     std::vector<std::pair<size_t, std::filesystem::directory_entry>> dir_entries;
     dir_entries.reserve(10000);
@@ -63,12 +63,7 @@ bool discover_book_vocabulary(SerialTask::Type task)
             abort();
     }
 
-    std::vector<int> as_ints;
-    as_ints.reserve(used_in_book.size());
-    for (uint32_t bits : used_in_book)
-        as_ints.push_back(static_cast<int>(bits));
-    return write_units("used_in_book", as_ints,
-                       array_cuts::unit_shift(Stage1Data::nil.as_array_budget()));
+    return true;
 }
 
 

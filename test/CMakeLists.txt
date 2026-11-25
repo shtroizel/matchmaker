@@ -562,7 +562,7 @@ add_test(
     NAME mini_array_units
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_array_units_check.py
             ${MINI_BUILD}/build ${MINI_ARRAY_BUDGET}
-            as_longest=61 from_longest=61 used_in_book=2 locations=121 chapters=4
+            as_longest=63 from_longest=63 used_in_book=2 locations=126 chapters=5
 )
 set_tests_properties(mini_array_units PROPERTIES
     LABELS mini_build FIXTURES_REQUIRED mini_library RESOURCE_LOCK mini_install
@@ -713,7 +713,7 @@ add_test(
     NAME mini_recut_units
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_array_units_check.py
             ${MINI_BUILD}/build ${MINI_RECUT_BUDGET}
-            as_longest=1 from_longest=1 used_in_book=1 locations=1 chapters=2
+            as_longest=1 from_longest=1 used_in_book=1 locations=1 chapters=3
 )
 add_test(
     NAME mini_recut_compiles

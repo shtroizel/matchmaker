@@ -1,7 +1,14 @@
 #include "create_books.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <vector>
+
+#ifdef Q_ONLY
+    #include <matchmaker_q/matchmaker.h>
+#else
+    #include <matchmaker/matchmaker.h>
+#endif
 
 #include "array_cuts.h"
 #include "Stage1Data.h"
@@ -149,9 +156,33 @@ bool create_books(SerialTask::Type task)
     }
     book_author_starts.push_back((int) headings.size());
 
+    // a book uses the terms of its vocabulary, and every word of its text with each phrase around it
+    std::vector<uint32_t> & used_in_book = Stage1Data::nil.as_mutable_used_in_book();
+    size_t const ints_per_book = ((size_t) mm_count() + 31) / 32;
+    used_in_book.resize(std::max(used_in_book.size(), books.size() * ints_per_book), 0);
+    for (size_t b = 0; b < books.size(); ++b)
+    {
+        auto const use =
+            [&](int term) { used_in_book[b * ints_per_book + term / 32] |= uint32_t{1} << (term % 32); };
+        for (Chapter const & chapter : books[b].chapters)
+            for (std::vector<BookWord> const & paragraph : chapter.paragraphs)
+                for (BookWord const & bw : paragraph)
+                {
+                    use(bw.word);
+                    for (int ancestor : bw.ancestors)
+                        use(ancestor);
+                }
+    }
+    std::vector<int> used_ints;
+    used_ints.reserve(used_in_book.size());
+    for (uint32_t bits : used_in_book)
+        used_ints.push_back(static_cast<int>(bits));
+
     return write_array("book_chapter_starts", book_chapter_starts) &&
            write_array("book_groups", book_groups) &&
            write_units("chapters", groups) &&
+           write_units("used_in_book", used_ints,
+                       array_cuts::unit_shift(Stage1Data::nil.as_array_budget())) &&
            write_array("headings", headings) &&
            write_array("book_title_starts", book_title_starts) &&
            write_array("book_author_starts", book_author_starts);
