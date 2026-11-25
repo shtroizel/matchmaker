@@ -497,6 +497,9 @@ def build_and_install(retain, retain_leaves, force_stage_1, jobs,
             if data_dir is not None:
                 dr_stage_1_data = data_dir
 
+            # the stage 1 reader finds the leaf of each word a leaf refers to in the leaf list
+            shutil.copy(stage_0_workspace_dir + 'leaf_list', stage_1_workspace_dir + 'leaf_list')
+
             run_dr_stage_1_cmd = [dr_stage_1_binary, dr_stage_1_data, stage_1_workspace_dir, jobs, books,
                                   array_budget]
             if subprocess.run(run_dr_stage_1_cmd).returncode != 0:

@@ -1,12 +1,14 @@
 #include "patch_matchables.h"
 
+#include <algorithm>
 #include <atomic>
-#include <cstdio>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
+#include <map>
 #include <mutex>
 #include <queue>
-#include <regex>
+#include <set>
 #include <string>
 #include <thread>
 #include <vector>
@@ -34,13 +36,92 @@ inline bool operator<(HeaderEntry const & l, HeaderEntry const & r)
 }
 
 
+// the leaves in term order: each one's name and the alphabetic index of its first term
+struct Leaves
+{
+    std::vector<std::string> names;
+    std::vector<int> firsts;
+};
+
+
+// the matchable and the variant a leaf holds a word as
+struct Word
+{
+    std::string type;
+    std::string variant;
+};
+
+
 bool patch_matchable_header(
     SerialTask::Type task,
-    std::vector<HeaderEntry> const & matchable_headers
+    std::vector<HeaderEntry> const & matchable_headers,
+    Leaves const & leaves
 );
 
 
 std::mutex patch_matchable_header_mutex;
+
+
+static bool read_leaves(Leaves & leaves)
+{
+    std::string const path{Stage1Data::nil.as_workspace_dir() + "/leaf_list"};
+    std::ifstream f{path, std::ios::binary};
+    for (std::string line; std::getline(f, line);)
+    {
+        size_t const space = line.find(' ');
+        bool found{false};
+        int const first = space == std::string::npos ? -1 : mm_lookup(line.c_str() + space + 1, &found);
+        bool const in_order = leaves.firsts.empty() ? first == 0 : first > leaves.firsts.back();
+        if (!found || !in_order)
+        {
+            std::cout << "'" << line << "' in " << path << " does not name the next leaf and its first term"
+                      << std::endl;
+            return false;
+        }
+        leaves.names.push_back(line.substr(0, space));
+        leaves.firsts.push_back(first);
+    }
+    if (leaves.names.empty())
+    {
+        std::cout << "no leaves in " << path << std::endl;
+        return false;
+    }
+    return true;
+}
+
+
+static Word word_at(Leaves const & leaves, int index)
+{
+    size_t const leaf =
+        std::upper_bound(leaves.firsts.begin(), leaves.firsts.end(), index) - leaves.firsts.begin() - 1;
+    int length{0};
+    char const * const term = mm_at(index, &length);
+    return {
+        "word_" + leaves.names[leaf],
+        "esc_" + matchable::escapable::escape_all(std::string(term, length))
+    };
+}
+
+
+// the references a leaf holds for the terms at indexes; the words of other leaves among them are added to
+// extern_variants
+static std::vector<std::string> references(
+    Leaves const & leaves,
+    std::vector<int> const & indexes,
+    std::string const & own_type,
+    std::map<std::string, std::set<std::string>> & extern_variants
+)
+{
+    std::vector<std::string> refs;
+    for (int index : indexes)
+    {
+        Word const word = word_at(leaves, index);
+        if (word.type != own_type)
+            extern_variants[word.type].insert(word.variant);
+        refs.push_back("::matchable::variant_ref<" + word.type + "::" + word.variant + ">()");
+    }
+    return refs;
+}
 
 
 bool patch_matchables(SerialTask::Type task)
@@ -48,6 +129,10 @@ bool patch_matchables(SerialTask::Type task)
     std::string const STAGE_1_MATCHABLES_DIR{
         Stage1Data::nil.as_workspace_dir() + "/generated_include/matchmaker/generated_matchables"
     };
+
+    Leaves leaves;
+    if (!read_leaves(leaves))
+        return false;
 
     // sort headers by file size (largest files first)
     std::priority_queue<
@@ -89,7 +174,7 @@ bool patch_matchables(SerialTask::Type task)
             std::thread(
                 [&]()
                 {
-                    if (all_ok && !patch_matchable_header(task, deal))
+                    if (all_ok && !patch_matchable_header(task, deal, leaves))
                         all_ok = false;
                 }
             )
@@ -104,7 +189,8 @@ bool patch_matchables(SerialTask::Type task)
 
 bool patch_matchable_header(
     SerialTask::Type task,
-    std::vector<HeaderEntry> const & matchable_headers
+    std::vector<HeaderEntry> const & matchable_headers,
+    Leaves const & leaves
 )
 {
     // aliases
@@ -122,72 +208,69 @@ bool patch_matchable_header(
                     << load_status << std::endl;
             return false;
         }
+        mm.extern_variants.clear();
 
-        std::string existing_word;
-        bool word_in_dictionary{false};
         bool found_word_matchable{false};
-        int index{-1};
 
-        for (auto const & [str, m] : mm.matchables)
+        for (auto const & [type, m] : mm.matchables)
         {
-            if (str.rfind("word", 0) != std::string::npos)
+            if (type.rfind("word", 0) == std::string::npos)
+                continue;
+
+            for (auto const & v : m->variants)
             {
-                std::vector<std::string> syn_vect;
-                std::vector<std::string> ant_vect;
-                for (auto const & v : m->variants)
+                std::string const existing_word = matchable::escapable::unescape_all(v.variant_name);
+
+                bool found = false;
+                int const existing_word_index = mm_lookup(existing_word.c_str(), &found);
+                if (!found)
                 {
-                    syn_vect.clear();
-                    ant_vect.clear();
+                    std::cout << "existing_word (" << existing_word
+                                << ") not found within dictionary!" << std::endl;
+                    return false;
+                }
 
-                    existing_word = matchable::escapable::unescape_all(v.variant_name);
+                Word const own = word_at(leaves, existing_word_index);
+                if (own.type != type || own.variant != v.variant_name)
+                {
+                    std::cout << "the leaf list has '" << existing_word << "' as " << own.type << "::"
+                              << own.variant << ", and " << matchable_header.entry << " as " << type
+                              << "::" << v.variant_name << std::endl;
+                    return false;
+                }
 
-                    // gather synonyms and antonynms
-                    auto contents_SynAnt_iter = contents_SynAnt.find(existing_word);
-                    if (contents_SynAnt_iter != contents_SynAnt.end())
+                // gather synonyms and antonynms
+                std::vector<int> syn;
+                std::vector<int> ant;
+                auto contents_SynAnt_iter = contents_SynAnt.find(existing_word);
+                if (contents_SynAnt_iter != contents_SynAnt.end())
+                {
+                    bool word_in_dictionary{false};
+                    for (auto const & s : contents_SynAnt_iter->second.syn)
                     {
-                        for (auto const & s : contents_SynAnt_iter->second.syn)
-                        {
-                            index = mm_lookup(s.c_str(), &word_in_dictionary);
-                            if (word_in_dictionary)
-                                syn_vect.push_back(std::to_string(index));
-                        }
-                        for (auto const & a : contents_SynAnt_iter->second.ant)
-                        {
-                            index = mm_lookup(a.c_str(), &word_in_dictionary);
-                            if (word_in_dictionary)
-                                ant_vect.push_back(std::to_string(index));
-                        }
+                        int const index = mm_lookup(s.c_str(), &word_in_dictionary);
+                        if (word_in_dictionary)
+                            syn.push_back(index);
                     }
-                    m->set_propertyvect(v.variant_name, "syn", syn_vect);
-                    m->set_propertyvect(v.variant_name, "ant", ant_vect);
-
-                    bool found = false;
-                    int const existing_word_index = mm_lookup(existing_word.c_str(), &found);
-                    if (!found)
+                    for (auto const & a : contents_SynAnt_iter->second.ant)
                     {
-                        std::cout << "existing_word (" << existing_word
-                                    << ") not found within dictionary!" << std::endl;
-                        return false;
-                    }
-
-                    {
-                        std::vector<std::string> embedded_word_vect;
-                        for (int i : embedded_words[existing_word_index])
-                            embedded_word_vect.push_back(std::to_string(i));
-                        m->set_propertyvect(v.variant_name, "embedded", embedded_word_vect);
-                    }
-
-                    {
-                        std::vector<std::string> def_vect;
-                        for (int i : defs[existing_word_index])
-                            def_vect.push_back(std::to_string(i));
-                        m->set_propertyvect(v.variant_name, "definition", def_vect);
+                        int const index = mm_lookup(a.c_str(), &word_in_dictionary);
+                        if (word_in_dictionary)
+                            ant.push_back(index);
                     }
                 }
 
-                found_word_matchable = true;
-                break;
+                auto const refs =
+                    [&](std::vector<int> const & indexes)
+                        { return references(leaves, indexes, type, mm.extern_variants); };
+                m->set_propertyvect(v.variant_name, "syn", refs(syn));
+                m->set_propertyvect(v.variant_name, "ant", refs(ant));
+                m->set_propertyvect(v.variant_name, "embedded", refs(embedded_words[existing_word_index]));
+                m->set_propertyvect(v.variant_name, "definition", refs(defs[existing_word_index]));
             }
+
+            found_word_matchable = true;
+            break;
         }
 
         std::lock_guard<std::mutex> const lock(patch_matchable_header_mutex);

@@ -39,6 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
+// this leaf owns its words: it defines their instances, which other leaves refer to by name
+#define MATCHABLE_INSTANCE_VISIBILITY protected
+
 #include <matchmaker/generated_symbols/aoeu/snth.h>
 #include <matchmaker/generated_matchables/aoeu/snth.h>
 
@@ -187,9 +190,9 @@ bool mm_is_phrase_snth(int index)
 }
 
 
-std::vector<int> const & mm_synonyms_snth(int index)
+std::vector<::matchable::VariantRef> const & mm_synonyms_snth(int index)
 {
-    static std::vector<int> const empty{};
+    static std::vector<::matchable::VariantRef> const empty{};
     if (index < 0 || index >= mm_count_snth())
     {
         std::cout << "mm_synonyms_snth(" << index << ") out of bounds with mm_count_snth() of: "
@@ -200,9 +203,9 @@ std::vector<int> const & mm_synonyms_snth(int index)
 }
 
 
-std::vector<int> const & mm_antonyms_snth(int index)
+std::vector<::matchable::VariantRef> const & mm_antonyms_snth(int index)
 {
-    static std::vector<int> const empty{};
+    static std::vector<::matchable::VariantRef> const empty{};
     if (index < 0 || index >= mm_count_snth())
     {
         std::cout << "mm_antonyms_snth(" << index << ") out of bounds with mm_count_snth() of: "
@@ -213,9 +216,9 @@ std::vector<int> const & mm_antonyms_snth(int index)
 }
 
 
-std::vector<int> const & mm_embedded_snth(int index)
+std::vector<::matchable::VariantRef> const & mm_embedded_snth(int index)
 {
-    static std::vector<int> const empty{};
+    static std::vector<::matchable::VariantRef> const empty{};
     if (index < 0 || index >= mm_count_snth())
     {
         std::cout << "mm_embedded_snth(" << index << ") out of bounds with mm_count_snth() of: "
@@ -226,9 +229,9 @@ std::vector<int> const & mm_embedded_snth(int index)
 }
 
 
-std::vector<int> const & mm_definition_snth(int index)
+std::vector<::matchable::VariantRef> const & mm_definition_snth(int index)
 {
-    static std::vector<int> const empty{};
+    static std::vector<::matchable::VariantRef> const empty{};
     if (index < 0 || index >= mm_count_snth())
     {
         std::cout << "mm_definition_snth(" << index << ") out of bounds with mm_count_snth() of: "

@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.16.3)
 
 # matchmaker checks, labeled by the point in the build they check:
-#     generator  scripts/generate_code.py and src/tree.cpp (the leaf table), with no data read
+#     generator  scripts/generate_code.py and src/tree.cpp (the leaf table), with no data read, and
+#                src/relations.cpp on leaves whose words refer to each other
 #     options    option parsing in the build scripts (-h comes last, so nothing is built)
 #     time_compiles  scripts/time_compile.py, the launcher build_and_install.py --time_compiles runs
 #                each compile through
-#     link       workspace_common's linker choice, link pool estimate and library size check
+#     link       workspace_common's linker choice, link pool estimate, library size check and the type
+#                header -e installs per leaf
 #     order      order.py's sort rules on fixtures/order, and its today rule against matchable's
 #     reader0    the stage 0 data reader, on small fixture data
 #     reader1    the stage 1 data reader's rules for cutting the generated arrays into compiled files
@@ -13,9 +15,9 @@ cmake_minimum_required(VERSION 3.16.3)
 #     toolchain  option parsing and the source check in build_toolchain.py (nothing is built)
 #     mini_build build_and_install.py on the fixture data, then the library it installs, again with -e,
 #                then units of words loaded on top, again with -q, again with -S (the system
-#                compiler), and stage 1 again with -r -f, on the same data, on moved book text and
-#                with another array budget
-#                (about 10 minutes; build_and_install.py runs every label but this one before its
+#                compiler), again with one more dictionary word, and stage 1 again with -r -f, on the
+#                same data, on moved book text and with another array budget
+#                (about 13 minutes; build_and_install.py runs every label but this one before its
 #                stage 0 data reader). The pinned toolchain builds the others, and these tests build
 #                with this compiler. The toolchain is the one in -DMM_TOOLCHAIN=<LLVM install> (or
 #                MM_TOOLCHAIN in the environment), else build_toolchain.py's, which the first run
@@ -82,6 +84,38 @@ function(add_routing_test name leaf_list)
 endfunction()
 
 add_routing_test(small ${FIXTURES}/leaf_list_small.txt)
+
+
+# relations_at_load: the leaves generate_code.py makes for fixtures/relations refer to words of their own
+# and of each other, and the library turns the references into alphabetic indexes
+set(RELATIONS_WORKSPACE ${CMAKE_CURRENT_BINARY_DIR}/relations_workspace)
+set(relations_srcs ${RELATIONS_WORKSPACE}/generated_src/tree_data.cpp)
+foreach(leaf la lb lc)
+    list(APPEND relations_srcs ${RELATIONS_WORKSPACE}/generated_src/${leaf}.cpp)
+endforeach()
+add_custom_command(
+    OUTPUT ${relations_srcs}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${RELATIONS_WORKSPACE}
+    COMMAND ${Python3_EXECUTABLE} ${GENERATE_CODE} -w ${RELATIONS_WORKSPACE}
+            -l ${FIXTURES}/relations/leaf_list.txt
+    DEPENDS ${FIXTURES}/relations/leaf_list.txt ${GENERATE_CODE} ${MATCHMAKER_ROOT}/templates/leaf.cpp
+            ${MATCHMAKER_ROOT}/templates/internal_interface.h
+    VERBATIM
+)
+add_executable(relations_check
+    relations_check.cpp
+    ${MATCHMAKER_ROOT}/src/tree.cpp
+    ${MATCHMAKER_ROOT}/src/relations.cpp
+    ${relations_srcs}
+)
+target_include_directories(relations_check PRIVATE
+    ${RELATIONS_WORKSPACE}/generated_include
+    ${FIXTURES}/relations
+)
+target_compile_definitions(relations_check PRIVATE MATCHABLE_OMIT_BY_INDEX)
+target_compile_options(relations_check PRIVATE -Wall -Werror -Wextra)
+add_test(NAME relations_at_load COMMAND relations_check)
+set_tests_properties(relations_at_load PROPERTIES LABELS generator)
 
 
 # generate_code.py refuses bad leaf lists with a message naming the problem
@@ -389,6 +423,19 @@ add_test(
             -P ${MATCHMAKER_ROOT}/workspace_common/check_lib_size.cmake
 )
 set_tests_properties(link_pool link_size_warns link_size_quiet PROPERTIES LABELS link)
+
+# leaf_type: the type header -e installs per leaf is taken from wherever the leaf's header declares its
+# type, and a header without one stops the configure
+add_test(
+    NAME leaf_type
+    COMMAND ${CMAKE_COMMAND} -DMATCHMAKER_ROOT=${MATCHMAKER_ROOT}
+            -DOUT=${CMAKE_CURRENT_BINARY_DIR}/leaf_type
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/leaf_type_check.cmake
+)
+set_tests_properties(leaf_type PROPERTIES
+    LABELS link
+    PASS_REGULAR_EXPRESSION "no declaration of word_other in"
+)
 set_tests_properties(link_size_warns PROPERTIES
     PASS_REGULAR_EXPRESSION "sparse_leaf_list loads [0-9]+ bytes"
 )
@@ -568,6 +615,18 @@ set_tests_properties(mini_array_units PROPERTIES
     LABELS mini_build FIXTURES_REQUIRED mini_library RESOURCE_LOCK mini_install
 )
 
+# mini_exports: beside the mm_* functions, the leaf libraries of mini_build export the address of each
+# word's instance, which leaves refer to by name, and nothing else; mini_system_exports checks the same of
+# the system compiler's build
+add_test(
+    NAME mini_exports
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_exports_check.py ${MINI_TOOLCHAIN_DIR}
+            ${MINI_BUILD}/install/lib/matchmaker
+)
+set_tests_properties(mini_exports PROPERTIES
+    LABELS mini_build FIXTURES_REQUIRED "mini_library;mini_toolchain" RESOURCE_LOCK mini_install
+)
+
 # mini_toolchain: the pinned toolchain built everything mini_build installed
 add_test(
     NAME mini_toolchain
@@ -681,6 +740,55 @@ set_tests_properties(mini_moved_back_library PROPERTIES LABELS mini_build FIXTUR
 set_tests_properties(mini_moved mini_moved_library mini_moved_back mini_moved_back_library
     PROPERTIES RESOURCE_LOCK mini_install)
 
+# mini_added: the same build from the fixture data with one more dictionary word, aardvark, which moves
+# every term after it one alphabetic index up. Leaves refer to words by name, so mini_added_leaves finds
+# stage 1 wrote the header mini_build has for every leaf but the one that holds the word, and
+# mini_added_library finds every link on the terms where they now are
+set(MINI_ADDED ${CMAKE_CURRENT_BINARY_DIR}/mini_added)
+set(MINI_ADDED_DATA ${CMAKE_CURRENT_BINARY_DIR}/mini_added_data)
+add_test(
+    NAME mini_added_data
+    COMMAND ${CMAKE_COMMAND} -DDATA=${READER0_DATA} -DOUT=${MINI_ADDED_DATA} -DWORD=aardvark
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/added_word_data.cmake
+)
+set_tests_properties(mini_added_data PROPERTIES LABELS mini_build FIXTURES_SETUP mini_added_start)
+add_test(
+    NAME mini_added
+    COMMAND ${Python3_EXECUTABLE} ${MATCHMAKER_ROOT}/scripts/build_and_install.py -s
+            ${MINI_TOOLCHAIN} -j ${MINI_BUILD_JOBS} --data_dir=${MINI_ADDED_DATA}
+            --leaf_budget=${MINI_LEAF_BUDGET} --array_budget=${MINI_ARRAY_BUDGET}
+            -b ${MINI_ADDED}/build -i ${MINI_ADDED}/install
+)
+set_tests_properties(mini_added PROPERTIES
+    LABELS mini_build
+    FIXTURES_REQUIRED "mini_toolchain;mini_added_start"
+    FIXTURES_SETUP mini_added
+    TIMEOUT 3600
+)
+add_test(
+    NAME mini_added_leaves
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_added_check.py
+            ${MINI_BUILD}/build ${MINI_ADDED}/build aardvark
+)
+set_tests_properties(mini_added_leaves PROPERTIES
+    LABELS mini_build FIXTURES_REQUIRED "mini_library;mini_added" RESOURCE_LOCK mini_install
+)
+add_test(
+    NAME mini_added_library
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
+            ${READER0_EXPECTED}/mini_library_added_word.txt
+            $<TARGET_FILE:mini_library_check> ${MINI_ADDED}/install/lib/matchmaker/libmatchmaker.so
+)
+set_tests_properties(mini_added_library PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_added)
+
+# the tests of mini_build as it is first built, which the builds that change it wait for
+set(MINI_FIRST_BUILD_TESTS
+    mini_library mini_library_by_spelling mini_library_one_check mini_array_units mini_exports
+    mini_toolchain mini_rerun mini_rerun_compiles mini_rerun_library
+    mini_moved mini_moved_compiles mini_moved_library mini_moved_back mini_moved_back_library
+    mini_added_leaves
+)
+
 # mini_recut: stage 1 again (-r -f) on the same build and data with a larger array budget, which puts the
 # chapters two to a group, every term's locations in one block and each other array in one unit.
 # mini_recut_units checks the cut, mini_recut_compiles that the units and the tables were compiled again
@@ -705,9 +813,7 @@ set_tests_properties(mini_recut PROPERTIES
     TIMEOUT 3600
 )
 set_property(TEST mini_recut APPEND PROPERTY DEPENDS
-    mini_library mini_library_by_spelling mini_library_one_check mini_array_units mini_toolchain
-    mini_rerun mini_rerun_compiles mini_rerun_library
-    mini_moved mini_moved_compiles mini_moved_library mini_moved_back mini_moved_back_library
+    ${MINI_FIRST_BUILD_TESTS}
 )
 add_test(
     NAME mini_recut_units
@@ -766,6 +872,14 @@ add_test(
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/expect_output.py
             ${READER0_EXPECTED}/mini_library.txt
             $<TARGET_FILE:mini_library_check> ${MINI_SYSTEM}/install/lib/matchmaker/libmatchmaker.so
+)
+add_test(
+    NAME mini_system_exports
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mini_exports_check.py ${MINI_TOOLCHAIN_DIR}
+            ${MINI_SYSTEM}/install/lib/matchmaker
+)
+set_tests_properties(mini_system_exports PROPERTIES
+    LABELS mini_build FIXTURES_REQUIRED "mini_system;mini_toolchain"
 )
 add_test(
     NAME mini_system_compiler

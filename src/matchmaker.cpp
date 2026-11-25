@@ -12,6 +12,7 @@
 #include <matchmaker/word_order.h>
 
 #include <arrays.h>
+#include <relations.h>
 #include <tree.h>
 
 
@@ -271,12 +272,7 @@ void mm_synonyms(int index, int const * * synonyms, int * count)
         return;
     }
 
-    int index_in_leaf;
-    tree::Leaf const & leaf = tree::leaf_at(index, &index_in_leaf);
-
-    auto & s = leaf.synonyms(index_in_leaf);
-    *synonyms = s.data();
-    *count = (int) s.size();
+    relations::get(relations::synonyms, index, synonyms, count);
 }
 
 
@@ -289,12 +285,7 @@ void mm_antonyms(int index, int const * * antonyms, int * count)
         return;
     }
 
-    int index_in_leaf;
-    tree::Leaf const & leaf = tree::leaf_at(index, &index_in_leaf);
-
-    auto & a = leaf.antonyms(index_in_leaf);
-    *antonyms = a.data();
-    *count = (int) a.size();
+    relations::get(relations::antonyms, index, antonyms, count);
 }
 
 
@@ -307,12 +298,7 @@ void mm_embedded(int index, int const * * embedded, int * count)
         return;
     }
 
-    int index_in_leaf;
-    tree::Leaf const & leaf = tree::leaf_at(index, &index_in_leaf);
-
-    auto & e = leaf.embedded(index_in_leaf);
-    *embedded = e.data();
-    *count = (int) e.size();
+    relations::get(relations::embedded, index, embedded, count);
 }
 
 
@@ -325,12 +311,7 @@ void mm_definition(int index, int const * * definition, int * count)
         return;
     }
 
-    int index_in_leaf;
-    tree::Leaf const & leaf = tree::leaf_at(index, &index_in_leaf);
-
-    auto & d = leaf.definition(index_in_leaf);
-    *definition = d.data();
-    *count = (int) d.size();
+    relations::get(relations::definition, index, definition, count);
 }
 
 

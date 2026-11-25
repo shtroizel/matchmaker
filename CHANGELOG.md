@@ -53,8 +53,21 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
 - array_cuts tests for the cut rule, mini_array_units for the cut of a mini build, and mini_recut tests:
   stage 1 run again with another budget compiles the generated arrays again and no leaf, and the library
   answers as before
+- relations_at_load test for the indexes computed from references, mini_added tests (a mini build from
+  the fixture data with one more word has the same header for every leaf but the word's own, and every
+  link on the terms where they now are), mini_exports for what the libraries export, and leaf_type for
+  the type header `-e` installs
 
 ### Changed
+- Leaves hold each word's synonyms, antonyms, embedded terms and definition as references to words
+  (matchable::VariantRef) that the linker resolves by name, instead of alphabetic indexes. An added word
+  moves the index of every term after it, and a leaf's references stay as they were, so its header
+  changes only when its own words or the words it links to do. Each leaf defines the instances of its
+  words with protected visibility, the leaf libraries export the instances' addresses beside the mm_*
+  functions, and a leaf declares the words of other leaves it refers to with MATCHABLE_EXTERN_VARIANTS.
+  The mm_* answers are unchanged
+- mm_synonyms(), mm_antonyms(), mm_embedded() and mm_definition() are O(1): they read one table per kind
+  of link, indexed by term, which the first of these calls builds from the leaves' references
 - Builds use the pinned toolchain for matchable, the data readers and both stages unless `-S` is given,
   building it first when it isn't there yet. libc++, libc++abi and libunwind are linked into each library, so an
   install loads into programs built with any compiler. Libraries link with lld unless `--linker` names
@@ -64,9 +77,10 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   writes with the same content keep their earlier modification times
 - `--time_compiles=<file>` works with `-r` and `-l`: a kept build logs to the file given, and changing the
   file no longer compiles everything again
-- Requires matchable 16.0.0 (unreleased: matchable's dev branch at 3d59e9d), which compares
-  names as unsigned bytes, lets each leaf declare its sort key and lets matchmaker search a leaf's names
-  with its own comparison
+- Requires matchable 16.0.0 (unreleased: matchable's dev branch at 38634fb), which compares
+  names as unsigned bytes, lets each leaf declare its sort key, lets matchmaker search a leaf's names
+  with its own comparison, and lets a leaf define the instances of its words and refer to the words of
+  other leaves
 - mm_lookup(), mm_lookup_any_case() and mm_complete() search the leaves' first words and then one leaf's
   names, comparing words where they are: none of them allocates, and mm_complete() takes O(log N) string
   comparisons however many terms match. Each leaf gives its names table (mm_names_<leaf>) instead of a

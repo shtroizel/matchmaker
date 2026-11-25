@@ -8,6 +8,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-dangling-reference")
+    # GCC makes the instances of words unique in the whole process by default, which would have a second
+    # matchmaker loaded beside this one refer to this one's words
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-gnu-unique")
 endif()
 
 if(CMAKE_SYSTEM_PROCESSOR STREQUAL "sparc64")
@@ -51,6 +54,7 @@ macro(export_mm_only target)
 endmacro()
 
 include(${MATCHMAKER_ROOT}/workspace_common/link_pool.cmake)
+include(${MATCHMAKER_ROOT}/workspace_common/leaf_type.cmake)
 set(MM_LINKER "" CACHE STRING
     "linker for the libraries (-fuse-ld=): gold, lld, mold or default; empty picks gold when installed")
 find_program(ld_gold ld.gold)
@@ -129,6 +133,7 @@ list(PREPEND matchmaker_srcs
     ${MATCHMAKER_ROOT}/src/matchmaker.cpp
     ${MATCHMAKER_ROOT}/src/tree.cpp
     ${MATCHMAKER_ROOT}/src/arrays.cpp
+    ${MATCHMAKER_ROOT}/src/relations.cpp
 )
 
 # the stage 1 reader's arrays are in generated_src/arrays: the ones it writes whole and the lists of the
@@ -230,22 +235,10 @@ if(EXPORT_ALL)
     file(GLOB_RECURSE leaf_headers RELATIVE ${generated_matchables} ${generated_matchables}/*.h)
     foreach(leaf_header ${leaf_headers})
         get_filename_component(prefix ${leaf_header} NAME_WE)
-        file(READ ${generated_matchables}/${leaf_header} head LIMIT 65536)
-        string(FIND "${head}" "\nMATCHABLE_SORTKEY(word_${prefix}," begin)
-        if(begin EQUAL -1)
-            string(FIND "${head}" "\nPROPERTYx" begin)
-        endif()
-        string(FIND "${head}" ", word_${prefix}" end)
-        if(begin EQUAL -1 OR end EQUAL -1 OR end LESS begin)
-            message(FATAL_ERROR "no declaration of word_${prefix} in ${leaf_header}")
-        endif()
-        math(EXPR begin "${begin} + 1")
-        string(LENGTH ", word_${prefix}" name_length)
-        math(EXPR length "${end} + ${name_length} - ${begin}")
-        string(SUBSTRING "${head}" ${begin} ${length} declaration)
+        mm_leaf_type(declaration ${generated_matchables}/${leaf_header} ${prefix})
         file(WRITE ${leaf_types}/${leaf_header}
             "#pragma once\n#include <matchable/matchable.h>\n#include \"../../word_order.h\"\n\n"
-            "${declaration})\n")
+            "${declaration}")
     endforeach()
     install(DIRECTORY ${leaf_types}/ DESTINATION ${inc_destination}/leaf_types)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/leaf_list DESTINATION ${inc_destination}/leaf_types)

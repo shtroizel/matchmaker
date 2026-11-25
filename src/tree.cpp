@@ -93,4 +93,11 @@ namespace tree
             *found = position != names.size() && names.equals(position, term, length);
         return position + offsets()[leaf];
     }
+
+
+    int index_of(::matchable::Variant const & word)
+    {
+        std::string const & term = word.as_string();
+        return offsets()[leaf_of(term.data(), term.size())] + word.as_by_string_index();
+    }
 }

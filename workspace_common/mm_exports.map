@@ -2,6 +2,7 @@
     global:
         mm_*;
         extern "C++" { mm_*; };
+        _ZN9matchable8InstanceI*7addressE;
     local:
         *;
 };

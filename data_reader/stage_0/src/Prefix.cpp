@@ -54,11 +54,11 @@ void Prefix::initialize(std::string const & prefix)
     str = prefix;
     std::string const matchable_name = "word_" + escaped_and_delimited('_');
     maker->grab(matchable_name)->add_property("int8_t", "pos");
-    maker->grab(matchable_name)->add_property("int", "syn");
-    maker->grab(matchable_name)->add_property("int", "ant");
+    maker->grab(matchable_name)->add_property("::matchable::VariantRef", "syn");
+    maker->grab(matchable_name)->add_property("::matchable::VariantRef", "ant");
     maker->grab(matchable_name)->add_property("int", "ordinal_summation");
-    maker->grab(matchable_name)->add_property("int", "embedded");
-    maker->grab(matchable_name)->add_property("int", "definition");
+    maker->grab(matchable_name)->add_property("::matchable::VariantRef", "embedded");
+    maker->grab(matchable_name)->add_property("::matchable::VariantRef", "definition");
 
     // "word_attribute" properties
     {

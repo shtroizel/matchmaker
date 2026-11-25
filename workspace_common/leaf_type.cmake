@@ -1,0 +1,22 @@
+# mm_leaf_type(<out> <leaf header> <leaf>): the lines of a leaf's header that declare its type without words
+# or values, its sort key (when it has one) and its properties, wherever in the header they are
+function(mm_leaf_type out header leaf)
+    file(STRINGS ${header} lines
+         REGEX "^(MATCHABLE_SORTKEY\\(word_${leaf},|PROPERTYx[0-9]+_MATCHABLE\\()")
+    set(declaration "")
+    foreach(line ${lines})
+        if(line MATCHES "^PROPERTYx")
+            string(FIND "${line}" ", word_${leaf}" end)
+            if(NOT end EQUAL -1)
+                string(LENGTH ", word_${leaf}" name_length)
+                math(EXPR length "${end} + ${name_length}")
+                string(SUBSTRING "${line}" 0 ${length} properties)
+                set(${out} "${declaration}${properties})\n" PARENT_SCOPE)
+                return()
+            endif()
+        else()
+            string(APPEND declaration "${line}\n")
+        endif()
+    endforeach()
+    message(FATAL_ERROR "no declaration of word_${leaf} in ${header}")
+endfunction()

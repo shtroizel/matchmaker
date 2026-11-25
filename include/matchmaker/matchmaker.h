@@ -50,7 +50,8 @@ self-inflicted pain and suffering...
 
 all of matchmaker's functions adhere to the following:
     * matchmaker always owns everything
-    * dynamic memory allocation is avoided completely
+    * no call allocates memory for what it returns: the few tables matchmaker builds are built once,
+      the first time a call needs them
     * all arrays or strings retrieved always exist because they are static!
 
 an "alphabetic index" is a term's position in matchmaker's word order: terms compare with their ASCII
@@ -306,7 +307,7 @@ bool mm_is_used_in_book(int book_index, int index);
 
 /**
  * retrieve an array of synonyms for a given term.
- * the complexity for this function is O(log N).
+ * the complexity for this function is O(1).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @param[out] synonyms
@@ -318,7 +319,7 @@ void mm_synonyms(int index, int const * * synonyms, int * count);
 
 /**
  * retrieve an array of antonyms for a given term.
- * the complexity for this function is O(log N).
+ * the complexity for this function is O(1).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @param[out] antonyms
@@ -330,7 +331,7 @@ void mm_antonyms(int index, int const * * antonyms, int * count);
 
 /**
  * retrieve the embedded terms within a phrase or expression.
- * the complexity for this function is O(log N).
+ * the complexity for this function is O(1).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @param[out] embedded
@@ -343,7 +344,7 @@ void mm_embedded(int index, int const * * embedded, int * count);
 /**
  * retrieve the definition for a given term.
  * note that definitions are still empty for almost all terms! (use mm_synonyms() instead)
- * the complexity for this function is O(log N).
+ * the complexity for this function is O(1).
  * @param[in] index
  *     alphabetic index of a term in the dictionary
  * @param[out] definition

@@ -26,10 +26,11 @@ namespace tree
         bool (*is_compound)(int);
         bool (*is_acronym)(int);
         bool (*is_phrase)(int);
-        std::vector<int> const & (*synonyms)(int);
-        std::vector<int> const & (*antonyms)(int);
-        std::vector<int> const & (*embedded)(int);
-        std::vector<int> const & (*definition)(int);
+        // links to other terms, as references to the words
+        std::vector<::matchable::VariantRef> const & (*synonyms)(int);
+        std::vector<::matchable::VariantRef> const & (*antonyms)(int);
+        std::vector<::matchable::VariantRef> const & (*embedded)(int);
+        std::vector<::matchable::VariantRef> const & (*definition)(int);
     };
 
     // generated (tree_data.cpp): the leaves in word order (word_order.h), and each leaf's first term
@@ -49,6 +50,9 @@ namespace tree
     int leaf_of(char const * term, size_t length);
 
     int lookup(char const * term, size_t length, bool * found);
+
+    // the index of a word some leaf holds
+    int index_of(::matchable::Variant const & word);
 
     // the first index whose term is not before, or count(). before(term, length) must be true for the
     // terms up to some index and false from there on. It is called O(log N) times: on leaves' first
@@ -96,10 +100,10 @@ namespace tree
     bool mm_is_compound_##n(int);                                                                          \
     bool mm_is_acronym_##n(int);                                                                           \
     bool mm_is_phrase_##n(int);                                                                            \
-    std::vector<int> const & mm_synonyms_##n(int);                                                         \
-    std::vector<int> const & mm_antonyms_##n(int);                                                         \
-    std::vector<int> const & mm_embedded_##n(int);                                                         \
-    std::vector<int> const & mm_definition_##n(int);
+    std::vector<::matchable::VariantRef> const & mm_synonyms_##n(int);                                     \
+    std::vector<::matchable::VariantRef> const & mm_antonyms_##n(int);                                     \
+    std::vector<::matchable::VariantRef> const & mm_embedded_##n(int);                                     \
+    std::vector<::matchable::VariantRef> const & mm_definition_##n(int);
 
 #define MM_LEAF(n)                                                                                         \
     tree::Leaf{                                                                                            \
