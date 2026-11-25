@@ -1,12 +1,13 @@
-// mini_library_check [--by-spelling] [--no-checks] <libmatchmaker.so>
+// mini_library_check [--by-spelling] [--no-checks] [--check=<name>] <libmatchmaker.so>
 // Loads a matchmaker library built from small data and checks how its parts agree: every term looks itself
 // up, terms are in strict order, cross-links (synonyms, antonyms, embedded words, definitions) are terms,
 // the longest and ordinal summation tables agree with the terms, every book location holds the term that
-// lists it (a phrase as an ancestor of the word there) and every book word lists its location,
-// completion finds exactly the terms with each prefix, and lookups and completion allocate nothing. Prints every term with its properties, then each
-// book, for expect_output.py to compare. --by-spelling prints the terms, synonyms and antonyms in
-// std::string order instead of the library's, so dumps of libraries that differ only in order compare
-// equal; --no-checks skips the checks, for full-size libraries.
+// lists it (a phrase as an ancestor of the word there) and every book word lists its location, completion
+// finds exactly the terms with each prefix, and lookups and completion allocate nothing. Each check
+// reports its problem count on standard error. Prints every term with its properties, then each book, for
+// expect_output.py to compare. --by-spelling prints the terms, synonyms and antonyms in std::string order
+// instead of the library's, so dumps of libraries that differ only in order compare equal. For full-size
+// libraries, --no-checks skips the checks and --check=<name> runs the one named, such as locations.
 #include <dlfcn.h>
 
 #include <algorithm>
@@ -482,6 +483,25 @@ namespace
     }
 
 
+    struct Check
+    {
+        char const * name;
+        void (*run)();
+    };
+
+
+    Check const all_checks[] = {
+        {"terms", check_terms},
+        {"longest", check_longest},
+        {"ordinal_summation", check_ordinal_summation},
+        {"completion", check_completion},
+        {"lookup_any_case", check_lookup_any_case},
+        {"no_allocations", check_no_allocations},
+        {"locations", check_locations},
+        {"out_of_range", check_out_of_range},
+    };
+
+
     std::vector<int> printed_order(std::vector<int> indexes)
     {
         if (by_spelling)
@@ -605,18 +625,29 @@ namespace
 int main(int argc, char ** argv)
 {
     bool checks = true;
+    char const * only = nullptr;
     int arg = 1;
     for (; arg < argc - 1; ++arg)
         if (std::string(argv[arg]) == "--by-spelling")
             by_spelling = true;
         else if (std::string(argv[arg]) == "--no-checks")
             checks = false;
+        else if (std::string(argv[arg]).rfind("--check=", 0) == 0)
+            only = argv[arg] + 8;
         else
             break;
-    if (arg != argc - 1)
+    bool known = nullptr == only;
+    for (auto const & check : all_checks)
+        known = known || std::string(check.name) == only;
+    if (arg != argc - 1 || !known)
     {
-        std::cerr << "usage: " << argv[0] << " [--by-spelling] [--no-checks] <libmatchmaker.so>"
-                  << std::endl;
+        if (!known)
+            std::cerr << "no check is named " << only << std::endl;
+        std::cerr << "usage: " << argv[0]
+                  << " [--by-spelling] [--no-checks] [--check=<name>] <libmatchmaker.so>\nchecks:";
+        for (auto const & check : all_checks)
+            std::cerr << " " << check.name;
+        std::cerr << std::endl;
         return 2;
     }
     void * library = dlopen(argv[arg], RTLD_NOW | RTLD_LOCAL);
@@ -642,16 +673,14 @@ int main(int argc, char ** argv)
     }
 
     if (checks)
-    {
-        check_terms();
-        check_longest();
-        check_ordinal_summation();
-        check_completion();
-        check_lookup_any_case();
-        check_no_allocations();
-        check_locations();
-        check_out_of_range();
-    }
+        for (auto const & check : all_checks)
+            if (nullptr == only || std::string(check.name) == only)
+            {
+                size_t const before = problems.size();
+                check.run();
+                std::cerr << "check " << check.name << ": " << problems.size() - before << " problems"
+                          << std::endl;
+            }
     print_terms();
     print_books();
 

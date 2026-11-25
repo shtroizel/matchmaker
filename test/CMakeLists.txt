@@ -508,6 +508,29 @@ add_test(
             ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
 )
 set_tests_properties(mini_library_by_spelling PROPERTIES LABELS mini_build FIXTURES_REQUIRED mini_library)
+# mini_library_one_check: --check=locations runs the locations check alone; mini_library_unknown_check: a
+# name that belongs to no check is refused with the names that do
+set(MINI_OTHER_CHECKS
+    "terms|longest|ordinal_summation|completion|lookup_any_case|no_allocations|out_of_range"
+)
+add_test(
+    NAME mini_library_one_check
+    COMMAND mini_library_check --check=locations ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
+)
+set_tests_properties(mini_library_one_check PROPERTIES
+    LABELS mini_build FIXTURES_REQUIRED mini_library RESOURCE_LOCK mini_install
+    PASS_REGULAR_EXPRESSION "check locations: 0 problems"
+    FAIL_REGULAR_EXPRESSION "check (${MINI_OTHER_CHECKS}): "
+)
+add_test(
+    NAME mini_library_unknown_check
+    COMMAND mini_library_check --check=spelling ${MINI_BUILD}/install/lib/matchmaker/libmatchmaker.so
+)
+set_tests_properties(mini_library_unknown_check PROPERTIES
+    LABELS options
+    PASS_REGULAR_EXPRESSION
+        "^no check is named spelling\n.*\nchecks: terms longest .* locations out_of_range\n$"
+)
 
 # mini_toolchain: the pinned toolchain built everything mini_build installed
 add_test(

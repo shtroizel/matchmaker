@@ -40,6 +40,9 @@ matchmaker.h: a removed function or a changed signature is a major change. Each 
   `--no-checks` in mini_library_check with order tests (test/order.py) for a later sort order change
 - mini_moved tests: stage 1 run again on a mini build with book text moved compiles only the generated
   arrays, the library shows the text where it now is, and the fixture data brings the first library back
+- `--check=<name>` in mini_library_check runs the one check named, so a check that finishes on a full-size
+  library can run there alone; each check reports its problem count on standard error, and
+  mini_library_one_check and mini_library_unknown_check test the option
 
 ### Changed
 - Builds use the pinned toolchain for matchable, the data readers and both stages unless `-S` is given,
